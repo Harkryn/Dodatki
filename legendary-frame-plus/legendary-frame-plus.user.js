@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem — Legendary Frame Plus
 // @namespace    local.margonem.legendary-frame-plus
-// @version      2.39.1
+// @version      2.40.0
 // @description  Ramka legendarnego lootu z efektami żywiołów, wybuchami i filtrem mapy.
 // @match        https://margonem.com/*
 // @match        https://*.margonem.com/*
@@ -9,6 +9,8 @@
 // @match        https://*.margonem.pl/*
 // @run-at       document-idle
 // @grant        none
+// @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/legendary-frame-plus/legendary-frame-plus.user.js
+// @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/legendary-frame-plus/legendary-frame-plus.user.js
 // ==/UserScript==
 
 (() => {
