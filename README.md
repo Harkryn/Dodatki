@@ -23,7 +23,8 @@ Czarny, elegancki motyw z kotami dla **nowego interfejsu (NI)** gry Margonem. T�
 Kocie detale:
 - **ekran wczytywania gry** — czarne niebo, księżyc i kot na dachu z mrugającymi oczami (kliknięcie lub Esc pomija),
 - **efekt legendy** — gdy w łupie albo w torbie pojawi się nowy przedmiot legendarny, w ciemności otwierają się wielkie kocie oczy w kolorze legendy, mrugają, a wokół rozbiegają się łapki,
-- **fioletowa kula HP** z delikatną, pulsującą poświatą,
+- **kula HP w kształcie odcisku kociej łapy** — wypełniona fioletowym płynem z przesuwającym się połyskiem i bąbelkami, z pulsującą poświatą; siedzi w księżycowym kręgu, a po bokach drgają kocie wąsy,
+- **górna tabliczka** (imię, lokacja, złoto) z kocimi uszami, które czasem drgną, i ogonem kołyszącym się spod spodu,
 - **oczy w ciemności** — co jakiś czas w czarnej kolumnie otwiera się para świecących oczu, mruga i znika,
 - uszy na oknach (lekko się przechylają przy najechaniu), łapki w nagłówkach i tooltipach, ledwo widoczny wzór łapek w tle,
 - czarny kot-maskotka siedzący na dolnej belce i kocia ikonka przełącznika.
@@ -44,11 +45,11 @@ Instalacja:
 
 Skróty:
 - **Alt+T** — włącz/wyłącz motyw (albo kliknij kocią ikonkę w lewym dolnym rogu),
-- **Alt+K** — włącz/wyłącz animacje (kot, oczy w ciemności, puls kuli HP),
+- **Alt+K** — włącz/wyłącz animacje (kot, oczy w ciemności, płyn i puls kuli HP, wąsy, uszy i ogon tabliczki),
 - **Alt+L** — podgląd efektu legendy.
 
 Ekran wczytywania pojawia się od drugiego wejścia na dany świat (skrypt musi najpierw zobaczyć, że to nowy interfejs).
 
-Dostosowanie: paleta to zmienne CSS `--mkn-*` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS`, a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (uszy, ekran wczytywania, efekt legendy, oczy, poświata kuli HP). Pozycję kota zmienisz w regule `right: 230px` w sekcji „KOT-MASKOTKA”.
+Dostosowanie: paleta to zmienne CSS `--mkn-*` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS`, a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (uszy, ekran wczytywania, efekt legendy, oczy, poświata kuli HP, kształt łapki `pawOrb`, zdobienia kuli `orbDecor`, tabliczka `hudDecor`). Pozycję kota zmienisz w regule `right: 230px` w sekcji „KOT-MASKOTKA”.
 
 Coś wygląda po staremu? Uruchom w konsoli gry (F12 → Console) [diagnostyka.js](margonem-kocia-noc/diagnostyka.js), a potem najedź na przedmiot i przytrzymaj kursor — skrypt przechwyci tooltip i skopiuje wynik do schowka. Niczego nie zmienia w grze.

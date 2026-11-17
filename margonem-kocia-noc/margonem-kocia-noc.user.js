@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.3.0
-// @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, fioletowa pulsująca kula HP. Zmienia wyłącznie wygląd UI.
+// @version      1.4.0
+// @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
 // @noframes
@@ -43,7 +43,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -58,7 +58,10 @@
     loadingScreen: true,  // ekran wczytywania
     legendEffect: true,   // efekt po zdobyciu legendy
     ambientEyes: true,    // mrugające oczy w ciemnych kolumnach
-    hpGlow: true          // pulsująca fioletowa poświata wokół kuli HP
+    hpGlow: true,         // pulsująca fioletowa poświata wokół kuli HP
+    pawOrb: true,         // kula HP w kształcie odcisku łapy (false = zwykła okrągła, fioletowa)
+    orbDecor: true,       // zdobienia wokół kuli: księżycowy krąg, kocie wąsy, kapsuły wartości
+    hudDecor: true        // górna tabliczka (imię, lokacja, złoto): rama, uszy, ogon
   };
 
   /** Prefiksy reguł. Dwa `:not(#…)` podbijają specyficzność, żeby wygrywać z innymi motywami. */
@@ -95,9 +98,11 @@
     rightColumn:     ['.interface-layer > .right-column'],          // kot siada tuż na lewo od tej kolumny
     column:          ['.interface-layer > .main-column'],
     columnBorder:    ['.interface-layer > .main-column > .border'],
-    spriteArt:       ['.top.positioner .hud-container', '.bottom-panel .bottom-panel-graphic',
-                      '.bottom-panel .pointer-exp-graphic', '.bottom-panel .pointer-ttl-graphic',
-                      '.exp-bar-wrapper .overlay'],
+    hud:             ['.top.positioner .hud-container'],                  // tabliczka: imię, lokacja, złoto
+    orbPanel:        ['.bottom-panel .bottom-panel-graphic'],             // grafika wokół kuli (590x100)
+    orbPointer:      ['.bottom-panel .pointer-exp-graphic', '.bottom-panel .pointer-ttl-graphic'],   // „9,18%”, „0 min”
+    expOverlay:      ['.exp-bar-wrapper .overlay'],                       // ramki pasków doświadczenia
+    spriteArt:       ['.lagmeter .lag'],                                  // pozostałe sprite'y — tylko przebarwienie
     slotGrid:        ['.interface-element-item-slot-grid-stretch'],              // kratki torby (kafel gry barwiony na fiolet)
     gridBorder:      ['.interface-element-grid-border', '.interface-element-grid-border-light'],
 
@@ -114,7 +119,8 @@
     /* === PASKI === */
     hpOrb:           ['.hp-indicator'],                               // kula HP (krew + procent) — barwiona na fiolet
     hpOrbBlood:      ['.hp-indicator .blood'],
-    hpOrbWrap:       ['.hp-indicator-wrapper'],                       // obudowa kuli — tu pulsuje poświata
+    hpOrbWrap:       ['.hp-indicator-wrapper'],                       // obudowa kuli — tu maska łapki
+    hpOrbHost:       ['.hp-indicator-wrapper-template'],              // rodzic obudowy — tu pulsuje poświata
     hpOrbGlass:      ['.hp-indicator-wrapper .glass'],
     barTrack:        ['[class*="interface-element-progress-bar-"]', '.progress-bar-wrapper',          // ? .progress-bar-wrapper
                       '.exp-bar-wrapper .exp-progress .progress'],
@@ -188,6 +194,14 @@
     `<ellipse cx="14.6" cy="5.8" rx="2.2" ry="2.9" transform="rotate(6 14.6 5.8)"/>` +
     `<ellipse cx="18.6" cy="10.2" rx="2.2" ry="2.8" transform="rotate(18 18.6 10.2)"/></g>`;
 
+  /** Kształt odcisku łapy (viewBox 100x90): duża poduszka (na niej mieści się procent HP) i cztery palce. */
+  const PAW_SHAPES =
+    '<path d="M50 37 C62 37 71 46 79 56 C87 66 87 80 75 85 C65 89 58 84 50 84 C42 84 35 89 25 85 C13 80 13 66 21 56 C29 46 38 37 50 37 Z"/>' +
+    '<ellipse cx="15.5" cy="31" rx="9.5" ry="12" transform="rotate(-25 15.5 31)"/>' +
+    '<ellipse cx="35" cy="13.5" rx="10.5" ry="12.5" transform="rotate(-8 35 13.5)"/>' +
+    '<ellipse cx="65" cy="13.5" rx="10.5" ry="12.5" transform="rotate(8 65 13.5)"/>' +
+    '<ellipse cx="84.5" cy="31" rx="9.5" ry="12" transform="rotate(25 84.5 31)"/>';
+
   const ICONS = {
     paw: svgUrl(SVG('0 0 24 24', PAW('#a98be0'))),
     pawDim: svgUrl(SVG('0 0 24 24', PAW('#2a2238'))),
@@ -229,6 +243,51 @@
       '<path d="M2 25 C18 2 82 2 98 25 C82 48 18 48 2 25 Z" fill="url(#e)" stroke="#2a1500" stroke-width="2"/>' +
       '<ellipse cx="50" cy="25" rx="5.5" ry="21" fill="#0a0503"/>' +
       '<ellipse cx="40" cy="16" rx="5" ry="3.2" fill="#fff" opacity=".55"/>')),
+
+    earR: svgUrl(SVG('0 0 20 16',
+      '<g transform="translate(20 0) scale(-1 1)">' +
+      '<path d="M1 16 C2 10 4 4 7 1 C9 3 14 8 19 16 Z" fill="#000" stroke="#9b7bd4" stroke-width=".9" stroke-linejoin="round"/>' +
+      '<path d="M5 15 C5.5 11 6.5 7 7.5 4.5 C9.5 7 12 10.5 14.5 15 Z" fill="#e3a3c6" opacity=".3"/></g>')),
+    earL: svgUrl(SVG('0 0 20 16',
+      '<path d="M1 16 C2 10 4 4 7 1 C9 3 14 8 19 16 Z" fill="#000" stroke="#9b7bd4" stroke-width=".9" stroke-linejoin="round"/>' +
+      '<path d="M5 15 C5.5 11 6.5 7 7.5 4.5 C9.5 7 12 10.5 14.5 15 Z" fill="#e3a3c6" opacity=".3"/>')),
+
+    // Ogon zwisający spod tabliczki HUD
+    tail: svgUrl(SVG('0 0 20 48',
+      '<path d="M10 0 C10 10 4 16 5 26 C6 36 15 38 14 44 C13.5 47 10 47.5 9 46" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M10 0 C10 10 4 16 5 26 C6 36 15 38 14 44 C13.5 47 10 47.5 9 46" fill="none" stroke="#9b7bd4" stroke-width=".9" stroke-linecap="round" opacity=".75"/>')),
+
+    // Kształt łapki — maska kuli HP (biały = widoczne) i jej obrys
+    pawMask: svgUrl(SVG('0 0 100 90', '<g fill="#fff">' + PAW_SHAPES + '</g>')),
+    pawRim: svgUrl(SVG('0 0 100 90',
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2d4ff"/><stop offset="1" stop-color="#7a5cc8"/></linearGradient></defs>' +
+      '<g fill="none" stroke="url(#g)" stroke-width="2.4">' + PAW_SHAPES + '</g>' +
+      '<g fill="#fff" opacity=".28"><ellipse cx="31" cy="8" rx="4" ry="2.4" transform="rotate(-20 31 8)"/><ellipse cx="61" cy="8" rx="4" ry="2.4" transform="rotate(-20 61 8)"/>' +
+      '<ellipse cx="12" cy="25" rx="3" ry="2" transform="rotate(-35 12 25)"/><ellipse cx="80" cy="25" rx="3" ry="2" transform="rotate(-10 80 25)"/>' +
+      '<path d="M30 48 C36 42 44 41 50 41" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></g>')),
+
+    // Zdobienie wokół kuli: księżycowy krąg, gwiazdki, szyny i ślady łapek (590x100)
+    orbPanel: svgUrl(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 590 100" preserveAspectRatio="none">' +
+      '<defs><linearGradient id="l" x1="0" x2="1"><stop offset="0" stop-color="#9b7bd4" stop-opacity="0"/><stop offset=".5" stop-color="#9b7bd4" stop-opacity=".7"/><stop offset="1" stop-color="#9b7bd4" stop-opacity="0"/></linearGradient>' +
+      '<radialGradient id="h"><stop offset=".72" stop-color="#140d24" stop-opacity=".95"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="295" cy="50" r="62" fill="url(#h)"/>' +
+      '<circle cx="295" cy="50" r="57" fill="none" stroke="#9b7bd4" stroke-opacity=".55" stroke-width="1.2"/>' +
+      '<path d="M241 68 A57 57 0 0 0 349 68" fill="none" stroke="#c3a8ff" stroke-opacity=".9" stroke-width="2.2" stroke-linecap="round"/>' +
+      '<circle cx="295" cy="50" r="62" fill="none" stroke="#9b7bd4" stroke-opacity=".25" stroke-width=".8" stroke-dasharray="2 5"/>' +
+      '<g fill="#e6dcff"><circle cx="232" cy="14" r="1.2"/><circle cx="360" cy="20" r="1"/><circle cx="248" cy="92" r=".9"/><circle cx="346" cy="90" r="1.1"/></g>' +
+      '<rect x="18" y="86" width="210" height="1" fill="url(#l)"/><rect x="362" y="86" width="210" height="1" fill="url(#l)"/>' +
+      `<g opacity=".22"><g transform="translate(40 66) rotate(80) scale(.55)">${PAW('#c3a8ff')}</g><g transform="translate(70 60) rotate(100) scale(.55)">${PAW('#c3a8ff')}</g>` +
+      `<g transform="translate(540 66) rotate(-80) scale(.55)">${PAW('#c3a8ff')}</g><g transform="translate(510 60) rotate(-100) scale(.55)">${PAW('#c3a8ff')}</g></g>` +
+      '</svg>'),
+
+    // Kocie wąsy (lewe; prawe = lustro) — przy kuli, drgają co kilka sekund
+    whiskers: svgUrl(SVG('0 0 100 44',
+      '<g fill="none" stroke="#c3a8ff" stroke-width="1.1" stroke-linecap="round" opacity=".75">' +
+      '<path d="M100 16 C70 10 40 6 4 2"/><path d="M100 22 C66 21 36 22 2 24"/><path d="M100 28 C70 32 42 37 6 44"/></g>')),
+    whiskersR: svgUrl(SVG('0 0 100 44',
+      '<g fill="none" stroke="#c3a8ff" stroke-width="1.1" stroke-linecap="round" opacity=".75" transform="translate(100 0) scale(-1 1)">' +
+      '<path d="M100 16 C70 10 40 6 4 2"/><path d="M100 22 C66 21 36 22 2 24"/><path d="M100 28 C70 32 42 37 6 44"/></g>')),
 
     face: svgUrl(SVG('0 0 24 24',
       '<path d="M4 20 C3 15 3 8 4.5 3 C7 5 8.5 6.5 9.5 8 C11 7.6 13 7.6 14.5 8 C15.5 6.5 17 5 19.5 3 C21 8 21 15 20 20 C18.5 22 15.5 23 12 23 C8.5 23 5.5 22 4 20 Z" fill="#000" stroke="#a98be0" stroke-width="1.1" stroke-linejoin="round"/>' +
@@ -456,14 +515,149 @@ ${P} .c-window:hover > .header-label-positioner::before { transform: rotate(-6de
 ${P} .c-window:hover > .header-label-positioner::after  { transform: scaleX(-1) rotate(-6deg); }`;
 
     const hpGlowCss = !FEATURES.hpGlow ? '' : `
-/* Pulsująca poświata wokół kuli HP — blask po kształcie kuli (filtr na obudowie, mały element) */
-${SA('hpOrbWrap')} {
+/* Pulsująca poświata — filtr na rodzicu obudowy, więc blask idzie po kształcie łapki/kuli */
+${SA('hpOrbHost')} {
   animation: mkn-hp-pulse 3.2s ease-in-out infinite;
 }
 @keyframes mkn-hp-pulse {
-  0%, 100% { filter: drop-shadow(0 0 3px rgba(155,123,212,.45)); }
-  50%      { filter: drop-shadow(0 0 10px rgba(155,123,212,.9)) drop-shadow(0 0 22px rgba(110,84,170,.55)); }
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(155,123,212,.5)); }
+  50%      { filter: drop-shadow(0 0 9px rgba(155,123,212,.95)) drop-shadow(0 0 20px rgba(110,84,170,.6)); }
 }`;
+
+    /* Kula HP. Wysokością „krwi” steruje gra — my zmieniamy tylko jej wygląd i kształt. */
+    const orbCss = `
+/* Maska łapki tylko na kuli i obrysie — napis z procentem zostaje nieprzycięty.
+   Kula dostaje ten sam prostokąt co obrys (cała obudowa), żeby kształty się pokrywały. */
+${S('hpOrb')} {
+  position: absolute !important;
+  left: 0 !important; top: 0 !important; right: 0 !important; bottom: 0 !important;
+  width: auto !important; height: auto !important;
+  ${FEATURES.pawOrb ? `-webkit-mask: ${ICONS.pawMask} center / contain no-repeat;
+  mask: ${ICONS.pawMask} center / contain no-repeat;` : 'border-radius: 50%; overflow: hidden;'}
+  background: radial-gradient(ellipse at 50% 38%, #1d1430, #06040b 72%) !important;
+}
+${S('hpOrbWrap')} { background: transparent !important; }
+/* Płyn: fioletowy z jaśniejszą powierzchnią */
+${S('hpOrbBlood')} {
+  background-image:
+    radial-gradient(120% 22% at 50% 0%, rgba(232,216,255,.75), rgba(196,166,255,.25) 45%, transparent 75%),
+    linear-gradient(to top, #1e0838, #5a26a8 55%, #9a6ae8 92%, #c7a6ff) !important;
+  background-size: 100% 100%, 100% 100% !important;
+  background-position: 0 0, 0 0 !important;
+  background-repeat: no-repeat !important;
+  overflow: hidden;
+}
+/* Połysk przesuwający się po płynie i unoszące się bąbelki — tylko transform/opacity */
+${SA('hpOrbBlood', '::before')} {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent);
+  pointer-events: none;
+  animation: mkn-shimmer 5.5s ease-in-out infinite;
+}
+${SA('hpOrbBlood', '::after')} {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 28% 92%, rgba(235,222,255,.85) 0 1.4px, transparent 2.2px),
+    radial-gradient(circle at 57% 97%, rgba(235,222,255,.7) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 74% 88%, rgba(235,222,255,.8) 0 1.6px, transparent 2.4px),
+    radial-gradient(circle at 42% 99%, rgba(235,222,255,.6) 0 .9px, transparent 1.6px);
+  pointer-events: none;
+  animation: mkn-bubbles 4.2s ease-in infinite;
+}
+@keyframes mkn-shimmer { 0% { transform: translateX(-120%); } 55%, 100% { transform: translateX(260%); } }
+@keyframes mkn-bubbles {
+  0%   { transform: translateY(0);    opacity: 0; }
+  15%  { opacity: .9; }
+  85%  { opacity: .6; }
+  100% { transform: translateY(-70%); opacity: 0; }
+}
+/* Obrys łapki z połyskiem (zastępuje okrągłe szkło) */
+${S('hpOrbGlass')} {
+  background: ${FEATURES.pawOrb ? ICONS.pawRim : 'none'} center / contain no-repeat !important;
+  ${FEATURES.pawOrb ? '' : 'border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(195,168,255,.8), inset 0 6px 14px rgba(255,255,255,.12) !important;'}
+}
+/* Procent HP — jasny z fioletową poświatą */
+${P} .hp-indicator-wrapper-template *:not(.blood):not(.glass) {
+  color: #f4eeff !important;
+  text-shadow: 0 0 6px rgba(155,123,212,.9), 0 1px 2px #000 !important;
+  font-family: var(--mkn-font-head) !important;
+}`;
+
+    /* Zdobienia wokół kuli */
+    const orbDecorCss = !FEATURES.orbDecor ? '' : `
+${S('orbPanel')} {
+  background: ${ICONS.orbPanel} center / 100% 100% no-repeat !important;
+  filter: none !important;
+}
+${S('orbPanel', '::before')},
+${S('orbPanel', '::after')} {
+  content: '';
+  position: absolute;
+  top: 50px;
+  width: 88px; height: 34px;
+  background: ${ICONS.whiskers} center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+${S('orbPanel', '::before')} { left: calc(50% - 144px); transform-origin: 100% 45%; }
+${S('orbPanel', '::after')}  { left: calc(50% + 56px); background-image: ${ICONS.whiskersR}; transform-origin: 0 45%; }
+${SA('orbPanel', '::before')} { animation: mkn-whisk-l 7s ease-in-out infinite; }
+${SA('orbPanel', '::after')}  { animation: mkn-whisk-r 7s ease-in-out .15s infinite; }
+@keyframes mkn-whisk-l { 0%, 84%, 100% { transform: rotate(0); } 87% { transform: rotate(-5deg); } 90% { transform: rotate(1deg); } 93% { transform: rotate(-3deg); } }
+@keyframes mkn-whisk-r { 0%, 84%, 100% { transform: rotate(0); } 87% { transform: rotate(5deg); } 90% { transform: rotate(-1deg); } 93% { transform: rotate(3deg); } }
+/* Kapsuły „9,18%” i „0 min” */
+${S('orbPointer')} {
+  background: linear-gradient(180deg, #120c1e, #030205) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 0 0 1px rgba(155,123,212,.6), 0 0 10px rgba(110,84,170,.3), inset 0 1px 0 rgba(195,168,255,.2) !important;
+  filter: none !important;
+}
+/* Ramki pasków doświadczenia: fioletowa obwódka i delikatna podziałka co 10% */
+${S('expOverlay')} {
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(155,123,212,.35) calc(10% - 1px) 10%) !important;
+  border-radius: 9px !important;
+  box-shadow: inset 0 0 0 1px rgba(155,123,212,.6), 0 0 6px rgba(110,84,170,.25) !important;
+  filter: none !important;
+}`;
+
+    /* Górna tabliczka HUD */
+    const hudCss = !FEATURES.hudDecor ? '' : `
+${S('hud')} {
+  background:
+    radial-gradient(70% 90% at 50% 0%, rgba(155,123,212,.16), transparent 70%),
+    var(--mkn-paws),
+    linear-gradient(180deg, rgba(18,13,30,.97), rgba(3,2,6,.97)) !important;
+  border-radius: 0 0 18px 18px !important;
+  box-shadow: 0 0 0 1px rgba(155,123,212,.6), 0 8px 22px rgba(0,0,0,.75), 0 0 20px rgba(110,84,170,.25),
+              inset 0 -1px 0 rgba(195,168,255,.3) !important;
+  filter: none !important;
+  color: var(--mkn-text);
+  font-family: var(--mkn-font-head);
+}
+/* Uszy na rogach tabliczki */
+${S('hud', '::before')} {
+  content: '';
+  position: absolute; left: 0; right: 0; top: -11px; height: 13px;
+  background:
+    ${ICONS.earL} left 26px top 0 / 16px 13px no-repeat,
+    ${ICONS.earR} right 26px top 0 / 16px 13px no-repeat;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+/* Ogon zwisający spod tabliczki */
+${S('hud', '::after')} {
+  content: '';
+  position: absolute; right: 34px; top: calc(100% - 2px);
+  width: 14px; height: 34px;
+  background: ${ICONS.tail} center top / contain no-repeat;
+  transform-origin: 50% 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px rgba(155,123,212,.4));
+}
+${SA('hud', '::before')} { animation: mkn-ears 8s ease-in-out infinite; }
+${SA('hud', '::after')}  { animation: mkn-tail 4.5s ease-in-out infinite alternate; }
+@keyframes mkn-ears { 0%, 90%, 100% { transform: scaleY(1); } 92% { transform: scaleY(.78); } 94% { transform: scaleY(1); } 96% { transform: scaleY(.85); } }
+@keyframes mkn-tail { 0% { transform: rotate(-9deg); } 100% { transform: rotate(9deg); } }`;
 
     return `
 /* =====================================================================
@@ -739,14 +933,10 @@ ${P} .mkn-ink  { color: var(--mkn-text) !important; text-shadow: none !important
 /* =====================================================================
  * === PASKI ===
  * ===================================================================== */
-/* Kula HP: krew i procent przebarwione na fiolet */
-${S('hpOrb')} {
-  filter: hue-rotate(272deg) saturate(1.15) brightness(.95);
-}
-${S('hpOrbGlass')} {
-  filter: grayscale(.6) brightness(.9) sepia(.4) hue-rotate(220deg) saturate(2);
-}
+${orbCss}
 ${hpGlowCss}
+${orbDecorCss}
+${hudCss}
 ${S('barTrack')} {
   background-color: #000 !important;
   border-radius: 6px;
@@ -1018,7 +1208,8 @@ ${P} .mkn-amb-eyes {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.${ROOT_CLASS} *::after, html.${ROOT_CLASS} .mkn-amb-eyes, html.${ROOT_CLASS} .hp-indicator-wrapper { animation: none !important; }
+  html.${ROOT_CLASS} *::before, html.${ROOT_CLASS} *::after, html.${ROOT_CLASS} .mkn-amb-eyes,
+  html.${ROOT_CLASS} .hp-indicator-wrapper-template { animation: none !important; }
 }
 
 /* =====================================================================
