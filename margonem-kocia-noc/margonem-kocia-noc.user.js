@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.0
+// @version      1.7.1
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,7 +50,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.7.0';
+  const VERSION = '1.7.1';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -107,7 +107,11 @@
     columnBorder:    ['.interface-layer > .main-column > .border'],
     hud:             ['.top.positioner .hud-container'],                  // tabliczka: imię, lokacja, złoto
     orbPanel:        ['.bottom-panel .bottom-panel-graphic'],             // grafika wokół kuli (590x100)
-    orbPointer:      ['.bottom-panel .pointer-exp-graphic', '.bottom-panel .pointer-ttl-graphic'],   // „9,18%”, „0 min”
+    orbPointer:      ['.bottom-panel .pointer-exp-graphic', '.bottom-panel .pointer-ttl-graphic'],   // tła kapsuł „9,18%”, „0 min”
+    orbPointerText:  ['.bottom-panel .pointer-exp', '.bottom-panel .pointer-ttl'],
+    mapBall:         ['.top.positioner .hud-container .map_ball'],                  // kulka koloru mapy (green/yellow/orange/red)
+    goldIcon:        ['.top.positioner .hud-container .gold-tip'],
+    creditsIcon:     ['.top.positioner .hud-container .credits-tip'],              // smocze łzy
     expOverlay:      ['.exp-bar-wrapper .overlay'],                       // ramki pasków doświadczenia
     spriteArt:       ['.lagmeter .lag'],                                  // pozostałe sprite'y — tylko przebarwienie
     slotGrid:        ['.interface-element-item-slot-grid-stretch'],              // kratki torby (kafel gry barwiony na fiolet)
@@ -127,7 +131,7 @@
     hpOrb:           ['.hp-indicator'],                               // kula HP (krew + procent) — barwiona na fiolet
     hpOrbBlood:      ['.hp-indicator .blood'],
     hpOrbWrap:       ['.hp-indicator-wrapper'],                       // obudowa kuli — tu maska łapki
-    hpOrbHost:       ['.hp-indicator-wrapper-template'],              // rodzic obudowy — tu pulsuje poświata
+    hpOrbHost:       ['.hp-indicator-wrapper-template'],              // rodzic obudowy — NIE dawać tu filter/transform (patrz hpGlowCss)
     hpOrbGlass:      ['.hp-indicator-wrapper .glass'],
     barTrack:        ['[class*="interface-element-progress-bar-"]', '.progress-bar-wrapper',          // ? .progress-bar-wrapper
                       '.exp-bar-wrapper .exp-progress .progress'],
@@ -218,6 +222,16 @@
     `<defs><linearGradient id="w" x1="1" x2="0"><stop offset="0" stop-color="#e2d4ff" stop-opacity=".95"/><stop offset="1" stop-color="#9b7bd4" stop-opacity="0"/></linearGradient></defs>` +
     `<g fill="none" stroke="url(#w)" stroke-width="1.2" stroke-linecap="round"${mirror ? ' transform="translate(100 0) scale(-1 1)"' : ''}>${WHISKER_PATHS}</g>`);
 
+  /** Kapsuła 70x35 (lewa; prawa = lustro): czarna obwódka, ciemne wnętrze, fioletowa krawędź, refleks, romb. */
+  const capsuleSvg = (mirror) => SVG('0 0 70 35',
+    '<defs><linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1330"/><stop offset=".55" stop-color="#0b0716"/><stop offset="1" stop-color="#030205"/></linearGradient>' +
+    '<linearGradient id="e" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9c8ff"/><stop offset="1" stop-color="#4b3b6e"/></linearGradient></defs>' +
+    `<g${mirror ? ' transform="translate(70 0) scale(-1 1)"' : ''}>` +
+    '<path d="M17.5 2.5 H70 V32.5 H17.5 A15 15 0 0 1 17.5 2.5 Z" fill="#000"/>' +
+    '<path d="M17.5 4 H70 V31 H17.5 A13.5 13.5 0 0 1 17.5 4 Z" fill="url(#f)" stroke="url(#e)" stroke-width="1"/>' +
+    '<path d="M17.5 6.5 H66 M17.5 6.5 A11 11 0 0 0 7 13" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width=".8"/>' +
+    '<path d="M10 17.5 L11.5 16 L13 17.5 L11.5 19 Z" fill="#c3a8ff" opacity=".9"/></g>');
+
   const ICONS = {
     paw: svgUrl(SVG('0 0 24 24', PAW('#a98be0'))),
     pawDim: svgUrl(SVG('0 0 24 24', PAW('#2a2238'))),
@@ -260,18 +274,14 @@
       '<ellipse cx="50" cy="25" rx="5.5" ry="21" fill="#0a0503"/>' +
       '<ellipse cx="40" cy="16" rx="5" ry="3.2" fill="#fff" opacity=".55"/>')),
 
-    // Ornament pod tabliczką HUD: zawijasy i medalion z kocią głową (oczy osobno — mrugają)
+    // Ornament pod tabliczką HUD: zawijasy i czarne gniazdo; sam medalion (kolor mapy + kot) to przestawiona
+    // kulka mapy gry (.map_ball), oczy kota osobno — mrugają
     hudOrnament: svgUrl(SVG('0 0 240 34',
-      '<defs><radialGradient id="b" cx=".5" cy=".4"><stop offset="0" stop-color="#2c1d4c"/><stop offset="1" stop-color="#07050c"/></radialGradient>' +
-      '<linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece2ff"/><stop offset="1" stop-color="#6a54a0"/></linearGradient></defs>' +
       '<g fill="none" stroke="#b79cf0" stroke-width="1" stroke-linecap="round" opacity=".85">' +
       '<path d="M103 15 C84 15 74 8 58 10 C46 11 40 17 28 15 C20 14 15 9 8 10"/><path d="M64 10 C61 16 55 18 50 16"/><path d="M36 15 C34 20 29 21 26 19"/>' +
       '<path d="M137 15 C156 15 166 8 182 10 C194 11 200 17 212 15 C220 14 225 9 232 10"/><path d="M176 10 C179 16 185 18 190 16"/><path d="M204 15 C206 20 211 21 214 19"/></g>' +
       '<g fill="#c3a8ff"><circle cx="8" cy="10" r="1.5"/><circle cx="232" cy="10" r="1.5"/></g>' +
-      '<circle cx="120" cy="17" r="15" fill="url(#b)" stroke="url(#r)" stroke-width="1.4"/>' +
-      '<circle cx="120" cy="17" r="12.4" fill="none" stroke="#9b7bd4" stroke-opacity=".4" stroke-width=".6"/>' +
-      '<path d="M113 23 C112.5 19 112.6 13 113.4 9.5 C115 11 116.3 12.2 117.1 13.3 C118.9 12.8 121.1 12.8 122.9 13.3 C123.7 12.2 125 11 126.6 9.5 C127.4 13 127.5 19 127 23 C125.8 25.5 123 26.5 120 26.5 C117 26.5 114.2 25.5 113 23 Z" fill="#000" stroke="#c3a8ff" stroke-width=".7"/>' +
-      '<path d="M119.2 21.4 L120 22 L120.8 21.4" stroke="#e3a3c6" stroke-width=".6" fill="none" stroke-linecap="round"/>')),
+      '<circle cx="120" cy="17" r="16.5" fill="#000"/>')),
     hudOrnamentEyes: svgUrl(SVG('0 0 240 34',
       '<g fill="#f0c95e"><ellipse cx="117.3" cy="18.6" rx="1.35" ry="1.5"/><ellipse cx="122.7" cy="18.6" rx="1.35" ry="1.5"/></g>' +
       '<g fill="#000"><ellipse cx="117.3" cy="18.6" rx=".35" ry="1.3"/><ellipse cx="122.7" cy="18.6" rx=".35" ry="1.3"/></g>')),
@@ -299,10 +309,38 @@
       '<circle cx="70" cy="70" r="67" fill="#000" fill-opacity=".9"/>' +
       '<circle cx="70" cy="70" r="65" fill="url(#b)" stroke="url(#r)" stroke-width="1.3"/>' +
       '<circle cx="70" cy="70" r="60.5" fill="none" stroke="#9b7bd4" stroke-opacity=".28" stroke-width=".7" stroke-dasharray="1 3.2"/>' +
-      '<g fill="#d9c8ff"><path d="M70 1.5 L72 5 L70 8.5 L68 5 Z"/><path d="M70 131.5 L72 135 L70 138.5 L68 135 Z" opacity=".5"/>' +
+      '<g fill="#d9c8ff"><path d="M70 131.5 L72 135 L70 138.5 L68 135 Z" opacity=".5"/>' +
       '<path d="M1.5 70 L5 68 L8.5 70 L5 72 Z" opacity=".75"/><path d="M138.5 70 L135 68 L131.5 70 L135 72 Z" opacity=".75"/></g>' +
-      '<circle cx="116" cy="24" r="9" fill="#05030a" stroke="url(#r)" stroke-width="1"/>' +
-      '<path d="M114 17.5 A7 7 0 1 0 122.5 26.5 A5.6 5.6 0 1 1 114 17.5 Z" fill="#ece6f7" opacity=".85"/>')),
+      // półksiężyc na szczycie pierścienia — w szczelinie między środkowymi palcami łapki
+      '<circle cx="70" cy="8" r="8" fill="#05030a" stroke="url(#r)" stroke-width="1"/>' +
+      '<path d="M68 2 A6.4 6.4 0 1 0 75.8 10.2 A5.1 5.1 0 1 1 68 2 Z" fill="#ece6f7" opacity=".9"/>')),
+
+    // Medalion pod tabliczką: pierścień i połysk (wnętrze maluje kolor mapy) oraz kocia głowa na wierzchu
+    mapRing: svgUrl(SVG('0 0 32 32',
+      '<defs><linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1e9ff"/><stop offset="1" stop-color="#6a54a0"/></linearGradient>' +
+      '<radialGradient id="v" cx=".5" cy=".5" r=".5"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient></defs>' +
+      '<circle cx="16" cy="16" r="15" fill="url(#v)"/><circle cx="16" cy="16" r="15.1" fill="none" stroke="url(#r)" stroke-width="1.5"/>' +
+      '<circle cx="16" cy="16" r="12.8" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width=".6"/>' +
+      '<ellipse cx="11" cy="7.5" rx="4.5" ry="2" fill="#fff" opacity=".22" transform="rotate(-25 11 7.5)"/>')),
+    mapCat: svgUrl(SVG('0 0 32 32',
+      '<path d="M9 22 C8.5 18 8.6 12 9.4 8.5 C11 10 12.3 11.2 13.1 12.3 C14.9 11.8 17.1 11.8 18.9 12.3 C19.7 11.2 21 10 22.6 8.5 C23.4 12 23.5 18 23 22 C21.8 24.5 19 25.5 16 25.5 C13 25.5 10.2 24.5 9 22 Z" fill="#05030a" stroke="#1a0f2c" stroke-width=".6"/>' +
+      '<path d="M15.2 20.4 L16 21 L16.8 20.4" stroke="#e3a3c6" stroke-width=".6" fill="none" stroke-linecap="round"/>')),
+
+    // Ikony waluty na tabliczce (grafika gry była częścią podmienionego tła): złota moneta z łapką i smocza łza
+    coin: svgUrl(SVG('0 0 24 24',
+      '<defs><radialGradient id="c" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#fff4c2"/><stop offset=".45" stop-color="#e8c25a"/><stop offset="1" stop-color="#8a5e12"/></radialGradient></defs>' +
+      '<circle cx="12" cy="12" r="9.5" fill="url(#c)" stroke="#3a2606" stroke-width="1"/>' +
+      '<circle cx="12" cy="12" r="7" fill="none" stroke="#fff3c4" stroke-opacity=".55" stroke-width=".7"/>' +
+      `<g transform="translate(6.6 6.4) scale(.45)">${PAW('#8a5e12')}</g>`)),
+    tear: svgUrl(SVG('0 0 24 24',
+      '<defs><linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd1e6"/><stop offset=".35" stop-color="#f05a9e"/><stop offset="1" stop-color="#6a0f3c"/></linearGradient></defs>' +
+      '<path d="M12 2.5 C15.5 8 19 11.5 19 15.2 C19 19.2 15.9 22 12 22 C8.1 22 5 19.2 5 15.2 C5 11.5 8.5 8 12 2.5 Z" fill="url(#t)" stroke="#2a0614" stroke-width="1"/>' +
+      '<path d="M12 6.5 L9 14.5 L12 19 L15 14.5 Z" fill="#fff" opacity=".18"/>' +
+      '<ellipse cx="9.2" cy="13.5" rx="1.4" ry="3" fill="#fff" opacity=".6" transform="rotate(20 9.2 13.5)"/>')),
+
+    // Kapsuły przy kuli (exp % i wyczerpanie): zaokrąglony koniec na zewnątrz, prosty pod kulą, romb-akcent
+    capsule: svgUrl(capsuleSvg(false)),
+    capsuleR: svgUrl(capsuleSvg(true)),
 
     // Panel pod kulą: delikatne szyny i ślady łapek (590x100) — krąg i wąsy są na samej kuli
     orbPanel: svgUrl(
@@ -551,8 +589,10 @@ ${P} .c-window:hover > .header-label-positioner::before { transform: rotate(-6de
 ${P} .c-window:hover > .header-label-positioner::after  { transform: scaleX(-1) rotate(-6deg); }`;
 
     const hpGlowCss = !FEATURES.hpGlow ? '' : `
-/* Pulsująca poświata — filtr na rodzicu obudowy, więc blask idzie po kształcie łapki/kuli */
-${SA('hpOrbHost')} {
+/* Pulsująca poświata — filtr na SAMEJ obudowie, nie na jej rodzicu: filter na rodzicu tworzy nowy
+   blok zawierający dla position:absolute i gra liczyła wtedy położenie kuli od pudełka o wysokości 0
+   (kula lądowała ~80 px wyżej niż w oryginale). */
+${SA('hpOrbWrap')} {
   animation: mkn-hp-pulse 3.2s ease-in-out infinite;
 }
 @keyframes mkn-hp-pulse {
@@ -569,7 +609,6 @@ ${S('hpOrbWrap')} {
   background: transparent !important;
   overflow: visible !important;      /* gra przycina obudowę do koła — medalion i wąsy muszą wystawać */
   border-radius: 0 !important;
-  ${FEATURES.pawOrb ? 'transform: scale(1.14); transform-origin: 50% 100%;' : ''}
 }
 ${S('hpOrb')} {
   ${FEATURES.pawOrb
@@ -639,24 +678,24 @@ ${S('orbPanel')} {
   background: ${ICONS.orbPanel} center / 100% 100% no-repeat !important;
   filter: none !important;
 }
-${S('hpOrbHost')} { isolation: isolate; }
-/* Medalion za łapką — przypięty do obręczy (= pudełka kuli), więc zawsze wyśrodkowany na łapce */
+/* Medalion za łapką — przypięty do obręczy (= pudełka kuli), więc zawsze wyśrodkowany na łapce.
+   Rozmiar ≈ oryginalna szklana kula gry (102 px), żeby kula mieściła się między kapsułami jak w oryginale. */
 ${S('hpOrbGlass', '::before')} {
   content: '';
   position: absolute; left: 50%; top: 50%;
-  width: 124%; aspect-ratio: 1;
+  width: 104%; aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: ${ICONS.orbSeat} center / contain no-repeat;
-  box-shadow: 0 0 22px rgba(110,84,170,.35), 0 6px 18px rgba(0,0,0,.7);
+  box-shadow: 0 0 16px rgba(110,84,170,.4), 0 4px 12px rgba(0,0,0,.7);
   pointer-events: none;
   z-index: -1;
 }
-/* Kocie wąsy po obu stronach medalionu */
+/* Kocie wąsy — od górnej części medalionu, ponad kapsułami */
 ${S('hpOrbGlass', '::after')} {
   content: '';
-  position: absolute; left: 50%; top: 58%;
-  width: 250px; height: 40px;
+  position: absolute; left: 50%; top: 12%;
+  width: 220px; height: 40px;
   transform: translate(-50%, -50%);
   background:
     ${ICONS.whiskers} left center / 74px 37px no-repeat,
@@ -671,12 +710,20 @@ ${SA('hpOrbGlass', '::after')} { animation: mkn-whisk 7s ease-in-out infinite; }
   90% { transform: translate(-50%, -50%); }
   93% { transform: translate(-50%, -52%) scaleY(1.07); }
 }
-/* Kapsuły „9,18%” i „0 min” */
+/* Kapsuły „11,38%” (exp) i „360 min” (wyczerpanie) — prosty koniec chowa się pod kulą */
 ${S('orbPointer')} {
-  background: linear-gradient(180deg, #120c1e, #030205) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 0 0 1px rgba(155,123,212,.6), 0 0 10px rgba(110,84,170,.3), inset 0 1px 0 rgba(195,168,255,.2) !important;
-  filter: none !important;
+  background: ${ICONS.capsule} center / 100% 100% no-repeat !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 6px rgba(110,84,170,.35)) !important;
+}
+${P} .bottom-panel .pointer-ttl-graphic { background-image: ${ICONS.capsuleR} !important; }
+${S('orbPointerText')} {
+  font-family: var(--mkn-font-head) !important;
+  font-weight: 700 !important;
+  letter-spacing: .02em;
+  color: #efe8ff !important;
+  text-shadow: 0 0 6px rgba(155,123,212,.6), 0 1px 1px #000 !important;
 }
 /* Ramki pasków doświadczenia: fioletowa obwódka i delikatna podziałka co 10% */
 ${S('expOverlay')} {
@@ -745,8 +792,35 @@ ${S('hud', '::after')} {
   background: ${ICONS.hudOrnamentEyes} center / contain no-repeat;
   transform-origin: 50% 55%;
   filter: drop-shadow(0 0 2px rgba(240,201,94,.9));
+  z-index: 4;
 }
-${SA('hud', '::after')} { animation: mkn-blink 6s infinite; }`;
+${SA('hud', '::after')} { animation: mkn-blink 6s infinite; }
+/* Kulka koloru mapy gry → medalion pod tabliczką: tło w kolorze mapy, pierścień i kocia głowa.
+   Element gry zostaje (z dymkiem po najechaniu) — tylko przestawiony i przemalowany. */
+${S('mapBall')} {
+  --mkn-map: #3fae5a;
+  left: calc(50% - 16px) !important; top: calc(100% - 2px) !important;
+  width: 32px !important; height: 32px !important;
+  border-radius: 50%;
+  z-index: 3;
+  background:
+    ${ICONS.mapCat} center / 100% 100% no-repeat,
+    ${ICONS.mapRing} center / 100% 100% no-repeat,
+    radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--mkn-map) 55%, #fff), var(--mkn-map) 45%, color-mix(in srgb, var(--mkn-map) 35%, #000) 100%) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--mkn-map) 55%, transparent), 0 2px 6px rgba(0,0,0,.8) !important;
+}
+${S('mapBall', '.yellow')} { --mkn-map: #e3c23f; }
+${S('mapBall', '.orange')} { --mkn-map: #e5873a; }
+${S('mapBall', '.red')}    { --mkn-map: #d8434f; }
+/* Waluty: złoto i smocze łzy (ich ikony były w podmienionym tle tabliczki) */
+${S('goldIcon')} {
+  background: ${ICONS.coin} center / 17px 17px no-repeat !important;
+  filter: drop-shadow(0 0 3px rgba(232,194,90,.45));
+}
+${S('creditsIcon')} {
+  background: ${ICONS.tear} center / 17px 17px no-repeat !important;
+  filter: drop-shadow(0 0 3px rgba(240,90,158,.45));
+}`;
 
     return `
 /* =====================================================================
@@ -1358,7 +1432,7 @@ ${P} .mkn-amb-eyes {
 
 @media (prefers-reduced-motion: reduce) {
   html.${ROOT_CLASS} *::before, html.${ROOT_CLASS} *::after, html.${ROOT_CLASS} .mkn-amb-eyes,
-  html.${ROOT_CLASS} .hp-indicator-wrapper-template { animation: none !important; }
+  html.${ROOT_CLASS} .hp-indicator-wrapper { animation: none !important; }
   html.${ROOT_CLASS} .mkn-bubble { display: none !important; }
 }
 
