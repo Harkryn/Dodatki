@@ -31,4 +31,8 @@ Instalacja:
 
 Włączanie / wyłączanie: **Alt+T** albo mała ikonka ✠ w lewym dolnym rogu ekranu. Stan jest zapamiętywany.
 
+Nie działa? Otwórz konsolę (F12 → Console) — skrypt wypisuje tam `[Dark Fantasy] … aktywny` albo powód, dla którego się nie włączył. W Operze / Operze GX sprawdź w `opera://extensions` → Tampermonkey → **Szczegóły**, czy włączone jest **Zezwalaj na skrypty użytkownika** i dostęp **Na wszystkich witrynach**. Jeśli równolegle używasz innego motywu interfejsu (np. nitheme), wyłącz go — oba podmieniają te same grafiki.
+
+Diagnostyka: [diagnostyka.js](margonem-dark-fantasy/diagnostyka.js) — wklej do konsoli w grze, a skopiuje do schowka listę klas i grafik interfejsu (pomaga poprawić selektory). Niczego nie zmienia w grze.
+
 Dostosowanie: paleta kolorów to zmienne CSS (`--mdf-gold`, `--mdf-blood`, `--mdf-ghost`, `--mdf-arcane`, `--mdf-rar-*` …) w funkcji `buildCss()`, a selektory elementów gry są zebrane w obiekcie `SELECTORS` na początku pliku. Selektory oznaczone `// ?` to przypuszczenia — sprawdź je w DevTools (F12) i popraw w razie potrzeby.
