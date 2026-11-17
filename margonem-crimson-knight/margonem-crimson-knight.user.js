@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Crimson Knight Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.3.0
+// @version      1.4.0
 // @description  Mroczny, gotycko-rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, maswerki, sterczyny i miecze. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -57,7 +57,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const KEY_ENABLED = 'ck.enabled';
   const KEY_VARIANT = 'ck.variant';
   const KEY_ANIM = 'ck.anim';
@@ -157,6 +157,11 @@
     hpOrb:           ['.hp-indicator'],                                           // [KN]
     hpOrbBlood:      ['.hp-indicator .blood'],                                    // [KN]
     hpOrbValue:      ['.hp-indicator .hpp .value'],                               // [GRA] napis „100%” — główny odczyt % HP
+    hpOrbWrap:       ['.hp-indicator-wrapper'],        // [GRA] 88×88, absolute, z-index 1, overflow hidden, koło
+    hpOrbGlass:      ['.hp-indicator-wrapper .glass'], // [GRA] szklana obręcz gry (sprite buttony.png)
+    orbPanelHost:    ['.bottom-panel'],                // [GRA] absolute — tu wisi oprawa kuli (Szkarłat)
+    expTrack:        ['.exp-bar-wrapper .progress'],   // [GRA] 212×10 po obu stronach kuli
+    expFrame:        ['.exp-bar-wrapper .overlay'],    // [GRA] 225×16, nakładka nad paskiem
     barTrack:        ['[class*="interface-element-progress-bar-"]:not(.one-warrior *)',
                       '.exp-bar-wrapper .exp-progress .progress'],                // [KN]
     hpFill:          ['.hero-hp-progress-bar .inner', '.hero-hp-top-progress-bar-light-mode .inner',   // [KN]
@@ -285,6 +290,24 @@
     '<circle cx="3.5" cy="3.5" r="1.4" fill="#0c0909"/><path d="M9 2.5 L10.5 0.8 L12 2.5 Z M2.5 9 L0.8 10.5 L2.5 12 Z" fill="#3d3838"/>';
   const tipCorner = (rot) => svgUrl(SVG('0 0 16 16', `<g transform="rotate(${rot} 8 8)">${TIP_CORNER}</g>`));
 
+  /* --- Oprawa kuli HP: pierścień, korona z trzech sterczyn z kwiatonem, szpikulce u dołu, wiszący grot --- */
+  const ORB_C = 'M80 25 A53 53 0 1 0 80 131 A53 53 0 1 0 80 25 Z M80 33.5 A44.5 44.5 0 1 1 80 122.5 A44.5 44.5 0 1 1 80 33.5 Z';
+  const ORB_SIDE = '<path d="M60 31 L63 13 L68 28.5 Z"/><path d="M64 21 Q59 20 58 23 Q61 22 64.5 23.5 Z"/>' +
+    '<path d="M44 118 L26 136 L49 122 Z"/><path d="M36 125 Q31 123 29 126 Q32.5 125.5 35 127.5 Z"/>' +
+    '<path d="M29 74 L20 78 L29 82 Z"/>';
+  const ORB_FRAME_IRON =
+    `<path fill-rule="evenodd" d="${ORB_C}"/>` +
+    '<path d="M73.5 28 L80 3 L86.5 28 Z"/><path d="M80 0 L82.6 4.2 L80 8.4 L77.4 4.2 Z"/>' +
+    '<path d="M76.6 17 Q72 15.8 71 19 Q74 18 76.9 19.6 Z M83.4 17 Q88 15.8 89 19 Q86 18 83.1 19.6 Z"/>' +
+    ORB_SIDE + `<g transform="translate(160 0) scale(-1 1)">${ORB_SIDE}</g>` +
+    '<path d="M73 129 L80 150 L87 129 Z"/><path d="M76.5 138 Q72 139 71.5 142 Q74 140.5 77.4 140.6 Z M83.5 138 Q88 139 88.5 142 Q86 140.5 82.6 140.6 Z"/>';
+  let ORB_FRAME_INLAY = '<path fill-rule="evenodd" d="M80 28.2 A49.8 49.8 0 1 0 80 127.8 A49.8 49.8 0 1 0 80 28.2 Z M80 29.6 A48.4 48.4 0 1 1 80 126.4 A48.4 48.4 0 1 1 80 29.6 Z"/>' +
+    '<circle cx="80" cy="17.5" r="1.9"/><path d="M80 134 L81.6 137.5 L80 141 L78.4 137.5 Z"/>';
+  for (let i = 0; i < 8; i++) {   // krwiste ćwieki na pierścieniu
+    const a = (i * 45 + 22.5) * Math.PI / 180;
+    ORB_FRAME_INLAY += `<circle cx="${(80 + 49.1 * Math.sin(a)).toFixed(2)}" cy="${(78 - 49.1 * Math.cos(a)).toFixed(2)}" r="2.3"/>`;
+  }
+
   const ICONS = {
     // Skrzyżowane miecze — maska (biały = widoczne)
     swordsCross: MASKSVG('0 0 24 24', `<g transform="rotate(40 12 12)">${SWORD_V}</g><g transform="rotate(-40 12 12)">${SWORD_V}</g>`),
@@ -318,6 +341,12 @@
       '<path d="M2 0 H14 V8 L12 12 V20 L10 24 L8 40 L6 24 L4 20 V12 L2 8 Z"/>' +
       '<path d="M4 14 Q0 15 0 18 Q2 16.5 4 17 Z M12 14 Q16 15 16 18 Q14 16.5 12 17 Z M5 22 Q2 23.5 2.5 26 Q4 24.5 5.6 25 Z M11 22 Q14 23.5 13.5 26 Q12 24.5 10.4 25 Z"/>'),
     pendantInlay: MASKSVG('0 0 16 40', '<path d="M7 2.5 H9 V9 L8 10.8 L7 9 Z"/><path d="M7.4 13 H8.6 V19 H7.4 Z"/>'),
+    // Oprawa kuli HP (Szkarłat): kute żelazne koło z koroną sterczyn, szpikulcami i wiszącym grotem.
+    // Środek kuli = (80, 78), promień kuli 44 → pierścień 44,5–53.
+    orbFrameIron: MASKSVG('0 0 160 150', ORB_FRAME_IRON),
+    orbFrameInlay: MASKSVG('0 0 160 150', ORB_FRAME_INLAY),
+    // Grot włóczni na końcu paska EXP (wskazuje w lewo; prawy = odbicie)
+    spearTip: MASKSVG('0 0 12 16', '<path d="M12 4.5 H6.5 L0 8 L6.5 11.5 H12 Z"/><path d="M9.8 2 H12 V14 H9.8 Z"/>'),
     battlement: MASKSVG('0 0 24 11', '<path fill-rule="evenodd" d="M0 1 H11 V8 H24 V11 H0 Z M4.9 3 H6.1 V6.5 H4.9 Z"/><path d="M-0.5 0 H11.5 V1.4 H-0.5 Z"/>'),
     tipTL: tipCorner(0), tipTR: tipCorner(90), tipBR: tipCorner(180), tipBL: tipCorner(270),
     // Szum (brud) — czarne drobinki
@@ -529,7 +558,7 @@ html[data-ck-variant="green"] {
 }
 
 /* Własne elementy są ukryte, dopóki motyw nie jest włączony */
-.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog, .ck-hud-deco { display: none; }
+.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog, .ck-hud-deco, .ck-orb, .ck-orb-frame { display: none; }
 
 /* =====================================================================
  * === OKNA ===
@@ -1246,7 +1275,7 @@ ${PA} .ck-fog::after  { animation: ck-fog2 90s ease-in-out infinite alternate; }
 @keyframes ck-fog2 { from { transform: translateX(10%) scaleX(-1); } to { transform: translateX(-6%) scaleX(-1); } }
 
 @media (prefers-reduced-motion: reduce) {
-  html.${ROOT_CLASS} .ck-glow,
+  html.${ROOT_CLASS} .ck-glow, html.${ROOT_CLASS} .ck-orb-swirl, html.${ROOT_CLASS} .ck-orb-glow,
   html.${ROOT_CLASS} .ck-fog::before, html.${ROOT_CLASS} .ck-fog::after { animation: none !important; }
   html.${ROOT_CLASS} .button > .background::after { transition: none !important; }
 }
@@ -1329,6 +1358,124 @@ ${PC} .ck-hud-deco > .ck-hud-corner.ck-l { left: -5px; transform: scaleY(-1); }
 ${PC} .ck-hud-deco > .ck-hud-corner.ck-r { right: -5px; transform: scale(-1, -1); }
 ${PC} .ck-hud-corner::before { ${MASK(ICONS.cornerIron, '0 0 / 100% 100%')} background: ${IRON_BG}; }
 ${PC} .ck-hud-corner::after  { ${MASK(ICONS.cornerInlay, '0 0 / 100% 100%')} background: ${INLAY_BG}; }
+
+/* =====================================================================
+ * === SZKARŁAT: KULA HP I PASKI EXP ===
+ * Kula: szklana kula z gęstą, ciemną krwią (poziom = % HP z napisu na kuli, przez zmienną --ck-hp),
+ * powoli wirującym wnętrzem, lśniącą powierzchnią i refleksem szkła, w kutej gotyckiej oprawie.
+ * Krew gry (.blood) i jej szklana obręcz są ukryte (opacity), ale zostają w DOM — gra działa jak dotąd.
+ * ===================================================================== */
+${PC} .hp-indicator-wrapper .blood,
+${PC} .hp-indicator-wrapper .glass { opacity: 0 !important; }
+${PC} .ck-orb {
+  display: block;
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, #140202, #060000 70%, #000);   /* puste szkło */
+}
+/* Ciecz: przesuwana w pionie (tylko transform) — 100% HP = pełna kula */
+${PC} .ck-orb-liquid {
+  position: absolute; inset: 0;
+  transform: translateY(calc((100 - var(--ck-hp, 100)) * 1%));
+  transition: transform .45s ease-out;
+  background:
+    radial-gradient(70% 45% at 30% 75%, rgba(0,0,0,.45), transparent 70%),
+    radial-gradient(60% 40% at 72% 60%, rgba(150,20,20,.35), transparent 70%),
+    linear-gradient(180deg, #8c1414 0%, #5e0b0b 18%, #3a0505 55%, #1a0202 100%);
+}
+/* Lśniąca powierzchnia krwi */
+${PC} .ck-orb-liquid::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 7px;
+  background: linear-gradient(180deg, rgba(255,150,140,.55), rgba(190,40,40,.25) 40%, transparent);
+}
+/* Wirujące, ciemniejsze smugi w głębi krwi */
+${PC} .ck-orb-swirl {
+  position: absolute; left: -30%; top: -30%; width: 160%; height: 160%;
+  background:
+    conic-gradient(from 0deg, transparent 0 8%, rgba(0,0,0,.35) 14% 20%, transparent 28% 46%, rgba(120,12,12,.3) 52% 58%, transparent 66% 82%, rgba(0,0,0,.3) 88% 94%, transparent 100%);
+  opacity: .9;
+}
+${PA}[data-ck-variant="crimson"] .ck-orb-swirl { animation: ck-swirl 38s linear infinite; }
+@keyframes ck-swirl { to { transform: rotate(360deg); } }
+/* Szkło: refleks światła, przyciemnione brzegi, delikatny drugi odblask */
+${PC} .ck-orb-glass {
+  position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(34% 22% at 36% 20%, rgba(255,236,226,.42), rgba(255,236,226,.08) 60%, transparent 75%),
+    radial-gradient(18% 10% at 66% 82%, rgba(255,120,110,.14), transparent 70%),
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(0,0,0,.55) 82%, rgba(0,0,0,.9) 100%);
+}
+/* Procent HP na kuli */
+${PC} .hp-indicator-wrapper .hpp .value {
+  font-family: var(--ck-font-caps) !important;
+  font-weight: 700 !important;
+  color: #efe2d8 !important;
+  text-shadow: 0 0 8px rgba(0,0,0,.95), 0 0 3px #000, 0 1px 1px #000 !important;
+}
+/* Kuta oprawa (doklejana do .bottom-panel i ustawiana przez JS na środku kuli) */
+${PC} .ck-orb-frame {
+  display: block;
+  position: absolute;
+  left: calc(var(--ck-orb-cx, 297px) - 80px); top: calc(var(--ck-orb-cy, 49px) - 78px);
+  width: 160px; height: 150px;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 2px 3px #000) drop-shadow(0 0 6px rgba(0,0,0,.9));
+}
+${PC} .ck-orb-frame::before, ${PC} .ck-orb-frame::after { content: ''; position: absolute; inset: 0; }
+${PC} .ck-orb-frame::before { ${MASK(ICONS.orbFrameIron)} background: ${IRON_BG}; }
+${PC} .ck-orb-frame::after  { ${MASK(ICONS.orbFrameInlay)} background: ${INLAY_BG}; }
+/* Niskie HP: oprawa i krew lekko pulsują czerwienią (tylko opacity warstwy poświaty) */
+${PC} .ck-orb-glow {
+  position: absolute; inset: 0; border-radius: 50%;
+  box-shadow: inset 0 0 18px rgba(200,20,20,.8);
+  opacity: 0;
+}
+html.${ROOT_CLASS}.${ANIM_CLASS}[data-ck-lowhp][data-ck-variant="crimson"]:not(#ck-x):not(#ck-y) .ck-orb-glow { animation: ck-pulse 1.4s ease-in-out infinite; }
+
+/* Paski EXP: czarny tor w żelaznej ramie, wypełnienie ze zgaszonego mosiądzu, groty włóczni na końcach */
+${PC} .exp-bar-wrapper .progress {
+  background: #000 !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 1px 3px #000, 0 0 0 1px #000, 0 0 0 2px #1d1717, 0 0 0 3px #000 !important;
+}
+${PC} .exp-bar-wrapper .progress .inner {
+  background:
+    linear-gradient(180deg, rgba(255,226,170,.2), transparent 45%, rgba(0,0,0,.45)),
+    linear-gradient(90deg, #1b140a, #43341b 65%, #6e5a31) !important;
+  border-radius: 0 !important;
+}
+${PC} .exp-bar-wrapper .overlay {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(0,0,0,.75) calc(10% - 1px) 10%) 6px 3px / calc(100% - 12px) calc(100% - 6px) no-repeat !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #221c1c, inset 0 0 0 3px #000 !important;
+  filter: none !important;
+}
+${PC} .exp-bar-wrapper .overlay::before,
+${PC} .exp-bar-wrapper .overlay::after {
+  content: ''; position: absolute; top: 0; width: 12px; height: 16px;
+  ${MASK(ICONS.spearTip, '0 0 / 100% 100%')}
+  background: ${IRON_BG};
+  pointer-events: none;
+}
+${PC} .exp-bar-wrapper .overlay::before { left: -11px; }
+${PC} .exp-bar-wrapper .overlay::after  { right: -11px; transform: scaleX(-1); }
+/* Kapsuły (% doświadczenia, czas wyczerpania) → czarne, zaostrzone tabliczki */
+${PC} .bottom-panel .pointer-exp-graphic,
+${PC} .bottom-panel .pointer-ttl-graphic {
+  background: var(--ck-noise), linear-gradient(180deg, #120d0d, #040202 60%, #000) !important;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #221c1c, inset 0 0 0 3px #000, inset 0 -3px 0 3px rgba(79,10,10,.55) !important;
+  filter: none !important;
+}
+${PC} .bottom-panel .pointer-exp-graphic { clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%); }
+${PC} .bottom-panel .pointer-ttl-graphic { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); }
+${PC} .bottom-panel .pointer-exp, ${PC} .bottom-panel .pointer-ttl {
+  color: #cdbca6 !important;
+  text-shadow: 0 1px 1px #000, 0 0 4px #000 !important;
+}
 
 /* =====================================================================
  * === ZABEZPIECZENIE: mapa i znaczniki rzadkości bez filtrów ===
@@ -1646,6 +1793,27 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
       ensureChild(SELECTORS.barTopHost.join(','), 'ck-bar-lace');
       ensureChild(SELECTORS.barBottomHost.join(','), 'ck-bar-wall');
     }
+    // Kula HP i jej oprawa (widoczne tylko w Szkarłacie). Kula wchodzi do okrągłej obudowy gry jako
+    // PIERWSZE dziecko — napis z procentem gry zostaje nad nią. Oprawa wisi w .bottom-panel na środku kuli.
+    const orbWrap = document.querySelector(SELECTORS.hpOrbWrap[0]);
+    if (orbWrap) {
+      if (!orbWrap.querySelector(':scope > .ck-orb')) {
+        const orb = mkDeco('div', 'ck-orb');
+        orb.innerHTML = '<div class="ck-orb-liquid"><i class="ck-orb-swirl"></i></div><i class="ck-orb-glass"></i><i class="ck-orb-glow"></i>';
+        orbWrap.prepend(orb);
+      }
+      const panel = orbWrap.closest(SELECTORS.orbPanelHost.join(','));
+      if (panel) {
+        let frame = panel.querySelector(':scope > .ck-orb-frame');
+        if (!frame) { frame = mkDeco('i', 'ck-orb-frame'); panel.appendChild(frame); }
+        if (orbWrap.offsetParent === panel) {
+          const cx = (orbWrap.offsetLeft + orbWrap.offsetWidth / 2) + 'px';
+          const cy = (orbWrap.offsetTop + orbWrap.offsetHeight / 2) + 'px';
+          if (frame.style.getPropertyValue('--ck-orb-cx') !== cx) frame.style.setProperty('--ck-orb-cx', cx);
+          if (frame.style.getPropertyValue('--ck-orb-cy') !== cy) frame.style.setProperty('--ck-orb-cy', cy);
+        }
+      }
+    }
     // Ozdoby tabliczki HUD (widoczne tylko w Szkarłacie — CSS pod data-ck-variant="crimson")
     document.querySelectorAll(SELECTORS.hud.join(',')).forEach((hud) => {
       if (hud.querySelector(':scope > .ck-hud-deco')) return;
@@ -1676,8 +1844,20 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     if (root.hasAttribute('data-ck-lowhp') !== low) root.toggleAttribute('data-ck-lowhp', low);
   }
 
+  /** Poziom krwi w kuli (Szkarłat) i niski HP — co 400 ms czytamy tylko tekst napisu, to tanie. */
+  let lastHpVar = '';
   function checkHp() {
-    if (!FEATURES.lowHpPulse || !isEnabled()) return;
+    if (!isEnabled()) return;
+    const pct = readHpPct();
+    if (pct !== null) {
+      const v = String(Math.max(0, Math.min(100, Math.round(pct))));
+      const wrap = document.querySelector(SELECTORS.hpOrbWrap[0]);
+      if (wrap && (v !== lastHpVar || wrap.style.getPropertyValue('--ck-hp') !== v)) { wrap.style.setProperty('--ck-hp', v); lastHpVar = v; }
+    }
+    if (FEATURES.lowHpPulse) setLowHp(pct !== null && pct > 0 && pct < LOW_HP_PCT);
+  }
+
+  function readHpPct() {
     // Najpierw napis z procentem na kuli (w grze: „100%”), zapasowo wysokość „krwi” względem kuli.
     let pct = null;
     const v = document.querySelector(SELECTORS.hpOrbValue.join(','));
@@ -1688,7 +1868,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
       const blood = document.querySelector(SELECTORS.hpOrbBlood[0]);
       if (orb && blood && orb.offsetHeight > 0) pct = (blood.offsetHeight / orb.offsetHeight) * 100;
     }
-    setLowHp(pct !== null && pct > 0 && pct < LOW_HP_PCT);
+    return pct;
   }
 
   /* ======================================================================
@@ -1890,7 +2070,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     fixGrids();
     recheckSkins();
     setInterval(heal, 3000);
-    setInterval(checkHp, 1000);
+    setInterval(checkHp, 400);
     setTimeout(checkKociaNoc, 4000);
     LOG(`v${VERSION} aktywny (wariant: ${VARIANTS[getVariant()]}). Alt+T — motyw, Alt+V — wariant, Alt+A — animacje.`);
   }
