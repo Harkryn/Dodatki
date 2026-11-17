@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Margonem – Crimson Knight Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.0.1
-// @description  Mroczny, rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, miecze i skapująca ciecz. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
+// @version      1.1.0
+// @description  Mroczny, gotycko-rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, maswerki, sterczyny i miecze. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -19,8 +19,9 @@
 
 /*
  * Crimson Knight — co robi
- *  - Czarny, zużyty interfejs: kute, poobijane żelazo z nitami, miecze, tarcze w tle,
- *    strużki cieczy skapujące z górnych krawędzi okien i górnej belki.
+ *  - Czarny, brudny interfejs mrocznego średniowiecza w stylu gotyckich budowli: kanciaste żelazne
+ *    ramy, okute narożniki ze sterczynami, szczyty z kwiatonem nad tytułami, maswerki, rozety,
+ *    ostrołuki, blanki nad dolną belką i koronka ostrołuków pod górną.
  *  - Dwa warianty kolorystyczne przez zmienne CSS (atrybut data-ck-variant na <html>):
  *      crimson — „Szkarłat” (zaschnięta krew, rdza),
  *      green   — „Butelkowa Zieleń” (gęsta zielona ciecz, patyna/śniedź).
@@ -56,7 +57,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.0.1';
+  const VERSION = '1.1.0';
   const KEY_ENABLED = 'ck.enabled';
   const KEY_VARIANT = 'ck.variant';
   const KEY_ANIM = 'ck.anim';
@@ -65,7 +66,6 @@
   const ANIM_CLASS = 'ck-anim';
   const DETECT_TIMEOUT_MS = 45000;
   const LOW_HP_PCT = 30;          // poniżej tylu procent HP poświata okna pulsuje na czerwono
-  const MAX_FALLING_DROPS = 3;    // ile kropli może spadać jednocześnie
   const LOG = (...a) => console.info('%c[Crimson Knight]', 'color:#9e1b1b;font-weight:bold', ...a);
 
   const VARIANTS = {
@@ -76,8 +76,9 @@
 
   /** Przełączniki funkcji — ustaw false, żeby wyłączyć. */
   const FEATURES = {
-    drips: true,          // strużki cieczy z górnych krawędzi okien i górnej belki
-    crest: true,          // tarcza-znak wodny w dużych oknach i kolumnach
+    gothicFrame: true,    // okute narożniki ze sterczynami, szczyt z kwiatonem nad tytułem, arkada u dołu okna
+    barOrnaments: true,   // blanki nad dolną belką i koronka ostrołuków pod górną
+    crest: true,          // rozeta w dużych oknach i ostrołukowe okno w kolumnach (znaki wodne)
     fog: true,            // mgła/dym na dole mapy
     lowHpPulse: true,     // czerwone pulsowanie przy niskim HP
     skinScanner: true,    // przemalowywanie drewna/pergaminu we wnętrzach okien (logika z „Kociej Nocy”)
@@ -135,7 +136,8 @@
     gridBorder:      ['.interface-element-grid-border', '.interface-element-grid-border-light'],
 
     /* === OZDOBNIKI — gdzie doklejamy własne elementy === [GRA] sprawdzone 18.11.2026 na margonem.com */
-    barTopHost:      ['.interface-layer > .top.positioner'],   // [GRA] position: absolute — strużki pod belką
+    barTopHost:      ['.interface-layer > .top.positioner'],   // [GRA] position: absolute — koronka ostrołuków pod belką
+    barBottomHost:   ['.interface-layer > .bottom.positioner'],// [GRA] position: absolute — blanki nad belką
     fogHost:         ['.game-layer'],                          // [GRA] position: absolute — mgła jako nakładka nad mapą (canvas nietknięty)
     // Uwaga [GRA]: .c-window > .header-label-positioner jest static, a .c-window .header-label — relative.
 
@@ -218,27 +220,87 @@
 
   const SWORD_V = '<path d="M12 .8 L13.3 3 V15 H10.7 V3 Z M7.6 15 H16.4 V16.7 H7.6 Z M11.2 16.7 H12.8 V20.4 H11.2 Z"/><circle cx="12" cy="21.7" r="1.5"/>';
 
+  const MASKSVG = (vb, body, extra = '') => svgUrl(SVG(vb, `<g fill="#fff">${body}</g>`, extra));
+
+  /* --- Okuty narożnik okna (lewy górny; pozostałe = odbicia). Narożnik okna leży w punkcie (8,8):
+         sterczyna wystaje na zewnątrz, ramiona biegną wzdłuż krawędzi, na nich żabki (crockets). --- */
+  const CORNER_IRON =
+    '<path d="M0 0 L11 4.5 L9.5 9.5 L4.5 11 Z"/>' +
+    '<path fill-rule="evenodd" d="M8 8 H25 V25 H8 Z M16.5 11.3 A5.2 5.2 0 1 0 16.5 21.7 A5.2 5.2 0 1 0 16.5 11.3 Z"/>' +
+    '<path d="M25 9 H50 L55 11 L50 13 H25 Z"/><path d="M25 15 H40 L43 16 L40 17 H25 Z"/>' +
+    '<path d="M9 25 V50 L11 55 L13 50 V25 Z"/><path d="M15 25 V40 L16 43 L17 40 V25 Z"/>' +
+    '<path d="M31 9 Q32 4 35.5 2.6 Q33.8 5.6 34.5 9 Z"/><path d="M41 9 Q42 4.5 45.5 3.4 Q43.8 6.2 44.5 9 Z"/>' +
+    '<path d="M9 31 Q4 32 2.6 35.5 Q5.6 33.8 9 34.5 Z"/><path d="M9 41 Q4.5 42 3.4 45.5 Q6.2 43.8 9 44.5 Z"/>';
+  const CORNER_INLAY =
+    '<circle cx="14.4" cy="16.5" r="2.3"/><circle cx="18.6" cy="16.5" r="2.3"/><circle cx="16.5" cy="14.4" r="2.3"/><circle cx="16.5" cy="18.6" r="2.3"/>' +
+    '<path d="M33 11 L35 9.7 L37 11 L35 12.3 Z"/><path d="M11 33 L9.7 35 L11 37 L12.3 35 Z"/>';
+
+  /* --- Szczyt nad tytułem okna: belka, ośli grzbiet z żabkami i kwiatonem, sterczyny. Górna krawędź okna = y 24. --- */
+  const GABLE_IRON =
+    '<path d="M14 21 L26 18 H214 L226 21 L214 24 H26 Z"/>' +
+    '<path d="M78 19 C96 19 110 14 120 6 C130 14 144 19 162 19 Z"/>' +
+    '<path d="M120 0 L123 3.5 L120 7.5 L117 3.5 Z"/><path d="M120 5.5 Q114 4.5 112.5 1 Q117 2.5 120 5.5 Z M120 5.5 Q126 4.5 127.5 1 Q123 2.5 120 5.5 Z"/>' +
+    '<path d="M100 16 Q99 11 102 9 Q101.5 12 103.5 15 Z"/><path d="M110 12 Q109.5 7.5 112 6 Q111.5 9 113 11 Z"/>' +
+    '<path d="M140 16 Q141 11 138 9 Q138.5 12 136.5 15 Z"/><path d="M130 12 Q130.5 7.5 128 6 Q128.5 9 127 11 Z"/>' +
+    '<path d="M70 21 V10 L73 2.5 L76 10 V21 Z"/><path d="M164 21 V10 L167 2.5 L170 10 V21 Z"/>' +
+    '<path d="M36 19 V13 L38 8.5 L40 13 V19 Z"/><path d="M200 19 V13 L202 8.5 L204 13 V19 Z"/>';
+  const GABLE_INLAY =
+    '<circle cx="120" cy="12.4" r="2.2"/><circle cx="118" cy="15.6" r="2.2"/><circle cx="122" cy="15.6" r="2.2"/>' +
+    '<circle cx="120" cy="3.5" r="1.2"/>' +
+    '<path d="M73 9.5 L74.5 12 L73 14.5 L71.5 12 Z"/><path d="M167 9.5 L168.5 12 L167 14.5 L165.5 12 Z"/>' +
+    '<path d="M50 21 L53 19.5 L56 21 L53 22.5 Z"/><path d="M184 21 L187 19.5 L190 21 L187 22.5 Z"/>';
+
+  /* --- Separator pod tytułem: medalion z czwórliściem, belki z trójliściowymi zakończeniami --- */
+  const DIV_HALF = '<circle cx="6" cy="7" r="2.4"/><circle cx="9.2" cy="4.4" r="1.7"/><circle cx="9.2" cy="9.6" r="1.7"/>' +
+    '<path d="M10 6.1 H84 L91 7 L84 7.9 H10 Z"/><path d="M60 6.1 L64 3.6 L68 6.1 Z M60 7.9 L64 10.4 L68 7.9 Z"/>';
+  const DIV_IRON = DIV_HALF + `<g transform="translate(200 0) scale(-1 1)">${DIV_HALF}</g>` +
+    '<path fill-rule="evenodd" d="M100 0 A7 7 0 1 0 100 14 A7 7 0 1 0 100 0 Z M100 2.8 A4.2 4.2 0 1 1 100 11.2 A4.2 4.2 0 1 1 100 2.8 Z"/>';
+  const DIV_INLAY = '<circle cx="98.2" cy="7" r="1.8"/><circle cx="101.8" cy="7" r="1.8"/><circle cx="100" cy="5.2" r="1.8"/><circle cx="100" cy="8.8" r="1.8"/>' +
+    '<path d="M36 7 L39 5.5 L42 7 L39 8.5 Z"/><path d="M158 7 L161 5.5 L164 7 L161 8.5 Z"/>';
+
+  /* --- Rozeta (znak wodny dużych okien) --- */
+  let ROSE = '<path fill-rule="evenodd" d="M50 1 A49 49 0 1 0 50 99 A49 49 0 1 0 50 1 Z M50 5 A45 45 0 1 1 50 95 A45 45 0 1 1 50 5 Z"/>' +
+    '<path fill-rule="evenodd" d="M50 31 A19 19 0 1 0 50 69 A19 19 0 1 0 50 31 Z M50 35 A15 15 0 1 1 50 65 A15 15 0 1 1 50 35 Z"/>' +
+    '<circle cx="46" cy="50" r="4"/><circle cx="54" cy="50" r="4"/><circle cx="50" cy="46" r="4"/><circle cx="50" cy="54" r="4"/>';
+  for (let i = 0; i < 12; i++) {
+    ROSE += `<rect x="49" y="5" width="2" height="27" transform="rotate(${i * 30} 50 50)"/>` +
+      `<circle cx="50" cy="18.5" r="5.4" fill="none" stroke="#fff" stroke-width="1.6" transform="rotate(${i * 30 + 15} 50 50)"/>`;
+  }
+
+  /* --- Ostrołukowe okno z maswerkiem (znak wodny kolumn) --- */
+  const LANCET = '<g fill="none" stroke="#fff" stroke-width="3">' +
+    '<path d="M3 140 V52 Q3 14 30 2 Q57 14 57 52 V140"/><path d="M30 62 V140"/>' +
+    '<path d="M8 140 V70 Q8 52 19 46 Q30 52 30 70"/><path d="M30 70 Q30 52 41 46 Q52 52 52 70 V140"/>' +
+    '<circle cx="30" cy="31" r="11"/></g>' +
+    '<g fill="none" stroke="#fff" stroke-width="1.6"><circle cx="26.5" cy="31" r="3.5"/><circle cx="33.5" cy="31" r="3.5"/><circle cx="30" cy="27.5" r="3.5"/><circle cx="30" cy="34.5" r="3.5"/></g>';
+
+  /* --- Ślepy ostrołuk z trójliściem (po bokach tytułu) --- */
+  const TRACERY = '<path fill-rule="evenodd" d="M2 22 V10 Q2 3.5 8 0 Q14 3.5 14 10 V22 Z M4 20 V10.5 Q4 5.6 8 2.6 Q12 5.6 12 10.5 V20 Z"/>' +
+    '<circle cx="8" cy="8.6" r="1.7"/><circle cx="6.5" cy="11.2" r="1.7"/><circle cx="9.5" cy="11.2" r="1.7"/><path d="M7.4 12.5 H8.6 V20 H7.4 Z"/>';
+
+  /* --- Narożnik tooltipa: stałe kolory żelaza (tooltip nie zależy od wariantu) --- */
+  const TIP_CORNER = '<path d="M0 0 H16 L14 2.5 H2.5 V14 L0 16 Z" fill="#57504c"/><path d="M0 0 H7 V7 H0 Z" fill="#6d6560"/>' +
+    '<circle cx="3.5" cy="3.5" r="1.4" fill="#0c0909"/><path d="M9 2.5 L10.5 0.8 L12 2.5 Z M2.5 9 L0.8 10.5 L2.5 12 Z" fill="#3d3838"/>';
+  const tipCorner = (rot) => svgUrl(SVG('0 0 16 16', `<g transform="rotate(${rot} 8 8)">${TIP_CORNER}</g>`));
+
   const ICONS = {
     // Skrzyżowane miecze — maska (biały = widoczne)
-    swordsCross: svgUrl(SVG('0 0 24 24',
-      `<g fill="#fff"><g transform="rotate(40 12 12)">${SWORD_V}</g><g transform="rotate(-40 12 12)">${SWORD_V}</g></g>`)),
-    // Miecz poziomo — separator (głowica po lewej, sztych po prawej)
-    swordH: svgUrl(SVG('0 0 200 14',
-      '<g fill="#fff"><circle cx="6.5" cy="7" r="3.2"/><path d="M9.5 5.8 H22 V8.2 H9.5 Z"/>' +
-      '<path d="M21 1.2 C22.5 2.5 23.5 2.5 25.5 1.2 V12.8 C23.5 11.5 22.5 11.5 21 12.8 Z"/>' +
-      '<path d="M25.5 5 L186 5.4 L199 7 L186 8.6 L25.5 9 Z"/></g>')),
-    // Tarcza z mieczem wbitym pionowo — znak wodny
-    crest: svgUrl(SVG('0 0 100 120',
-      '<g fill="#fff"><path fill-rule="evenodd" d="M50 3 L95 15 V52 C95 84 75 104 50 117 C25 104 5 84 5 52 V15 Z M50 11 L87 21 V52 C87 79 70 96 50 108 C30 96 13 79 13 52 V21 Z"/>' +
-      '<path d="M50 20 L53.2 26 V78 H46.8 V26 Z"/><rect x="35" y="78" width="30" height="4.5" rx="1"/><rect x="47.8" y="82.5" width="4.4" height="12"/><circle cx="50" cy="98" r="3.6"/>' +
-      '<path d="M22 30 H40 V33 H22 Z M60 30 H78 V33 H60 Z" opacity=".6"/></g>')),
-    // Strużki: zwężające się, nieregularne (rozciągane na wysokość strużki)
-    dripA: svgUrl(SVG('0 0 10 40',
-      '<path fill="#fff" d="M0 0 H10 C9 2.5 7.9 4.5 7.5 8.5 C7.1 13 7.7 19 7 25 C6.6 30 6.3 35 6 40 H4 C3.7 35 3.4 30 3 25 C2.3 19 2.9 13 2.5 8.5 C2.1 4.5 1 2.5 0 0 Z"/>',
-      ' preserveAspectRatio="none"')),
-    dripB: svgUrl(SVG('0 0 10 40',
-      '<path fill="#fff" d="M0 0 H10 C8.6 3 8.2 6 8 10 C7.8 15 6.6 18 6.8 24 C7 30 6.2 35 6 40 H4 C3.6 34 3.2 29 3.4 23 C3.6 17 2.4 13 2.2 9 C2 5 1.2 2.5 0 0 Z"/>',
-      ' preserveAspectRatio="none"')),
+    swordsCross: MASKSVG('0 0 24 24', `<g transform="rotate(40 12 12)">${SWORD_V}</g><g transform="rotate(-40 12 12)">${SWORD_V}</g>`),
+    cornerIron: MASKSVG('0 0 56 56', CORNER_IRON),
+    cornerInlay: MASKSVG('0 0 56 56', CORNER_INLAY),
+    gableIron: MASKSVG('0 0 240 26', GABLE_IRON),
+    gableInlay: MASKSVG('0 0 240 26', GABLE_INLAY),
+    dividerIron: MASKSVG('0 0 200 14', DIV_IRON),
+    dividerInlay: MASKSVG('0 0 200 14', DIV_INLAY),
+    rose: MASKSVG('0 0 100 100', ROSE),
+    lancet: MASKSVG('0 0 60 140', LANCET),
+    tracery: MASKSVG('0 0 16 22', TRACERY),
+    // Kafle powtarzane poziomo: koronka (wiszące ostrołuki), blanki z otworem strzelniczym
+    lace: MASKSVG('0 0 18 10', '<path fill-rule="evenodd" d="M0 0 H18 V2 Q15.5 2.4 13.6 5.4 L9 10 L4.4 5.4 Q2.5 2.4 0 2 Z M4.2 2.7 Q6.6 3.6 9 7.4 Q11.4 3.6 13.8 2.7 Z"/><circle cx="18" cy="2.6" r="1.3"/><circle cx="0" cy="2.6" r="1.3"/>'),
+    // Ślepa arkada jako zwykłe tło (stały kolor ciemnego żelaza) — na belkach interfejsu
+    arcadeBg: svgUrl(SVG('0 0 14 9', '<path fill="#2c2727" d="M0.5 9 V5 Q0.5 1.5 7 0 Q13.5 1.5 13.5 5 V9 H12 V5.4 Q12 2.7 7 1.6 Q2 2.7 2 5.4 V9 Z"/>')),
+    battlement: MASKSVG('0 0 24 11', '<path fill-rule="evenodd" d="M0 1 H11 V8 H24 V11 H0 Z M4.9 3 H6.1 V6.5 H4.9 Z"/><path d="M-0.5 0 H11.5 V1.4 H-0.5 Z"/>'),
+    tipTL: tipCorner(0), tipTR: tipCorner(90), tipBR: tipCorner(180), tipBL: tipCorner(270),
     // Szum (brud) — czarne drobinki
     noise: svgUrl('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180">' +
       '<filter id="n" x="0" y="0"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>' +
@@ -314,6 +376,9 @@
   const S = (key, suffix = '') => SELECTORS[key].map((s) => `${P} ${s}${suffix}`).join(',\n');
   const SA = (key, suffix = '') => SELECTORS[key].map((s) => `${PA} ${s}${suffix}`).join(',\n');
   const MASK = (icon, pos = 'center / contain') => `-webkit-mask: ${icon} ${pos} no-repeat; mask: ${icon} ${pos} no-repeat;`;
+  /** Wypełnienia ozdobników nakładane przez maskę: brudne kute żelazo (z przebarwieniem wariantu) i inkrustacja w kolorze wariantu. */
+  const IRON_BG = 'var(--ck-noise), linear-gradient(160deg, #8f8680 0%, #5d5550 20%, var(--ck-metal-tint) 52%, #1b1616 100%)';
+  const INLAY_BG = 'linear-gradient(180deg, var(--ck-a4), var(--ck-a2) 70%, var(--ck-a1))';
   /** Łańcuch (dwie warstwy tła: ogniwa z boku i z góry), kolory ze zmiennych. Pozycja od góry albo od dołu. */
   const CHAIN_RING = 'radial-gradient(ellipse 4.5px 2.6px at 4.5px 3px, transparent 48%, var(--ck-metal-hi) 56% 76%, transparent 86%)';
   const CHAIN_LINK = 'linear-gradient(90deg, transparent 3px, var(--ck-iron-3) 3px 6px, transparent 6px)';
@@ -322,8 +387,7 @@
 
   /** Zmienne zależne od wariantu — rejestrowane przez @property, żeby kolory płynnie się przenikały. */
   const VARIANT_PROPS = ['--ck-a0', '--ck-a1', '--ck-a2', '--ck-a3', '--ck-a4', '--ck-glow', '--ck-glow-soft',
-    '--ck-stain', '--ck-stain-2', '--ck-tint', '--ck-liquid-1', '--ck-liquid-2', '--ck-liquid-3', '--ck-liquid-shine',
-    '--ck-metal-tint', '--ck-metal-hi', '--ck-fog', '--ck-grid-line'];
+    '--ck-stain', '--ck-stain-2', '--ck-tint', '--ck-metal-tint', '--ck-metal-hi', '--ck-fog', '--ck-grid-line'];
 
   function buildCss() {
     const props = VARIANT_PROPS.map((p) => `@property ${p} { syntax: '<color>'; inherits: true; initial-value: transparent; }`).join('\n');
@@ -352,7 +416,7 @@ html[data-ck-variant] {
   --ck-text:     #d9cfc4;  /* kość / popiół */
   --ck-text-dim: #8f857d;
 
-  --ck-font-gothic: 'Pirata One', 'UnifrakturMaguntia', serif;
+  --ck-font-gothic: 'UnifrakturMaguntia', 'Pirata One', serif;
   --ck-font-caps:   'Cinzel', 'Crimson Text', Georgia, serif;
   --ck-font-body:   'Crimson Text', Georgia, 'Times New Roman', serif;
 
@@ -389,12 +453,8 @@ html[data-ck-variant="crimson"] {
   --ck-glow-soft: rgba(122,20,20,.28);
   --ck-stain: rgba(98,44,22,.42);          /* rdza */
   --ck-stain-2: rgba(120,62,30,.26);
-  --ck-tint: rgba(58,10,10,.30);
-  --ck-liquid-1: #6a1010;
-  --ck-liquid-2: #4a0b0b;
-  --ck-liquid-3: #250404;
-  --ck-liquid-shine: rgba(255,140,130,.16);
-  --ck-metal-tint: #3a2622;
+  --ck-tint: rgba(58,10,10,.32);
+  --ck-metal-tint: #3a2420;               /* rdzawe, okopcone żelazo */
   --ck-metal-hi: #5d4842;
   --ck-fog: rgba(36,26,26,.55);
   --ck-grid-line: rgba(92,52,48,.75);
@@ -415,10 +475,6 @@ html[data-ck-variant="green"] {
   --ck-stain: rgba(38,88,74,.36);          /* śniedź */
   --ck-stain-2: rgba(62,104,88,.22);
   --ck-tint: rgba(10,34,24,.38);
-  --ck-liquid-1: #1f5238;
-  --ck-liquid-2: #12301f;
-  --ck-liquid-3: #061a10;
-  --ck-liquid-shine: rgba(170,255,215,.22);   /* szklisty połysk starego szkła */
   --ck-metal-tint: #24302a;
   --ck-metal-hi: #46564d;
   --ck-fog: rgba(20,46,34,.5);
@@ -429,31 +485,42 @@ html[data-ck-variant="green"] {
 }
 
 /* Własne elementy są ukryte, dopóki motyw nie jest włączony */
-.ck-deco, .ck-bar-drips, .ck-col-crest, .ck-fog { display: none; }
+.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog { display: none; }
 
 /* =====================================================================
  * === OKNA ===
- * Kute, poobijane żelazo: czarna bryła z szumem i rysami, ramka z nitami (warstwa .ck-deco),
- * przebarwienia przy krawędziach (rdza / śniedź).
+ * Kanciasta gotycka bryła z kutego żelaza: okopcone, brudne wnętrze, podwójna rama z inkrustowaną
+ * linią w kolorze wariantu, okute narożniki ze sterczynami i żabkami, szczyt z kwiatonem nad tytułem,
+ * koronka ostrołuków pod spodem (elementy w warstwie .ck-deco). Żadnych zaokrągleń.
  * ===================================================================== */
 ${S('window')} {
   border-image: none !important;
   border-color: transparent !important;
-  background-color: rgba(12,9,9,.97) !important;
+  background-color: rgba(11,8,8,.97) !important;
   background-image:
-    radial-gradient(120% 55% at 50% 0%, var(--ck-tint), transparent 70%),
-    radial-gradient(140% 110% at 50% 50%, transparent 55%, rgba(0,0,0,.6)),
+    radial-gradient(120% 50% at 50% 0%, var(--ck-tint), transparent 70%),
+    radial-gradient(60% 40% at 18% 100%, rgba(48,30,18,.24), transparent 70%),
+    radial-gradient(40% 30% at 88% 70%, rgba(40,24,14,.2), transparent 70%),
+    radial-gradient(140% 110% at 50% 50%, transparent 48%, rgba(0,0,0,.72)),
+    linear-gradient(180deg, rgba(0,0,0,.4), transparent 20%),
     var(--ck-scratches),
+    var(--ck-noise),
     var(--ck-noise) !important;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 90px 45px !important;
   background-clip: border-box !important;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px #000, 0 16px 40px rgba(0,0,0,.88), 0 0 26px var(--ck-glow-soft) !important;
+  border-radius: 0 !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 0 3px var(--ck-iron-1),
+    0 0 0 4px #000,
+    0 18px 44px rgba(0,0,0,.9),
+    0 0 30px var(--ck-glow-soft) !important;
   color: var(--ck-text) !important;
 }
-${P} .c-window.transparent[data-opacity-lvl="1"] { background-color: rgba(12,9,9,.85) !important; }
-${P} .c-window.transparent[data-opacity-lvl="2"] { background-color: rgba(12,9,9,.7) !important; }
-${P} .c-window.transparent[data-opacity-lvl="3"] { background-color: rgba(12,9,9,.55) !important; }
-${P} .c-window.transparent[data-opacity-lvl="4"] { background-color: rgba(12,9,9,.4) !important; }
+${P} .c-window.transparent[data-opacity-lvl="1"] { background-color: rgba(11,8,8,.85) !important; }
+${P} .c-window.transparent[data-opacity-lvl="2"] { background-color: rgba(11,8,8,.7) !important; }
+${P} .c-window.transparent[data-opacity-lvl="3"] { background-color: rgba(11,8,8,.55) !important; }
+${P} .c-window.transparent[data-opacity-lvl="4"] { background-color: rgba(11,8,8,.4) !important; }
 
 ${S('windowOverlay')} {
   border-image-source: none !important;
@@ -468,21 +535,24 @@ ${S('windowContent')} {
   font-size-adjust: .48;                 /* Crimson Text ma niską x-wysokość — wyrównujemy czytelność */
   font-variant-numeric: lining-nums;
 }
-/* Pas nagłówka: linia pod tytułem przechodząca w żelazo, pośrodku miecz poziomo (separator).
-   Miecz siedzi na .header-label (position: relative, wyśrodkowany nad tytułem) — .header-label-positioner
-   jest statyczny, więc pseudo-element na nim lądował na dole okna (sprawdzone w grze). */
+/* Nadproże z tytułem: ciemny pas, linia z inkrustacją, pośrodku gotycki separator (medalion z czwórliściem).
+   Separator siedzi na .header-label (position: relative, wyśrodkowany nad tytułem) — .header-label-positioner
+   jest statyczny (sprawdzone w grze). ::after = żelazo, ::before = inkrustacja w kolorze wariantu. */
 ${S('windowHeaderBox')} {
-  background: linear-gradient(90deg, transparent 4%, var(--ck-iron-2) 28%, var(--ck-a2) 50%, var(--ck-iron-2) 72%, transparent 96%) 0 100% / 100% 1px no-repeat !important;
+  background:
+    linear-gradient(90deg, transparent 2%, var(--ck-iron-2) 18%, var(--ck-a3) 50%, var(--ck-iron-2) 82%, transparent 98%) 0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(0,0,0,.5), color-mix(in srgb, var(--ck-a1) 40%, transparent)) !important;
 }
+${S('windowHeader', '::before')},
 ${S('windowHeader', '::after')} {
   content: '';
-  position: absolute; left: 50%; bottom: -5px;
-  width: 132px; height: 10px; margin-left: -66px;
-  ${MASK(ICONS.swordH)}
-  background: linear-gradient(90deg, var(--ck-a2) 0 12%, var(--ck-brass) 12% 13.5%, var(--ck-iron-3) 13.5% 16%, #6d6560 16%, var(--ck-iron-2) 86%, var(--ck-a3) 95%);
+  position: absolute; left: 50%; bottom: -6px;
+  width: 172px; height: 12px; margin-left: -86px;
   pointer-events: none;
   z-index: 6;
 }
+${S('windowHeader', '::after')} { ${MASK(ICONS.dividerIron)} background: ${IRON_BG}; }
+${S('windowHeader', '::before')} { ${MASK(ICONS.dividerInlay)} background: ${INLAY_BG}; z-index: 7; }
 ${S('windowHeader')} {
   background: none !important;
   border-image: none !important;
@@ -492,17 +562,16 @@ ${S('windowHeader')} {
 ${S('windowTitle')} {
   font-family: var(--ck-font-gothic) !important;
   font-weight: 400 !important;
-  font-size: 14px !important;
-  letter-spacing: .06em !important;
-  color: var(--ck-text) !important;
-  text-shadow: 0 0 10px var(--ck-glow), 0 1px 0 #000, 0 0 2px #000 !important;
+  font-size: 15px !important;
+  letter-spacing: .05em !important;
+  color: #e4d8ca !important;
+  text-shadow: 0 0 12px var(--ck-glow), 0 1px 0 #000, 0 0 3px #000, 0 0 1px #000 !important;
 }
-/* Ozdobniki po bokach tytułu → skrzyżowane miecze */
+/* Ozdobniki po bokach tytułu → ślepe ostrołuki z trójliściem */
 ${S('windowDecor')} {
   border-image: none !important;
-  background: linear-gradient(180deg, #7b726c, var(--ck-iron-2) 55%, var(--ck-a3)) !important;
-  ${MASK(ICONS.swordsCross, 'center / 15px 15px')}
-  opacity: .85;
+  background: linear-gradient(180deg, #9a918a, var(--ck-metal-tint) 55%, var(--ck-a3)) !important;
+  ${MASK(ICONS.tracery, 'center / 13px 18px')}
 }
 ${S('windowSmallBtn')} {
   filter: var(--ck-sprite-filter);
@@ -511,12 +580,19 @@ ${S('windowSmallBtn')} {
 ${S('windowSmallBtn', ':hover')} {
   filter: var(--ck-sprite-filter) brightness(1.6) drop-shadow(0 0 4px var(--ck-glow));
 }
-/* Dolny pasek okna: łańcuch zamiast drewna */
+/* Przyciski okna (zamknij, menu okien przezroczystych) nad warstwą ozdobników */
+${P} .c-window > .close-button-corner-decor,
+${P} .c-window > .transparent-window-buttons-menu { z-index: 8 !important; }
+/* Dolny pasek okna: ciemny cokół z żelazną listwą */
 ${S('windowBottomBar')},
 ${S('headerBand')} {
   border-image: none !important;
   border-color: transparent !important;
-  background: ${CHAIN_TOP(0)}, linear-gradient(180deg, rgba(20,16,16,.9), rgba(5,4,4,.95)) !important;
+  background:
+    linear-gradient(90deg, transparent, var(--ck-iron-3) 12% 88%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--ck-a2) 70%, transparent) 30% 70%, transparent) 0 2px / 100% 1px no-repeat,
+    var(--ck-noise),
+    linear-gradient(180deg, rgba(20,16,16,.92), rgba(5,4,4,.96)) !important;
   background-clip: border-box !important;
   box-shadow: none !important;
 }
@@ -524,8 +600,8 @@ ${S('innerPanel')} {
   border-image: none !important;
   border-color: transparent !important;
   background: rgba(255,255,255,.012) !important;
-  box-shadow: inset 0 0 0 1px rgba(61,56,56,.45), inset 0 0 10px rgba(0,0,0,.5) !important;
-  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(61,56,56,.5), inset 0 0 0 2px #000, inset 0 0 12px rgba(0,0,0,.55) !important;
+  border-radius: 0 !important;
 }
 
 /* --- Warstwa ozdobników okna (.ck-deco — doklejana przez JS, nie przechwytuje kliknięć) --- */
@@ -534,12 +610,7 @@ ${P} .ck-deco {
   position: absolute; inset: 0;
   pointer-events: none;
   z-index: 5;
-  border-radius: inherit;
   background:
-    var(--ck-rivet) left 3px top 3px / 10px 10px no-repeat,
-    var(--ck-rivet) right 3px top 3px / 10px 10px no-repeat,
-    var(--ck-rivet) left 3px bottom 3px / 10px 10px no-repeat,
-    var(--ck-rivet) right 3px bottom 3px / 10px 10px no-repeat,
     radial-gradient(ellipse 18% 12% at 0 0, var(--ck-stain), transparent),
     radial-gradient(ellipse 14% 9% at 100% 0, var(--ck-stain-2), transparent),
     radial-gradient(ellipse 16% 13% at 100% 100%, var(--ck-stain), transparent),
@@ -549,17 +620,53 @@ ${P} .ck-deco {
     radial-gradient(ellipse 1.5% 5% at 0 64%, rgba(0,0,0,.7), transparent);
   box-shadow:
     inset 0 0 0 1px #000,
-    inset 0 0 0 3px var(--ck-iron-1),
-    inset 0 0 0 4px rgba(0,0,0,.85),
-    inset 0 0 0 5px color-mix(in srgb, var(--ck-metal-hi) 30%, transparent),
-    inset 0 0 22px rgba(0,0,0,.55);
+    inset 0 0 0 4px var(--ck-iron-1),
+    inset 0 0 0 5px #000,
+    inset 0 0 0 6px color-mix(in srgb, var(--ck-a3) 70%, transparent),
+    inset 0 0 0 7px rgba(0,0,0,.85),
+    inset 0 0 0 8px color-mix(in srgb, var(--ck-metal-hi) 25%, transparent),
+    inset 0 0 26px rgba(0,0,0,.6);
 }
+/* Okute narożniki: sterczyna na zewnątrz, ramiona z żabkami, czwórliść w kolorze wariantu */
+${P} .ck-deco > .ck-corner {
+  --cs: 56px;
+  position: absolute;
+  width: var(--cs); height: var(--cs);
+  filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 2px rgba(0,0,0,.8));
+}
+${P} .ck-deco.ck-small > .ck-corner { --cs: 40px; }
+${P} .ck-corner::before, ${P} .ck-corner::after,
+${P} .ck-gable::before, ${P} .ck-gable::after { content: ''; position: absolute; inset: 0; }
+${P} .ck-corner::before { ${MASK(ICONS.cornerIron, '0 0 / 100% 100%')} background: ${IRON_BG}; }
+${P} .ck-corner::after  { ${MASK(ICONS.cornerInlay, '0 0 / 100% 100%')} background: ${INLAY_BG}; }
+${P} .ck-deco > .ck-tl { left: calc(var(--cs) * -.143); top: calc(var(--cs) * -.143); }
+${P} .ck-deco > .ck-tr { right: calc(var(--cs) * -.143); top: calc(var(--cs) * -.143); transform: scaleX(-1); }
+${P} .ck-deco > .ck-bl { left: calc(var(--cs) * -.143); bottom: calc(var(--cs) * -.143); transform: scaleY(-1); }
+${P} .ck-deco > .ck-br { right: calc(var(--cs) * -.143); bottom: calc(var(--cs) * -.143); transform: scale(-1, -1); }
+/* Szczyt nad tytułem: belka, ośli grzbiet z żabkami i kwiatonem, sterczyny */
+${P} .ck-deco > .ck-gable {
+  position: absolute; left: 50%; top: 0;
+  width: min(240px, 92%); aspect-ratio: 240 / 26;
+  transform: translate(-50%, -92.3%);
+  filter: drop-shadow(0 -1px 2px rgba(0,0,0,.85));
+}
+${P} .ck-deco.ck-small > .ck-gable { width: min(170px, 92%); }
+${P} .ck-gable::before { ${MASK(ICONS.gableIron)} background: ${IRON_BG}; }
+${P} .ck-gable::after  { ${MASK(ICONS.gableInlay)} background: ${INLAY_BG}; }
+/* Koronka wiszących ostrołuków pod oknem (nie przy oknach przezroczystych) */
+${P} .ck-deco > .ck-lace {
+  position: absolute; left: 24px; right: 24px; top: 100%;
+  height: 8px;
+  -webkit-mask: ${ICONS.lace} 0 0 / 16px 8px repeat-x; mask: ${ICONS.lace} 0 0 / 16px 8px repeat-x;
+  background: ${IRON_BG};
+}
+${P} .c-window.transparent > .ck-deco > .ck-lace { display: none; }
+
 /* Poświata aktywnego okna (ostatnio klikniętego) — animowana tylko opacity */
 ${P} .ck-deco > .ck-glow {
   position: absolute; inset: 0;
-  border-radius: inherit;
   opacity: 0;
-  box-shadow: inset 0 0 0 1px var(--ck-a4), inset 0 0 16px var(--ck-glow);
+  box-shadow: inset 0 0 0 1px var(--ck-a4), inset 0 0 18px var(--ck-glow);
   transition: opacity .3s ease;
 }
 ${P} .c-window.ck-active-win > .ck-deco > .ck-glow { opacity: .55; }
@@ -570,73 +677,46 @@ ${PL} .c-window.ck-active-win > .ck-deco > .ck-glow { opacity: .8; }
 html.${ROOT_CLASS}.${ANIM_CLASS}[data-ck-lowhp]:not(#ck-x):not(#ck-y) .c-window.ck-active-win > .ck-deco > .ck-glow { animation-duration: 1.4s; }
 @keyframes ck-pulse { 0%, 100% { opacity: .28; } 50% { opacity: .85; } }
 
-/* Tarcza-znak wodny w dużych oknach i w kolumnach — ledwo widoczna */
-${P} .ck-deco > .ck-crest { display: none; }
-${P} .ck-deco.ck-big > .ck-crest,
+/* Znaki wodne: rozeta w dużych oknach, ostrołukowe okno z maswerkiem w kolumnach — ledwo widoczne */
+${P} .ck-deco > .ck-rose { display: none; }
+${P} .ck-deco.ck-big > .ck-rose {
+  display: block;
+  position: absolute; left: 50%; top: 55%;
+  width: 46%; max-width: 240px; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  ${MASK(ICONS.rose)}
+  background: linear-gradient(180deg, var(--ck-a3), var(--ck-a1));
+  opacity: .07;
+}
 ${P} .ck-col-crest {
   display: block;
-  position: absolute; left: 50%; top: 54%;
-  width: 40%; max-width: 210px; aspect-ratio: 100 / 120;
+  position: absolute; left: 50%; top: 50%;
+  width: 62%; max-width: 150px; aspect-ratio: 60 / 140;
   transform: translate(-50%, -50%);
-  ${MASK(ICONS.crest)}
+  ${MASK(ICONS.lancet)}
   background: linear-gradient(180deg, var(--ck-a3), var(--ck-a1));
-  opacity: .06;
+  opacity: .08;
   pointer-events: none;
+  z-index: 0;
 }
-${P} .ck-col-crest { width: 70%; max-width: 160px; top: 50%; opacity: .07; z-index: 0; }
 
-/* =====================================================================
- * === STRUŻKI I KROPLE === (krew albo zielona ciecz — ten sam kształt, kolor ze zmiennych)
- * ===================================================================== */
-${P} .ck-drip {
-  position: absolute; top: 2px; left: var(--x);
-  width: var(--w); height: var(--len);
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-${P} .ck-drip::before {
-  content: ''; position: absolute; inset: 0;
-  ${MASK(ICONS.dripA, '0 0 / 100% 100%')}
-  background:
-    linear-gradient(90deg, transparent 22%, var(--ck-liquid-shine) 36%, transparent 52%),
-    linear-gradient(180deg, var(--ck-liquid-1), var(--ck-liquid-2) 62%, var(--ck-liquid-3));
-}
-${P} .ck-drip.ck-drip-b::before { -webkit-mask-image: ${ICONS.dripB}; mask-image: ${ICONS.dripB}; }
-/* Ciemniejsza kropla na końcu strużki */
-${P} .ck-drip::after {
-  content: ''; position: absolute; left: 50%;
-  top: calc(100% - var(--b) * .55);
-  width: var(--b); height: calc(var(--b) * 1.2);
-  transform: translateX(-50%);
-  border-radius: 50% 50% 50% 50% / 42% 42% 58% 58%;
-  background: radial-gradient(circle at 38% 34%, var(--ck-liquid-shine), transparent 46%), var(--ck-liquid-3);
-}
-/* Kropla, która co jakiś czas się odrywa (JS dodaje klasę ck-fall; tylko transform + opacity) */
-${P} .ck-drop {
-  position: absolute; left: 50%;
-  top: calc(100% - var(--b) * .35);
-  width: calc(var(--b) * .82); height: var(--b);
-  margin-left: calc(var(--b) * -.41);
-  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
-  background: radial-gradient(circle at 38% 36%, var(--ck-liquid-shine), transparent 48%), var(--ck-liquid-2);
-  opacity: 0;
-  pointer-events: none;
-}
-${PA} .ck-drop.ck-fall { animation: ck-drop-fall 2.4s cubic-bezier(.55,0,.9,.55) forwards; }
-@keyframes ck-drop-fall {
-  0%   { opacity: 0; transform: translateY(-2px) scale(.4); }
-  30%  { opacity: 1; transform: translateY(0) scale(1); }
-  48%  { opacity: 1; transform: translateY(3px) scale(.9, 1.25); }
-  100% { opacity: 0; transform: translateY(var(--fall)) scale(.8, 1.1); }
-}
-/* Strużki pod górną belką interfejsu */
-${P} .ck-bar-drips {
+/* --- Ozdoby belek: koronka ostrołuków pod górną, blanki z otworami strzelniczymi nad dolną.
+       z-index: -1 — pod HUD-em i kulą HP, ale nad mapą (warstwa interfejsu ma własny kontekst). --- */
+${P} .ck-bar-lace, ${P} .ck-bar-wall {
   display: block;
-  position: absolute; left: 0; right: 0; top: 100%; height: 0;
+  position: absolute; left: 0; right: 0;
   pointer-events: none;
-  z-index: 4;
+  z-index: -1;
+  background: ${IRON_BG};
 }
-${P} .ck-bar-drips .ck-drip { top: -1px; }
+${P} .ck-bar-lace {
+  top: 100%; height: 10px;
+  -webkit-mask: ${ICONS.lace} 0 0 / 20px 10px repeat-x; mask: ${ICONS.lace} 0 0 / 20px 10px repeat-x;
+}
+${P} .ck-bar-wall {
+  bottom: 100%; height: 11px;
+  -webkit-mask: ${ICONS.battlement} 0 100% / 24px 11px repeat-x; mask: ${ICONS.battlement} 0 100% / 24px 11px repeat-x;
+}
 
 /* =====================================================================
  * === RAMA INTERFEJSU ===
@@ -644,9 +724,11 @@ ${P} .ck-bar-drips .ck-drip { top: -1px; }
 ${S('barTop')},
 ${S('barBottom')} {
   background:
-    linear-gradient(90deg, transparent, var(--ck-a2) 50%, transparent) 0 0 / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent, var(--ck-a2) 50%, transparent) 0 100% / 100% 1px no-repeat,
-    var(--ck-rivet) 14px 50% / 120px 10px repeat-x,
+    linear-gradient(90deg, transparent, var(--ck-a3) 50%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, var(--ck-a3) 50%, transparent) 0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 2%, var(--ck-iron-2) 20% 80%, transparent 98%) 0 3px / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 2%, var(--ck-iron-2) 20% 80%, transparent 98%) 0 calc(100% - 3px) / 100% 1px no-repeat,
+    ${ICONS.arcadeBg} 0 50% / 14px 9px repeat-x,
     radial-gradient(60% 140% at 50% 50%, var(--ck-tint), transparent 70%),
     var(--ck-noise),
     linear-gradient(180deg, var(--ck-iron-1), var(--ck-graphite) 30%, var(--ck-black) 100%) !important;
@@ -677,20 +759,33 @@ ${S('hud')} {
     radial-gradient(90% 120% at 50% 140%, var(--ck-tint), transparent 62%),
     var(--ck-noise),
     linear-gradient(180deg, var(--ck-black), var(--ck-graphite) 60%, #1b1616) !important;
-  border-radius: 0 0 8px 8px !important;
+  border-radius: 0 !important;
   box-shadow:
-    inset 0 0 0 1px #000, inset 0 0 0 3px var(--ck-iron-1), inset 0 0 0 4px #000,
+    inset 0 0 0 1px #000, inset 0 0 0 4px var(--ck-iron-1), inset 0 0 0 5px #000,
+    inset 0 0 0 6px color-mix(in srgb, var(--ck-a3) 70%, transparent), inset 0 0 0 7px #000,
     0 0 0 1px #000, 0 10px 26px rgba(0,0,0,.8), 0 0 20px var(--ck-glow-soft) !important;
   filter: none !important;
   color: var(--ck-text) !important;
 }
+/* Pod tabliczką: rozeta w kolorze wariantu, na niej skrzyżowane miecze z kutego żelaza */
+${S('hud', '::before')},
 ${S('hud', '::after')} {
   content: '';
-  position: absolute; left: 50%; top: calc(100% - 4px);
-  width: 22px; height: 22px; margin-left: -11px;
-  ${MASK(ICONS.swordsCross)}
-  background: linear-gradient(180deg, #7b726c, var(--ck-iron-2) 55%, var(--ck-a3));
+  position: absolute; left: 50%;
   pointer-events: none;
+}
+${S('hud', '::before')} {
+  top: calc(100% - 10px);
+  width: 34px; height: 34px; margin-left: -17px;
+  ${MASK(ICONS.rose)}
+  background: ${INLAY_BG};
+  z-index: 2;
+}
+${S('hud', '::after')} {
+  top: calc(100% - 5px);
+  width: 24px; height: 24px; margin-left: -12px;
+  ${MASK(ICONS.swordsCross)}
+  background: ${IRON_BG};
   z-index: 3;
 }
 ${P} .hud-container *:not([class*="icon"]):not(.map_ball) {
@@ -704,7 +799,7 @@ ${P} .hud-container .map-data *, ${P} .hud-container .herogold, ${P} .hud-contai
 ${P} .hud-container .btn-min {
   background: linear-gradient(180deg, var(--ck-iron-2), var(--ck-iron-1)) !important;
   border: 1px solid #000 !important;
-  border-radius: 2px !important;
+  border-radius: 0 !important;
   box-shadow: inset 0 0 0 1px var(--ck-a2), inset 0 1px 0 rgba(255,255,255,.1) !important;
   color: var(--ck-text) !important;
   filter: none !important;
@@ -728,11 +823,10 @@ ${S('orbPanel')} {
 }
 ${S('orbPointer')} {
   background: var(--ck-noise), linear-gradient(180deg, var(--ck-iron-1), var(--ck-coal) 60%, #000) !important;
-  border-radius: 17px 0 0 17px !important;
+  border-radius: 0 !important;
   box-shadow: inset 0 0 0 1px var(--ck-iron-2), inset 0 0 0 2px #000, 0 0 0 1px #000 !important;
   filter: none !important;
 }
-${P} .bottom-panel .pointer-ttl-graphic { border-radius: 0 17px 17px 0 !important; }
 ${S('orbPointerText')} {
   font-family: var(--ck-font-caps) !important;
   font-weight: 700 !important;
@@ -741,7 +835,7 @@ ${S('orbPointerText')} {
 }
 ${S('expOverlay')} {
   background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(140,120,82,.35) calc(10% - 1px) 10%) !important;
-  border-radius: 2px !important;
+  border-radius: 0 !important;
   box-shadow: inset 0 0 0 1px var(--ck-iron-2), 0 0 0 1px #000 !important;
   filter: none !important;
 }
@@ -756,8 +850,14 @@ ${S('buttonBg')} {
     var(--ck-noise),
     linear-gradient(180deg, var(--ck-iron-2) 0%, var(--ck-iron-1) 18%, #1b1717 60%, #0e0b0b 100%) !important;
   border: 1px solid #050404 !important;
-  border-radius: 3px !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.7), inset 0 0 0 1px rgba(87,80,76,.35), 0 1px 2px rgba(0,0,0,.7) !important;
+  border-radius: 0 !important;
+  /* Okuta tabliczka: jasna krawędź, czarna fuga, inkrustowana listwa u dołu */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 0 0 1px rgba(110,100,95,.38),
+    inset 0 0 0 2px rgba(0,0,0,.85),
+    inset 0 -3px 0 0 color-mix(in srgb, var(--ck-a2) 60%, transparent),
+    0 0 0 1px #000, 0 2px 3px rgba(0,0,0,.75) !important;
   transition: box-shadow .2s ease, border-color .2s ease;
 }
 ${S('button')} { color: var(--ck-text) !important; border-image: none !important; }
@@ -768,7 +868,12 @@ ${P} .button.green, ${P} .button.green > .background { border-color: var(--ck-a3
 ${S('button', ':hover')},
 ${S('button', ':hover > .background')} {
   border-color: var(--ck-a3) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(87,80,76,.35), 0 0 9px var(--ck-glow) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 0 0 1px color-mix(in srgb, var(--ck-a4) 70%, transparent),
+    inset 0 0 0 2px rgba(0,0,0,.85),
+    inset 0 -3px 0 0 var(--ck-a3),
+    0 0 0 1px #000, 0 0 10px var(--ck-glow) !important;
 }
 ${S('button', ':active > .background')} { box-shadow: inset 0 2px 6px rgba(0,0,0,.75) !important; }
 ${S('buttonBg', '::after')} {
@@ -818,7 +923,7 @@ ${S('widget', '::after')} { filter: var(--ck-widget-filter); }
 ${S('slot')} {
   background: radial-gradient(ellipse at 50% 35%, var(--ck-graphite), var(--ck-black) 78%) !important;
   border-image: none !important;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--ck-iron-2), inset 0 0 0 2px #000, inset 0 0 10px rgba(0,0,0,.85) !important;
 }
 ${S('slot', ':hover')} {
@@ -880,7 +985,7 @@ ${P} .c-window .players-online__item:hover { background: var(--ck-glow-soft) !im
 ${P} .c-checkbox__label::before {
   background: var(--ck-black) !important;
   border: 1px solid var(--ck-iron-2) !important;
-  border-radius: 2px !important;
+  border-radius: 0 !important;
   box-shadow: inset 0 1px 3px #000 !important;
 }
 ${P} .c-checkbox input:checked + .c-checkbox__label::before {
@@ -921,23 +1026,23 @@ ${S('hpOrbValue')} {
 }
 ${S('barTrack')} {
   background-color: #000 !important;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: inset 0 1px 3px #000, 0 0 0 1px var(--ck-iron-2) !important;
 }
 ${S('hpFill')} {
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 50%, rgba(0,0,0,.3)),
               linear-gradient(90deg, var(--ck-hp-1), var(--ck-hp-2) 60%, var(--ck-hp-3)) !important;
-  border-radius: 2px;
+  border-radius: 0;
 }
 ${S('mpFill')} {
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 50%, rgba(0,0,0,.3)),
               linear-gradient(90deg, var(--ck-mp-1), var(--ck-mp-2) 60%, var(--ck-mp-3)) !important;
-  border-radius: 2px;
+  border-radius: 0;
 }
 ${S('expFill')} {
   background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0) 50%, rgba(0,0,0,.3)),
               linear-gradient(90deg, var(--ck-xp-1), var(--ck-xp-2) 60%, var(--ck-xp-3)) !important;
-  border-radius: 2px;
+  border-radius: 0;
 }
 ${S('barValue')} {
   font-family: var(--ck-font-caps) !important;
@@ -961,7 +1066,7 @@ ${S('chatMessage')} {
 ${S('chatTabs')} {
   background: var(--ck-noise), linear-gradient(180deg, var(--ck-iron-1), var(--ck-graphite)) !important;
   border-color: #000 !important;
-  border-radius: 2px 2px 0 0 !important;
+  border-radius: 0 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05) !important;
   color: var(--ck-text-dim) !important;
   font-family: var(--ck-font-caps) !important;
@@ -984,12 +1089,12 @@ ${S('chatInput')} {
  * ===================================================================== */
 ${S('scrollTrack')} {
   background: rgba(0,0,0,.92) !important;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--ck-iron-1) !important;
 }
 ${S('scrollHandle')} {
   background: linear-gradient(90deg, var(--ck-iron-1), var(--ck-iron-3) 50%, var(--ck-iron-1)) !important;
-  border-radius: 2px !important;
+  border-radius: 0 !important;
   box-shadow: inset 0 0 0 1px var(--ck-a2), 0 0 4px rgba(0,0,0,.8) !important;
 }
 ${P} .interface-layer *, ${P} .c-window *, ${P} .tip-wrapper * {
@@ -1002,7 +1107,7 @@ html.${ROOT_CLASS} ::-webkit-scrollbar-thumb {
   background: linear-gradient(90deg, var(--ck-iron-1), var(--ck-iron-3) 50%, var(--ck-iron-1));
   border: 1px solid #000;
   box-shadow: inset 0 0 0 1px var(--ck-a2);
-  border-radius: 2px;
+  border-radius: 0;
 }
 html.${ROOT_CLASS} ::-webkit-scrollbar-corner { background: #000; }
 
@@ -1012,10 +1117,10 @@ html.${ROOT_CLASS} ::-webkit-scrollbar-corner { background: #000; }
 ${S('tooltip')} {
   --ck-rarity: var(--ck-iron-3);
   background:
-    var(--ck-rivet) left 2px top 2px / 9px 9px no-repeat,
-    var(--ck-rivet) right 2px top 2px / 9px 9px no-repeat,
-    var(--ck-rivet) left 2px bottom 2px / 9px 9px no-repeat,
-    var(--ck-rivet) right 2px bottom 2px / 9px 9px no-repeat,
+    ${ICONS.tipTL} left 0 top 0 / 16px 16px no-repeat,
+    ${ICONS.tipTR} right 0 top 0 / 16px 16px no-repeat,
+    ${ICONS.tipBR} right 0 bottom 0 / 16px 16px no-repeat,
+    ${ICONS.tipBL} left 0 bottom 0 / 16px 16px no-repeat,
     radial-gradient(130% 40% at 50% 0%, color-mix(in srgb, var(--ck-rarity) 14%, transparent), transparent 70%) no-repeat,
     radial-gradient(ellipse 40% 30% at 85% 80%, rgba(70,48,30,.22), transparent 70%) no-repeat,
     radial-gradient(ellipse 35% 25% at 12% 60%, rgba(60,40,26,.2), transparent 70%) no-repeat,
@@ -1025,7 +1130,7 @@ ${S('tooltip')} {
   border: 1px solid var(--ck-iron-2) !important;
   border-top: 2px solid var(--ck-rarity) !important;
   border-image: none !important;
-  border-radius: 3px !important;
+  border-radius: 0 !important;
   box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(0,0,0,.8), inset 0 0 18px rgba(0,0,0,.55), 0 12px 28px rgba(0,0,0,.85) !important;
   color: #d8cdbf !important;
   font-family: var(--ck-font-body) !important;
@@ -1096,7 +1201,7 @@ ${PA} .ck-fog::after  { animation: ck-fog2 90s ease-in-out infinite alternate; }
 @keyframes ck-fog2 { from { transform: translateX(10%) scaleX(-1); } to { transform: translateX(-6%) scaleX(-1); } }
 
 @media (prefers-reduced-motion: reduce) {
-  html.${ROOT_CLASS} .ck-drop, html.${ROOT_CLASS} .ck-glow,
+  html.${ROOT_CLASS} .ck-glow,
   html.${ROOT_CLASS} .ck-fog::before, html.${ROOT_CLASS} .ck-fog::after { animation: none !important; }
   html.${ROOT_CLASS} .button > .background::after { transition: none !important; }
 }
@@ -1114,7 +1219,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
   position: fixed; left: 6px; bottom: 38px; z-index: 2147483000;   /* nad ikonką „Kociej Nocy” (6px/6px) */
   width: 26px; height: 26px; padding: 0; margin: 0;
   background: radial-gradient(circle at 50% 35%, #2a2626, #050404 80%);
-  border: 1px solid #3d3838; border-radius: 3px;
+  border: 1px solid #3d3838; border-radius: 0;
   box-shadow: 0 0 0 1px #000, 0 2px 6px rgba(0,0,0,.7);
   opacity: .5; cursor: pointer;
   transition: opacity .18s ease, box-shadow .18s ease;
@@ -1133,7 +1238,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
   position: fixed; left: 6px; bottom: 70px; z-index: 2147483001;
   width: 268px; box-sizing: border-box; padding: 9px 10px 10px;
   background: ${ICONS.noise}, radial-gradient(120% 60% at 50% 0%, var(--ck-tint, transparent), transparent 70%), linear-gradient(180deg, #141010, #070505);
-  border: 1px solid #3d3838; border-radius: 3px;
+  border: 1px solid #3d3838; border-radius: 0;
   box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(0,0,0,.9), 0 10px 26px rgba(0,0,0,.85);
   color: #d9cfc4;
   font: 600 12px var(--ck-font-caps, Georgia, serif);
@@ -1146,14 +1251,14 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
 }
 #ck-panel .ck-p-sep {
   height: 9px; margin: 3px auto 6px; width: 140px;
-  ${MASK(ICONS.swordH)}
-  background: linear-gradient(90deg, var(--ck-a2, #5c0f0f) 0 12%, #57504c 12% 16%, #6d6560 16%, #3d3838 86%, var(--ck-a3, #7a1414) 95%);
+  ${MASK(ICONS.dividerIron)}
+  background: linear-gradient(160deg, #8f8680, #57504c 30%, #2a2626);
 }
 #ck-panel .ck-row {
   display: flex; align-items: center; gap: 7px;
   width: 100%; box-sizing: border-box; margin: 5px 0 0; padding: 6px 8px;
   background: linear-gradient(180deg, #2a2626, #141010);
-  border: 1px solid #050404; border-radius: 2px;
+  border: 1px solid #050404; border-radius: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(87,80,76,.3);
   color: #d9cfc4; font: inherit; text-align: left; cursor: pointer;
   transition: box-shadow .18s ease, border-color .18s ease;
@@ -1163,7 +1268,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 0 8px var(--ck-glow, transparent);
 }
 #ck-panel .ck-row i {
-  flex: none; width: 8px; height: 8px; border-radius: 50%;
+  flex: none; width: 7px; height: 7px; transform: rotate(45deg);
   background: #2a2626; box-shadow: inset 0 0 0 1px #000;
 }
 #ck-panel .ck-row[aria-pressed="true"] i { background: var(--ck-a4, #9e1b1b); box-shadow: 0 0 6px var(--ck-glow, transparent); }
@@ -1171,12 +1276,12 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
 #ck-panel .ck-row b { font-weight: 400; color: #a39890; font-family: var(--ck-font-body, Georgia, serif); font-size: 13px; }
 #ck-panel kbd {
   font: 10px var(--ck-font-body, Georgia, serif); color: #8f857d;
-  border: 1px solid #3d3838; border-radius: 2px; padding: 0 3px; background: #0c0909;
+  border: 1px solid #3d3838; border-radius: 0; padding: 0 3px; background: #0c0909;
 }
 #ck-toast {
   position: fixed; left: 38px; bottom: 38px; z-index: 2147483001;
   max-width: 320px; box-sizing: border-box; padding: 8px 26px 8px 10px;
-  background: #0c0909; border: 1px solid #3d3838; border-left: 3px solid var(--ck-a3, #7a1414); border-radius: 2px;
+  background: #0c0909; border: 1px solid #3d3838; border-left: 3px solid var(--ck-a3, #7a1414); border-radius: 0;
   box-shadow: 0 0 0 1px #000, 0 8px 22px rgba(0,0,0,.8);
   color: #d9cfc4; font: 13px/1.35 var(--ck-font-body, Georgia, serif);
   opacity: 0; transform: translateY(6px);
@@ -1214,7 +1319,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     const link = document.createElement('link');
     link.id = 'ck-fonts';
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:wght@400;600;700&family=Pirata+One&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:wght@400;600;700&family=Pirata+One&family=UnifrakturMaguntia&display=swap';
     (document.head || document.documentElement).appendChild(link);
   }
 
@@ -1367,98 +1472,60 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
   }
 
   /* ======================================================================
-   * OZDOBNIKI W DOM (strużki, nity, tarcze, poświata, mgła)
+   * OZDOBNIKI W DOM (gotyckie narożniki, szczyty, koronki, rozety, blanki, poświata, mgła)
    * Jeden MutationObserver (debounce) — każdy element dostaje ozdobniki raz.
    * ====================================================================== */
 
-  function hashStr(s) {
-    let h = 2166136261;
-    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
-  function seeded(seed) {   // mulberry32 — te same okna zawsze wyglądają tak samo
-    let a = seed >>> 0;
-    return () => {
-      a = (a + 0x6D2B79F5) >>> 0;
-      let t = a;
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
+  const mkDeco = (tag, cls) => {
+    const el = document.createElement(tag);
+    el.className = cls;
+    el.setAttribute('data-ck', '');
+    el.setAttribute('aria-hidden', 'true');
+    return el;
+  };
 
-  function dripsHtml(seedStr, count, minLen, maxLen, avoidCenter) {
-    if (!FEATURES.drips || count <= 0) return '';
-    const rnd = seeded(hashStr(seedStr));
-    const xs = [];
-    let html = '';
-    for (let i = 0, tries = 0; i < count && tries < 60; tries++) {
-      const x = 5 + rnd() * 90;
-      if (avoidCenter && x > 30 && x < 70) continue;   // nie na tytule okna
-      if (xs.some((p) => Math.abs(p - x) < 7)) continue;
-      xs.push(x);
-      const w = 2.6 + rnd() * 2.8;
-      const len = Math.round(minLen + rnd() * (maxLen - minLen));
-      const b = w * 1.35 + rnd() * 1.4;
-      const fall = Math.round(28 + rnd() * 50);
-      html += `<span class="ck-drip${rnd() < 0.5 ? ' ck-drip-b' : ''}" style="--x:${x.toFixed(1)}%;--w:${w.toFixed(1)}px;` +
-        `--len:${len}px;--b:${b.toFixed(1)}px;--fall:${fall}px"><b class="ck-drop"></b></span>`;
-      i++;
-    }
-    return html;
-  }
-
-  function buildWindowDeco(win) {
-    const deco = document.createElement('div');
-    deco.className = 'ck-deco';
-    deco.setAttribute('data-ck', '');
-    deco.setAttribute('aria-hidden', 'true');
-    const title = (win.querySelector('.header-label .text')?.textContent || '').trim();
-    const seed = title || [...win.classList].filter((c) => !c.startsWith('ck-')).join('.');
-    const count = [0, 1, 2, 2, 3][hashStr(seed + '#n') % 5];   // część okien bez strużek — „wybrane”
-    deco.innerHTML = '<i class="ck-glow"></i>' + (FEATURES.crest ? '<i class="ck-crest"></i>' : '') +
-      dripsHtml(seed, count, 8, 34, true);
+  function buildWindowDeco() {
+    const deco = mkDeco('div', 'ck-deco');
+    deco.innerHTML = '<i class="ck-glow"></i>' +
+      (FEATURES.crest ? '<i class="ck-rose"></i>' : '') +
+      (FEATURES.gothicFrame
+        ? '<i class="ck-corner ck-tl"></i><i class="ck-corner ck-tr"></i><i class="ck-corner ck-bl"></i><i class="ck-corner ck-br"></i>' +
+          '<i class="ck-gable"></i><i class="ck-lace"></i>'
+        : '');
     return deco;
   }
+
+  /** Dokleja ozdobnik do każdego hosta, który go jeszcze nie ma. */
+  const ensureChild = (hostSel, cls, tag = 'i') => {
+    document.querySelectorAll(hostSel).forEach((host) => {
+      if (!host.querySelector(`:scope > .${cls}`)) host.appendChild(mkDeco(tag, cls));
+    });
+  };
 
   function decorate() {
     if (!isEnabled() || !document.body) return;
     document.querySelectorAll(SELECTORS.window.join(',')).forEach((win) => {
       let deco = win.querySelector(':scope > .ck-deco');
-      if (!deco) { deco = buildWindowDeco(win); win.appendChild(deco); }
-      const big = win.offsetWidth >= 300 && win.offsetHeight >= 240;
+      if (!deco) { deco = buildWindowDeco(); win.appendChild(deco); }
+      // Gra daje oknom przezroczysty border (12–20 px) — warstwa ozdobników sięga do zewnętrznej krawędzi okna.
+      const cs = getComputedStyle(win);
+      const bw = [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth];
+      const inset = bw.map((v) => `-${v}`).join(' ');
+      if (deco.dataset.ckInset !== inset) { deco.dataset.ckInset = inset; deco.style.inset = inset; }
+      const w = win.offsetWidth, h = win.offsetHeight;
+      const big = w >= 300 && h >= 240;
+      const small = w > 0 && (w < 200 || h < 110);
       if (deco.classList.contains('ck-big') !== big) deco.classList.toggle('ck-big', big);
+      if (deco.classList.contains('ck-small') !== small) deco.classList.toggle('ck-small', small);
     });
-    if (FEATURES.drips) {
-      document.querySelectorAll(SELECTORS.barTopHost.join(',')).forEach((host) => {
-        if (host.querySelector(':scope > .ck-bar-drips')) return;
-        const d = document.createElement('div');
-        d.className = 'ck-bar-drips';
-        d.setAttribute('data-ck', '');
-        d.setAttribute('aria-hidden', 'true');
-        d.innerHTML = dripsHtml('top-bar', 5, 10, 30, false);
-        host.appendChild(d);
-      });
+    if (FEATURES.barOrnaments) {
+      ensureChild(SELECTORS.barTopHost.join(','), 'ck-bar-lace');
+      ensureChild(SELECTORS.barBottomHost.join(','), 'ck-bar-wall');
     }
-    if (FEATURES.crest) {
-      document.querySelectorAll(SELECTORS.column.join(',')).forEach((col) => {
-        if (col.querySelector(':scope > .ck-col-crest')) return;
-        const c = document.createElement('i');
-        c.className = 'ck-col-crest';
-        c.setAttribute('data-ck', '');
-        c.setAttribute('aria-hidden', 'true');
-        col.appendChild(c);
-      });
-    }
+    if (FEATURES.crest) ensureChild(SELECTORS.column.join(','), 'ck-col-crest');
     if (FEATURES.fog) {
       const host = document.querySelector(SELECTORS.fogHost.join(','));
-      if (host && !host.querySelector(':scope > .ck-fog')) {
-        const f = document.createElement('div');
-        f.className = 'ck-fog';
-        f.setAttribute('data-ck', '');
-        f.setAttribute('aria-hidden', 'true');
-        host.appendChild(f);
-      }
+      if (host && !host.querySelector(':scope > .ck-fog')) host.appendChild(mkDeco('div', 'ck-fog'));
     }
   }
 
@@ -1466,24 +1533,6 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
   function scheduleDecorate() {
     clearTimeout(decorateTimer);
     decorateTimer = setTimeout(decorate, 300);
-  }
-
-  /** Krople odrywają się co kilka sekund, w kilku losowych miejscach naraz, nigdy wszędzie. */
-  function scheduleDrops() {
-    setTimeout(() => { try { dropTick(); } finally { scheduleDrops(); } }, 2500 + Math.random() * 5500);
-  }
-  function dropTick() {
-    if (!FEATURES.drips || !isEnabled() || !isAnim() || document.hidden || reducedMotion()) return;
-    const falling = document.querySelectorAll('.ck-drop.ck-fall').length;
-    const free = [...document.querySelectorAll('.ck-drop:not(.ck-fall)')].filter((d) => d.offsetParent);
-    let n = Math.min(MAX_FALLING_DROPS - falling, 1 + Math.floor(Math.random() * 2), free.length);
-    while (n-- > 0) {
-      const drop = free.splice(Math.floor(Math.random() * free.length), 1)[0];
-      const done = () => drop.classList.remove('ck-fall');
-      drop.addEventListener('animationend', done, { once: true });
-      setTimeout(done, 3200);
-      drop.classList.add('ck-fall');
-    }
   }
 
   /* ======================================================================
@@ -1710,7 +1759,6 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     recheckSkins();
     setInterval(heal, 3000);
     setInterval(checkHp, 1000);
-    scheduleDrops();
     setTimeout(checkKociaNoc, 4000);
     LOG(`v${VERSION} aktywny (wariant: ${VARIANTS[getVariant()]}). Alt+T — motyw, Alt+V — wariant, Alt+A — animacje.`);
   }
