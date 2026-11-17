@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.2.0
-// @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kotki w kuli HP. Zmienia wyłącznie wygląd UI.
+// @version      1.3.0
+// @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, fioletowa pulsująca kula HP. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
 // @noframes
@@ -19,7 +19,7 @@
  * Kocia Noc — co robi
  *  - Czarny interfejs; fiolet tylko jako akcent (cienkie linie, poświata, aktywne zakładki).
  *  - Kocie detale: uszy na oknach, łapki w nagłówkach i tooltipach, wzór łapek w tle,
- *    kot-maskotka na dolnej belce, kotki ganiające się w kuli HP, mrugające oczy w ciemności.
+ *    kot-maskotka na dolnej belce, mrugające oczy w ciemności, fioletowa kula HP z pulsującą poświatą.
  *  - Ekran wczytywania gry (księżyc, kot na dachu) i efekt po zdobyciu legendy.
  *  - Wszystkie grafiki to SVG/CSS wygenerowane w kodzie — żadnych zewnętrznych obrazków.
  *
@@ -43,9 +43,9 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
   const KEY_ENABLED = 'mkn.enabled';
-  const KEY_ANIM = 'mkn.mascot';                       // kocie animacje (kot, kotki w HP, oczy)
+  const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
   const ROOT_CLASS = 'mkn-on';
   const ANIM_CLASS = 'mkn-mascot';
@@ -58,7 +58,7 @@
     loadingScreen: true,  // ekran wczytywania
     legendEffect: true,   // efekt po zdobyciu legendy
     ambientEyes: true,    // mrugające oczy w ciemnych kolumnach
-    hpKittens: true       // kotki w kuli HP
+    hpGlow: true          // pulsująca fioletowa poświata wokół kuli HP
   };
 
   /** Prefiksy reguł. Dwa `:not(#…)` podbijają specyficzność, żeby wygrywać z innymi motywami. */
@@ -97,7 +97,9 @@
     columnBorder:    ['.interface-layer > .main-column > .border'],
     spriteArt:       ['.top.positioner .hud-container', '.bottom-panel .bottom-panel-graphic',
                       '.bottom-panel .pointer-exp-graphic', '.bottom-panel .pointer-ttl-graphic',
-                      '.exp-bar-wrapper .overlay', '.interface-element-item-slot-grid-stretch'],
+                      '.exp-bar-wrapper .overlay'],
+    slotGrid:        ['.interface-element-item-slot-grid-stretch'],              // kratki torby (kafel gry barwiony na fiolet)
+    gridBorder:      ['.interface-element-grid-border', '.interface-element-grid-border-light'],
 
     /* === PRZYCISKI === */
     button:          ['.button'],
@@ -110,8 +112,9 @@
                       '.interface-element-one-item-slot-2'],                      // drugi: ? sloty paska szybkiego dostępu
 
     /* === PASKI === */
-    hpOrb:           ['.hp-indicator'],                               // kula HP (kotki biegają w środku)
+    hpOrb:           ['.hp-indicator'],                               // kula HP (krew + procent) — barwiona na fiolet
     hpOrbBlood:      ['.hp-indicator .blood'],
+    hpOrbWrap:       ['.hp-indicator-wrapper'],                       // obudowa kuli — tu pulsuje poświata
     hpOrbGlass:      ['.hp-indicator-wrapper .glass'],
     barTrack:        ['[class*="interface-element-progress-bar-"]', '.progress-bar-wrapper',          // ? .progress-bar-wrapper
                       '.exp-bar-wrapper .exp-progress .progress'],
@@ -185,17 +188,6 @@
     `<ellipse cx="14.6" cy="5.8" rx="2.2" ry="2.9" transform="rotate(6 14.6 5.8)"/>` +
     `<ellipse cx="18.6" cy="10.2" rx="2.2" ry="2.8" transform="rotate(18 18.6 10.2)"/></g>`;
 
-  /** Biegnący kot (bokiem, w prawo) — do kuli HP. */
-  const RUNNING_CAT = (x, s) =>
-    `<g transform="translate(${x} 0) scale(${s})">` +
-    '<g fill="none" stroke="#050507" stroke-width="1.9" stroke-linecap="round">' +
-    '<path d="M25 15 L31 19.5"/><path d="M23.5 15.5 L27.5 20.5"/><path d="M12.5 15 L6.5 19.5"/><path d="M14 15.5 L9.5 20.5"/>' +
-    '<path d="M9.5 12 C5 11 3 7 4.6 4"/></g>' +
-    '<g fill="#050507" stroke="#a98be0" stroke-width=".55" stroke-opacity=".8">' +
-    '<ellipse cx="18" cy="13" rx="9" ry="4.3"/><circle cx="28.4" cy="9.6" r="3.9"/>' +
-    '<path d="M25.9 7.2 L26.5 3.1 L28.7 6.1 Z"/><path d="M29.3 6 L31.7 3.1 L32.1 7.2 Z"/></g>' +
-    '<circle cx="30" cy="9.2" r=".7" fill="#e8c25a"/></g>';
-
   const ICONS = {
     paw: svgUrl(SVG('0 0 24 24', PAW('#a98be0'))),
     pawDim: svgUrl(SVG('0 0 24 24', PAW('#2a2238'))),
@@ -237,13 +229,6 @@
       '<path d="M2 25 C18 2 82 2 98 25 C82 48 18 48 2 25 Z" fill="url(#e)" stroke="#2a1500" stroke-width="2"/>' +
       '<ellipse cx="50" cy="25" rx="5.5" ry="21" fill="#0a0503"/>' +
       '<ellipse cx="40" cy="16" rx="5" ry="3.2" fill="#fff" opacity=".55"/>')),
-
-    // Dwa ganiające się kotki i kłębek włóczki — pasek do kuli HP
-    kittens: svgUrl(SVG('0 0 120 24',
-      RUNNING_CAT(0, 0.82) + RUNNING_CAT(44, 0.95) +
-      '<circle cx="104" cy="17" r="4.2" fill="#9b7bd4"/>' +
-      '<path d="M100.5 15 C103 16 105 18 107 20 M101 18.5 C103 17.5 106 15.5 107.5 15.5 M103 13 C104 15 104.5 18 104 21" fill="none" stroke="#e6dcff" stroke-width=".55" opacity=".8"/>' +
-      '<path d="M99.9 17.5 C95 19 92 21 88 21" fill="none" stroke="#9b7bd4" stroke-width=".6"/>')),
 
     face: svgUrl(SVG('0 0 24 24',
       '<path d="M4 20 C3 15 3 8 4.5 3 C7 5 8.5 6.5 9.5 8 C11 7.6 13 7.6 14.5 8 C15.5 6.5 17 5 19.5 3 C21 8 21 15 20 20 C18.5 22 15.5 23 12 23 C8.5 23 5.5 22 4 20 Z" fill="#000" stroke="#a98be0" stroke-width="1.1" stroke-linejoin="round"/>' +
@@ -470,28 +455,14 @@ ${S('windowHeaderBox', '::after')}  { right: 16px; transform: scaleX(-1); transf
 ${P} .c-window:hover > .header-label-positioner::before { transform: rotate(-6deg); }
 ${P} .c-window:hover > .header-label-positioner::after  { transform: scaleX(-1) rotate(-6deg); }`;
 
-    const kittensCss = !FEATURES.hpKittens ? '' : `
-/* Kotki ganiające kłębek w kuli HP — przebiegają co ~30 s (animowane tylko tło małego elementu) */
-${SA('hpOrb', '::after')} {
-  content: '';
-  position: absolute;
-  left: 9%; right: 9%; top: 9%; bottom: 9%;
-  border-radius: 50%;
-  background: ${ICONS.kittens} no-repeat;
-  background-size: 66px auto;
-  background-position: -90px 80%;
-  pointer-events: none;
-  z-index: 3;
-  animation: mkn-kittens 30s linear 4s infinite;
+    const hpGlowCss = !FEATURES.hpGlow ? '' : `
+/* Pulsująca poświata wokół kuli HP — blask po kształcie kuli (filtr na obudowie, mały element) */
+${SA('hpOrbWrap')} {
+  animation: mkn-hp-pulse 3.2s ease-in-out infinite;
 }
-@keyframes mkn-kittens {
-  0%        { background-position: -90px 80%; }
-  2.5%      { background-position: -55px 76%; }
-  5%        { background-position: -20px 80%; }
-  7.5%      { background-position: 15px 76%; }
-  10%       { background-position: 50px 80%; }
-  12.5%     { background-position: 85px 76%; }
-  15%, 100% { background-position: 130px 80%; }
+@keyframes mkn-hp-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(155,123,212,.45)); }
+  50%      { filter: drop-shadow(0 0 10px rgba(155,123,212,.9)) drop-shadow(0 0 22px rgba(110,84,170,.55)); }
 }`;
 
     return `
@@ -503,7 +474,7 @@ html.${ROOT_CLASS} {
   --mkn-night:      #040405;   /* tło okien */
   --mkn-velvet:     #0b0a0e;   /* powierzchnie (przyciski, zakładki) */
   --mkn-velvet-2:   #15131b;   /* powierzchnie podniesione */
-  --mkn-line:       #2a2436;   /* cienkie linie, ramki */
+  --mkn-line:       #3b2d5e;   /* cienkie linie, ramki — fioletowe */
   --mkn-violet:     #9b7bd4;   /* główny akcent — używany oszczędnie */
   --mkn-violet-hi:  #c3a8ff;   /* poświata */
   --mkn-violet-lo:  #4b3b6e;
@@ -515,7 +486,7 @@ html.${ROOT_CLASS} {
   --mkn-font-head:  'Quicksand', 'Nunito', 'Segoe UI', sans-serif;
   --mkn-font-body:  'Nunito', 'Quicksand', 'Segoe UI', sans-serif;
 
-  --mkn-hp-1: #4a1027; --mkn-hp-2: #b8385f; --mkn-hp-3: #f08aa8;
+  --mkn-hp-1: #4a1040; --mkn-hp-2: #b0368f; --mkn-hp-3: #f08ad6;
   --mkn-mp-1: #1d2a63; --mkn-mp-2: #4a6ee0; --mkn-mp-3: #a8bcff;
   --mkn-xp-1: #2f2357; --mkn-xp-2: #7c5cd6; --mkn-xp-3: #c9b2ff;
 
@@ -527,11 +498,13 @@ html.${ROOT_CLASS} {
   --mkn-rar-artifact:  #ff4f4f;
 
   /* Sprite'y gry, których nie da się odtworzyć w CSS: przyciemnij i przesuń w chłodny fiolet */
-  --mkn-sprite-filter: grayscale(.8) brightness(.45) sepia(.25) hue-rotate(215deg) saturate(1.4) contrast(1.08);
+  --mkn-sprite-filter: grayscale(.7) brightness(.5) sepia(.5) hue-rotate(220deg) saturate(2.2) contrast(1.08);
+  /* Kafle gry (kratki torby) → fiolet z zachowaniem kształtu */
+  --mkn-tile-filter: grayscale(1) brightness(.8) sepia(1) hue-rotate(222deg) saturate(3) contrast(1.15);
 
   --mkn-paws: ${ICONS.pawPattern};
   --mkn-frame-v: linear-gradient(90deg, #000, #241c38 35%, #6a54a0 50%, #241c38 65%, #000);
-  --mkn-hairline: rgba(155,123,212,.38);
+  --mkn-hairline: rgba(155,123,212,.6);
   --mkn-surface:
     radial-gradient(120% 70% at 50% 0%, rgba(155,123,212,.06), transparent 60%),
     var(--mkn-paws),
@@ -578,7 +551,7 @@ ${S('windowContent')} {
 }
 /* Nagłówek: bez tła i ramek — tylko tekst i łapki; pod spodem wygaszająca się linia na całą szerokość */
 ${S('windowHeaderBox')} {
-  background: linear-gradient(90deg, transparent 4%, rgba(155,123,212,.32) 50%, transparent 96%) 0 100% / 100% 1px no-repeat !important;
+  background: linear-gradient(90deg, transparent 4%, rgba(155,123,212,.6) 50%, transparent 96%) 0 100% / 100% 1px no-repeat !important;
 }
 ${S('windowHeader')} {
   background: none !important;
@@ -630,8 +603,9 @@ ${earsCss}
 ${S('barTop')},
 ${S('barBottom')} {
   background:
-    linear-gradient(90deg, transparent, rgba(155,123,212,.45) 50%, transparent) 0 0 / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent, rgba(155,123,212,.45) 50%, transparent) 0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(155,123,212,.8) 50%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(155,123,212,.8) 50%, transparent) 0 100% / 100% 1px no-repeat,
+    radial-gradient(60% 120% at 50% 50%, rgba(110,84,170,.14), transparent 70%),
     var(--mkn-paws),
     #000 !important;
   box-shadow: inset 0 0 0 1px #000 !important;
@@ -681,9 +655,10 @@ ${S('buttonLabel')} {
 ${S('button', '.disabled > .label')} { color: var(--mkn-text-dim) !important; }
 
 ${S('widget')} {
-  background: radial-gradient(circle at 50% 30%, #16131e, #000 75%) !important;
-  border-color: var(--mkn-line) !important;
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(195,168,255,.12), inset 0 -3px 6px rgba(0,0,0,.6) !important;
+  background: radial-gradient(circle at 50% 30%, #1d1630, #000 75%) !important;
+  border-color: rgba(155,123,212,.6) !important;
+  outline-color: rgba(155,123,212,.6) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(195,168,255,.25), inset 0 -3px 6px rgba(0,0,0,.6), 0 0 6px rgba(155,123,212,.25) !important;
   transition: box-shadow .18s ease;
 }
 ${S('widget', ':hover')} {
@@ -697,6 +672,11 @@ ${S('widget', '.blue')} {
   box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(168,188,255,.45) !important;
 }
 ${S('widget', '.disabled')} { opacity: .5; }
+/* Zielone obwódki gry rysowane pseudo-elementami → przesunięcie barwy na fiolet (ikona w środku zostaje) */
+${S('widget', '::before')},
+${S('widget', '::after')} {
+  filter: hue-rotate(150deg) saturate(1.2);
+}
 
 /* =====================================================================
  * === SLOTY === (bez filtrów — przedmiot i jego rzadkość zostają nietknięte)
@@ -705,7 +685,19 @@ ${S('slot')} {
   background: radial-gradient(ellipse at 50% 35%, #100e15, #000 78%) !important;
   border-image: none !important;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 1px var(--mkn-line), inset 0 0 8px rgba(0,0,0,.85) !important;
+  box-shadow: inset 0 0 0 1px rgba(155,123,212,.5), inset 0 0 10px rgba(110,84,170,.25), inset 0 0 8px rgba(0,0,0,.85) !important;
+}
+${S('slot', ':hover')} {
+  box-shadow: inset 0 0 0 1px rgba(195,168,255,.85), inset 0 0 12px rgba(155,123,212,.4) !important;
+}
+/* Kratki torby: kafel gry przebarwiony na fiolet (dokładnie te same kształty i odstępy) */
+${S('slotGrid')} {
+  filter: var(--mkn-tile-filter);
+}
+${S('gridBorder')} {
+  border-image: none !important;
+  border-color: rgba(155,123,212,.45) !important;
+  box-shadow: 0 0 0 1px rgba(155,123,212,.35), 0 0 10px rgba(110,84,170,.2) !important;
 }
 
 /* =====================================================================
@@ -747,13 +739,14 @@ ${P} .mkn-ink  { color: var(--mkn-text) !important; text-shadow: none !important
 /* =====================================================================
  * === PASKI ===
  * ===================================================================== */
-${S('hpOrbBlood')} {
-  filter: hue-rotate(-14deg) saturate(1.15) brightness(.9);
+/* Kula HP: krew i procent przebarwione na fiolet */
+${S('hpOrb')} {
+  filter: hue-rotate(272deg) saturate(1.15) brightness(.95);
 }
 ${S('hpOrbGlass')} {
-  filter: grayscale(.5) brightness(.85) hue-rotate(215deg) saturate(1.3);
+  filter: grayscale(.6) brightness(.9) sepia(.4) hue-rotate(220deg) saturate(2);
 }
-${kittensCss}
+${hpGlowCss}
 ${S('barTrack')} {
   background-color: #000 !important;
   border-radius: 6px;
@@ -1025,7 +1018,7 @@ ${P} .mkn-amb-eyes {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.${ROOT_CLASS} *::after, html.${ROOT_CLASS} .mkn-amb-eyes { animation: none !important; }
+  html.${ROOT_CLASS} *::after, html.${ROOT_CLASS} .mkn-amb-eyes, html.${ROOT_CLASS} .hp-indicator-wrapper { animation: none !important; }
 }
 
 /* =====================================================================
