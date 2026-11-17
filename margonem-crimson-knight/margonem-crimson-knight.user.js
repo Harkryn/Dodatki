@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Crimson Knight Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.0.0
+// @version      1.0.1
 // @description  Mroczny, rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, miecze i skapująca ciecz. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,8 @@
  * Oznaczenia selektorów w obiekcie SELECTORS:
  *   [KN]   — przejęty z „Kociej Nocy”, tam potwierdzony w grze,
  *   [KN?]  — przejęty z „Kociej Nocy”, ale już tam oznaczony jako przypuszczenie,
- *   [NOWY] — dopisany na potrzeby tego motywu, DO WERYFIKACJI w grze (F12).
+ *   [NOWY] — dopisany na potrzeby tego motywu, DO WERYFIKACJI w grze (F12),
+ *   [GRA]  — sprawdzony bezpośrednio w grze (NI na margonem.com, 18.11.2026).
  */
 
 (() => {
@@ -55,7 +56,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
   const KEY_ENABLED = 'ck.enabled';
   const KEY_VARIANT = 'ck.variant';
   const KEY_ANIM = 'ck.anim';
@@ -133,13 +134,14 @@
     slotGrid:        ['.interface-element-item-slot-grid-stretch'],
     gridBorder:      ['.interface-element-grid-border', '.interface-element-grid-border-light'],
 
-    /* === OZDOBNIKI — gdzie doklejamy własne elementy === */
-    barTopHost:      ['.interface-layer > .top.positioner'],   // [NOWY] element z [KN]; zakładamy, że jest pozycjonowany (strużki pod belką)
-    fogHost:         ['.game-layer'],                          // [NOWY] element z DETECT [KN]; mgła jako nakładka nad mapą (canvas nietknięty)
+    /* === OZDOBNIKI — gdzie doklejamy własne elementy === [GRA] sprawdzone 18.11.2026 na margonem.com */
+    barTopHost:      ['.interface-layer > .top.positioner'],   // [GRA] position: absolute — strużki pod belką
+    fogHost:         ['.game-layer'],                          // [GRA] position: absolute — mgła jako nakładka nad mapą (canvas nietknięty)
+    // Uwaga [GRA]: .c-window > .header-label-positioner jest static, a .c-window .header-label — relative.
 
     /* === PRZYCISKI === [KN] */
-    button:          ['.button'],
-    buttonBg:        ['.button > .background'],   // [NOWY] ::after na nim (rozlanie koloru) — zakładamy position:absolute
+    button:          ['.button'],                  // [GRA] position: relative
+    buttonBg:        ['.button > .background'],   // [GRA] static — ::after (rozlanie koloru) pozycjonuje się więc względem .button
     buttonLabel:     ['.button > .label'],
     widget:          ['.widget-button'],
 
@@ -150,7 +152,7 @@
     /* === PASKI === */
     hpOrb:           ['.hp-indicator'],                                           // [KN]
     hpOrbBlood:      ['.hp-indicator .blood'],                                    // [KN]
-    hpOrbValue:      ['.hp-indicator .hpp .value'],                               // [KN] (w KN tylko w CSS) — zapasowy odczyt % HP
+    hpOrbValue:      ['.hp-indicator .hpp .value'],                               // [GRA] napis „100%” — główny odczyt % HP
     barTrack:        ['[class*="interface-element-progress-bar-"]:not(.one-warrior *)',
                       '.exp-bar-wrapper .exp-progress .progress'],                // [KN]
     hpFill:          ['.hero-hp-progress-bar .inner', '.hero-hp-top-progress-bar-light-mode .inner',   // [KN]
@@ -172,7 +174,8 @@
     scrollTrack:     ['.scrollbar-wrapper .track'],
     scrollHandle:    ['.scrollbar-wrapper .track .handle'],
 
-    /* === TOOLTIPY === [KN?] (struktura do potwierdzenia — diagnostyka.js ma tryb przechwytywania) */
+    /* === TOOLTIPY === [GRA] .tip-wrapper[data-item-type="t-…"] i .item-name potwierdzone; .tw-tooltip i
+       .item-head .name nadal [KN?] */
     tooltip:         ['.tip-wrapper', '.tw-tooltip'],
     tooltipItemName: ['.tip-wrapper .item-name', '.tip-wrapper .item-head .name'],
 
@@ -465,11 +468,13 @@ ${S('windowContent')} {
   font-size-adjust: .48;                 /* Crimson Text ma niską x-wysokość — wyrównujemy czytelność */
   font-variant-numeric: lining-nums;
 }
-/* Pas nagłówka: linia pod tytułem przechodząca w żelazo, pośrodku miecz poziomo (separator) */
+/* Pas nagłówka: linia pod tytułem przechodząca w żelazo, pośrodku miecz poziomo (separator).
+   Miecz siedzi na .header-label (position: relative, wyśrodkowany nad tytułem) — .header-label-positioner
+   jest statyczny, więc pseudo-element na nim lądował na dole okna (sprawdzone w grze). */
 ${S('windowHeaderBox')} {
   background: linear-gradient(90deg, transparent 4%, var(--ck-iron-2) 28%, var(--ck-a2) 50%, var(--ck-iron-2) 72%, transparent 96%) 0 100% / 100% 1px no-repeat !important;
 }
-${S('windowHeaderBox', '::after')} {
+${S('windowHeader', '::after')} {
   content: '';
   position: absolute; left: 50%; bottom: -5px;
   width: 132px; height: 10px; margin-left: -66px;
@@ -1492,14 +1497,15 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
 
   function checkHp() {
     if (!FEATURES.lowHpPulse || !isEnabled()) return;
+    // Najpierw napis z procentem na kuli (w grze: „100%”), zapasowo wysokość „krwi” względem kuli.
     let pct = null;
-    const orb = document.querySelector(SELECTORS.hpOrb[0]);
-    const blood = document.querySelector(SELECTORS.hpOrbBlood[0]);
-    if (orb && blood && orb.offsetHeight > 0) pct = (blood.offsetHeight / orb.offsetHeight) * 100;
+    const v = document.querySelector(SELECTORS.hpOrbValue.join(','));
+    const m = v && /(\d+(?:[.,]\d+)?)\s*%/.exec(v.textContent || '');
+    if (m) pct = parseFloat(m[1].replace(',', '.'));
     if (pct === null) {
-      const v = document.querySelector(SELECTORS.hpOrbValue.join(','));
-      const m = v && /(\d+(?:[.,]\d+)?)\s*%/.exec(v.textContent || '');
-      if (m) pct = parseFloat(m[1].replace(',', '.'));
+      const orb = document.querySelector(SELECTORS.hpOrb[0]);
+      const blood = document.querySelector(SELECTORS.hpOrbBlood[0]);
+      if (orb && blood && orb.offsetHeight > 0) pct = (blood.offsetHeight / orb.offsetHeight) * 100;
     }
     setLowHp(pct !== null && pct > 0 && pct < LOW_HP_PCT);
   }
