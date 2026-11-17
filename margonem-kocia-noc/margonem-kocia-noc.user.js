@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.2
+// @version      1.7.3
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,7 +50,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.7.2';
+  const VERSION = '1.7.3';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -177,7 +177,7 @@
     skinSkip:        ['.item', '.highlight', '[class*="icon"]', 'canvas', 'img', 'input', 'textarea', 'select',
                       '.new-chat-message', '[class*="progress"]', '[class*="avatar"]', '.button', '.widget-button',
                       '[class*="close-button"]', '.header-label', '.scrollbar-wrapper', '.card', '[id^="mkn-"]', '.mkn-amb-eyes',
-                      '.new-chat-window', '.hp-indicator-wrapper-template', '[class*="vaddonz"]', '[class*="ll:"]', '[class*="mz-"]', '[class*="ykp"]'],
+                      '.new-chat-window', '.hp-indicator-wrapper-template', '.interface-element-item-slot-grid-stretch', '.mkn-grid', '[class*="vaddonz"]', '[class*="ll:"]', '[class*="mz-"]', '[class*="ykp"]'],
 
     neverStyle:      ['#GAME_CANVAS', '.game-layer canvas', '.item .highlight', '.widget-button .icon']
   };
@@ -1058,7 +1058,7 @@ ${S('slotGrid')} {
   filter: var(--mkn-tile-filter);   /* zapas, zanim JS zmierzy kratkę */
 }
 /* Kratki zmierzone z grafiki gry: czarne wnętrze, fioletowe linie dokładnie w tych samych miejscach */
-${P} .mkn-grid {
+${P} .mkn-grid.mkn-grid {   /* podwójna klasa: wygrywa z .mkn-skin, gdyby skaner jednak oznaczył kratkę */
   background:
     linear-gradient(to right, rgba(155,123,212,.65) 0 1px, transparent 1px) 0 0 / var(--mkn-cell-w) var(--mkn-cell-h),
     linear-gradient(to bottom, rgba(155,123,212,.65) 0 1px, transparent 1px) 0 0 / var(--mkn-cell-w) var(--mkn-cell-h),
