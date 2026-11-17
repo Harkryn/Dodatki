@@ -1307,7 +1307,8 @@ ${PC} .ck-hud-deco > i { position: absolute; display: block; filter: drop-shadow
 ${PC} .ck-hud-deco > i::before, ${PC} .ck-hud-deco > i::after { content: ''; position: absolute; inset: 0; }
 /* Wiszący ośli łuk z mieczami pośrodku */
 ${PC} .ck-hud-deco > .ck-hud-crest { left: 50%; top: calc(100% - 1px); width: 108px; height: 50px; margin-left: -54px; }
-${PC} .ck-hud-crest::before { ${MASK(ICONS.hudCrestInlay)} background: linear-gradient(180deg, #4f0a0a, #210404 70%, #0e0202); }
+/* Wnętrze łuku czarne, tylko za mieczami przytłumiona, krwista poświata (sprawdzone w grze — pełna czerwień była zbyt jaskrawa) */
+${PC} .ck-hud-crest::before { ${MASK(ICONS.hudCrestInlay)} background: radial-gradient(22% 32% at 50% 30%, #4a0909, #160202 60%, #030000 85%); }
 ${PC} .ck-hud-crest::after  { ${MASK(ICONS.hudCrestIron)} background: ${IRON_BG}; }
 /* Wiszące sterczyny po bokach */
 ${PC} .ck-hud-deco > .ck-hud-pend { top: calc(100% - 1px); width: 14px; height: 36px; }
