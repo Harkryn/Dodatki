@@ -60,7 +60,7 @@ Coś wygląda po staremu? Uruchom w konsoli gry (F12 → Console) [diagnostyka.j
 Mroczny, gotycko-rycerski motyw dla **nowego interfejsu (NI)** gry Margonem — brudne, mroczne średniowiecze. Przeważa czerń i okopcone grafity, a kolor wariantu jest tylko akcentem, inkrustowanym w żelazo. Wszystko jest kanciaste, bez zaokrągleń, i bogato zdobione jak gotycka budowla. Powierzchnie mają brud, sadzę, szum i rysy (generowane w CSS).
 
 Dwa warianty kolorystyczne:
-- **Szkarłat** (domyślny) — czerń i brudna, zaschnięta czerwień, rdzawe, okopcone żelazo,
+- **Szkarłat** (domyślny) — mega mroczny: niemal wszystko czarne, poczerniałe żelazo, a czerwień wyłącznie jako ciemne, zakrzepłe akcenty,
 - **Butelkowa Zieleń** — czerń i głęboka, szklista zieleń starego szkła, metal z patyną i śniedzią, chłodny przygaszony blask.
 
 Gotyckie i rycerskie zdobienia:
