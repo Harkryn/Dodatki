@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.5.0
+// @version      1.5.1
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
+// @match        https://*.margonem.com/*
+// @match        https://margonem.com/*
 // @noframes
 // @run-at       document-start
 // @grant        GM_addStyle
@@ -43,7 +45,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
