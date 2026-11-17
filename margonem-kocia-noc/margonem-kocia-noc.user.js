@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.4.0
+// @version      1.5.0
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -43,7 +43,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.5.0';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -162,10 +162,11 @@
 
     /* === SKANER SKÓREK === (JS oznacza elementy z drewnem/pergaminem gry klasami mkn-skin/mkn-edge/mkn-ink)
        Gdzie szukać i czego nigdy nie ruszać. */
-    skinScope:       ['.c-window', '.battle-controller'],
+    skinScope:       ['.c-window', '.battle-controller', '.interface-layer > .main-column', '.top.positioner .hud-container'],
     skinSkip:        ['.item', '.highlight', '[class*="icon"]', 'canvas', 'img', 'input', 'textarea', 'select',
                       '.new-chat-message', '[class*="progress"]', '[class*="avatar"]', '.button', '.widget-button',
-                      '[class*="close-button"]', '.header-label', '.scrollbar-wrapper', '.card', '[id^="mkn-"]', '.mkn-amb-eyes'],
+                      '[class*="close-button"]', '.header-label', '.scrollbar-wrapper', '.card', '[id^="mkn-"]', '.mkn-amb-eyes',
+                      '.new-chat-window', '.hp-indicator-wrapper-template', '[class*="vaddonz"]', '[class*="ll:"]', '[class*="mz-"]', '[class*="ykp"]'],
 
     neverStyle:      ['#GAME_CANVAS', '.game-layer canvas', '.item .highlight', '.widget-button .icon']
   };
@@ -244,21 +245,27 @@
       '<ellipse cx="50" cy="25" rx="5.5" ry="21" fill="#0a0503"/>' +
       '<ellipse cx="40" cy="16" rx="5" ry="3.2" fill="#fff" opacity=".55"/>')),
 
-    earR: svgUrl(SVG('0 0 20 16',
-      '<g transform="translate(20 0) scale(-1 1)">' +
-      '<path d="M1 16 C2 10 4 4 7 1 C9 3 14 8 19 16 Z" fill="#000" stroke="#9b7bd4" stroke-width=".9" stroke-linejoin="round"/>' +
-      '<path d="M5 15 C5.5 11 6.5 7 7.5 4.5 C9.5 7 12 10.5 14.5 15 Z" fill="#e3a3c6" opacity=".3"/></g>')),
-    earL: svgUrl(SVG('0 0 20 16',
-      '<path d="M1 16 C2 10 4 4 7 1 C9 3 14 8 19 16 Z" fill="#000" stroke="#9b7bd4" stroke-width=".9" stroke-linejoin="round"/>' +
-      '<path d="M5 15 C5.5 11 6.5 7 7.5 4.5 C9.5 7 12 10.5 14.5 15 Z" fill="#e3a3c6" opacity=".3"/>')),
-
-    // Ogon zwisający spod tabliczki HUD
-    tail: svgUrl(SVG('0 0 20 48',
-      '<path d="M10 0 C10 10 4 16 5 26 C6 36 15 38 14 44 C13.5 47 10 47.5 9 46" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>' +
-      '<path d="M10 0 C10 10 4 16 5 26 C6 36 15 38 14 44 C13.5 47 10 47.5 9 46" fill="none" stroke="#9b7bd4" stroke-width=".9" stroke-linecap="round" opacity=".75"/>')),
+    // Ornament pod tabliczką HUD: zawijasy i medalion z kocią głową (oczy osobno — mrugają)
+    hudOrnament: svgUrl(SVG('0 0 240 34',
+      '<defs><radialGradient id="b" cx=".5" cy=".4"><stop offset="0" stop-color="#2c1d4c"/><stop offset="1" stop-color="#07050c"/></radialGradient>' +
+      '<linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece2ff"/><stop offset="1" stop-color="#6a54a0"/></linearGradient></defs>' +
+      '<g fill="none" stroke="#b79cf0" stroke-width="1" stroke-linecap="round" opacity=".85">' +
+      '<path d="M103 15 C84 15 74 8 58 10 C46 11 40 17 28 15 C20 14 15 9 8 10"/><path d="M64 10 C61 16 55 18 50 16"/><path d="M36 15 C34 20 29 21 26 19"/>' +
+      '<path d="M137 15 C156 15 166 8 182 10 C194 11 200 17 212 15 C220 14 225 9 232 10"/><path d="M176 10 C179 16 185 18 190 16"/><path d="M204 15 C206 20 211 21 214 19"/></g>' +
+      '<g fill="#c3a8ff"><circle cx="8" cy="10" r="1.5"/><circle cx="232" cy="10" r="1.5"/></g>' +
+      '<circle cx="120" cy="17" r="15" fill="url(#b)" stroke="url(#r)" stroke-width="1.4"/>' +
+      '<circle cx="120" cy="17" r="12.4" fill="none" stroke="#9b7bd4" stroke-opacity=".4" stroke-width=".6"/>' +
+      '<path d="M113 23 C112.5 19 112.6 13 113.4 9.5 C115 11 116.3 12.2 117.1 13.3 C118.9 12.8 121.1 12.8 122.9 13.3 C123.7 12.2 125 11 126.6 9.5 C127.4 13 127.5 19 127 23 C125.8 25.5 123 26.5 120 26.5 C117 26.5 114.2 25.5 113 23 Z" fill="#000" stroke="#c3a8ff" stroke-width=".7"/>' +
+      '<path d="M119.2 21.4 L120 22 L120.8 21.4" stroke="#e3a3c6" stroke-width=".6" fill="none" stroke-linecap="round"/>')),
+    hudOrnamentEyes: svgUrl(SVG('0 0 240 34',
+      '<g fill="#f0c95e"><ellipse cx="117.3" cy="18.6" rx="1.35" ry="1.5"/><ellipse cx="122.7" cy="18.6" rx="1.35" ry="1.5"/></g>' +
+      '<g fill="#000"><ellipse cx="117.3" cy="18.6" rx=".35" ry="1.3"/><ellipse cx="122.7" cy="18.6" rx=".35" ry="1.3"/></g>')),
 
     // Kształt łapki — maska kuli HP (biały = widoczne) i jej obrys
     pawMask: svgUrl(SVG('0 0 100 90', '<g fill="#fff">' + PAW_SHAPES + '</g>')),
+    pawFill: svgUrl(SVG('0 0 100 90',
+      '<defs><radialGradient id="f" cx=".5" cy=".42" r=".65"><stop offset="0" stop-color="#22173a"/><stop offset="1" stop-color="#05030a"/></radialGradient></defs>' +
+      '<g fill="url(#f)">' + PAW_SHAPES + '</g>')),
     pawRim: svgUrl(SVG('0 0 100 90',
       '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2d4ff"/><stop offset="1" stop-color="#7a5cc8"/></linearGradient></defs>' +
       '<g fill="none" stroke="url(#g)" stroke-width="2.4">' + PAW_SHAPES + '</g>' +
@@ -266,16 +273,10 @@
       '<ellipse cx="12" cy="25" rx="3" ry="2" transform="rotate(-35 12 25)"/><ellipse cx="80" cy="25" rx="3" ry="2" transform="rotate(-10 80 25)"/>' +
       '<path d="M30 48 C36 42 44 41 50 41" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></g>')),
 
-    // Zdobienie wokół kuli: księżycowy krąg, gwiazdki, szyny i ślady łapek (590x100)
+    // Panel pod kulą: delikatne szyny i ślady łapek (590x100) — krąg i wąsy są na samej kuli
     orbPanel: svgUrl(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 590 100" preserveAspectRatio="none">' +
-      '<defs><linearGradient id="l" x1="0" x2="1"><stop offset="0" stop-color="#9b7bd4" stop-opacity="0"/><stop offset=".5" stop-color="#9b7bd4" stop-opacity=".7"/><stop offset="1" stop-color="#9b7bd4" stop-opacity="0"/></linearGradient>' +
-      '<radialGradient id="h"><stop offset=".72" stop-color="#140d24" stop-opacity=".95"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>' +
-      '<circle cx="295" cy="50" r="62" fill="url(#h)"/>' +
-      '<circle cx="295" cy="50" r="57" fill="none" stroke="#9b7bd4" stroke-opacity=".55" stroke-width="1.2"/>' +
-      '<path d="M241 68 A57 57 0 0 0 349 68" fill="none" stroke="#c3a8ff" stroke-opacity=".9" stroke-width="2.2" stroke-linecap="round"/>' +
-      '<circle cx="295" cy="50" r="62" fill="none" stroke="#9b7bd4" stroke-opacity=".25" stroke-width=".8" stroke-dasharray="2 5"/>' +
-      '<g fill="#e6dcff"><circle cx="232" cy="14" r="1.2"/><circle cx="360" cy="20" r="1"/><circle cx="248" cy="92" r=".9"/><circle cx="346" cy="90" r="1.1"/></g>' +
+      '<defs><linearGradient id="l" x1="0" x2="1"><stop offset="0" stop-color="#9b7bd4" stop-opacity="0"/><stop offset=".5" stop-color="#9b7bd4" stop-opacity=".7"/><stop offset="1" stop-color="#9b7bd4" stop-opacity="0"/></linearGradient></defs>' +
       '<rect x="18" y="86" width="210" height="1" fill="url(#l)"/><rect x="362" y="86" width="210" height="1" fill="url(#l)"/>' +
       `<g opacity=".22"><g transform="translate(40 66) rotate(80) scale(.55)">${PAW('#c3a8ff')}</g><g transform="translate(70 60) rotate(100) scale(.55)">${PAW('#c3a8ff')}</g>` +
       `<g transform="translate(540 66) rotate(-80) scale(.55)">${PAW('#c3a8ff')}</g><g transform="translate(510 60) rotate(-100) scale(.55)">${PAW('#c3a8ff')}</g></g>` +
@@ -524,20 +525,16 @@ ${SA('hpOrbHost')} {
   50%      { filter: drop-shadow(0 0 9px rgba(155,123,212,.95)) drop-shadow(0 0 20px rgba(110,84,170,.6)); }
 }`;
 
-    /* Kula HP. Wysokością „krwi” steruje gra — my zmieniamy tylko jej wygląd i kształt. */
+    /* Kula HP. Wysokością „krwi” steruje gra — my zmieniamy tylko jej wygląd i kształt.
+       Położenie łapki liczy JS (alignOrb) z prostokąta szklanej obręczy: --mkn-paw-pos/size/mpos. */
     const orbCss = `
-/* Maska łapki tylko na kuli i obrysie — napis z procentem zostaje nieprzycięty.
-   Kula dostaje ten sam prostokąt co obrys (cała obudowa), żeby kształty się pokrywały. */
-${S('hpOrb')} {
-  position: absolute !important;
-  left: 0 !important; top: 0 !important; right: 0 !important; bottom: 0 !important;
-  width: auto !important; height: auto !important;
-  ${FEATURES.pawOrb ? `-webkit-mask: ${ICONS.pawMask} center / contain no-repeat;
-  mask: ${ICONS.pawMask} center / contain no-repeat;` : 'border-radius: 50%; overflow: hidden;'}
-  background: radial-gradient(ellipse at 50% 38%, #1d1430, #06040b 72%) !important;
-}
 ${S('hpOrbWrap')} { background: transparent !important; }
-/* Płyn: fioletowy z jaśniejszą powierzchnią */
+${S('hpOrb')} {
+  ${FEATURES.pawOrb
+    ? `background: ${ICONS.pawFill} var(--mkn-paw-pos, center) / var(--mkn-paw-size, contain) no-repeat !important;`
+    : 'background: radial-gradient(ellipse at 50% 38%, #1d1430, #06040b 72%) !important; border-radius: 50%; overflow: hidden;'}
+}
+/* Płyn: fioletowy z jaśniejszą powierzchnią; maska łapki tylko na płynie, więc napis z procentem nie jest przycinany */
 ${S('hpOrbBlood')} {
   background-image:
     radial-gradient(120% 22% at 50% 0%, rgba(232,216,255,.75), rgba(196,166,255,.25) 45%, transparent 75%),
@@ -546,30 +543,31 @@ ${S('hpOrbBlood')} {
   background-position: 0 0, 0 0 !important;
   background-repeat: no-repeat !important;
   overflow: hidden;
+  ${FEATURES.pawOrb ? `-webkit-mask: ${ICONS.pawMask} var(--mkn-paw-mpos, center bottom) / var(--mkn-paw-size, contain) no-repeat;
+  mask: ${ICONS.pawMask} var(--mkn-paw-mpos, center bottom) / var(--mkn-paw-size, contain) no-repeat;` : ''}
 }
-/* Połysk przesuwający się po płynie i unoszące się bąbelki — tylko transform/opacity */
+/* Połysk przesuwający się po płynie */
 ${SA('hpOrbBlood', '::before')} {
   content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%;
   background: linear-gradient(100deg, transparent, rgba(255,255,255,.22), transparent);
   pointer-events: none;
   animation: mkn-shimmer 5.5s ease-in-out infinite;
 }
-${SA('hpOrbBlood', '::after')} {
-  content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(circle at 28% 92%, rgba(235,222,255,.85) 0 1.4px, transparent 2.2px),
-    radial-gradient(circle at 57% 97%, rgba(235,222,255,.7) 0 1px, transparent 1.8px),
-    radial-gradient(circle at 74% 88%, rgba(235,222,255,.8) 0 1.6px, transparent 2.4px),
-    radial-gradient(circle at 42% 99%, rgba(235,222,255,.6) 0 .9px, transparent 1.6px);
-  pointer-events: none;
-  animation: mkn-bubbles 4.2s ease-in infinite;
-}
 @keyframes mkn-shimmer { 0% { transform: translateX(-120%); } 55%, 100% { transform: translateX(260%); } }
-@keyframes mkn-bubbles {
-  0%   { transform: translateY(0);    opacity: 0; }
-  15%  { opacity: .9; }
-  85%  { opacity: .6; }
-  100% { transform: translateY(-70%); opacity: 0; }
+/* Bąbelki — tworzone przez JS w losowych miejscach, rozmiarach i tempie; każdy leci inaczej */
+${P} .mkn-bubble {
+  position: absolute; bottom: -6px; left: var(--x);
+  width: var(--s); height: var(--s); border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.95), rgba(220,200,255,.55) 45%, rgba(195,168,255,.15) 68%, transparent 72%);
+  pointer-events: none;
+  animation: mkn-bubble var(--d) ease-in forwards;
+}
+@keyframes mkn-bubble {
+  0%   { transform: translate(0, 0) scale(.6); opacity: 0; }
+  12%  { opacity: .9; }
+  35%  { transform: translate(var(--w1), calc(var(--h) * -.35)) scale(.85); }
+  65%  { transform: translate(var(--w2), calc(var(--h) * -.7)) scale(1); opacity: .85; }
+  100% { transform: translate(var(--w3), calc(var(--h) * -1)) scale(1.1); opacity: 0; }
 }
 /* Obrys łapki z połyskiem (zastępuje okrągłe szkło) */
 ${S('hpOrbGlass')} {
@@ -577,33 +575,50 @@ ${S('hpOrbGlass')} {
   ${FEATURES.pawOrb ? '' : 'border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(195,168,255,.8), inset 0 6px 14px rgba(255,255,255,.12) !important;'}
 }
 /* Procent HP — jasny z fioletową poświatą */
-${P} .hp-indicator-wrapper-template *:not(.blood):not(.glass) {
+${P} .hp-indicator-wrapper-template *:not(.blood):not(.glass):not(.mkn-bubble) {
   color: #f4eeff !important;
   text-shadow: 0 0 6px rgba(155,123,212,.9), 0 1px 2px #000 !important;
   font-family: var(--mkn-font-head) !important;
 }`;
 
-    /* Zdobienia wokół kuli */
+    /* Zdobienia wokół kuli — przypięte do samej kuli (jej rodzica), więc jadą razem z nią */
     const orbDecorCss = !FEATURES.orbDecor ? '' : `
 ${S('orbPanel')} {
   background: ${ICONS.orbPanel} center / 100% 100% no-repeat !important;
   filter: none !important;
 }
-${S('orbPanel', '::before')},
-${S('orbPanel', '::after')} {
+${S('hpOrbHost')} { isolation: isolate; }
+/* Księżycowy krąg za łapką — przypięty do szklanej obręczy, więc zawsze w jej rozmiarze */
+${S('hpOrbGlass', '::before')} {
   content: '';
-  position: absolute;
-  top: 50px;
-  width: 88px; height: 34px;
-  background: ${ICONS.whiskers} center / 100% 100% no-repeat;
+  position: absolute; left: 50%; top: 50%;
+  width: 128%; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, rgba(24,15,42,.96) 0 78%, rgba(24,15,42,0) 100%);
+  box-shadow: 0 0 0 1px rgba(155,123,212,.6), 0 0 0 4px rgba(0,0,0,.75), 0 0 0 5px rgba(155,123,212,.22), 0 0 26px rgba(110,84,170,.35);
   pointer-events: none;
+  z-index: -1;
 }
-${S('orbPanel', '::before')} { left: calc(50% - 144px); transform-origin: 100% 45%; }
-${S('orbPanel', '::after')}  { left: calc(50% + 56px); background-image: ${ICONS.whiskersR}; transform-origin: 0 45%; }
-${SA('orbPanel', '::before')} { animation: mkn-whisk-l 7s ease-in-out infinite; }
-${SA('orbPanel', '::after')}  { animation: mkn-whisk-r 7s ease-in-out .15s infinite; }
-@keyframes mkn-whisk-l { 0%, 84%, 100% { transform: rotate(0); } 87% { transform: rotate(-5deg); } 90% { transform: rotate(1deg); } 93% { transform: rotate(-3deg); } }
-@keyframes mkn-whisk-r { 0%, 84%, 100% { transform: rotate(0); } 87% { transform: rotate(5deg); } 90% { transform: rotate(-1deg); } 93% { transform: rotate(3deg); } }
+/* Kocie wąsy po obu stronach */
+${S('hpOrbGlass', '::after')} {
+  content: '';
+  position: absolute; left: 50%; top: 60%;
+  width: 300px; height: 32px;
+  transform: translate(-50%, -50%);
+  background:
+    ${ICONS.whiskers} left center / 86px 32px no-repeat,
+    ${ICONS.whiskersR} right center / 86px 32px no-repeat;
+  pointer-events: none;
+  z-index: -1;
+}
+${SA('hpOrbGlass', '::after')} { animation: mkn-whisk 7s ease-in-out infinite; }
+@keyframes mkn-whisk {
+  0%, 84%, 100% { transform: translate(-50%, -50%); }
+  87% { transform: translate(-50%, -54%) scaleY(1.14); }
+  90% { transform: translate(-50%, -50%); }
+  93% { transform: translate(-50%, -52%) scaleY(1.07); }
+}
 /* Kapsuły „9,18%” i „0 min” */
 ${S('orbPointer')} {
   background: linear-gradient(180deg, #120c1e, #030205) !important;
@@ -619,45 +634,51 @@ ${S('expOverlay')} {
   filter: none !important;
 }`;
 
-    /* Górna tabliczka HUD */
+    /* Górna tabliczka HUD: podwójna rama, fioletowa poświata od dołu, ornament z medalionem */
     const hudCss = !FEATURES.hudDecor ? '' : `
 ${S('hud')} {
   background:
-    radial-gradient(70% 90% at 50% 0%, rgba(155,123,212,.16), transparent 70%),
-    var(--mkn-paws),
-    linear-gradient(180deg, rgba(18,13,30,.97), rgba(3,2,6,.97)) !important;
-  border-radius: 0 0 18px 18px !important;
-  box-shadow: 0 0 0 1px rgba(155,123,212,.6), 0 8px 22px rgba(0,0,0,.75), 0 0 20px rgba(110,84,170,.25),
-              inset 0 -1px 0 rgba(195,168,255,.3) !important;
+    linear-gradient(90deg, transparent 6%, rgba(195,168,255,.65) 50%, transparent 94%) 0 100% / 100% 1px no-repeat,
+    radial-gradient(90% 120% at 50% 135%, rgba(120,86,190,.42), transparent 62%),
+    radial-gradient(60% 80% at 50% -25%, rgba(155,123,212,.14), transparent 70%),
+    linear-gradient(180deg, #050309, #0c0816 65%, #150d27) !important;
+  border-radius: 0 0 28px 28px / 0 0 22px 22px !important;
+  box-shadow:
+    0 0 0 1px rgba(155,123,212,.6),
+    0 0 0 4px rgba(0,0,0,.9),
+    0 0 0 5px rgba(155,123,212,.25),
+    0 12px 28px rgba(0,0,0,.8),
+    0 0 30px rgba(110,84,170,.3) !important;
   filter: none !important;
-  color: var(--mkn-text);
-  font-family: var(--mkn-font-head);
 }
-/* Uszy na rogach tabliczki */
-${S('hud', '::before')} {
-  content: '';
-  position: absolute; left: 0; right: 0; top: -11px; height: 13px;
-  background:
-    ${ICONS.earL} left 26px top 0 / 16px 13px no-repeat,
-    ${ICONS.earR} right 26px top 0 / 16px 13px no-repeat;
-  transform-origin: 50% 100%;
-  pointer-events: none;
-  z-index: 2;
+${P} .hud-container *:not([class*="icon"]):not(.map_ball) {
+  color: #ece5f8 !important;
+  text-shadow: 0 0 8px rgba(155,123,212,.45), 0 1px 1px #000 !important;
+  font-family: var(--mkn-font-head) !important;
 }
-/* Ogon zwisający spod tabliczki */
+/* Zielone „+” na tabliczce → fiolet (? klasy przycisków) */
+${P} .hud-container [class*="plus"], ${P} .hud-container [class*="add"] {
+  filter: hue-rotate(150deg) saturate(.9);
+}
+/* Ornament z medalionem pod tabliczką i mrugające oczy kota w medalionie */
+${S('hud', '::before')},
 ${S('hud', '::after')} {
   content: '';
-  position: absolute; right: 34px; top: calc(100% - 2px);
-  width: 14px; height: 34px;
-  background: ${ICONS.tail} center top / contain no-repeat;
-  transform-origin: 50% 0;
+  position: absolute; left: 50%; top: calc(100% - 3px);
+  width: 240px; height: 34px; margin-left: -120px;
   pointer-events: none;
-  filter: drop-shadow(0 0 3px rgba(155,123,212,.4));
+  z-index: 3;
 }
-${SA('hud', '::before')} { animation: mkn-ears 8s ease-in-out infinite; }
-${SA('hud', '::after')}  { animation: mkn-tail 4.5s ease-in-out infinite alternate; }
-@keyframes mkn-ears { 0%, 90%, 100% { transform: scaleY(1); } 92% { transform: scaleY(.78); } 94% { transform: scaleY(1); } 96% { transform: scaleY(.85); } }
-@keyframes mkn-tail { 0% { transform: rotate(-9deg); } 100% { transform: rotate(9deg); } }`;
+${S('hud', '::before')} {
+  background: ${ICONS.hudOrnament} center / contain no-repeat;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.8)) drop-shadow(0 0 6px rgba(155,123,212,.35));
+}
+${S('hud', '::after')} {
+  background: ${ICONS.hudOrnamentEyes} center / contain no-repeat;
+  transform-origin: 50% 55%;
+  filter: drop-shadow(0 0 2px rgba(240,201,94,.9));
+}
+${SA('hud', '::after')} { animation: mkn-blink 6s infinite; }`;
 
     return `
 /* =====================================================================
@@ -886,7 +907,17 @@ ${S('slot', ':hover')} {
 }
 /* Kratki torby: kafel gry przebarwiony na fiolet (dokładnie te same kształty i odstępy) */
 ${S('slotGrid')} {
-  filter: var(--mkn-tile-filter);
+  filter: var(--mkn-tile-filter);   /* zapas, zanim JS zmierzy kratkę */
+}
+/* Kratki zmierzone z grafiki gry: czarne wnętrze, fioletowe linie dokładnie w tych samych miejscach */
+${P} .mkn-grid {
+  background:
+    linear-gradient(to right, rgba(155,123,212,.65) 0 1px, transparent 1px) 0 0 / var(--mkn-cell-w) var(--mkn-cell-h),
+    linear-gradient(to bottom, rgba(155,123,212,.65) 0 1px, transparent 1px) 0 0 / var(--mkn-cell-w) var(--mkn-cell-h),
+    radial-gradient(ellipse at 50% 0%, rgba(110,84,170,.12), transparent 70%),
+    #040307 !important;
+  box-shadow: inset -1px -1px 0 rgba(155,123,212,.65) !important;
+  filter: none !important;
 }
 ${S('gridBorder')} {
   border-image: none !important;
@@ -920,15 +951,31 @@ ${S('windowTabs', '.active')} {
  * jasnymi panelami albo brązowymi ramkami. Tu decydujemy, jak mają wyglądać.
  * ===================================================================== */
 ${P} .mkn-skin {
-  background: rgba(8,7,11,.94) !important;
+  background: linear-gradient(180deg, rgba(30,20,52,.92), rgba(9,6,16,.95)) !important;
   border-image: none !important;
-  border-color: var(--mkn-line) !important;
+  border-color: rgba(155,123,212,.45) !important;
   box-shadow: none !important;
   color: var(--mkn-text) !important;
   text-shadow: none !important;
 }
 ${P} .mkn-edge { border-image: none !important; border-color: var(--mkn-line) !important; }
 ${P} .mkn-ink  { color: var(--mkn-text) !important; text-shadow: none !important; }
+
+/* Panele interfejsu gry (np. Statystyki): fioletowe tła, nagłówki i obwódki */
+${P} .interface-layer [class*="interface-element-background-color-"],
+${P} .c-window [class*="interface-element-background-color-"] {
+  background-color: rgba(20,13,34,.94) !important;
+  background-image: linear-gradient(180deg, rgba(155,123,212,.16), transparent 55%) !important;
+}
+${P} [class*="interface-element-box-shadow-"] {
+  box-shadow: 0 0 0 1px rgba(155,123,212,.55), 0 0 14px rgba(110,84,170,.3) !important;
+}
+${P} [class*="interface-element-header-"] {
+  background: linear-gradient(180deg, #3a2a62, #1a1230) !important;
+  border-image: none !important;
+  color: #f1eaff !important;
+  text-shadow: 0 0 8px rgba(155,123,212,.6) !important;
+}
 
 /* =====================================================================
  * === PASKI ===
@@ -1210,6 +1257,7 @@ ${P} .mkn-amb-eyes {
 @media (prefers-reduced-motion: reduce) {
   html.${ROOT_CLASS} *::before, html.${ROOT_CLASS} *::after, html.${ROOT_CLASS} .mkn-amb-eyes,
   html.${ROOT_CLASS} .hp-indicator-wrapper-template { animation: none !important; }
+  html.${ROOT_CLASS} .mkn-bubble { display: none !important; }
 }
 
 /* =====================================================================
@@ -1534,6 +1582,72 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     if (root.classList.contains(ROOT_CLASS) !== isEnabled() || root.classList.contains(ANIM_CLASS) !== isAnim()) applyState();
     createToggle();
     placeCat();
+    alignOrb();
+    fixGrids();
+  }
+
+  /**
+   * Łapka ma leżeć dokładnie tam, gdzie szklana obręcz kuli. Mierzymy obręcz, kulę i płyn i podajemy
+   * położenie w zmiennych CSS (uwzględnia skalowanie interfejsu). Tanie: trzy pomiary co 3 s.
+   */
+  function alignOrb() {
+    if (!FEATURES.pawOrb) return;
+    const glass = document.querySelector(SELECTORS.hpOrbGlass[0]);
+    const orb = document.querySelector(SELECTORS.hpOrb[0]);
+    const blood = document.querySelector(SELECTORS.hpOrbBlood[0]);
+    if (!glass || !orb || !glass.offsetWidth || !orb.offsetWidth) return;
+    const g = glass.getBoundingClientRect(), o = orb.getBoundingClientRect();
+    const k = orb.offsetWidth / (o.width || 1);           // px CSS na px ekranu
+    const px = (v) => (v * k).toFixed(1) + 'px';
+    orb.style.setProperty('--mkn-paw-pos', `${px(g.left - o.left)} ${px(g.top - o.top)}`);
+    orb.style.setProperty('--mkn-paw-size', `${glass.offsetWidth}px ${glass.offsetHeight}px`);
+    if (blood && blood.offsetWidth) {
+      const b = blood.getBoundingClientRect();
+      blood.style.setProperty('--mkn-paw-mpos', `left ${px(g.left - b.left)} bottom ${px(b.bottom - g.bottom)}`);
+    }
+  }
+
+  /** Bąbelki w płynie: losowy odstęp, miejsce, rozmiar, tempo i zygzak — żaden nie leci tak samo. */
+  function scheduleBubbles() {
+    setTimeout(() => { try { spawnBubble(); } finally { scheduleBubbles(); } }, 350 + Math.random() * 1150);
+  }
+  function spawnBubble() {
+    if (!isEnabled() || !isAnim() || document.hidden || reducedMotion()) return;
+    const blood = document.querySelector(SELECTORS.hpOrbBlood[0]);
+    if (!blood || blood.offsetHeight < 8 || blood.querySelectorAll('.mkn-bubble').length >= 7) return;
+    const w = blood.offsetWidth, h = blood.offsetHeight;
+    const size = 1.6 + Math.random() * 3.4;
+    const dur = (1.8 + Math.random() * 2.6) * (0.6 + h / 120);
+    const wob = () => ((Math.random() - 0.5) * 12).toFixed(1) + 'px';
+    const el = document.createElement('i');
+    el.className = 'mkn-bubble';
+    el.style.cssText = `--x:${(10 + Math.random() * Math.max(0, w - 20)).toFixed(1)}px;--s:${size.toFixed(1)}px;` +
+      `--d:${dur.toFixed(2)}s;--h:${h}px;--w1:${wob()};--w2:${wob()};--w3:${wob()}`;
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+    blood.appendChild(el);
+    setTimeout(() => el.remove(), dur * 1000 + 600);
+  }
+
+  /** Kratki torby: rozmiar kratki odczytany z grafiki gry, potem rysujemy własne fioletowe linie. */
+  function fixGrids() {
+    document.querySelectorAll(SELECTORS.slotGrid.join(',')).forEach((grid) => {
+      if (grid.dataset.mknGrid) return;
+      const st = getComputedStyle(grid);
+      const m = /url\(["']?([^"')]+)["']?\)/.exec(st.backgroundImage || '');
+      if (!m) return;
+      grid.dataset.mknGrid = '1';
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const [sw, sh] = (st.backgroundSize || 'auto').split(' ');
+        if (sw && sw.endsWith('px')) { const nw = parseFloat(sw); h = sh && sh.endsWith('px') ? parseFloat(sh) : h * (nw / w); w = nw; }
+        if (!w || !h) return;
+        grid.style.setProperty('--mkn-cell-w', w + 'px');
+        grid.style.setProperty('--mkn-cell-h', h + 'px');
+        grid.classList.add('mkn-grid');
+      };
+      img.src = m[1];   // grafika jest już w pamięci podręcznej przeglądarki (gra jej używa)
+    });
   }
 
   /** Kot siada na dolnej belce tuż na lewo od prawej kolumny (nad mapą, niczego nie zasłania). */
@@ -1557,6 +1671,9 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     watchLegends();
     watchSkins();
     placeCat();
+    alignOrb();
+    fixGrids();
+    scheduleBubbles();
     scheduleAmbientEyes();
     whenGameReady(() => hideLoader());
     LOG(`v${VERSION} aktywna. Alt+T — motyw, Alt+K — kocie animacje, Alt+L — podgląd legendy.`);

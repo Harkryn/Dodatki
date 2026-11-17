@@ -23,8 +23,9 @@ Czarny, elegancki motyw z kotami dla **nowego interfejsu (NI)** gry Margonem. T�
 Kocie detale:
 - **ekran wczytywania gry** — czarne niebo, księżyc i kot na dachu z mrugającymi oczami (kliknięcie lub Esc pomija),
 - **efekt legendy** — gdy w łupie albo w torbie pojawi się nowy przedmiot legendarny, w ciemności otwierają się wielkie kocie oczy w kolorze legendy, mrugają, a wokół rozbiegają się łapki,
-- **kula HP w kształcie odcisku kociej łapy** — wypełniona fioletowym płynem z przesuwającym się połyskiem i bąbelkami, z pulsującą poświatą; siedzi w księżycowym kręgu, a po bokach drgają kocie wąsy,
-- **górna tabliczka** (imię, lokacja, złoto) z kocimi uszami, które czasem drgną, i ogonem kołyszącym się spod spodu,
+- **kula HP w kształcie odcisku kociej łapy** — wypełniona fioletowym płynem z przesuwającym się połyskiem i losowo unoszącymi się bąbelkami, z pulsującą poświatą; siedzi w księżycowym kręgu, a po bokach drgają kocie wąsy,
+- **górna tabliczka** (imię, lokacja, złoto) z podwójną ramą, fioletową poświatą i ornamentem z medalionem, w którym mruga kot,
+- **torba** z czarnymi kratkami i fioletowymi liniami, **panele interfejsu** (np. Statystyki) w fiolecie,
 - **oczy w ciemności** — co jakiś czas w czarnej kolumnie otwiera się para świecących oczu, mruga i znika,
 - uszy na oknach (lekko się przechylają przy najechaniu), łapki w nagłówkach i tooltipach, ledwo widoczny wzór łapek w tle,
 - czarny kot-maskotka siedzący na dolnej belce i kocia ikonka przełącznika.
@@ -45,7 +46,7 @@ Instalacja:
 
 Skróty:
 - **Alt+T** — włącz/wyłącz motyw (albo kliknij kocią ikonkę w lewym dolnym rogu),
-- **Alt+K** — włącz/wyłącz animacje (kot, oczy w ciemności, płyn i puls kuli HP, wąsy, uszy i ogon tabliczki),
+- **Alt+K** — włącz/wyłącz animacje (kot, oczy w ciemności, płyn, bąbelki i puls kuli HP, wąsy, medalion),
 - **Alt+L** — podgląd efektu legendy.
 
 Ekran wczytywania pojawia się od drugiego wejścia na dany świat (skrypt musi najpierw zobaczyć, że to nowy interfejs).
