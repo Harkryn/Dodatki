@@ -554,6 +554,7 @@ ${S('windowHeader', '::after')} {
 ${S('windowHeader', '::after')} { ${MASK(ICONS.dividerIron)} background: ${IRON_BG}; }
 ${S('windowHeader', '::before')} { ${MASK(ICONS.dividerInlay)} background: ${INLAY_BG}; z-index: 7; }
 ${S('windowHeader')} {
+  z-index: 6;   /* nad warstwą ozdobników — w części okien gra kładzie tytuł na samej górnej krawędzi (sprawdzone w grze) */
   background: none !important;
   border-image: none !important;
   border-color: transparent !important;

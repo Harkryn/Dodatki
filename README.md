@@ -57,19 +57,21 @@ Coś wygląda po staremu? Uruchom w konsoli gry (F12 → Console) [diagnostyka.j
 
 ## Margonem — Crimson Knight
 
-Mroczny, rycerski motyw dla **nowego interfejsu (NI)** gry Margonem. Przeważa czerń i bardzo ciemne grafity, a kolor wariantu jest tylko akcentem. Okna wyglądają jak kute, poobijane żelazo z nitami w narożnikach i przebarwieniami przy krawędziach. Powierzchnie mają brud, szum i rysy (generowane w CSS).
+Mroczny, gotycko-rycerski motyw dla **nowego interfejsu (NI)** gry Margonem — brudne, mroczne średniowiecze. Przeważa czerń i okopcone grafity, a kolor wariantu jest tylko akcentem, inkrustowanym w żelazo. Wszystko jest kanciaste, bez zaokrągleń, i bogato zdobione jak gotycka budowla. Powierzchnie mają brud, sadzę, szum i rysy (generowane w CSS).
 
 Dwa warianty kolorystyczne:
-- **Szkarłat** (domyślny) — czerń i brudna, zaschnięta czerwień, krew w strużkach, rdzawy metal,
-- **Butelkowa Zieleń** — czerń i głęboka, szklista zieleń starego szkła, gęsta zielona ciecz (jad, trucizna), metal z patyną i śniedzią, chłodny przygaszony blask.
+- **Szkarłat** (domyślny) — czerń i brudna, zaschnięta czerwień, rdzawe, okopcone żelazo,
+- **Butelkowa Zieleń** — czerń i głęboka, szklista zieleń starego szkła, metal z patyną i śniedzią, chłodny przygaszony blask.
 
-Rycerskie detale:
-- **skrzyżowane miecze** po bokach tytułów okien i pod górną tabliczką, **miecz poziomo** jako separator pod nagłówkiem, **łańcuch** na dolnych paskach okien,
-- **strużki cieczy** skapujące z górnych krawędzi wybranych okien i spod górnej belki — co kilka sekund w kilku miejscach odrywa się kropla,
-- **tarcza z mieczem** jako ledwo widoczny znak wodny w dużych oknach i bocznych kolumnach,
-- **przyciski jak żelazne tabliczki** — przy najechaniu kolor wariantu rozlewa się od krawędzi,
+Gotyckie i rycerskie zdobienia:
+- **okna** jak kute żelazo: podwójna rama z inkrustowaną linią w kolorze wariantu, **okute narożniki ze sterczynami i żabkami** oraz czwórliściem,
+- **szczyt z kwiatonem** (ośli grzbiet, sterczyny) nad tytułem okna, tytuły **frakturą**, po bokach **ślepe ostrołuki z trójliściem**, pod tytułem separator z medalionem,
+- **koronka wiszących ostrołuków** pod oknami i pod górną belką, **blanki z otworami strzelniczymi** nad dolną belką, ślepa arkada na belkach,
+- **rozeta** jako ledwo widoczny znak wodny w dużych oknach i **ostrołukowe okno z maswerkiem** w bocznych kolumnach,
+- pod górną tabliczką **rozeta ze skrzyżowanymi mieczami**,
+- **przyciski jak okute tabliczki** z inkrustowaną listwą — przy najechaniu kolor wariantu rozlewa się od krawędzi,
 - **poświata aktywnego okna** (ostatnio klikniętego) delikatnie pulsuje; przy niskim HP (poniżej 30%) pulsuje zawsze na czerwono,
-- **tooltipy** jak ciemny, brudny pergamin w żelaznej ramce z nitami, rzadkość na górnej krawędzi,
+- **tooltipy** jak ciemny, brudny pergamin w żelaznej ramie z okutymi narożnikami, rzadkość na górnej krawędzi,
 - subtelna **mgła** na dole mapy (w wariancie zielonym zielonkawa).
 
 **Kolory rzadkości przedmiotów są stałe i takie same w obu wariantach.** Pasek HP jest zawsze czerwony, mana zawsze w zimnym, ciemnym błękicie, a doświadczenie w przyciemnionym mosiądzu. Kanały czatu zachowują swoje kolory, tylko lekko przytłumione. Wszystkie grafiki są rysowane w kodzie (SVG/CSS), bez zewnętrznych obrazków. Animacje są spokojne, korzystają tylko z `transform` i `opacity` i wyłączają się same przy systemowym ustawieniu „ogranicz ruch”.
@@ -87,8 +89,8 @@ Instalacja:
 Przełączanie (ikonka skrzyżowanych mieczy w lewym dolnym rogu otwiera panel z tymi samymi opcjami):
 - **Alt+T** — włącz/wyłącz motyw (gdy zainstalowana jest też Kocia Noc, która używa Alt+T: **Alt+Shift+T**),
 - **Alt+V** — przełącz wariant Szkarłat ↔ Butelkowa Zieleń (od razu, bez przeładowania, z płynnym przejściem kolorów),
-- **Alt+A** — włącz/wyłącz animacje (krople, pulsowanie, mgła).
+- **Alt+A** — włącz/wyłącz animacje (pulsowanie poświaty, mgła).
 
 Ustawienia są zapamiętywane i wracają po przeładowaniu. Interfejs jest rozpoznawany tak samo jak w Kociej Nocy (ciasteczko gry `interface`). Motyw działa na margonem.pl i margonem.com, wyłącznie na stronach światów gry.
 
-Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-variant="crimson"]` i `html[data-ck-variant="green"]` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS` (oznaczone `[KN]` — sprawdzone w Kociej Nocy, `[NOWY]` — do weryfikacji), a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (strużki, tarcze, mgła, czerwony puls przy niskim HP).
+Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-variant="crimson"]` i `html[data-ck-variant="green"]` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS` (oznaczone `[GRA]` — sprawdzone w grze, `[KN]` — sprawdzone w Kociej Nocy, `[NOWY]` — do weryfikacji), a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (gotyckie ramy, ozdoby belek, znaki wodne, mgła, czerwony puls przy niskim HP).
