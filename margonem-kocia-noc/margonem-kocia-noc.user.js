@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.5.1
+// @version      1.6.0
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -41,11 +41,16 @@
 
   if (window.top !== window.self) return;
 
+  // Tylko strona gry: subdomena świata (np. solphyr.margonem.pl), ścieżka „/”. Strona główna, forum itp. — nic.
+  const HOST_PARTS = location.hostname.split('.');
+  const NON_GAME = ['www', 'forum', 'commons', 'addons', 'pomoc', 'wiki', 'static'];
+  if (HOST_PARTS.length < 3 || NON_GAME.includes(HOST_PARTS[0]) || location.pathname !== '/') return;
+
   /* ======================================================================
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.5.1';
+  const VERSION = '1.6.0';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -458,7 +463,15 @@
     try { return !!document.querySelector(s); } catch { return false; }
   });
 
+  /** Gra sama zapisuje wybrany interfejs w ciasteczku `interface` (ni / si) — najszybsze i najpewniejsze źródło. */
+  function cookieInterface() {
+    const m = /(?:^|;\s*)interface=(\w+)/.exec(document.cookie || '');
+    return m ? m[1].toLowerCase() : null;
+  }
+
   function detectInterface() {
+    const c = cookieInterface();
+    if (c === 'ni' || c === 'si') return c;
     if (!document.body) return null;
     if (anyMatch(DETECT.ni)) return 'ni';
     if (anyMatch(DETECT.si)) return 'si';
@@ -1681,8 +1694,11 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     LOG(`v${VERSION} aktywna. Alt+T — motyw, Alt+K — kocie animacje, Alt+L — podgląd legendy.`);
   }
 
-  // Ekran wczytywania — od razu, jeśli ten świat ostatnio działał na NI.
-  if (FEATURES.loadingScreen && isEnabled() && getVal(KEY_IFACE, '') === 'ni') showLoader();
+  // Ekran wczytywania — od razu, jeśli ciasteczko gry mówi „ni” (albo ten świat ostatnio działał na NI).
+  if (FEATURES.loadingScreen && isEnabled()) {
+    const c = cookieInterface();
+    if (c === 'ni' || (c !== 'si' && getVal(KEY_IFACE, '') === 'ni')) showLoader();
+  }
 
   whenInterfaceKnown((iface) => {
     setVal(KEY_IFACE, iface || 'none');

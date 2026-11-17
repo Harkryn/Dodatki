@@ -49,7 +49,7 @@ Skróty:
 - **Alt+K** — włącz/wyłącz animacje (kot, oczy w ciemności, płyn, bąbelki i puls kuli HP, wąsy, medalion),
 - **Alt+L** — podgląd efektu legendy.
 
-Ekran wczytywania pojawia się od drugiego wejścia na dany świat (skrypt musi najpierw zobaczyć, że to nowy interfejs).
+Interfejs jest rozpoznawany po ciasteczku gry `interface`, więc ekran wczytywania pojawia się od razu, a na starym interfejsie (SI) skrypt nic nie robi. Motyw działa na margonem.pl i margonem.com, wyłącznie na stronach światów gry (nie na forum ani stronie głównej).
 
 Dostosowanie: paleta to zmienne CSS `--mkn-*` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS`, a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (uszy, ekran wczytywania, efekt legendy, oczy, poświata kuli HP, kształt łapki `pawOrb`, zdobienia kuli `orbDecor`, tabliczka `hudDecor`). Pozycję kota zmienisz w regule `right: 230px` w sekcji „KOT-MASKOTKA”.
 
