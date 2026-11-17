@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.8.0
+// @version      1.8.1
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,7 +50,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.8.0';
+  const VERSION = '1.8.1';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -1402,7 +1402,7 @@ ${P} .mkn-amb-eyes {
   background:
     radial-gradient(ellipse at 50% 46%, rgba(255,140,26,.10), transparent 30%),
     radial-gradient(ellipse at 50% 46%, transparent 22%, rgba(18,8,36,.55) 62%, rgba(0,0,0,.86) 100%);
-  box-shadow: inset 0 0 160px rgba(110,84,170,.55), inset 0 0 60px rgba(255,140,26,.25);
+  box-shadow: inset 0 0 120px rgba(60,30,120,.55), inset 0 0 40px rgba(255,140,26,.18);
   animation: mkn-lg-pulse 1.6s ease-in-out 3;
 }
 /* Fioletowa aureola z księżycowym pierścieniem za napisem */
@@ -1468,8 +1468,8 @@ ${P} .mkn-amb-eyes {
 #mkn-legend .mkn-lg-pair i:last-child { transform: scaleX(-1); }
 @keyframes mkn-lg-fade  { 0% { opacity: 0; } 5% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes mkn-lg-pulse {
-  0%, 100% { box-shadow: inset 0 0 160px rgba(110,84,170,.55), inset 0 0 60px rgba(255,140,26,.25); }
-  50%      { box-shadow: inset 0 0 220px rgba(155,123,212,.7), inset 0 0 90px rgba(255,140,26,.45); }
+  0%, 100% { box-shadow: inset 0 0 120px rgba(60,30,120,.55), inset 0 0 40px rgba(255,140,26,.18); }
+  50%      { box-shadow: inset 0 0 160px rgba(90,55,160,.7), inset 0 0 70px rgba(255,140,26,.35); }
 }
 @keyframes mkn-lg-halo { 0% { opacity: 0; transform: scale(.6); } 12% { opacity: 1; transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(1.08); } }
 @keyframes mkn-lg-spin { to { transform: rotate(360deg); } }
@@ -1652,17 +1652,17 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
    */
   function legendEyesHtml() {
     const rnd = (a, b) => a + Math.random() * (b - a);
-    const count = 12 + Math.floor(Math.random() * 5);           // 12–16 par
+    const count = 15 + Math.floor(Math.random() * 5);           // 15–19 par
     const placed = [];
     let html = '';
     for (let n = 0, tries = 0; n < count && tries < 400; tries++) {
       const x = rnd(3, 88), y = rnd(5, 88);
       if (Math.abs(x + 4 - 50) < 22 && Math.abs(y - 50) < 17) continue;   // nie na napisie
-      if (placed.some(([px, py]) => Math.hypot(px - x, (py - y) * 1.4) < 13)) continue;
+      if (placed.some(([px, py]) => Math.hypot(px - x, (py - y) * 1.4) < 11)) continue;
       placed.push([x, y]);
       const w = Math.round(rnd(18, 70) * (Math.random() < 0.18 ? 1.5 : 1));   // czasem duża para
-      const d = rnd(1.0, 1.9);
-      const t = rnd(0.15, LEGEND_EYES_MS / 1000 - d);
+      const d = rnd(1.4, 2.8);                                   // ok. 6–9 par widocznych naraz
+      const t = rnd(0.1, LEGEND_EYES_MS / 1000 - d);
       const cls = ['mkn-lg-pair', Math.random() < 0.45 ? 'mkn-violet' : '', Math.random() < 0.4 ? 'mkn-twice' : ''].join(' ');
       html += `<div class="${cls}" style="--x:${x.toFixed(1)}%;--y:${y.toFixed(1)}%;--w:${w}px;` +
         `--r:${rnd(-14, 14).toFixed(1)}deg;--d:${d.toFixed(2)}s;--t:${t.toFixed(2)}s"><i></i><i></i></div>`;
