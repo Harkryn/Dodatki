@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.1
+// @version      1.7.2
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,7 +50,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.7.1';
+  const VERSION = '1.7.2';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -332,11 +332,17 @@
       '<circle cx="12" cy="12" r="9.5" fill="url(#c)" stroke="#3a2606" stroke-width="1"/>' +
       '<circle cx="12" cy="12" r="7" fill="none" stroke="#fff3c4" stroke-opacity=".55" stroke-width=".7"/>' +
       `<g transform="translate(6.6 6.4) scale(.45)">${PAW('#8a5e12')}</g>`)),
+    // Smocza łza jak w grze: zielony klejnot-migdał (czubek w prawo-górę), grzbiet przez środek, złote zawijasy u podstawy
     tear: svgUrl(SVG('0 0 24 24',
-      '<defs><linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd1e6"/><stop offset=".35" stop-color="#f05a9e"/><stop offset="1" stop-color="#6a0f3c"/></linearGradient></defs>' +
-      '<path d="M12 2.5 C15.5 8 19 11.5 19 15.2 C19 19.2 15.9 22 12 22 C8.1 22 5 19.2 5 15.2 C5 11.5 8.5 8 12 2.5 Z" fill="url(#t)" stroke="#2a0614" stroke-width="1"/>' +
-      '<path d="M12 6.5 L9 14.5 L12 19 L15 14.5 Z" fill="#fff" opacity=".18"/>' +
-      '<ellipse cx="9.2" cy="13.5" rx="1.4" ry="3" fill="#fff" opacity=".6" transform="rotate(20 9.2 13.5)"/>')),
+      '<defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9f7b0"/><stop offset=".35" stop-color="#5cbf4e"/><stop offset=".8" stop-color="#25752a"/><stop offset="1" stop-color="#123f16"/></linearGradient>' +
+      '<linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7a0"/><stop offset="1" stop-color="#b07a1c"/></linearGradient></defs>' +
+      '<g transform="rotate(42 12 12)">' +
+      '<path d="M12 1.8 C16.6 6.4 18.2 12 17.6 15.8 C17 19.8 14.8 22 12 22 C9.2 22 7 19.8 6.4 15.8 C5.8 12 7.4 6.4 12 1.8 Z" fill="url(#a)" stroke="#0a260d" stroke-width="1"/>' +
+      '<path d="M12 2.8 C15.8 7 17 12 16.5 15.6 C16 19 14.3 20.9 12 20.9 Z" fill="#0a2e0e" opacity=".35"/>' +
+      '<path d="M12 3.5 V20" stroke="#e4ffd6" stroke-opacity=".55" stroke-width=".6"/>' +
+      '<ellipse cx="9.6" cy="10" rx="1.1" ry="3.2" fill="#fff" opacity=".55"/>' +
+      '<g fill="none" stroke="url(#g)" stroke-width="1.1" stroke-linecap="round">' +
+      '<path d="M6.8 17.5 C4.8 18.5 4.6 20.8 6.2 21 C7.2 21.1 7.3 20 6.6 19.8"/><path d="M17.2 17.5 C19.2 18.5 19.4 20.8 17.8 21 C16.8 21.1 16.7 20 17.4 19.8"/></g></g>')),
 
     // Kapsuły przy kuli (exp % i wyczerpanie): zaokrąglony koniec na zewnątrz, prosty pod kulą, romb-akcent
     capsule: svgUrl(capsuleSvg(false)),
@@ -818,8 +824,8 @@ ${S('goldIcon')} {
   filter: drop-shadow(0 0 3px rgba(232,194,90,.45));
 }
 ${S('creditsIcon')} {
-  background: ${ICONS.tear} center / 17px 17px no-repeat !important;
-  filter: drop-shadow(0 0 3px rgba(240,90,158,.45));
+  background: ${ICONS.tear} center / 19px 19px no-repeat !important;
+  filter: drop-shadow(0 0 3px rgba(95,207,90,.45));
 }`;
 
     return `
