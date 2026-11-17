@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Crimson Knight Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.2.0
+// @version      1.3.0
 // @description  Mroczny, gotycko-rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, maswerki, sterczyny i miecze. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -57,7 +57,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
   const KEY_ENABLED = 'ck.enabled';
   const KEY_VARIANT = 'ck.variant';
   const KEY_ANIM = 'ck.anim';
@@ -89,6 +89,8 @@
   const P = `html.${ROOT_CLASS}:not(#ck-x):not(#ck-y)`;
   const PA = `html.${ROOT_CLASS}.${ANIM_CLASS}:not(#ck-x):not(#ck-y)`;
   const PL = `html.${ROOT_CLASS}[data-ck-lowhp]:not(#ck-x):not(#ck-y)`;
+  /** Reguły tylko dla Szkarłatu (wyższa specyficzność niż P, więc nadpisują wspólne; Zieleń ich nie widzi). */
+  const PC = `html.${ROOT_CLASS}[data-ck-variant="crimson"]:not(#ck-x):not(#ck-y)`;
 
   const DETECT = {
     ni: ['.game-window-positioner', '.interface-layer', '.game-layer', '.c-window'],   // [KN]
@@ -299,6 +301,23 @@
     lace: MASKSVG('0 0 18 10', '<path fill-rule="evenodd" d="M0 0 H18 V2 Q15.5 2.4 13.6 5.4 L9 10 L4.4 5.4 Q2.5 2.4 0 2 Z M4.2 2.7 Q6.6 3.6 9 7.4 Q11.4 3.6 13.8 2.7 Z"/><circle cx="18" cy="2.6" r="1.3"/><circle cx="0" cy="2.6" r="1.3"/>'),
     // Ślepa arkada jako zwykłe tło (stały kolor ciemnego żelaza) — na belkach interfejsu
     arcadeBg: svgUrl(SVG('0 0 14 9', '<path fill="#2c2727" d="M0.5 9 V5 Q0.5 1.5 7 0 Q13.5 1.5 13.5 5 V9 H12 V5.4 Q12 2.7 7 1.6 Q2 2.7 2 5.4 V9 Z"/>')),
+    // …i jej wersja dla Szkarłatu: ledwo odróżnialna od czerni
+    arcadeBgDark: svgUrl(SVG('0 0 14 9', '<path fill="#120c0c" d="M0.5 9 V5 Q0.5 1.5 7 0 Q13.5 1.5 13.5 5 V9 H12 V5.4 Q12 2.7 7 1.6 Q2 2.7 2 5.4 V9 Z"/>')),
+    // Tabliczka HUD (Szkarłat): wiszący ośli łuk z żabkami i skrzyżowanymi mieczami; górna krawędź = dół tabliczki
+    hudCrestIron: MASKSVG('0 0 100 46',
+      '<path d="M6 0 H94 L90 4 H10 Z"/>' +
+      '<path fill-rule="evenodd" d="M18 4 H82 C80 14 68 22 58 28 C54 31 51.5 36 50 46 C48.5 36 46 31 42 28 C32 22 20 14 18 4 Z M27 6.5 H73 C70 13.5 62 19 55 23.5 C52.8 25 51 27.5 50 31 C49 27.5 47.2 25 45 23.5 C38 19 30 13.5 27 6.5 Z"/>' +
+      '<path d="M22 10 Q16 12 15 16 Q19 13.5 23.5 13 Z M78 10 Q84 12 85 16 Q81 13.5 76.5 13 Z M33 20 Q27 23 27 27 Q30 24 35 23 Z M67 20 Q73 23 73 27 Q70 24 65 23 Z"/>' +
+      '<path d="M8 4 V10 L10 15 L12 10 V4 Z M88 4 V10 L90 15 L92 10 V4 Z"/>' +
+      `<g transform="translate(41 4.2) scale(.75)"><g transform="rotate(40 12 12)">${SWORD_V}</g><g transform="rotate(-40 12 12)">${SWORD_V}</g></g>`),
+    hudCrestInlay: MASKSVG('0 0 100 46',
+      '<path d="M27 6.5 H73 C70 13.5 62 19 55 23.5 C52.8 25 51 27.5 50 31 C49 27.5 47.2 25 45 23.5 C38 19 30 13.5 27 6.5 Z"/>' +
+      '<circle cx="10" cy="7" r="1.1"/><circle cx="90" cy="7" r="1.1"/>'),
+    // Wisząca sterczyna z żabkami (po bokach tabliczki)
+    pendantIron: MASKSVG('0 0 16 40',
+      '<path d="M2 0 H14 V8 L12 12 V20 L10 24 L8 40 L6 24 L4 20 V12 L2 8 Z"/>' +
+      '<path d="M4 14 Q0 15 0 18 Q2 16.5 4 17 Z M12 14 Q16 15 16 18 Q14 16.5 12 17 Z M5 22 Q2 23.5 2.5 26 Q4 24.5 5.6 25 Z M11 22 Q14 23.5 13.5 26 Q12 24.5 10.4 25 Z"/>'),
+    pendantInlay: MASKSVG('0 0 16 40', '<path d="M7 2.5 H9 V9 L8 10.8 L7 9 Z"/><path d="M7.4 13 H8.6 V19 H7.4 Z"/>'),
     battlement: MASKSVG('0 0 24 11', '<path fill-rule="evenodd" d="M0 1 H11 V8 H24 V11 H0 Z M4.9 3 H6.1 V6.5 H4.9 Z"/><path d="M-0.5 0 H11.5 V1.4 H-0.5 Z"/>'),
     tipTL: tipCorner(0), tipTR: tipCorner(90), tipBR: tipCorner(180), tipBL: tipCorner(270),
     // Szum (brud) — czarne drobinki
@@ -510,7 +529,7 @@ html[data-ck-variant="green"] {
 }
 
 /* Własne elementy są ukryte, dopóki motyw nie jest włączony */
-.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog { display: none; }
+.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog, .ck-hud-deco { display: none; }
 
 /* =====================================================================
  * === OKNA ===
@@ -1233,6 +1252,84 @@ ${PA} .ck-fog::after  { animation: ck-fog2 90s ease-in-out infinite alternate; }
 }
 
 /* =====================================================================
+ * === SZKARŁAT: BELKI I TABLICZKA HUD === (tylko ten wariant — Butelkowa Zieleń zostaje bez zmian)
+ * ===================================================================== */
+/* Belki: czerń, ledwo widoczna ślepa arkada, cienkie krwiste linie przy krawędziach */
+${PC} .interface-layer > .top.positioner > .bg,
+${PC} .interface-layer > .bottom.positioner > .bg {
+  background:
+    linear-gradient(90deg, transparent, var(--ck-a3) 50%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, var(--ck-a3) 50%, transparent) 0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 2%, #120e0e 20% 80%, transparent 98%) 0 3px / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 2%, #120e0e 20% 80%, transparent 98%) 0 calc(100% - 3px) / 100% 1px no-repeat,
+    ${ICONS.arcadeBgDark} 0 50% / 14px 9px repeat-x,
+    var(--ck-noise),
+    linear-gradient(180deg, #070404, #020101 45%, #000 100%) !important;
+  box-shadow: inset 0 0 0 1px #000 !important;
+}
+
+/* Tabliczka: czarna płyta w podwójnej żelaznej ramie z krwistą inkrustacją */
+${PC} .top.positioner .hud-container {
+  background:
+    radial-gradient(80% 140% at 50% 125%, rgba(55,7,7,.28), transparent 60%),
+    radial-gradient(140% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.85)),
+    var(--ck-noise),
+    linear-gradient(180deg, #000, #040202 55%, #0a0505) !important;
+  box-shadow:
+    inset 0 0 0 1px #000, inset 0 0 0 3px #171212, inset 0 0 0 4px #000,
+    inset 0 0 0 5px rgba(79,10,10,.75), inset 0 0 0 6px #000,
+    inset 0 -12px 18px rgba(0,0,0,.8),
+    0 0 0 1px #000, 0 0 0 3px #171212, 0 0 0 4px #000,
+    0 14px 30px rgba(0,0,0,.92) !important;
+}
+${PC} .top.positioner .hud-container::before,
+${PC} .top.positioner .hud-container::after { display: none !important; }   /* stara rozeta z mieczami → wiszący łuk niżej */
+${PC} .hud-container .heroname {
+  font-family: var(--ck-font-gothic) !important;
+  font-size: 15px !important;
+  letter-spacing: .04em !important;
+  color: var(--ck-title) !important;
+  text-shadow: 0 0 10px rgba(110,14,14,.55), 0 1px 0 #000, 0 0 3px #000 !important;
+}
+${PC} .hud-container .btn-min {
+  background: linear-gradient(180deg, #1c1616, #090606) !important;
+  box-shadow: inset 0 0 0 1px var(--ck-a3), inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px #000 !important;
+}
+
+/* Ozdoby tabliczki (.ck-hud-deco — doklejane przez JS do .hud-container) */
+${PC} .ck-hud-deco {
+  display: block;
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+${PC} .ck-hud-deco > i { position: absolute; display: block; filter: drop-shadow(0 2px 2px #000); }
+${PC} .ck-hud-deco > i::before, ${PC} .ck-hud-deco > i::after { content: ''; position: absolute; inset: 0; }
+/* Wiszący ośli łuk z mieczami pośrodku */
+${PC} .ck-hud-deco > .ck-hud-crest { left: 50%; top: calc(100% - 1px); width: 108px; height: 50px; margin-left: -54px; }
+${PC} .ck-hud-crest::before { ${MASK(ICONS.hudCrestInlay)} background: linear-gradient(180deg, #4f0a0a, #210404 70%, #0e0202); }
+${PC} .ck-hud-crest::after  { ${MASK(ICONS.hudCrestIron)} background: ${IRON_BG}; }
+/* Wiszące sterczyny po bokach */
+${PC} .ck-hud-deco > .ck-hud-pend { top: calc(100% - 1px); width: 14px; height: 36px; }
+${PC} .ck-hud-deco > .ck-hud-pend.ck-l { left: 22%; margin-left: -7px; }
+${PC} .ck-hud-deco > .ck-hud-pend.ck-r { left: 78%; margin-left: -7px; }
+${PC} .ck-hud-pend::before { ${MASK(ICONS.pendantIron)} background: ${IRON_BG}; }
+${PC} .ck-hud-pend::after  { ${MASK(ICONS.pendantInlay)} background: linear-gradient(180deg, var(--ck-a4), var(--ck-a2)); }
+/* Koronka ostrołuków wzdłuż dolnej krawędzi */
+${PC} .ck-hud-deco > .ck-hud-lace {
+  left: 10px; right: 10px; top: 100%; height: 8px;
+  -webkit-mask: ${ICONS.lace} 0 0 / 14px 8px repeat-x; mask: ${ICONS.lace} 0 0 / 14px 8px repeat-x;
+  background: ${IRON_BG};
+  filter: none;
+}
+/* Okute narożniki u dołu (sterczyna na zewnątrz) */
+${PC} .ck-hud-deco > .ck-hud-corner { width: 34px; height: 34px; bottom: -5px; }
+${PC} .ck-hud-deco > .ck-hud-corner.ck-l { left: -5px; transform: scaleY(-1); }
+${PC} .ck-hud-deco > .ck-hud-corner.ck-r { right: -5px; transform: scale(-1, -1); }
+${PC} .ck-hud-corner::before { ${MASK(ICONS.cornerIron, '0 0 / 100% 100%')} background: ${IRON_BG}; }
+${PC} .ck-hud-corner::after  { ${MASK(ICONS.cornerInlay, '0 0 / 100% 100%')} background: ${INLAY_BG}; }
+
+/* =====================================================================
  * === ZABEZPIECZENIE: mapa i znaczniki rzadkości bez filtrów ===
  * ===================================================================== */
 ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
@@ -1548,6 +1645,14 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
       ensureChild(SELECTORS.barTopHost.join(','), 'ck-bar-lace');
       ensureChild(SELECTORS.barBottomHost.join(','), 'ck-bar-wall');
     }
+    // Ozdoby tabliczki HUD (widoczne tylko w Szkarłacie — CSS pod data-ck-variant="crimson")
+    document.querySelectorAll(SELECTORS.hud.join(',')).forEach((hud) => {
+      if (hud.querySelector(':scope > .ck-hud-deco')) return;
+      const d = mkDeco('div', 'ck-hud-deco');
+      d.innerHTML = '<i class="ck-hud-lace"></i><i class="ck-hud-corner ck-l"></i><i class="ck-hud-corner ck-r"></i>' +
+        '<i class="ck-hud-pend ck-l"></i><i class="ck-hud-pend ck-r"></i><i class="ck-hud-crest"></i>';
+      hud.appendChild(d);
+    });
     if (FEATURES.crest) ensureChild(SELECTORS.column.join(','), 'ck-col-crest');
     if (FEATURES.fog) {
       const host = document.querySelector(SELECTORS.fogHost.join(','));
