@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.4
+// @version      1.7.5
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,7 +50,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.7.4';
+  const VERSION = '1.7.5';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -981,6 +981,12 @@ ${S('column')} {
 ${S('columnBorder')} {
   background: var(--mkn-frame-v) !important;
   box-shadow: 0 0 8px rgba(0,0,0,.9) !important;
+}
+/* Tryb okienkowy: gra ustawia body[data-res] i ramkę windowModeBorder.png na .interface-layer
+   → fioletowa rama z gradientem, czarna linia i poświata. (Warstwa ma overflow:hidden — bez ozdób na zewnątrz.) */
+${P} body[data-res] .game-window-positioner > .interface-layer {
+  border-image: linear-gradient(180deg, #e2d4ff, #9b7bd4 18%, #4b3b6e 55%, #2a1f45 85%, #6a54a0) 1 !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 3px rgba(155,123,212,.28), 0 0 34px rgba(110,84,170,.45), 0 18px 50px rgba(0,0,0,.9) !important;
 }
 ${S('spriteArt')} {
   filter: var(--mkn-sprite-filter);
