@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Crimson Knight Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.1.0
+// @version      1.2.0
 // @description  Mroczny, gotycko-rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, maswerki, sterczyny i miecze. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -57,7 +57,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const KEY_ENABLED = 'ck.enabled';
   const KEY_VARIANT = 'ck.variant';
   const KEY_ANIM = 'ck.anim';
@@ -377,7 +377,7 @@
   const SA = (key, suffix = '') => SELECTORS[key].map((s) => `${PA} ${s}${suffix}`).join(',\n');
   const MASK = (icon, pos = 'center / contain') => `-webkit-mask: ${icon} ${pos} no-repeat; mask: ${icon} ${pos} no-repeat;`;
   /** Wypełnienia ozdobników nakładane przez maskę: brudne kute żelazo (z przebarwieniem wariantu) i inkrustacja w kolorze wariantu. */
-  const IRON_BG = 'var(--ck-noise), linear-gradient(160deg, #8f8680 0%, #5d5550 20%, var(--ck-metal-tint) 52%, #1b1616 100%)';
+  const IRON_BG = 'var(--ck-noise), var(--ck-iron-grad)';   // gradient żelaza zależy od wariantu (patrz --ck-iron-grad)
   const INLAY_BG = 'linear-gradient(180deg, var(--ck-a4), var(--ck-a2) 70%, var(--ck-a1))';
   /** Łańcuch (dwie warstwy tła: ogniwa z boku i z góry), kolory ze zmiennych. Pozycja od góry albo od dołu. */
   const CHAIN_RING = 'radial-gradient(ellipse 4.5px 2.6px at 4.5px 3px, transparent 48%, var(--ck-metal-hi) 56% 76%, transparent 86%)';
@@ -437,30 +437,55 @@ html[data-ck-variant] {
   --ck-noise: ${ICONS.noise};
   --ck-scratches: ${ICONS.scratches};
   /* Nit: łebek z refleksem, ciemna obwódka i przebarwienie metalu wokół */
+  /* Domyślne wartości powierzchni (używa ich Butelkowa Zieleń; Szkarłat nadpisuje je na ciemniejsze) */
+  --ck-win-rgb: 11 8 8;                                     /* tło okien */
+  --ck-title: #e4d8ca;                                      /* tytuły okien */
+  --ck-steel-hi: #9a918a;                                   /* jasna krawędź drobnych ozdobników */
+  --ck-grime: rgba(48,30,18,.24);                           /* brudne, brunatne zacieki */
+  --ck-grime-2: rgba(40,24,14,.2);
+  --ck-vignette: rgba(0,0,0,.72);                           /* przyciemnienie brzegów okien */
+  --ck-iron-grad: linear-gradient(160deg, #8f8680 0%, #5d5550 20%, var(--ck-metal-tint) 52%, #1b1616 100%);
   --ck-rivet: radial-gradient(circle at 42% 38%, #8a827c 0 .7px, #4f4844 1.2px 2.3px, #0a0808 2.9px, var(--ck-stain) 3.3px, transparent 4.6px);
 
   transition: ${VARIANT_PROPS.map((p) => `${p} .3s ease`).join(', ')};
 }
 
-/* --- Wariant 1: Szkarłat — zaschnięta krew, rdza --- */
+/* --- Wariant 1: Szkarłat — mega mroczny: niemal sama czerń, czerwień tylko jako ciemne, zaschnięte akcenty --- */
 html[data-ck-variant="crimson"] {
-  --ck-a0: #1e0505;
-  --ck-a1: #3a0a0a;
-  --ck-a2: #5c0f0f;
-  --ck-a3: #7a1414;
-  --ck-a4: #9e1b1b;                       /* najjaśniejszy akcent */
-  --ck-glow: rgba(158,27,27,.55);
-  --ck-glow-soft: rgba(122,20,20,.28);
-  --ck-stain: rgba(98,44,22,.42);          /* rdza */
-  --ck-stain-2: rgba(120,62,30,.26);
-  --ck-tint: rgba(58,10,10,.32);
-  --ck-metal-tint: #3a2420;               /* rdzawe, okopcone żelazo */
-  --ck-metal-hi: #5d4842;
-  --ck-fog: rgba(36,26,26,.55);
-  --ck-grid-line: rgba(92,52,48,.75);
-  --ck-sprite-filter: grayscale(.85) brightness(.48) sepia(.4) hue-rotate(-22deg) saturate(1.5) contrast(1.1);
-  --ck-tile-filter: grayscale(1) brightness(.55) sepia(.6) hue-rotate(-30deg) saturate(1.6) contrast(1.15);
-  --ck-widget-filter: hue-rotate(-120deg) saturate(.7) brightness(.75);
+  --ck-a0: #0e0202;
+  --ck-a1: #210404;
+  --ck-a2: #370707;
+  --ck-a3: #4f0a0a;
+  --ck-a4: #6e0e0e;                       /* najjaśniejszy akcent — nadal ciemna, zakrzepła czerwień */
+  --ck-glow: rgba(110,14,14,.42);
+  --ck-glow-soft: rgba(70,8,8,.2);
+  --ck-stain: rgba(30,8,6,.55);            /* zakrzepły brud zamiast jasnej rdzy */
+  --ck-stain-2: rgba(22,6,5,.4);
+  --ck-tint: rgba(28,3,3,.35);
+  --ck-metal-tint: #140c0b;               /* poczerniałe, okopcone żelazo */
+  --ck-metal-hi: #2b1c1a;
+  --ck-fog: rgba(6,3,3,.7);               /* czarny dym */
+  --ck-grid-line: rgba(48,20,18,.8);
+  --ck-sprite-filter: grayscale(.9) brightness(.34) sepia(.35) hue-rotate(-22deg) saturate(1.4) contrast(1.15);
+  --ck-tile-filter: grayscale(1) brightness(.38) sepia(.55) hue-rotate(-30deg) saturate(1.4) contrast(1.2);
+  --ck-widget-filter: hue-rotate(-120deg) saturate(.6) brightness(.55);
+
+  /* Powierzchnie: niemal czysta czerń */
+  --ck-black:    #010000;
+  --ck-coal:     #040202;
+  --ck-graphite: #080505;
+  --ck-iron-1:   #161212;
+  --ck-iron-2:   #221c1c;
+  --ck-iron-3:   #332b2a;
+  --ck-text:     #cbbfb4;                 /* przygaszona kość — nadal czytelna */
+  --ck-text-dim: #7a6f68;
+  --ck-win-rgb: 3 2 2;
+  --ck-title: #c9b9ac;
+  --ck-steel-hi: #4a403e;
+  --ck-grime: rgba(0,0,0,.45);
+  --ck-grime-2: rgba(10,2,2,.4);
+  --ck-vignette: rgba(0,0,0,.88);
+  --ck-iron-grad: linear-gradient(160deg, #4a403e 0%, #2a2120 22%, var(--ck-metal-tint) 55%, #030202 100%);
 }
 
 /* --- Wariant 2: Butelkowa Zieleń — gęsta zielona ciecz, patyna i śniedź --- */
@@ -496,12 +521,12 @@ html[data-ck-variant="green"] {
 ${S('window')} {
   border-image: none !important;
   border-color: transparent !important;
-  background-color: rgba(11,8,8,.97) !important;
+  background-color: rgb(var(--ck-win-rgb) / .97) !important;
   background-image:
     radial-gradient(120% 50% at 50% 0%, var(--ck-tint), transparent 70%),
-    radial-gradient(60% 40% at 18% 100%, rgba(48,30,18,.24), transparent 70%),
-    radial-gradient(40% 30% at 88% 70%, rgba(40,24,14,.2), transparent 70%),
-    radial-gradient(140% 110% at 50% 50%, transparent 48%, rgba(0,0,0,.72)),
+    radial-gradient(60% 40% at 18% 100%, var(--ck-grime), transparent 70%),
+    radial-gradient(40% 30% at 88% 70%, var(--ck-grime-2), transparent 70%),
+    radial-gradient(140% 110% at 50% 50%, transparent 48%, var(--ck-vignette)),
     linear-gradient(180deg, rgba(0,0,0,.4), transparent 20%),
     var(--ck-scratches),
     var(--ck-noise),
@@ -517,10 +542,10 @@ ${S('window')} {
     0 0 30px var(--ck-glow-soft) !important;
   color: var(--ck-text) !important;
 }
-${P} .c-window.transparent[data-opacity-lvl="1"] { background-color: rgba(11,8,8,.85) !important; }
-${P} .c-window.transparent[data-opacity-lvl="2"] { background-color: rgba(11,8,8,.7) !important; }
-${P} .c-window.transparent[data-opacity-lvl="3"] { background-color: rgba(11,8,8,.55) !important; }
-${P} .c-window.transparent[data-opacity-lvl="4"] { background-color: rgba(11,8,8,.4) !important; }
+${P} .c-window.transparent[data-opacity-lvl="1"] { background-color: rgb(var(--ck-win-rgb) / .85) !important; }
+${P} .c-window.transparent[data-opacity-lvl="2"] { background-color: rgb(var(--ck-win-rgb) / .7) !important; }
+${P} .c-window.transparent[data-opacity-lvl="3"] { background-color: rgb(var(--ck-win-rgb) / .55) !important; }
+${P} .c-window.transparent[data-opacity-lvl="4"] { background-color: rgb(var(--ck-win-rgb) / .4) !important; }
 
 ${S('windowOverlay')} {
   border-image-source: none !important;
@@ -565,13 +590,13 @@ ${S('windowTitle')} {
   font-weight: 400 !important;
   font-size: 15px !important;
   letter-spacing: .05em !important;
-  color: #e4d8ca !important;
+  color: var(--ck-title) !important;
   text-shadow: 0 0 12px var(--ck-glow), 0 1px 0 #000, 0 0 3px #000, 0 0 1px #000 !important;
 }
 /* Ozdobniki po bokach tytułu → ślepe ostrołuki z trójliściem */
 ${S('windowDecor')} {
   border-image: none !important;
-  background: linear-gradient(180deg, #9a918a, var(--ck-metal-tint) 55%, var(--ck-a3)) !important;
+  background: linear-gradient(180deg, var(--ck-steel-hi), var(--ck-metal-tint) 55%, var(--ck-a3)) !important;
   ${MASK(ICONS.tracery, 'center / 13px 18px')}
 }
 ${S('windowSmallBtn')} {
