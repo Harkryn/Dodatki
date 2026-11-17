@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.5
+// @version      1.8.0
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,13 +50,15 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.7.5';
+  const VERSION = '1.8.0';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
   const ROOT_CLASS = 'mkn-on';
   const ANIM_CLASS = 'mkn-mascot';
   const DETECT_TIMEOUT_MS = 45000;
+  const LEGEND_EYES_MS = 5000;   // przez tyle po zdobyciu legendy pojawiają się i mrugają oczy
+  const LEGEND_MS = 6200;        // cały efekt legendy (oczy + wygaszenie)
   const LOG = (...a) => console.info('%c[Kocia Noc]', 'color:#b79cf0;font-weight:bold', ...a);
 
   /** Przełączniki funkcji — ustaw false, żeby wyłączyć. */
@@ -275,6 +277,12 @@
       '<path d="M2 25 C18 2 82 2 98 25 C82 48 18 48 2 25 Z" fill="url(#e)" stroke="#2a1500" stroke-width="2"/>' +
       '<ellipse cx="50" cy="25" rx="5.5" ry="21" fill="#0a0503"/>' +
       '<ellipse cx="40" cy="16" rx="5" ry="3.2" fill="#fff" opacity=".55"/>')),
+    // …i jego fioletowa wersja (część par oczu w efekcie legendy)
+    legendEyeViolet: svgUrl(SVG('0 0 100 50',
+      '<defs><radialGradient id="e" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#fbf8ff"/><stop offset=".35" stop-color="#c3a8ff"/><stop offset=".8" stop-color="#7a5cc8"/><stop offset="1" stop-color="#2a1650"/></radialGradient></defs>' +
+      '<path d="M2 25 C18 2 82 2 98 25 C82 48 18 48 2 25 Z" fill="url(#e)" stroke="#120826" stroke-width="2"/>' +
+      '<ellipse cx="50" cy="25" rx="5.5" ry="21" fill="#05020c"/>' +
+      '<ellipse cx="40" cy="16" rx="5" ry="3.2" fill="#fff" opacity=".6"/>')),
 
     // Ornament pod tabliczką HUD: zawijasy i czarne gniazdo; sam medalion (kolor mapy + kot) to przestawiona
     // kulka mapy gry (.map_ball), oczy kota osobno — mrugają
@@ -1383,65 +1391,114 @@ ${P} .mkn-amb-eyes {
  * === EFEKT LEGENDY ===
  * ===================================================================== */
 #mkn-legend {
-  position: fixed; inset: 0; z-index: 2147483600; pointer-events: none;
+  position: fixed; inset: 0; z-index: 2147483600; pointer-events: none; overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  animation: mkn-lg-fade 4.2s ease forwards;
+  animation: mkn-lg-fade ${LEGEND_MS}ms ease forwards;
   font-family: var(--mkn-font-head);
 }
+/* Winieta: czerń na brzegach, fioletowa noc i pomarańczowy żar legendy na zmianę */
 #mkn-legend .mkn-lg-vignette {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 42%, transparent 25%, rgba(0,0,0,.78) 100%);
-  box-shadow: inset 0 0 140px rgba(255,140,26,.35);
-  animation: mkn-lg-pulse 1.4s ease-in-out 2;
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(255,140,26,.10), transparent 30%),
+    radial-gradient(ellipse at 50% 46%, transparent 22%, rgba(18,8,36,.55) 62%, rgba(0,0,0,.86) 100%);
+  box-shadow: inset 0 0 160px rgba(110,84,170,.55), inset 0 0 60px rgba(255,140,26,.25);
+  animation: mkn-lg-pulse 1.6s ease-in-out 3;
 }
-#mkn-legend .mkn-lg-eyes { position: relative; display: flex; gap: 46px; margin-top: -60px; }
-#mkn-legend .mkn-lg-eyes i {
-  width: 96px; height: 48px;
-  background: ${ICONS.legendEye} center / contain no-repeat;
-  filter: drop-shadow(0 0 14px rgba(255,140,26,.85)) drop-shadow(0 0 40px rgba(255,140,26,.45));
-  transform: scaleY(.04);
-  animation: mkn-lg-eye 4.2s ease forwards;
+/* Fioletowa aureola z księżycowym pierścieniem za napisem */
+#mkn-legend .mkn-lg-halo {
+  position: absolute; left: 50%; top: 50%; width: 340px; height: 340px; margin: -170px 0 0 -170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(155,123,212,.32), rgba(110,84,170,.12) 45%, transparent 70%);
+  animation: mkn-lg-halo ${LEGEND_MS}ms ease forwards;
 }
-#mkn-legend .mkn-lg-eyes i:last-child { transform: scaleX(-1) scaleY(.04); animation-name: mkn-lg-eye-r; }
+#mkn-legend .mkn-lg-halo::before, #mkn-legend .mkn-lg-halo::after {
+  content: ''; position: absolute; inset: 58px; border-radius: 50%;
+  border: 1px solid rgba(195,168,255,.65);
+  box-shadow: 0 0 18px rgba(155,123,212,.6), inset 0 0 18px rgba(155,123,212,.35);
+}
+#mkn-legend .mkn-lg-halo::after {
+  inset: 46px; border: 1px dashed rgba(255,179,71,.55); box-shadow: none;
+  animation: mkn-lg-spin 9s linear infinite;
+}
 #mkn-legend .mkn-lg-title {
-  position: relative; margin-top: 18px;
-  font-size: 30px; font-weight: 700; letter-spacing: .55em; text-indent: .55em; text-transform: uppercase;
+  position: relative;
+  font-size: 32px; font-weight: 700; letter-spacing: .55em; text-indent: .55em; text-transform: uppercase;
   background: linear-gradient(180deg, #fff2c9, #ffb347 45%, #ff8c1a);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 0 12px rgba(255,140,26,.7));
-  opacity: 0; animation: mkn-lg-text 4.2s ease forwards;
+  filter: drop-shadow(0 0 10px rgba(255,140,26,.65)) drop-shadow(0 0 22px rgba(155,123,212,.85));
+  opacity: 0; animation: mkn-lg-text ${LEGEND_MS}ms ease forwards;
 }
 #mkn-legend .mkn-lg-sub {
-  position: relative; font-size: 11px; letter-spacing: .35em; text-transform: uppercase; color: #d9c6a8;
-  opacity: 0; animation: mkn-lg-text 4.2s ease .15s forwards;
+  position: relative; font-size: 11px; letter-spacing: .35em; text-transform: uppercase; color: #c3a8ff;
+  text-shadow: 0 0 10px rgba(155,123,212,.9);
+  opacity: 0; animation: mkn-lg-text ${LEGEND_MS}ms ease .15s forwards;
 }
-#mkn-legend .mkn-lg-burst { position: absolute; left: 50%; top: 46%; }
+/* Rozbłysk łapek: na przemian fioletowe i pomarańczowe */
+#mkn-legend .mkn-lg-burst { position: absolute; left: 50%; top: 50%; }
 #mkn-legend .mkn-lg-burst b {
   position: absolute; width: 18px; height: 18px; margin: -9px;
   background: ${ICONS.paw} center / contain no-repeat;
-  filter: hue-rotate(150deg) saturate(2.4) brightness(1.3) drop-shadow(0 0 6px rgba(255,140,26,.8));
+  filter: brightness(1.25) drop-shadow(0 0 6px rgba(155,123,212,.95));
   opacity: 0;
-  animation: mkn-lg-paw 2.4s ease-out .5s forwards;
+  animation: mkn-lg-paw 2.6s ease-out .5s forwards;
 }
-@keyframes mkn-lg-fade  { 0% { opacity: 0; } 8% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes mkn-lg-pulse { 50% { box-shadow: inset 0 0 200px rgba(255,140,26,.55); } }
-@keyframes mkn-lg-eye {
-  0% { transform: scaleY(.04); } 12% { transform: scaleY(1); }
-  34% { transform: scaleY(1); } 37% { transform: scaleY(.06); } 41% { transform: scaleY(1); }
-  58% { transform: scaleY(1); } 61% { transform: scaleY(.06); } 65% { transform: scaleY(1); }
-  84% { transform: scaleY(1); } 92%, 100% { transform: scaleY(.04); }
+#mkn-legend .mkn-lg-burst b:nth-child(even) {
+  filter: hue-rotate(150deg) saturate(2.4) brightness(1.3) drop-shadow(0 0 6px rgba(255,140,26,.8));
 }
-@keyframes mkn-lg-eye-r {
-  0% { transform: scaleX(-1) scaleY(.04); } 12% { transform: scaleX(-1) scaleY(1); }
-  34% { transform: scaleX(-1) scaleY(1); } 37% { transform: scaleX(-1) scaleY(.06); } 41% { transform: scaleX(-1) scaleY(1); }
-  58% { transform: scaleX(-1) scaleY(1); } 61% { transform: scaleX(-1) scaleY(.06); } 65% { transform: scaleX(-1) scaleY(1); }
-  84% { transform: scaleX(-1) scaleY(1); } 92%, 100% { transform: scaleX(-1) scaleY(.04); }
+/* Oczy w ciemności: kilkanaście par w losowych miejscach i rozmiarach (JS), każda pojawia się,
+   mruga raz lub dwa razy i znika. Mruga cała para — obie źrenice naraz. */
+#mkn-legend .mkn-lg-pair {
+  position: absolute; left: var(--x); top: var(--y);
+  display: flex; gap: calc(var(--w) * .42);
+  opacity: 0;
+  transform: rotate(var(--r)) scaleY(.05);
+  animation: mkn-lg-blink1 var(--d) ease-in-out var(--t) forwards;
 }
-@keyframes mkn-lg-text { 0%, 15% { opacity: 0; transform: translateY(6px); } 25%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+#mkn-legend .mkn-lg-pair.mkn-twice { animation-name: mkn-lg-blink2; }
+#mkn-legend .mkn-lg-pair i {
+  width: var(--w); height: calc(var(--w) / 2);
+  background: ${ICONS.legendEye} center / contain no-repeat;
+  filter: drop-shadow(0 0 calc(var(--w) * .12) rgba(255,140,26,.85)) drop-shadow(0 0 calc(var(--w) * .35) rgba(255,140,26,.4));
+}
+#mkn-legend .mkn-lg-pair.mkn-violet i {
+  background-image: ${ICONS.legendEyeViolet};
+  filter: drop-shadow(0 0 calc(var(--w) * .12) rgba(195,168,255,.9)) drop-shadow(0 0 calc(var(--w) * .35) rgba(110,84,170,.5));
+}
+#mkn-legend .mkn-lg-pair i:last-child { transform: scaleX(-1); }
+@keyframes mkn-lg-fade  { 0% { opacity: 0; } 5% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes mkn-lg-pulse {
+  0%, 100% { box-shadow: inset 0 0 160px rgba(110,84,170,.55), inset 0 0 60px rgba(255,140,26,.25); }
+  50%      { box-shadow: inset 0 0 220px rgba(155,123,212,.7), inset 0 0 90px rgba(255,140,26,.45); }
+}
+@keyframes mkn-lg-halo { 0% { opacity: 0; transform: scale(.6); } 12% { opacity: 1; transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(1.08); } }
+@keyframes mkn-lg-spin { to { transform: rotate(360deg); } }
+@keyframes mkn-lg-blink1 {
+  0%       { opacity: 0; transform: rotate(var(--r)) scaleY(.05); }
+  16%      { opacity: 1; transform: rotate(var(--r)) scaleY(1); }
+  50%      { transform: rotate(var(--r)) scaleY(1); }
+  56%      { transform: rotate(var(--r)) scaleY(.06); }
+  63%      { transform: rotate(var(--r)) scaleY(1); }
+  84%      { opacity: 1; transform: rotate(var(--r)) scaleY(1); }
+  100%     { opacity: 0; transform: rotate(var(--r)) scaleY(.05); }
+}
+@keyframes mkn-lg-blink2 {
+  0%       { opacity: 0; transform: rotate(var(--r)) scaleY(.05); }
+  14%      { opacity: 1; transform: rotate(var(--r)) scaleY(1); }
+  34%      { transform: rotate(var(--r)) scaleY(1); }
+  39%      { transform: rotate(var(--r)) scaleY(.06); }
+  45%      { transform: rotate(var(--r)) scaleY(1); }
+  60%      { transform: rotate(var(--r)) scaleY(1); }
+  65%      { transform: rotate(var(--r)) scaleY(.06); }
+  71%      { transform: rotate(var(--r)) scaleY(1); }
+  86%      { opacity: 1; transform: rotate(var(--r)) scaleY(1); }
+  100%     { opacity: 0; transform: rotate(var(--r)) scaleY(.05); }
+}
+@keyframes mkn-lg-text { 0%, 6% { opacity: 0; transform: translateY(6px); } 14%, 86% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 @keyframes mkn-lg-paw {
   0%   { opacity: 0;  transform: rotate(var(--a)) translateY(0) scale(.3); }
   20%  { opacity: .95; }
-  100% { opacity: 0;  transform: rotate(var(--a)) translateY(-190px) scale(1.1); }
+  100% { opacity: 0;  transform: rotate(var(--a)) translateY(-210px) scale(1.1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1576,15 +1633,42 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     const fx = document.createElement('div');
     fx.id = 'mkn-legend';
     fx.setAttribute('aria-hidden', 'true');
-    const paws = Array.from({ length: 10 }, (_, i) => `<b style="--a:${i * 36 + 8}deg;animation-delay:${0.45 + (i % 3) * 0.08}s"></b>`).join('');
+    const paws = Array.from({ length: 12 }, (_, i) => `<b style="--a:${i * 30 + 8}deg;animation-delay:${0.45 + (i % 3) * 0.08}s"></b>`).join('');
     fx.innerHTML =
       '<div class="mkn-lg-vignette"></div>' +
+      '<div class="mkn-lg-halo"></div>' +
+      legendEyesHtml() +
       `<div class="mkn-lg-burst">${paws}</div>` +
-      '<div class="mkn-lg-eyes"><i></i><i></i></div>' +
       '<div class="mkn-lg-title">Legenda</div>' +
       '<div class="mkn-lg-sub">kocie szczęście dopisało</div>';
     document.body.appendChild(fx);
-    setTimeout(() => fx.remove(), 4400);
+    setTimeout(() => fx.remove(), LEGEND_MS + 200);
+  }
+
+  /**
+   * Kilkanaście par oczu w losowych miejscach okna (z dala od napisu i od siebie nawzajem),
+   * w różnych rozmiarach, kolorach (legenda / fiolet) i chwilach. Każda para pojawia się w ciągu
+   * LEGEND_EYES_MS od zdobycia legendy, mruga raz albo dwa razy i znika.
+   */
+  function legendEyesHtml() {
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const count = 12 + Math.floor(Math.random() * 5);           // 12–16 par
+    const placed = [];
+    let html = '';
+    for (let n = 0, tries = 0; n < count && tries < 400; tries++) {
+      const x = rnd(3, 88), y = rnd(5, 88);
+      if (Math.abs(x + 4 - 50) < 22 && Math.abs(y - 50) < 17) continue;   // nie na napisie
+      if (placed.some(([px, py]) => Math.hypot(px - x, (py - y) * 1.4) < 13)) continue;
+      placed.push([x, y]);
+      const w = Math.round(rnd(18, 70) * (Math.random() < 0.18 ? 1.5 : 1));   // czasem duża para
+      const d = rnd(1.0, 1.9);
+      const t = rnd(0.15, LEGEND_EYES_MS / 1000 - d);
+      const cls = ['mkn-lg-pair', Math.random() < 0.45 ? 'mkn-violet' : '', Math.random() < 0.4 ? 'mkn-twice' : ''].join(' ');
+      html += `<div class="${cls}" style="--x:${x.toFixed(1)}%;--y:${y.toFixed(1)}%;--w:${w}px;` +
+        `--r:${rnd(-14, 14).toFixed(1)}deg;--d:${d.toFixed(2)}s;--t:${t.toFixed(2)}s"><i></i><i></i></div>`;
+      n++;
+    }
+    return html;
   }
 
   function itemId(item) {
