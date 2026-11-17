@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Crimson Knight Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.4.0
+// @version      1.5.0
 // @description  Mroczny, gotycko-rycerski motyw dla nowego interfejsu Margonem (NI): czerń, kute żelazo, maswerki, sterczyny i miecze. Dwa warianty: Szkarłat i Butelkowa Zieleń. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -57,7 +57,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.5.0';
   const KEY_ENABLED = 'ck.enabled';
   const KEY_VARIANT = 'ck.variant';
   const KEY_ANIM = 'ck.anim';
@@ -308,6 +308,22 @@
     ORB_FRAME_INLAY += `<circle cx="${(80 + 49.1 * Math.sin(a)).toFixed(2)}" cy="${(78 - 49.1 * Math.cos(a)).toFixed(2)}" r="2.3"/>`;
   }
 
+  /* --- Ciernie: kolczaste pnącze (kafel 40×12, powtarzany; pionowe = obrót) --- */
+  const THORN = '<path d="M0 7 C7 4 13 10 20 7 C27 4 33 10 40 7 L40 8.6 C33 11.6 27 5.6 20 8.6 C13 11.6 7 5.6 0 8.6 Z"/>' +
+    '<path d="M4 6.6 L6.5 0.8 L8 6.2 Z"/><path d="M13 9.2 L15.5 12 L16.5 8.6 Z"/><path d="M24 6.6 L26.5 1.2 L28 6 Z"/>' +
+    '<path d="M33 9.4 L35 12 L36.4 8.8 Z"/><path d="M17.5 7.6 L19 4.4 L20.4 7.2 Z"/><path d="M29.5 8 L30.5 10.8 L31.8 8.4 Z"/>';
+
+  /* --- Czaszka (maska kości; oczodoły, nos i szpary w zębach wycięte) i jej żarzące się oczy --- */
+  const SKULL = '<path fill-rule="evenodd" d="M12 1 C5.5 1 2 5.5 2 11 C2 14.5 3.6 16.8 5.5 18 V21.5 C5.5 22.6 6.4 23.5 7.5 23.5 H16.5 C17.6 23.5 18.5 22.6 18.5 21.5 V18 C20.4 16.8 22 14.5 22 11 C22 5.5 18.5 1 12 1 Z ' +
+    'M7.6 10 C9.6 10 10.6 11.2 10.4 13 C10.2 14.6 8.6 15.2 7.4 14.8 C6 14.3 5.6 12.6 6 11.4 C6.3 10.5 6.9 10 7.6 10 Z ' +
+    'M16.4 10 C14.4 10 13.4 11.2 13.6 13 C13.8 14.6 15.4 15.2 16.6 14.8 C18 14.3 18.4 12.6 18 11.4 C17.7 10.5 17.1 10 16.4 10 Z ' +
+    'M12 15.2 L13.2 17.6 H10.8 Z M9 19.6 H9.8 V23.5 H9 Z M11.6 19.6 H12.4 V23.5 H11.6 Z M14.2 19.6 H15 V23.5 H14.2 Z"/>';
+  const SKULL_EYES = '<circle cx="8" cy="12.4" r="1.7"/><circle cx="16" cy="12.4" r="1.7"/>';
+
+  /* --- Świeca z zaciekami wosku i żelazną podstawką (płomień rysuje CSS) --- */
+  const CANDLE = '<path d="M2 8.6 Q4 7.2 6 8.4 Q8 7.4 10 8.6 V28 H2 Z"/><path d="M2 9 Q1.3 12 1.9 14.5 Q2.7 12.5 2.9 9.6 Z"/>' +
+    '<path d="M7 9 Q6.5 13 7.5 16.5 Q8.5 13 8 9 Z"/><path d="M5.6 3.8 H6.4 V8.6 H5.6 Z"/><path d="M0 27.6 H12 L11 30 H1 Z"/>';
+
   const ICONS = {
     // Skrzyżowane miecze — maska (biały = widoczne)
     swordsCross: MASKSVG('0 0 24 24', `<g transform="rotate(40 12 12)">${SWORD_V}</g><g transform="rotate(-40 12 12)">${SWORD_V}</g>`),
@@ -347,6 +363,16 @@
     orbFrameInlay: MASKSVG('0 0 160 150', ORB_FRAME_INLAY),
     // Grot włóczni na końcu paska EXP (wskazuje w lewo; prawy = odbicie)
     spearTip: MASKSVG('0 0 12 16', '<path d="M12 4.5 H6.5 L0 8 L6.5 11.5 H12 Z"/><path d="M9.8 2 H12 V14 H9.8 Z"/>'),
+    thornH: MASKSVG('0 0 40 12', THORN),
+    thornV: MASKSVG('0 0 12 40', `<g transform="translate(12 0) rotate(90)">${THORN}</g>`),
+    skull: MASKSVG('0 0 24 26', SKULL),
+    skullEyes: MASKSVG('0 0 24 26', SKULL_EYES),
+    candle: MASKSVG('0 0 12 30', CANDLE),
+    // Czerwony dym/brud (Szkarłat): miękkie, nieregularne czerwone smugi — kafel 320×320
+    smoke: svgUrl('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320">' +
+      '<filter id="s" x="0" y="0"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="4" seed="7" stitchTiles="stitch"/>' +
+      '<feColorMatrix values="0 0 0 0 .34  0 0 0 0 .02  0 0 0 0 .02  1.3 0 0 0 -.66"/></filter>' +
+      '<rect width="320" height="320" filter="url(#s)" opacity=".38"/></svg>'),
     battlement: MASKSVG('0 0 24 11', '<path fill-rule="evenodd" d="M0 1 H11 V8 H24 V11 H0 Z M4.9 3 H6.1 V6.5 H4.9 Z"/><path d="M-0.5 0 H11.5 V1.4 H-0.5 Z"/>'),
     tipTL: tipCorner(0), tipTR: tipCorner(90), tipBR: tipCorner(180), tipBL: tipCorner(270),
     // Szum (brud) — czarne drobinki
@@ -500,20 +526,22 @@ html[data-ck-variant] {
 
 /* --- Wariant 1: Szkarłat — mega mroczny: niemal sama czerń, czerwień tylko jako ciemne, zaschnięte akcenty --- */
 html[data-ck-variant="crimson"] {
-  --ck-a0: #0e0202;
-  --ck-a1: #210404;
-  --ck-a2: #370707;
-  --ck-a3: #4f0a0a;
-  --ck-a4: #6e0e0e;                       /* najjaśniejszy akcent — nadal ciemna, zakrzepła czerwień */
-  --ck-glow: rgba(110,14,14,.42);
-  --ck-glow-soft: rgba(70,8,8,.2);
-  --ck-stain: rgba(30,8,6,.55);            /* zakrzepły brud zamiast jasnej rdzy */
-  --ck-stain-2: rgba(22,6,5,.4);
-  --ck-tint: rgba(28,3,3,.35);
+  --ck-a0: #120202;
+  --ck-a1: #2a0404;
+  --ck-a2: #4a0808;
+  --ck-a3: #7a1010;
+  --ck-a4: #a51818;                       /* najjaśniejszy akcent — żarząca się krwista czerwień (linie, aktywne elementy) */
+  --ck-glow: rgba(180,20,20,.55);
+  --ck-glow-soft: rgba(120,12,12,.3);
+  --ck-stain: rgba(40,6,4,.55);            /* zakrzepły brud */
+  --ck-stain-2: rgba(30,5,4,.42);
+  --ck-tint: rgba(45,4,4,.38);
   --ck-metal-tint: #140c0b;               /* poczerniałe, okopcone żelazo */
   --ck-metal-hi: #2b1c1a;
-  --ck-fog: rgba(6,3,3,.7);               /* czarny dym */
-  --ck-grid-line: rgba(48,20,18,.8);
+  --ck-fog: rgba(70,6,6,.35);             /* czerwona mgła */
+  --ck-grid-line: rgba(110,16,16,.55);
+  --ck-ember: rgba(190,24,12,.42);        /* czerwony żar w narożnikach ram */
+  --ck-bone-grad: linear-gradient(180deg, #8d8277, #4e443c 55%, #1a1412);   /* brudna kość */
   --ck-sprite-filter: grayscale(.9) brightness(.34) sepia(.35) hue-rotate(-22deg) saturate(1.4) contrast(1.15);
   --ck-tile-filter: grayscale(1) brightness(.38) sepia(.55) hue-rotate(-30deg) saturate(1.4) contrast(1.2);
   --ck-widget-filter: hue-rotate(-120deg) saturate(.6) brightness(.55);
@@ -558,7 +586,8 @@ html[data-ck-variant="green"] {
 }
 
 /* Własne elementy są ukryte, dopóki motyw nie jest włączony */
-.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog, .ck-hud-deco, .ck-orb, .ck-orb-frame { display: none; }
+.ck-deco, .ck-bar-lace, .ck-bar-wall, .ck-col-crest, .ck-fog, .ck-hud-deco, .ck-orb, .ck-orb-frame,
+.ck-thorn, .ck-skull, .ck-bar-candles { display: none; }
 
 /* =====================================================================
  * === OKNA ===
@@ -1276,6 +1305,7 @@ ${PA} .ck-fog::after  { animation: ck-fog2 90s ease-in-out infinite alternate; }
 
 @media (prefers-reduced-motion: reduce) {
   html.${ROOT_CLASS} .ck-glow, html.${ROOT_CLASS} .ck-orb-swirl, html.${ROOT_CLASS} .ck-orb-glow,
+  html.${ROOT_CLASS} .ck-flame, html.${ROOT_CLASS} .ck-halo,
   html.${ROOT_CLASS} .ck-fog::before, html.${ROOT_CLASS} .ck-fog::after { animation: none !important; }
   html.${ROOT_CLASS} .button > .background::after { transition: none !important; }
 }
@@ -1476,6 +1506,201 @@ ${PC} .bottom-panel .pointer-exp, ${PC} .bottom-panel .pointer-ttl {
   color: #cdbca6 !important;
   text-shadow: 0 1px 1px #000, 0 0 4px #000 !important;
 }
+
+/* =====================================================================
+ * === SZKARŁAT: STYL WG KONCEPTU (ciernie, czaszki, świece, czerwony dym i żar) ===
+ * ===================================================================== */
+/* Czerwony dym/brud na czarnych powierzchniach */
+${PC} .c-window {
+  background-image:
+    radial-gradient(120% 50% at 50% 0%, var(--ck-tint), transparent 70%),
+    radial-gradient(140% 110% at 50% 50%, transparent 45%, rgba(0,0,0,.8)),
+    ${ICONS.smoke},
+    var(--ck-scratches),
+    var(--ck-noise) !important;
+  background-position: 0 0, 0 0, var(--ck-smoke-x, 0) var(--ck-smoke-y, 0), 0 0, 0 0 !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 3px #161212, 0 0 0 4px #000, 0 0 0 5px rgba(122,16,16,.55),
+    0 18px 44px rgba(0,0,0,.92), 0 0 22px rgba(140,10,10,.35) !important;
+}
+${PC} .interface-layer > .main-column,
+${PC} .new-chat-window {
+  background: radial-gradient(130% 40% at 50% 0%, var(--ck-tint), transparent 70%), ${ICONS.smoke}, var(--ck-noise), #030101 !important;
+}
+${PC} .interface-layer > .top.positioner > .bg,
+${PC} .interface-layer > .bottom.positioner > .bg {
+  background:
+    linear-gradient(90deg, transparent, var(--ck-a4) 50%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, var(--ck-a4) 50%, transparent) 0 100% / 100% 1px no-repeat,
+    ${ICONS.smoke},
+    var(--ck-noise),
+    linear-gradient(180deg, #070404, #020101 45%, #000 100%) !important;
+}
+${PC} .ck-col-crest { opacity: .12; background: linear-gradient(180deg, var(--ck-a4), var(--ck-a1)); }
+
+/* Żar w narożnikach okien i rozżarzona, cienka czerwona linia ramy */
+${PC} .ck-deco {
+  background:
+    radial-gradient(circle at 0 0, var(--ck-ember), transparent 70px),
+    radial-gradient(circle at 100% 0, var(--ck-ember), transparent 70px),
+    radial-gradient(circle at 0 100%, var(--ck-ember), transparent 60px),
+    radial-gradient(circle at 100% 100%, var(--ck-ember), transparent 60px);
+  box-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 0 0 4px #120e0e,
+    inset 0 0 0 5px #000,
+    inset 0 0 0 6px rgba(165,24,24,.75),
+    inset 0 0 0 7px #000,
+    inset 0 0 26px rgba(0,0,0,.65);
+}
+${PC} .ck-deco > .ck-corner { filter: drop-shadow(0 0 3px rgba(190,20,10,.55)) drop-shadow(0 1px 1px #000); }
+
+/* Ciernie oplatające krawędzie okien (zamiast koronki) */
+${PC} .ck-deco > .ck-lace { display: none; }
+${PC} .ck-thorn {
+  display: block;
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgba(160,14,14,.55)) drop-shadow(0 1px 1px #000);
+}
+${PC} .ck-thorn::before { content: ''; position: absolute; inset: 0; background: ${IRON_BG}; }
+${PC} .ck-thorn-t, ${PC} .ck-thorn-b { left: 30px; right: 30px; height: 12px; }
+${PC} .ck-thorn-l, ${PC} .ck-thorn-r { top: 30px; bottom: 30px; width: 12px; }
+${PC} .ck-thorn-t { top: -6px; }
+${PC} .ck-thorn-b { bottom: -6px; }
+${PC} .ck-thorn-l { left: -6px; }
+${PC} .ck-thorn-r { right: -6px; }
+${PC} .ck-thorn-t::before, ${PC} .ck-thorn-b::before {
+  -webkit-mask: ${ICONS.thornH} 0 0 / 40px 12px repeat-x; mask: ${ICONS.thornH} 0 0 / 40px 12px repeat-x;
+}
+${PC} .ck-thorn-b::before { transform: scaleY(-1); }
+${PC} .ck-thorn-l::before, ${PC} .ck-thorn-r::before {
+  -webkit-mask: ${ICONS.thornV} 0 0 / 12px 40px repeat-y; mask: ${ICONS.thornV} 0 0 / 12px 40px repeat-y;
+}
+${PC} .ck-thorn-r::before { transform: scaleX(-1); }
+
+/* Czaszki: brudna kość z żarzącymi się oczami */
+${PC} .ck-skull {
+  display: block;
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px #000) drop-shadow(0 0 3px rgba(0,0,0,.9));
+}
+${PC} .ck-skull::before, ${PC} .ck-skull::after { content: ''; position: absolute; inset: 0; }
+${PC} .ck-skull::before { ${MASK(ICONS.skull, '0 0 / 100% 100%')} background: var(--ck-noise), var(--ck-bone-grad); }
+${PC} .ck-skull::after  { ${MASK(ICONS.skullEyes, '0 0 / 100% 100%')} background: radial-gradient(circle, #ff5a3a, #b0140a 60%, #4a0303); }
+/* …na szczycie każdego okna, nad kwiatonem */
+${PC} .ck-deco > .ck-skull { left: 50%; top: -22px; width: 13px; height: 14px; margin-left: -6.5px; z-index: 1; }
+${PC} .ck-deco.ck-small > .ck-skull { top: -17px; width: 11px; height: 12px; margin-left: -5.5px; }
+/* …na wiszącym łuku pod tabliczką (na skrzyżowanych mieczach) */
+${PC} .ck-hud-deco > .ck-skull { left: 50%; top: calc(100% + 5px); width: 17px; height: 18px; margin-left: -8.5px; }
+
+/* Okno: tytuł rzymskimi kapitalikami z czerwonym żarem (jak w koncepcie) */
+${PC} .c-window .header-label .text {
+  font-family: var(--ck-font-caps) !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+  color: #d6c3b4 !important;
+  text-shadow: 0 0 10px rgba(200,20,20,.7), 0 0 2px #000, 0 1px 0 #000 !important;
+}
+${PC} .hud-container .heroname {
+  font-family: var(--ck-font-caps) !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: .08em !important;
+  text-shadow: 0 0 10px rgba(200,20,20,.65), 0 1px 0 #000, 0 0 3px #000 !important;
+}
+
+/* Tabliczka: ciernie zamiast koronki, czerwony żar pod spodem */
+${PC} .ck-hud-deco > .ck-hud-lace {
+  -webkit-mask: ${ICONS.thornH} 0 0 / 40px 12px repeat-x; mask: ${ICONS.thornH} 0 0 / 40px 12px repeat-x;
+  height: 12px; top: calc(100% - 4px);
+  filter: drop-shadow(0 0 2px rgba(160,14,14,.6));
+}
+${PC} .top.positioner .hud-container { box-shadow:
+    inset 0 0 0 1px #000, inset 0 0 0 3px #171212, inset 0 0 0 4px #000,
+    inset 0 0 0 5px rgba(165,24,24,.8), inset 0 0 0 6px #000, inset 0 -12px 18px rgba(0,0,0,.8),
+    0 0 0 1px #000, 0 0 0 3px #171212, 0 0 0 4px #000, 0 0 0 5px rgba(122,16,16,.6),
+    0 14px 30px rgba(0,0,0,.92), 0 0 24px rgba(140,10,10,.35) !important; }
+
+/* Belki: ciernie zamiast koronki i blanków */
+${PC} .ck-bar-lace, ${PC} .ck-bar-wall {
+  height: 12px;
+  -webkit-mask: ${ICONS.thornH} 0 0 / 40px 12px repeat-x; mask: ${ICONS.thornH} 0 0 / 40px 12px repeat-x;
+}
+${PC} .ck-bar-lace { top: calc(100% - 5px); }
+${PC} .ck-bar-wall { bottom: calc(100% - 5px); }
+
+/* Świece i czaszki w dolnych rogach (na dolnej belce) */
+${PC} .ck-bar-candles {
+  display: block;
+  position: absolute; left: 0; right: 0; bottom: 100%; height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+${PC} .ck-bar-candles > .ck-side { position: absolute; bottom: -4px; width: 60px; height: 40px; }
+${PC} .ck-bar-candles > .ck-side.ck-l { left: 6px; }
+${PC} .ck-bar-candles > .ck-side.ck-r { right: 6px; transform: scaleX(-1); }
+${PC} .ck-side > .ck-skull { left: 0; bottom: 0; width: 22px; height: 24px; }
+${PC} .ck-candle { position: absolute; bottom: 0; width: 10px; height: var(--h, 26px); }
+${PC} .ck-candle::before {
+  content: ''; position: absolute; inset: 0;
+  ${MASK(ICONS.candle, '0 0 / 100% 100%')}
+  background: linear-gradient(90deg, #1c0202, #6a0a0a 40%, #8a1212 55%, #2a0303);
+}
+${PC} .ck-side > .ck-candle:nth-of-type(2) { left: 25px; --h: 30px; }
+${PC} .ck-side > .ck-candle:nth-of-type(3) { left: 40px; --h: 20px; }
+${PC} .ck-flame {
+  position: absolute; left: 50%; bottom: calc(100% - 3px);
+  width: 7px; height: 13px; margin-left: -3.5px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(50% 60% at 50% 72%, #fff4c8 0, #ffc25a 28%, #ef5a1e 58%, rgba(170,20,10,.0) 78%);
+  transform-origin: 50% 100%;
+}
+${PC} .ck-halo {
+  position: absolute; left: 50%; bottom: calc(100% - 4px);
+  width: 46px; height: 46px; margin: 0 0 -16px -23px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,120,40,.35), rgba(200,30,10,.16) 40%, transparent 70%);
+  opacity: .6;
+}
+${PA}[data-ck-variant="crimson"] .ck-flame { animation: ck-flicker 1.9s ease-in-out infinite; }
+${PA}[data-ck-variant="crimson"] .ck-candle:nth-of-type(3) .ck-flame { animation-duration: 2.4s; animation-delay: -.7s; }
+${PA}[data-ck-variant="crimson"] .ck-side.ck-r .ck-flame { animation-duration: 2.1s; animation-delay: -1.1s; }
+${PA}[data-ck-variant="crimson"] .ck-halo { animation: ck-halo 2.6s ease-in-out infinite; }
+@keyframes ck-flicker {
+  0%, 100% { transform: scale(1, 1); opacity: .95; }
+  20% { transform: scale(.9, 1.1) translateX(.3px); opacity: 1; }
+  40% { transform: scale(1.06, .93); opacity: .85; }
+  60% { transform: scale(.94, 1.12) translateX(-.3px); opacity: 1; }
+  80% { transform: scale(1.03, .95); opacity: .9; }
+}
+@keyframes ck-halo { 0%, 100% { opacity: .55; } 30% { opacity: .75; } 55% { opacity: .45; } 80% { opacity: .7; } }
+
+/* Przyciski-ikony gry: kanciaste, czarne, z czerwoną ramką; ikony zabarwione na krwisto */
+${PC} .widget-button {
+  border-radius: 0 !important;
+  background: radial-gradient(circle at 50% 40%, #1e0606, #050101 75%) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(165,24,24,.7), inset 0 0 0 2px #000, inset 0 0 10px rgba(0,0,0,.9), 0 0 6px rgba(140,10,10,.35) !important;
+}
+${PC} .widget-button:hover { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--ck-a4), inset 0 0 0 2px #000, 0 0 12px var(--ck-glow) !important; }
+${PC} .widget-button .icon { filter: grayscale(1) sepia(1) hue-rotate(-42deg) saturate(3.4) brightness(.78) contrast(1.15); }
+/* Zakładki: aktywna z czerwonym napisem i żarem, nieaktywne przygaszone */
+${PC} .c-window .card { color: #8a7c72 !important; }
+${PC} .c-window .card.active {
+  color: #c42020 !important;
+  text-shadow: 0 0 8px rgba(200,20,20,.6) !important;
+  box-shadow: inset 0 -2px 0 var(--ck-a4), inset 0 0 0 1px rgba(122,16,16,.5) !important;
+}
+${PC} .chat-channel-card { filter: grayscale(.6) sepia(.5) hue-rotate(-30deg) saturate(2) brightness(.8); }
+${PC} .chat-channel-card.active { filter: none; box-shadow: inset 0 -2px 0 var(--ck-a4), 0 0 8px var(--ck-glow) !important; }
+/* Sloty i zwykłe przyciski z czerwoną obwódką */
+${PC} .interface-element-one-item-slot-background-to-repeat,
+${PC} .interface-element-one-item-slot-2 {
+  box-shadow: inset 0 0 0 1px rgba(122,16,16,.6), inset 0 0 0 2px #000, inset 0 0 10px rgba(0,0,0,.9) !important;
+}
+${PC} .button, ${PC} .button > .background { border-color: #4a0909 !important; }
 
 /* =====================================================================
  * === ZABEZPIECZENIE: mapa i znaczniki rzadkości bez filtrów ===
@@ -1761,7 +1986,10 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
       (FEATURES.crest ? '<i class="ck-rose"></i>' : '') +
       (FEATURES.gothicFrame
         ? '<i class="ck-corner ck-tl"></i><i class="ck-corner ck-tr"></i><i class="ck-corner ck-bl"></i><i class="ck-corner ck-br"></i>' +
-          '<i class="ck-gable"></i><i class="ck-lace"></i>'
+          '<i class="ck-gable"></i><i class="ck-lace"></i>' +
+          // ciernie i czaszka — widoczne tylko w Szkarłacie
+          '<i class="ck-thorn ck-thorn-t"></i><i class="ck-thorn ck-thorn-b"></i><i class="ck-thorn ck-thorn-l"></i><i class="ck-thorn ck-thorn-r"></i>' +
+          '<i class="ck-skull"></i>'
         : '');
     return deco;
   }
@@ -1792,6 +2020,16 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     if (FEATURES.barOrnaments) {
       ensureChild(SELECTORS.barTopHost.join(','), 'ck-bar-lace');
       ensureChild(SELECTORS.barBottomHost.join(','), 'ck-bar-wall');
+      // Świece i czaszki w dolnych rogach (Szkarłat)
+      document.querySelectorAll(SELECTORS.barBottomHost.join(',')).forEach((host) => {
+        if (host.querySelector(':scope > .ck-bar-candles')) return;
+        const c = mkDeco('div', 'ck-bar-candles');
+        const side = (s) => `<div class="ck-side ${s}"><i class="ck-skull"></i>` +
+          '<i class="ck-candle"><b class="ck-halo"></b><b class="ck-flame"></b></i>' +
+          '<i class="ck-candle"><b class="ck-halo"></b><b class="ck-flame"></b></i></div>';
+        c.innerHTML = side('ck-l') + side('ck-r');
+        host.appendChild(c);
+      });
     }
     // Kula HP i jej oprawa (widoczne tylko w Szkarłacie). Kula wchodzi do okrągłej obudowy gry jako
     // PIERWSZE dziecko — napis z procentem gry zostaje nad nią. Oprawa wisi w .bottom-panel na środku kuli.
@@ -1819,7 +2057,7 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
       if (hud.querySelector(':scope > .ck-hud-deco')) return;
       const d = mkDeco('div', 'ck-hud-deco');
       d.innerHTML = '<i class="ck-hud-lace"></i><i class="ck-hud-corner ck-l"></i><i class="ck-hud-corner ck-r"></i>' +
-        '<i class="ck-hud-pend ck-l"></i><i class="ck-hud-pend ck-r"></i><i class="ck-hud-crest"></i>';
+        '<i class="ck-hud-pend ck-l"></i><i class="ck-hud-pend ck-r"></i><i class="ck-hud-crest"></i><i class="ck-skull"></i>';
       hud.appendChild(d);
     });
     if (FEATURES.crest) ensureChild(SELECTORS.column.join(','), 'ck-col-crest');
