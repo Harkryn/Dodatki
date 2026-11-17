@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.1.0
+// @version      1.2.0
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kotki w kuli HP. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -43,7 +43,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // kocie animacje (kot, kotki w HP, oczy)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -92,6 +92,7 @@
     barTop:          ['.interface-layer > .top.positioner > .bg'],
     barBottom:       ['.interface-layer > .bottom.positioner > .bg'],
     bottomBarHost:   ['.interface-layer > .bottom.positioner'],     // tu siedzi kot-maskotka
+    rightColumn:     ['.interface-layer > .right-column'],          // kot siada tuż na lewo od tej kolumny
     column:          ['.interface-layer > .main-column'],
     columnBorder:    ['.interface-layer > .main-column > .border'],
     spriteArt:       ['.top.positioner .hud-container', '.bottom-panel .bottom-panel-graphic',
@@ -105,7 +106,8 @@
     widget:          ['.widget-button'],
 
     /* === SLOTY === */
-    slot:            ['.interface-element-one-item-slot-background-to-repeat'],
+    slot:            ['.interface-element-one-item-slot-background-to-repeat',
+                      '.interface-element-one-item-slot-2'],                      // drugi: ? sloty paska szybkiego dostępu
 
     /* === PASKI === */
     hpOrb:           ['.hp-indicator'],                               // kula HP (kotki biegają w środku)
@@ -146,6 +148,16 @@
     legendScope:     ['.loot-wnd', '.interface-layer'],     // torba/ekwipunek są w .interface-layer, łup w .loot-wnd
 
     /* === NIE RUSZAĆ — dokumentacja === */
+    /* === ZAKŁADKI W OKNACH === */
+    windowTabs:      ['.c-window .card'],                                         // ? np. „Gracze online” w oknie Świat
+
+    /* === SKANER SKÓREK === (JS oznacza elementy z drewnem/pergaminem gry klasami mkn-skin/mkn-edge/mkn-ink)
+       Gdzie szukać i czego nigdy nie ruszać. */
+    skinScope:       ['.c-window', '.battle-controller'],
+    skinSkip:        ['.item', '.highlight', '[class*="icon"]', 'canvas', 'img', 'input', 'textarea', 'select',
+                      '.new-chat-message', '[class*="progress"]', '[class*="avatar"]', '.button', '.widget-button',
+                      '[class*="close-button"]', '.header-label', '.scrollbar-wrapper', '.card', '[id^="mkn-"]', '.mkn-amb-eyes'],
+
     neverStyle:      ['#GAME_CANVAS', '.game-layer canvas', '.item .highlight', '.widget-button .icon']
   };
 
@@ -638,6 +650,8 @@ ${S('spriteArt')} {
 /* =====================================================================
  * === PRZYCISKI ===
  * ===================================================================== */
+/* Część przycisków gry ma tło w .background, część bezpośrednio na .button — stylujemy oba */
+${S('button')},
 ${S('buttonBg')} {
   background: linear-gradient(180deg, var(--mkn-velvet-2), var(--mkn-velvet)) !important;
   border: 1px solid var(--mkn-line) !important;
@@ -645,7 +659,11 @@ ${S('buttonBg')} {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 2px rgba(0,0,0,.6) !important;
   transition: box-shadow .18s ease, border-color .18s ease;
 }
-${P} .button.red > .background { background: linear-gradient(180deg, #2a0f1b, #160810) !important; }
+${S('button')} { color: var(--mkn-text) !important; border-image: none !important; }
+${P} .button.red, ${P} .button.red > .background { background: linear-gradient(180deg, #2a0f1b, #160810) !important; }
+/* „Zielony” przycisk gry = główna akcja → subtelny fioletowy akcent zamiast zieleni */
+${P} .button.green, ${P} .button.green > .background { border-color: rgba(155,123,212,.55) !important; }
+${S('button', ':hover')},
 ${S('button', ':hover > .background')} {
   border-color: var(--mkn-violet) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 10px rgba(155,123,212,.45) !important;
@@ -685,9 +703,46 @@ ${S('widget', '.disabled')} { opacity: .5; }
  * ===================================================================== */
 ${S('slot')} {
   background: radial-gradient(ellipse at 50% 35%, #100e15, #000 78%) !important;
+  border-image: none !important;
   border-radius: 4px;
   box-shadow: inset 0 0 0 1px var(--mkn-line), inset 0 0 8px rgba(0,0,0,.85) !important;
 }
+
+/* =====================================================================
+ * === ZAKŁADKI W OKNACH ===
+ * ===================================================================== */
+${S('windowTabs')} {
+  background: var(--mkn-velvet) !important;
+  border-image: none !important;
+  border-color: var(--mkn-line) !important;
+  box-shadow: none !important;
+  color: var(--mkn-text-dim) !important;
+  font-family: var(--mkn-font-head) !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+${S('windowTabs', ':hover')} { background: var(--mkn-velvet-2) !important; color: var(--mkn-text) !important; }
+${S('windowTabs', '.active')} {
+  background: var(--mkn-velvet-2) !important;
+  box-shadow: inset 0 -2px 0 var(--mkn-violet) !important;
+  color: var(--mkn-text) !important;
+}
+
+/* =====================================================================
+ * === SKANER SKÓREK ===
+ * Klasy nadawane przez JS elementom w oknach, które gra maluje drewnem, pergaminem,
+ * jasnymi panelami albo brązowymi ramkami. Tu decydujemy, jak mają wyglądać.
+ * ===================================================================== */
+${P} .mkn-skin {
+  background: rgba(8,7,11,.94) !important;
+  border-image: none !important;
+  border-color: var(--mkn-line) !important;
+  box-shadow: none !important;
+  color: var(--mkn-text) !important;
+  text-shadow: none !important;
+}
+${P} .mkn-edge { border-image: none !important; border-color: var(--mkn-line) !important; }
+${P} .mkn-ink  { color: var(--mkn-text) !important; text-shadow: none !important; }
 
 /* =====================================================================
  * === PASKI ===
@@ -857,7 +912,7 @@ ${SA('bottomBarHost', '::before')},
 ${SA('bottomBarHost', '::after')} {
   content: '';
   position: absolute;
-  right: 230px;          /* ? przesuń, jeśli kot zasłania coś na belce */
+  right: var(--mkn-cat-right, 230px);   /* liczone w JS: tuż na lewo od prawej kolumny */
   bottom: calc(100% - 6px);
   width: 46px;
   height: 46px;
@@ -1172,6 +1227,117 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
   }
 
   /* ======================================================================
+   * SKANER SKÓREK
+   * Gra maluje wnętrza okien dziesiątkami różnych grafik (drewno, pergamin, paski). Zamiast
+   * zgadywać klasy, sprawdzamy wygląd nowych elementów w oknach (raz na element) i oznaczamy:
+   *   mkn-skin — grafika z /img/gui/ gry, jasne lub brązowe tło → czarny panel,
+   *   mkn-edge — brązowa/jasna ramka → cienka linia motywu,
+   *   mkn-ink  — ciemny tekst (pod pergamin) → jasny tekst.
+   * MutationObserver tylko zbiera nowe elementy; przetwarzanie w porcjach w wolnym czasie przeglądarki.
+   * ====================================================================== */
+
+  const GUI_RE = /\/img\/gui\//i;
+  const ICON_RE = /buttony|addons-icons|krew|oneItemSlot|emots|obrazki|progressbar/i;
+  const skinChecked = new WeakSet();
+  const skinSeenVisible = new WeakSet();
+  const skinQueue = [];
+  let skinFlushScheduled = false;
+
+  function parseRgb(str) {
+    const m = /rgba?\(([^)]+)\)/.exec(str || '');
+    if (!m) return null;
+    const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);
+    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+  }
+  function toHsl({ r, g, b }) {
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    let h = 0, s = 0;
+    if (d) {
+      s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    return { h, s, l };
+  }
+  const isBrown = (c) => c.h >= 12 && c.h <= 50 && c.s > 0.25;
+  const isPale = (c) => c.l > 0.55 && c.s < 0.85;   // jasne panele i pergamin
+  const hasOwnText = (el) => { for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) return true; return false; };
+  const SKIP_SEL = SELECTORS.skinSkip.join(',');
+  const SCOPE_SEL = SELECTORS.skinScope.join(',');
+
+  function classifySkin(el) {
+    if (skinChecked.has(el) || !el.isConnected) return;
+    if (el.closest(SKIP_SEL)) { skinChecked.add(el); return; }
+    if (el.matches('.c-window')) { skinChecked.add(el); return; }   // samo okno stylujemy CSS-em
+    const st = getComputedStyle(el);
+    const visible = el.offsetWidth > 0;
+    let skin = false, pending = false;
+    for (const src of [st.backgroundImage, st.borderImageSource]) {
+      if (!src || src === 'none' || !GUI_RE.test(src)) continue;
+      if (!ICON_RE.test(src)) skin = true;                                       // drewno, pergamin, ramki
+      else if (visible) skin = skin || (el.offsetWidth >= 80 && el.offsetHeight >= 14); // duży kawałek sprite'a
+      else pending = true;                                                       // ukryty — sprawdzimy później
+    }
+    if (!skin) {
+      const c = parseRgb(st.backgroundColor);
+      if (c && c.a > 0.5) { const h = toHsl(c); if (isPale(h) || (isBrown(h) && h.l < 0.5)) skin = true; }
+    }
+    let edge = false;
+    if (st.borderTopStyle !== 'none' && parseFloat(st.borderTopWidth) >= 1) {
+      const c = parseRgb(st.borderTopColor);
+      if (c && c.a > 0.3) { const h = toHsl(c); if (isBrown(h) || isPale(h)) edge = true; }
+    }
+    let ink = false;
+    if (hasOwnText(el)) {
+      const c = parseRgb(st.color);
+      if (c) { const h = toHsl(c); if (h.l < 0.32 && (h.s < 0.35 || isBrown(h))) ink = true; }
+    }
+    if (skin) el.classList.add('mkn-skin');
+    if (edge) el.classList.add('mkn-edge');
+    if (ink) el.classList.add('mkn-ink');
+    if (!pending) skinChecked.add(el);
+  }
+
+  function enqueueSkin(root) {
+    if (!root || root.nodeType !== 1) return;
+    skinQueue.push(root, ...root.querySelectorAll('*'));
+    scheduleSkinFlush();
+  }
+
+  function scheduleSkinFlush() {
+    if (skinFlushScheduled) return;
+    skinFlushScheduled = true;
+    const run = (deadline) => {
+      skinFlushScheduled = false;
+      let n = 0;
+      while (skinQueue.length && n < 600 && (!deadline || deadline.timeRemaining() > 2 || n < 60)) { classifySkin(skinQueue.shift()); n++; }
+      if (skinQueue.length) scheduleSkinFlush();
+    };
+    if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 500 }); else setTimeout(run, 50);
+  }
+
+  function watchSkins() {
+    new MutationObserver((records) => {
+      for (const r of records) {
+        for (const node of r.addedNodes) {
+          if (node.nodeType !== 1 || node.id === 'mkn-legend') continue;
+          if (node.closest(SCOPE_SEL)) enqueueSkin(node);
+          else if (node.querySelector) node.querySelectorAll(SCOPE_SEL).forEach(enqueueSkin);
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+    // Okna budowane jako ukryte sprawdzamy jeszcze raz, gdy pierwszy raz staną się widoczne.
+    const recheck = () => {
+      document.querySelectorAll(SCOPE_SEL).forEach((w) => {
+        if (w.offsetWidth > 0 && !skinSeenVisible.has(w)) { skinSeenVisible.add(w); enqueueSkin(w); }
+      });
+    };
+    recheck();
+    setInterval(recheck, 1500);
+  }
+
+  /* ======================================================================
    * START
    * ====================================================================== */
 
@@ -1183,6 +1349,16 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     const root = document.documentElement;
     if (root.classList.contains(ROOT_CLASS) !== isEnabled() || root.classList.contains(ANIM_CLASS) !== isAnim()) applyState();
     createToggle();
+    placeCat();
+  }
+
+  /** Kot siada na dolnej belce tuż na lewo od prawej kolumny (nad mapą, niczego nie zasłania). */
+  function placeCat() {
+    const bar = document.querySelector(SELECTORS.bottomBarHost[0]);
+    const col = document.querySelector(SELECTORS.rightColumn[0]);
+    if (!bar || !col || !col.offsetWidth) return;
+    const right = Math.round(bar.getBoundingClientRect().right - col.getBoundingClientRect().left + 10);
+    if (right > 0) document.documentElement.style.setProperty('--mkn-cat-right', right + 'px');
   }
 
   function start() {
@@ -1195,6 +1371,8 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
     window.addEventListener('keydown', onKey, true);
     setInterval(heal, 3000);
     watchLegends();
+    watchSkins();
+    placeCat();
     scheduleAmbientEyes();
     whenGameReady(() => hideLoader());
     LOG(`v${VERSION} aktywna. Alt+T — motyw, Alt+K — kocie animacje, Alt+L — podgląd legendy.`);
