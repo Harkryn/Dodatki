@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Kocia Noc
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.3
+// @version      1.7.4
 // @description  Czarny, elegancki motyw z kotami i subtelnymi fioletowymi akcentami dla nowego interfejsu Margonem (NI). Ekran wczytywania, efekt legendy, kula HP w kształcie kociej łapki. Zmienia wyłącznie wygląd UI.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -50,7 +50,7 @@
    * KONFIGURACJA
    * ====================================================================== */
 
-  const VERSION = '1.7.3';
+  const VERSION = '1.7.4';
   const KEY_ENABLED = 'mkn.enabled';
   const KEY_ANIM = 'mkn.mascot';                       // animacje (kot, oczy, puls kuli HP)
   const KEY_IFACE = 'mkn.iface.' + location.hostname;  // jaki interfejs był tu ostatnio
@@ -133,7 +133,9 @@
     hpOrbWrap:       ['.hp-indicator-wrapper'],                       // obudowa kuli — tu maska łapki
     hpOrbHost:       ['.hp-indicator-wrapper-template'],              // rodzic obudowy — NIE dawać tu filter/transform (patrz hpGlowCss)
     hpOrbGlass:      ['.hp-indicator-wrapper .glass'],
-    barTrack:        ['[class*="interface-element-progress-bar-"]', '.progress-bar-wrapper',          // ? .progress-bar-wrapper
+    // Uwaga: NIE dodawać „.progress-bar-wrapper” — to też szeroki kontener pasków nad postaciami w walce
+    // (.battle-window .one-warrior), czarne tło robiło z niego czarne belki nad głowami.
+    barTrack:        ['[class*="interface-element-progress-bar-"]:not(.one-warrior *)',
                       '.exp-bar-wrapper .exp-progress .progress'],
     hpFill:          ['.hero-hp-progress-bar .inner', '.hero-hp-top-progress-bar-light-mode .inner',
                       '.hp-progress-bar .inner', '.hp-progress-bar .progress-bar'],                   // ? dwa ostatnie
@@ -177,7 +179,7 @@
     skinSkip:        ['.item', '.highlight', '[class*="icon"]', 'canvas', 'img', 'input', 'textarea', 'select',
                       '.new-chat-message', '[class*="progress"]', '[class*="avatar"]', '.button', '.widget-button',
                       '[class*="close-button"]', '.header-label', '.scrollbar-wrapper', '.card', '[id^="mkn-"]', '.mkn-amb-eyes',
-                      '.new-chat-window', '.hp-indicator-wrapper-template', '.interface-element-item-slot-grid-stretch', '.mkn-grid', '[class*="vaddonz"]', '[class*="ll:"]', '[class*="mz-"]', '[class*="ykp"]'],
+                      '.new-chat-window', '.hp-indicator-wrapper-template', '.one-warrior', '.interface-element-item-slot-grid-stretch', '.mkn-grid', '[class*="vaddonz"]', '[class*="ll:"]', '[class*="mz-"]', '[class*="ykp"]'],
 
     neverStyle:      ['#GAME_CANVAS', '.game-layer canvas', '.item .highlight', '.widget-button .icon']
   };
