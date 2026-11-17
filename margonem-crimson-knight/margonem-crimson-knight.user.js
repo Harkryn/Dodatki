@@ -1640,8 +1640,9 @@ ${PC} .ck-bar-candles {
   z-index: 3;
 }
 ${PC} .ck-bar-candles > .ck-side { position: absolute; bottom: -4px; width: 60px; height: 40px; }
-${PC} .ck-bar-candles > .ck-side.ck-l { left: 6px; }
-${PC} .ck-bar-candles > .ck-side.ck-r { right: 6px; transform: scaleX(-1); }
+/* W dolnych narożnikach mapy — tuż przy wewnętrznych krawędziach bocznych kolumn (liczone w JS), żeby nie zasłaniać czatu */
+${PC} .ck-bar-candles > .ck-side.ck-l { left: var(--ck-candle-l, 6px); }
+${PC} .ck-bar-candles > .ck-side.ck-r { right: var(--ck-candle-r, 6px); transform: scaleX(-1); }
 ${PC} .ck-side > .ck-skull { left: 0; bottom: 0; width: 22px; height: 24px; }
 ${PC} .ck-candle { position: absolute; bottom: 0; width: 10px; height: var(--h, 26px); }
 ${PC} .ck-candle::before {
@@ -2029,6 +2030,17 @@ ${P} #GAME_CANVAS, ${P} .item .highlight { filter: none !important; }
           '<i class="ck-candle"><b class="ck-halo"></b><b class="ck-flame"></b></i></div>';
         c.innerHTML = side('ck-l') + side('ck-r');
         host.appendChild(c);
+      });
+      // Świece stawiamy przy wewnętrznych krawędziach bocznych kolumn (czat po lewej, ekwipunek po prawej)
+      document.querySelectorAll('.ck-bar-candles').forEach((c) => {
+        const bar = c.parentElement.getBoundingClientRect();
+        const cols = [...document.querySelectorAll(SELECTORS.column.join(','))].filter((e) => e.offsetWidth > 40).map((e) => e.getBoundingClientRect());
+        const leftCol = cols.filter((r) => r.left - bar.left < bar.width / 2).sort((a, b) => b.right - a.right)[0];
+        const rightCol = cols.filter((r) => r.left - bar.left >= bar.width / 2).sort((a, b) => a.left - b.left)[0];
+        const l = leftCol ? Math.round(leftCol.right - bar.left + 4) + 'px' : '6px';
+        const r = rightCol ? Math.round(bar.right - rightCol.left + 4) + 'px' : '6px';
+        if (c.style.getPropertyValue('--ck-candle-l') !== l) c.style.setProperty('--ck-candle-l', l);
+        if (c.style.getPropertyValue('--ck-candle-r') !== r) c.style.setProperty('--ck-candle-r', r);
       });
     }
     // Kula HP i jej oprawa (widoczne tylko w Szkarłacie). Kula wchodzi do okrągłej obudowy gry jako
