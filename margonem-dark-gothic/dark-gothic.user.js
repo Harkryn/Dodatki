@@ -529,6 +529,8 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
 
   async function processRule(rule) {
     const st = rule.style;
+    // stany wyróżnienia (hover/aktywny/zaznaczony) przyciemniamy słabiej, żeby nadal odróżniały się od tła
+    const hl = /:hover|\.active|\.selected|highlight|\.is-active|\.pressed/.test(rule.selectorText);
     for (const prop of IMG_PROPS) {
       const v = st.getPropertyValue(prop);
       if (!v || v.indexOf('/img/gui/') === -1 || v.indexOf('blob:') !== -1) continue;
@@ -545,7 +547,23 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
       remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(9, 8, 10, .92)', st.getPropertyPriority('background-color'));
       const col = st.getPropertyValue('color');
       if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#cbc2b6', st.getPropertyPriority('color')); }
+    } else if (neutral(bg) && lum(bg) > 0.2) {
+      // szare tła (nagłówki sekcji, tabele, kafle) → ciemna sadza
+      remember(rule, 'background-color'); st.setProperty('background-color', soot(bg, hl), st.getPropertyPriority('background-color'));
     }
+    // szare gradienty w tłach → przyciemnione; kolorowe (zielone/czerwone przyciski) zostają
+    const bi = st.getPropertyValue('background-image');
+    if (bi && bi.indexOf('gradient') !== -1 && bi.indexOf('blob:') === -1) {
+      const nb = bi.replace(/rgba?\([^)]*\)/g, (c) => (neutral(c) && lum(c) > 0.2 ? soot(c, hl) : c));
+      if (nb !== bi) { remember(rule, 'background-image'); st.setProperty('background-image', nb, st.getPropertyPriority('background-image')); }
+    }
+  }
+
+  function neutral(v) { const c = parseRgb(v); if (!c || c[3] < 0.5) return false; return Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]) < 24; }
+  function soot(v, highlight) {
+    const c = parseRgb(v); const L = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+    const k = Math.round((highlight ? 0.09 + L * 0.26 : 0.035 + L * 0.17) * 255);
+    return `rgba(${k + 3}, ${k - 1}, ${k + 1}, ${c[3]})`;
   }
 
   const seen = new WeakSet();
