@@ -97,21 +97,21 @@ Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-
 
 ## Margonem — Dark Gothic
 
-Mroczny, demoniczny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **własnych rastrowych grafik**: rogate głowy demonów, czarne żelazo z runami i żarem, krwawy dym, pierścień kuli HP z rogami. Paleta: prawie czarny `#070607`/`#0b0b0d`, bordo i ciemna czerwień `#3a0508`/`#5a0a0f`/`#8b0000`, żar `#c0262d`, kość `#d8cfc0`.
+Mroczny, spójny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **własnych rastrowych grafik**: spękany, okopcony kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP. Prawie wszystko jest czarne, a czerwień to tylko stłumiony akcent. Paleta: `#050405`/`#09080a`/`#110e10`, przygaszona czerwień `#43080c`/`#6e0f14`/`#8f1a1f`, popiół `#8d878c`, kość `#cbc2b6`.
 
 Co jest ostylowane:
-- **tabliczka HUD** (imię, lokacja, złoto) — kuta tabliczka z rogami, imię czerwonymi kapitalikami, **głowy demonów** po obu stronach,
-- **kula HP** — żelazny pierścień z rogami i kolcami, krwawa poświata; gra dalej pokazuje w środku swój poziom HP i procent,
-- **dolny panel** — poczerniała oprawa pasków EXP (karmazyn), głowy demonów na końcach, ciemne sloty,
-- **górna i dolna belka** — czerń z belką z runami i żarem na krawędzi,
-- **przyciski HUD** — ciemne obsydianowe kafle z czerwoną poświatą, ikony w szarości (kolor przy najechaniu), kolor gry (fiolet, niebieski) zostaje jako delikatna poświata,
-- **okna z ramką** — ramka 9-slice z belki z runami i żelaznymi guzami z żarem (`border-image`, skaluje się do każdego rozmiaru), krwawy dym w tle, **baner tytułu z rogami**, czaszka demona pod oknem,
-- **okna przezroczyste** (śledzone questy, sorter) — czerń z czerwoną obwódką,
-- **dialog z NPC** — ta sama rama i głowa demona nad oknem,
-- **sklep** — markiza w ciemnym bordo, krata zamiast drewnianej belki,
-- **ekwipunek, torby, statystyki, czat** — czarne tło z krwawym dymem od dołu, czerwone aktywne zakładki, kolory kanałów bez zmian,
-- **tooltipy przedmiotów** — żelazna ramka, czerwony nagłówek, kolory rzadkości bez zmian,
-- **przyciski tekstowe** — obsydianowe kafle; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie,
+- **tabliczka HUD** (imię, lokacja, waluty) — imię w przygaszonej czerwieni na czerni, **poniszczone maski demonów** po obu stronach,
+- **kula HP** — **runiczny pierścień** ze spękanego żelaza, który powoli się obraca, a żar w rowkach run pulsuje (animacja wyłącza się przy systemowym „ogranicz ruch”); gra dalej pokazuje w środku swój poziom HP i procent,
+- **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, maski demonów po bokach kuli, ciemne sloty,
+- **górna i dolna belka** — czerń z cienką kamienną krawędzią,
+- **przyciski HUD** — **12 kamiennych kafli o różnym stopniu zniszczenia** (każdy pasek zaczyna od innego, więc sąsiednie przyciski się różnią), ikony w szarości, kolor gry (fiolet, niebieski) zostaje jako słaby poblask,
+- **okna z ramką** — cienka (6 px) kamienna ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z subtelnymi narożnikami w kształcie sierpowatych rogów z runą, bardzo ciemny dym w tle, tytuł kapitalikami na czerni,
+- **okna przezroczyste** (śledzone questy, sorter) — czerń z cienką obwódką,
+- **dialog z NPC** — ta sama cienka rama z narożnikami,
+- **sklep** — markiza przyciemniona do brązowej czerni, kamienna krawędź zamiast drewnianej belki,
+- **ekwipunek, torby, statystyki, czat** — czarne tło z ledwo widocznym dymem od dołu, aktywne zakładki z cienką czerwoną kreską, kolory kanałów bez zmian,
+- **tooltipy przedmiotów** — cienka kamienna ramka, ciemny nagłówek, kolory rzadkości bez zmian,
+- **przyciski tekstowe** — kamienna oprawa; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie (stonowane),
 - **paski postępu, scrollbary**.
 
 Mapa (canvas) i logika gry pozostają nietknięte — skrypt wstrzykuje wyłącznie CSS.
@@ -126,4 +126,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (10 plików WebP, razem ok. 140 KB, każdy poniżej 40 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea (seed 1337) jako osobne elementy, tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, belka dopasowana do bezszwowego powtarzania. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (22 pliki WebP, razem ok. 158 KB, każdy poniżej 30 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
