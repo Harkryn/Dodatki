@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.10.0
+// @version      3.11.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -337,12 +337,34 @@ ${R} .bottom-panel-pointer-bg .pointer-exp-graphic,
 ${R} .bottom-panel-pointer-bg .pointer-ttl-graphic { filter: grayscale(1) brightness(.45) contrast(1.3); }
 ${R} .bottom-panel-pointer-bg .pointer-exp,
 ${R} .bottom-panel-pointer-bg .pointer-ttl { color: #b3acb1; text-shadow: 0 1px 2px #000; }
+/* sloty szybkiego użycia i sloty ekwipunku wyglądają jak pola torby: ciemna wnęka, linia w bardzo
+ * ciemnej czerwieni, czarna fuga i ten sam połysk przesuwający się po linii */
 ${R} .interface-element-one-item-slot-2 {
-  background: radial-gradient(circle at 50% 40%, #141113, #060506 75%);
-  border-color: #1d191b;
-  outline-color: #030203;
-  box-shadow: inset 0 0 10px #000;
+  background: radial-gradient(circle at 50% 42%, #1a1517 0, #0b090a 55%, #040304 100%);
+  border-color: #3b0a0e;
+  outline-color: #020102;
+  box-shadow: 0 0 0 1px #020102, inset 0 0 8px #000;
 }
+${R} .eq-slot {
+  background: radial-gradient(circle at 50% 42%, #1a1517 0, #0b090a 55%, #040304 100%);
+  box-shadow: inset 0 0 0 1px #3b0a0e, 0 0 0 1px #020102;
+}
+${R} .interface-element-one-item-slot-2::after,
+${R} .eq-slot::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  /* jedna smuga dla całego ekranu (tło przypięte do okna), więc przechodzi kolejno przez sloty */
+  background: linear-gradient(115deg, rgba(0,0,0,0) 46%, rgba(190, 36, 40, .7) 50%, rgba(0,0,0,0) 54%) 0 0 / 300vw 100vh no-repeat fixed;
+  /* tylko obwódka: pełny prostokąt minus wnętrze (1 px linii) */
+  padding: 1px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: dg-shine 9s linear infinite;
+}
+${R} .interface-element-one-item-slot-2::after { inset: -1px; }  /* na ramce gry (border) */
+${R} .eq-slot::after { inset: 0; }
 
 /* ═════════════ PRZYCISKI HUD: 12 kamiennych kafli ═════════════ */
 ${btnRules}
@@ -693,7 +715,9 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
   ${R} .bottom-panel-pointer-bg::before,
   ${R} .bottom-panel-pointer-bg::after,
   ${R} .top.positioner::after,
-  ${R} .interface-element-item-slot-grid-stretch::after { animation: none; }
+  ${R} .interface-element-item-slot-grid-stretch::after,
+  ${R} .interface-element-one-item-slot-2::after,
+  ${R} .eq-slot::after { animation: none; }
   html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::after { animation: dg-eyes-burn 7s ease-out forwards; }
   ${R} .hp-indicator .blood, ${R} .hp-indicator .blood::before, ${R} .hp-indicator .blood::after { animation: none; }
 }
