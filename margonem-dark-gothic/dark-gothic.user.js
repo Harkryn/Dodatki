@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.7.0
+// @version      3.8.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -74,7 +74,9 @@ html.${ON_CLASS} {
   --dg-hair: rgba(140, 132, 138, .16);
   --dg-frame: url("${A}frame.webp");
   --dg-edge: url("${A}edge.webp");
-  --dg-wall: url("${A}bg-wall.webp");
+  --dg-wall: url("${A}bg-wall.webp");     /* tylko pod czatem */
+  --dg-altar: url("${A}bg-altar.webp");   /* prawa kolumna */
+  --dg-seal: url("${A}bg-seal.webp");     /* okna, panele, dialogi */
   --dg-corners:
     url("${A}corner-tl.webp") left top / 26px 26px no-repeat,
     url("${A}corner-tr.webp") right top / 26px 26px no-repeat,
@@ -146,13 +148,11 @@ html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::aft
 }
 
 /* ═════════════ TABLICZKA HUD ═════════════ */
-/* tabliczka z imieniem: ciemna, spękana płyta z runicznym brzegiem (bez górnej krawędzi –
- * tabliczka styka się z górą okna); dolną krawędź tworzy listwa z runami i medalionem (niżej) */
+/* tabliczka z imieniem: ciemna, mocno zniszczona płyta granitu (pęknięcia, wyszczerbienia,
+ * runiczny brzeg, widoczna faktura kamienia); dolną krawędź tworzy listwa z runami i medalionem (niżej) */
 ${HUD} {
-  background: none;
-  border-style: solid;
-  border-width: 0;
-  border-image: url("${A}stats-plaque.webp") 46 fill / 0 12px 12px 12px / 0 stretch;
+  background: url("${A}nameplate.webp") center / 100% 100% no-repeat;
+  border-image: none;
   z-index: 0;
 }
 /* głowy kamiennych posągów po obu stronach imienia – bez szyi, patrzą na zewnątrz
@@ -207,8 +207,14 @@ ${R} .top.positioner:has(.map_ball.green) > .bg::before { --dg-pvp: #2f8a3a; --d
 ${R} .top.positioner:has(.map_ball.yellow) > .bg::before { --dg-pvp: #c9a227; --dg-pvp-glow: rgba(220, 180, 50, .35); }
 ${R} .top.positioner:has(.map_ball.orange) > .bg::before { --dg-pvp: #d0661c; --dg-pvp-glow: rgba(230, 110, 30, .35); }
 ${R} .top.positioner:has(.map_ball.red) > .bg::before { --dg-pvp: #b3141c; --dg-pvp-glow: rgba(210, 30, 30, .4); }
-/* sama kropka znika (zostaje przezroczysta, więc jej podpowiedź po najechaniu nadal działa) */
-${HUD} .map_ball { opacity: 0; }
+/* sama kropka jest niewidoczna i przeniesiona nad medalion z kroplą – jej podpowiedź
+ * („PvP mode…”) i kliknięcie (lista poszukiwanych) działają teraz po najechaniu na kroplę */
+${HUD} .map_ball {
+  opacity: 0;
+  left: calc(50% - 10px); top: 63px;
+  width: 20px; height: 24px;
+  z-index: 3;
+}
 ${HUD} .hero-data .heroname {
   color: #a3242a;
   font-family: var(--dg-font-title);
@@ -335,6 +341,10 @@ ${R} .layer.interface-layer .main-column {
   /* ciemna ściana z płaskorzeźbą demona, łańcuchami i czaszkami – u dołu kolumny, góra pod tekstem zostaje ciemna */
   background: linear-gradient(rgba(5,4,5,.5), rgba(5,4,5,.12) 55%, rgba(5,4,5,0)), var(--dg-wall) center bottom / 100% auto no-repeat, var(--dg-void);
 }
+/* prawa kolumna (ekwipunek): krypta z ołtarzem, świecznikiem i czaszkami */
+${R} .layer.interface-layer .right-column.main-column {
+  background: linear-gradient(rgba(5,4,5,.35), rgba(5,4,5,0) 60%), var(--dg-altar) center bottom / 100% auto no-repeat, var(--dg-void);
+}
 /* tekst czatu na ilustracji – cień dla czytelności */
 ${R} .chat-message-wrapper .scroll-pane { text-shadow: 0 1px 2px #000, 0 0 4px #000; }
 ${R} .layer.interface-layer .main-column > .border,
@@ -379,7 +389,7 @@ ${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) br
 ${R} .border-window:not(.transparent) {
   border-image: var(--dg-frame) 12 / 6px / 0 round;
   /* ta sama ściana, mocniej przygaszona – w oknach ma być tylko tłem */
-  background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-wall) center / cover no-repeat, var(--dg-void);
+  background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-seal) center / cover no-repeat, var(--dg-void);
   background-clip: border-box;
   background-origin: border-box;
   box-shadow: 0 10px 26px rgba(0,0,0,.85), 0 0 0 1px #000;
@@ -490,7 +500,7 @@ ${R} .interface-element-middle-3-background,
 ${R} .interface-element-middle-3-background-stretch { background: rgba(7, 6, 7, .94); }
 ${R} .interface-element-background-color-1,
 ${R} .interface-element-middle-1-background,
-${R} .interface-element-middle-1-background-stretch { background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-wall) center / cover no-repeat, var(--dg-void); }
+${R} .interface-element-middle-1-background-stretch { background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-seal) center / cover no-repeat, var(--dg-void); }
 ${R} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px #1d191b, inset 0 0 14px #000; }
 ${R} .interface-element-active-card-background-stretch,
 ${R} .interface-element-active-card-border-image {
@@ -549,11 +559,33 @@ ${R} .tip-wrapper .item-head {
 ${R} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 0 2px #2a2427; }
 ${R} .tip-wrapper .item-tip-section { border-color: rgba(140, 132, 138, .14) !important; }
 
+/* akcent rzadkości: kolor z gry (ramka ikony w nagłówku ma klasę t-…) → poświata wokół tooltipa,
+ * linia u góry, zabarwiony nagłówek i obwódka ikony. Zwykłe przedmioty zostają neutralne. */
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-uniupg) { --dg-rar: 255, 251, 0; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-her) { --dg-rar: 56, 184, 235; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-upgraded) { --dg-rar: 255, 89, 175; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-leg) { --dg-rar: 255, 132, 0; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-art) { --dg-rar: 225, 64, 70; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) {
+  box-shadow: 0 10px 22px rgba(0,0,0,.9), 0 0 0 1px #000, 0 0 16px rgba(var(--dg-rar), .28);
+}
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) > .content {
+  box-shadow: inset 0 2px 0 rgba(var(--dg-rar), .55), inset 0 0 18px rgba(0,0,0,.85), inset 0 0 26px rgba(var(--dg-rar), .1);
+}
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head {
+  background:
+    var(--dg-edge) repeat-x left bottom / auto 4px,
+    linear-gradient(rgba(var(--dg-rar), .2), rgba(8, 5, 6, .55) 85%);
+}
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head .item {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(var(--dg-rar), .55), 0 0 8px rgba(var(--dg-rar), .45);
+}
+
 /* ═════════════ DIALOG Z NPC ═════════════ */
 ${R} .dialogue-window .border-image {
   border: 6px solid transparent;
   border-image: var(--dg-frame) 12 / 6px / 0 round;
-  background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-wall) center / cover no-repeat, var(--dg-void);
+  background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-seal) center / cover no-repeat, var(--dg-void);
   background-clip: padding-box;
   box-shadow: 0 10px 26px rgba(0,0,0,.9);
   inset: -4px;
