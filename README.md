@@ -94,3 +94,32 @@ Przełączanie (ikonka skrzyżowanych mieczy w lewym dolnym rogu otwiera panel z
 Ustawienia są zapamiętywane i wracają po przeładowaniu. Interfejs jest rozpoznawany tak samo jak w Kociej Nocy (ciasteczko gry `interface`). Motyw działa na margonem.pl i margonem.com, wyłącznie na stronach światów gry.
 
 Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-variant="crimson"]` i `html[data-ck-variant="green"]` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS` (oznaczone `[GRA]` — sprawdzone w grze, `[KN]` — sprawdzone w Kociej Nocy, `[NOWY]` — do weryfikacji), a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (gotyckie ramy, ozdoby belek, znaki wodne, mgła, czerwony puls przy niskim HP).
+
+## Margonem — Dark Gothic
+
+Mroczny gotycki motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **rastrowych grafik** (kute żelazo, czaszki, poczerniałe srebro, zaschnięta krew) zamiast rysunków w CSS. Paleta: prawie czarny `#0b0b0d`/`#141012`, bordo i ciemna czerwień `#3a0508`/`#5a0a0f`/`#8b0000`, kość `#d8cfc0` i zmatowiałe srebro `#8a8a90`.
+
+Co jest ostylowane:
+- **okna z ramką** — ramka 9-slice z kutej kraty z czaszkami w narożnikach (`border-image`, skaluje się do każdego rozmiaru okna), tło z ciemnej skóry/kamienia, bordowy nagłówek kapitalikami, zakrwawiony przycisk zamknięcia,
+- **okna przezroczyste** (śledzone questy, sorter) — ciemniejsze tło i srebrna obwódka,
+- **dialog z NPC** — ta sama rama plus duże kute narożniki z czaszką,
+- **sklep** — rama, markiza w bordo i kości, krata zamiast drewnianej belki,
+- **ekwipunek, torby, statystyki** — przyciemniona siatka slotów, bordowe obrysy,
+- **czat** — tekstura, bordowa aktywna zakładka, kolory kanałów bez zmian,
+- **tooltipy przedmiotów** — mała rama z kraty, bordowy nagłówek, kolory rzadkości bez zmian,
+- **przyciski** — żelazna oprawa z czaszkami; zielony (domyślny) przycisk gry staje się bordową skórą, pozostałe kolory (czerwony, niebieski, fiolet…) zachowują znaczenie,
+- **belki górna i dolna, boczne kolumny, pasek EXP (karmazyn), paski postępu, scrollbary**.
+
+Mapa (canvas) i logika gry pozostają nietknięte — skrypt wstrzykuje wyłącznie CSS.
+
+**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-gothic/dark-gothic.user.js
+
+Instalacja:
+1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
+2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
+3. Wyłącz w Tampermonkey inne motywy interfejsu (Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
+4. Odśwież grę.
+
+Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
+
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (6 plików WebP, razem ok. 61 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea (seed 1337), tło wycięte kluczowaniem czerni, tekstura i pasek ramki dopasowane do bezszwowego kafelkowania. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).

@@ -266,6 +266,20 @@ ${R} .dialogue-window .border-image::after { right: -24px; transform: scaleX(-1)
 ${R} .dialogue-window .dialogue-background-color { background: rgba(11,11,13,.72); }
 ${R} .dialogue-window .content .npc-message { color: var(--dg-bone); }
 
+/* ───────────── Sklep ───────────── */
+/* zielono-biała markiza → bordo i kość */
+${R} .shop-background .canopy { filter: grayscale(1) sepia(1) hue-rotate(-48deg) saturate(3.2) brightness(.62) contrast(1.15); }
+/* drewniana pionowa belka (sklep i inne okna) → kuta krata */
+${R} .interface-element-vertical-wood {
+  background: none;
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 0 0 0 10px;
+  border-image: var(--dg-frame) 36 / 0 0 0 10px / 0 round;
+}
+/* brązowy dolny pasek okien („Need more gold?”) → poczerniałe żelazo */
+${R} .interface-element-bottom-bar-background-stretch { filter: grayscale(.85) sepia(.5) hue-rotate(-30deg) saturate(1.6) brightness(.55); }
+
 /* ───────────── Scrollbary ───────────── */
 ${R} .scrollbar-wrapper .track { background: rgba(0,0,0,.35); box-shadow: inset 0 0 0 1px rgba(138,138,144,.15); }
 ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #5a0a0f, #8b0000, #5a0a0f); box-shadow: 0 0 0 1px #0b0b0d; }
