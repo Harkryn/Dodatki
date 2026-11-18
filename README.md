@@ -97,18 +97,22 @@ Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-
 
 ## Margonem — Dark Gothic
 
-Mroczny gotycki motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **rastrowych grafik** (kute żelazo, czaszki, poczerniałe srebro, zaschnięta krew) zamiast rysunków w CSS. Paleta: prawie czarny `#0b0b0d`/`#141012`, bordo i ciemna czerwień `#3a0508`/`#5a0a0f`/`#8b0000`, kość `#d8cfc0` i zmatowiałe srebro `#8a8a90`.
+Mroczny, demoniczny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **własnych rastrowych grafik**: rogate głowy demonów, czarne żelazo z runami i żarem, krwawy dym, pierścień kuli HP z rogami. Paleta: prawie czarny `#070607`/`#0b0b0d`, bordo i ciemna czerwień `#3a0508`/`#5a0a0f`/`#8b0000`, żar `#c0262d`, kość `#d8cfc0`.
 
 Co jest ostylowane:
-- **okna z ramką** — ramka 9-slice z kutej kraty z czaszkami w narożnikach (`border-image`, skaluje się do każdego rozmiaru okna), tło z ciemnej skóry/kamienia, bordowy nagłówek kapitalikami, zakrwawiony przycisk zamknięcia,
-- **okna przezroczyste** (śledzone questy, sorter) — ciemniejsze tło i srebrna obwódka,
-- **dialog z NPC** — ta sama rama plus duże kute narożniki z czaszką,
-- **sklep** — rama, markiza w bordo i kości, krata zamiast drewnianej belki,
-- **ekwipunek, torby, statystyki** — przyciemniona siatka slotów, bordowe obrysy,
-- **czat** — tekstura, bordowa aktywna zakładka, kolory kanałów bez zmian,
-- **tooltipy przedmiotów** — mała rama z kraty, bordowy nagłówek, kolory rzadkości bez zmian,
-- **przyciski** — żelazna oprawa z czaszkami; zielony (domyślny) przycisk gry staje się bordową skórą, pozostałe kolory (czerwony, niebieski, fiolet…) zachowują znaczenie,
-- **belki górna i dolna, boczne kolumny, pasek EXP (karmazyn), paski postępu, scrollbary**.
+- **tabliczka HUD** (imię, lokacja, złoto) — kuta tabliczka z rogami, imię czerwonymi kapitalikami, **głowy demonów** po obu stronach,
+- **kula HP** — żelazny pierścień z rogami i kolcami, krwawa poświata; gra dalej pokazuje w środku swój poziom HP i procent,
+- **dolny panel** — poczerniała oprawa pasków EXP (karmazyn), głowy demonów na końcach, ciemne sloty,
+- **górna i dolna belka** — czerń z belką z runami i żarem na krawędzi,
+- **przyciski HUD** — ciemne obsydianowe kafle z czerwoną poświatą, ikony w szarości (kolor przy najechaniu), kolor gry (fiolet, niebieski) zostaje jako delikatna poświata,
+- **okna z ramką** — ramka 9-slice z belki z runami i żelaznymi guzami z żarem (`border-image`, skaluje się do każdego rozmiaru), krwawy dym w tle, **baner tytułu z rogami**, czaszka demona pod oknem,
+- **okna przezroczyste** (śledzone questy, sorter) — czerń z czerwoną obwódką,
+- **dialog z NPC** — ta sama rama i głowa demona nad oknem,
+- **sklep** — markiza w ciemnym bordo, krata zamiast drewnianej belki,
+- **ekwipunek, torby, statystyki, czat** — czarne tło z krwawym dymem od dołu, czerwone aktywne zakładki, kolory kanałów bez zmian,
+- **tooltipy przedmiotów** — żelazna ramka, czerwony nagłówek, kolory rzadkości bez zmian,
+- **przyciski tekstowe** — obsydianowe kafle; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie,
+- **paski postępu, scrollbary**.
 
 Mapa (canvas) i logika gry pozostają nietknięte — skrypt wstrzykuje wyłącznie CSS.
 
@@ -122,4 +126,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (6 plików WebP, razem ok. 61 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea (seed 1337), tło wycięte kluczowaniem czerni, tekstura i pasek ramki dopasowane do bezszwowego kafelkowania. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (10 plików WebP, razem ok. 140 KB, każdy poniżej 40 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea (seed 1337) jako osobne elementy, tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, belka dopasowana do bezszwowego powtarzania. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
