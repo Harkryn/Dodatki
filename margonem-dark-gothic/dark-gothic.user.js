@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.12.0
+// @version      3.12.1
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -38,7 +38,7 @@
    *   corner-*.webp     64×64   subtelne narożniki: sierpowate łuki-rogi z runą (tl/tr/bl/br)
    *   edge.webp         55×12   kafel kamiennej krawędzi belek
    *   btn-01…12.webp    96×96   12 kamiennych kafli przycisków o różnym stopniu zniszczenia
-   *   top-skull-left/right.webp 115×150 mroczne, spękane czaszki przy imieniu (patrzą na zewnątrz; + top-skull-eyes-* – żar przy legendzie)
+   *   top-skull2-left/right.webp 116×150 mroczne, spękane czaszki przy imieniu (patrzą na zewnątrz; + top-skull2-eyes-* – żar przy legendzie)
    *   top-eyes-left/right.webp 120×150 ogień w ich oczach (legenda)
    *   hud-ornament.webp 760×64  kamienna listwa z runami i medalionem pod tabliczką z imieniem
    *   stats-plaque.webp 256×396 spękana płyta z runicznym obramowaniem pod statystyki (9-slice)
@@ -174,16 +174,16 @@ ${R} .hud-container::after {
 ${R} .hud-container::after {
   z-index: -2;
   background:
-    url("${A}top-skull-left.webp") left center / auto 100% no-repeat,
-    url("${A}top-skull-right.webp") right center / auto 100% no-repeat;
+    url("${A}top-skull2-left.webp") left center / auto 100% no-repeat,
+    url("${A}top-skull2-right.webp") right center / auto 100% no-repeat;
   filter: drop-shadow(0 3px 4px #000);
 }
 /* ogień w ich oczach – zapala się razem z dolnymi przy legendzie */
 ${R} .hud-container::before {
   z-index: -1;
   background:
-    url("${A}top-skull-eyes-left.webp") left center / auto 100% no-repeat,
-    url("${A}top-skull-eyes-right.webp") right center / auto 100% no-repeat;
+    url("${A}top-skull2-eyes-left.webp") left center / auto 100% no-repeat,
+    url("${A}top-skull2-eyes-right.webp") right center / auto 100% no-repeat;
   mix-blend-mode: screen;
   opacity: 0;
 }
