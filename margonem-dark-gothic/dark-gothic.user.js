@@ -422,14 +422,149 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
     return s;
   }
 
+  /* ─────────────────────────────────────────────────────────────────────────
+   * PRZEMALOWANIE GRAFIK GRY W LOCIE
+   * Gra rysuje większość UI z kilkudziesięciu plików /img/gui/* (sam atlas buttony.png
+   * jest w ~180 regułach CSS). Zamiast podmieniać każdą regułę ręcznie, skrypt:
+   *  1) pobiera dany plik z serwera gry (to samo źródło, nic nie jest kopiowane do repo),
+   *  2) przemalowuje go na canvasie: drewno/brąz/pergamin/szarości → okopcony czarny kamień,
+   *     a kolory znaczeniowe (złoto, zieleń statusów, błękit, czerwone znaczniki, jasne ikony) zostają,
+   *  3) podmienia adres w regułach CSS gry na wersję przemalowaną (blob:).
+   * Jasne, pergaminowe tła w regułach CSS są przyciemniane, a ciemny tekst na nich rozjaśniany.
+   * Wyłączenie motywu przywraca oryginalne wartości reguł.
+   * ───────────────────────────────────────────────────────────────────────── */
+  const GUI_URL = /url\(\s*["']?([^"')]*\/img\/gui\/[^"')]+\.(?:png|gif))(\?[^"')]*)?["']?\s*\)/gi;
+  // grafiki, które mają zostać nietknięte: kursory, ramki rzadkości, ikony umiejętności/mapy, animacje slotów…
+  const KEEP = /\/img\/gui\/(?:cursor|item_frames|skills|map-icons|emo|buffs-in-fight|item-slot-anim|line-highlight|X-blackoutline|ok-blackoutline|triangle|search|zoom|battle-|outfit)/i;
+  const IMG_PROPS = ['background-image', 'border-image-source', 'list-style-image'];
+  const blobCache = new Map();   // ścieżka → Promise<blob URL | null>
+  const touched = new Map();     // reguła CSS → { właściwość: [wartość oryginalna, priorytet] }
+
+  function recolorPixels(ctx, w, h) {
+    const id = ctx.getImageData(0, 0, w, h), a = id.data;
+    for (let i = 0; i < a.length; i += 4) {
+      if (a[i + 3] === 0) continue;
+      const r = a[i] / 255, g = a[i + 1] / 255, b = a[i + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+      let s = 0, hue = 0;
+      if (d > 0) {
+        s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+        if (mx === r) hue = (g - b) / d + (g < b ? 6 : 0); else if (mx === g) hue = (b - r) / d + 2; else hue = (r - g) / d + 4;
+        hue *= 60;
+      }
+      const vivid = s > 0.62 && l > 0.3 && l < 0.72;                 // złoto, klejnoty, ogień
+      const green = hue > 70 && hue < 170 && s > 0.3;               // statusy, potwierdzenia
+      const blue = hue > 190 && hue < 260 && s > 0.3;               // mana, informacje
+      const redMark = (hue < 8 || hue > 340) && s > 0.55 && l > 0.25; // powiadomienia, ostrzeżenia
+      if (vivid || green || blue || redMark) continue;
+      const warm = hue >= 8 && hue <= 58;                            // drewno, brąz, pergamin
+      if (s < 0.22 && l > 0.6) {                                     // jasne ikony i glify – zostają czytelne
+        a[i] *= 0.88; a[i + 1] *= 0.86; a[i + 2] *= 0.86;
+      } else if (warm || s < 0.22) {
+        const L = 0.025 + Math.pow(l, 1.45) * 0.42;
+        a[i] = Math.min(255, L * 1.06 * 255); a[i + 1] = L * 0.97 * 255; a[i + 2] = L * 255;
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+  }
+
+  function recolored(path) {
+    if (!blobCache.has(path)) {
+      blobCache.set(path, (async () => {
+        const res = await fetch(path, { credentials: 'same-origin' });
+        if (!res.ok) return null;
+        const bm = await createImageBitmap(await res.blob());
+        const c = document.createElement('canvas');
+        c.width = bm.width; c.height = bm.height;
+        const x = c.getContext('2d', { willReadFrequently: true });
+        x.drawImage(bm, 0, 0);
+        recolorPixels(x, bm.width, bm.height);
+        const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
+        return blob ? URL.createObjectURL(blob) : null;
+      })().catch(() => null));
+    }
+    return blobCache.get(path);
+  }
+
+  function remember(rule, prop) {
+    let m = touched.get(rule);
+    if (!m) { m = {}; touched.set(rule, m); }
+    if (!(prop in m)) m[prop] = [rule.style.getPropertyValue(prop), rule.style.getPropertyPriority(prop)];
+  }
+
+  // jasność koloru CSS (0–1) albo -1, gdy to nie kolor rgb/rgba
+  function lum(v) {
+    const m = /rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)(?:[ ,/]+([\d.]+))?/.exec(v || '');
+    if (!m) return -1;
+    if (m[4] !== undefined && parseFloat(m[4]) < 0.5) return -1;    // półprzezroczyste – zostawiamy
+    return (0.299 * m[1] + 0.587 * m[2] + 0.114 * m[3]) / 255;
+  }
+
+  async function processRule(rule) {
+    const st = rule.style;
+    for (const prop of IMG_PROPS) {
+      const v = st.getPropertyValue(prop);
+      if (!v || v.indexOf('/img/gui/') === -1 || v.indexOf('blob:') !== -1) continue;
+      const jobs = [];
+      v.replace(GUI_URL, (all, url) => { const path = url.replace(/^https?:\/\/[^/]+/, ''); if (!KEEP.test(path)) jobs.push([all, recolored(path)]); return all; });
+      if (!jobs.length) continue;
+      let nv = v;
+      for (const [token, p] of jobs) { const u = await p; if (u) nv = nv.split(token).join(`url("${u}")`); }
+      if (nv !== v && document.documentElement.classList.contains(ON_CLASS)) { remember(rule, prop); st.setProperty(prop, nv, st.getPropertyPriority(prop)); }
+    }
+    // jasne (pergaminowe) tła → czerń; ciemny tekst w tej samej regule → kość
+    const bg = st.getPropertyValue('background-color');
+    if (lum(bg) > 0.72) {
+      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(9, 8, 10, .92)', st.getPropertyPriority('background-color'));
+      const col = st.getPropertyValue('color');
+      if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#cbc2b6', st.getPropertyPriority('color')); }
+    }
+  }
+
+  const seen = new WeakSet();
+  function walk(rules, out) {
+    for (const r of rules) {
+      if (r.cssRules && !r.selectorText) { walk(r.cssRules, out); continue; }
+      if (!r.style || !r.selectorText || seen.has(r) || r.selectorText.indexOf(ON_CLASS) !== -1) continue;
+      seen.add(r); out.push(r);
+    }
+  }
+  function scanSheets() {
+    if (!document.documentElement.classList.contains(ON_CLASS)) return;
+    const rules = [];
+    for (const sh of document.styleSheets) { let rr; try { rr = sh.cssRules; } catch (e) { continue; } if (rr) walk(rr, rules); }
+    rules.forEach((r) => { processRule(r); });
+  }
+  function restoreSheets() {
+    for (const [rule, props] of touched) for (const p in props) rule.style.setProperty(p, props[p][0], props[p][1]);
+    touched.clear();
+  }
+  function reapplySheets() {
+    // ponowne włączenie: reguły znów do przetworzenia (przemalowane pliki są już w pamięci)
+    for (const sh of document.styleSheets) { let rr; try { rr = sh.cssRules; } catch (e) { continue; } const all = []; if (rr) (function w(list) { for (const r of list) { if (r.cssRules && !r.selectorText) w(r.cssRules); else if (r.style) all.push(r); } })(rr); all.forEach((r) => seen.delete(r)); }
+    scanSheets();
+  }
+
   function apply(on) {
     document.documentElement.classList.toggle(ON_CLASS, on);
+    if (on) reapplySheets(); else restoreSheets();
   }
 
   const style = addStyle(css);
   if (style && style.id !== undefined) style.id = 'dark-gothic-theme';
   let enabled = get(KEY, true);
   apply(enabled);
+
+  // Arkusze gry dochodzą w trakcie ładowania (i czasem później) – skanujemy przy zdarzeniach,
+  // przy każdym nowym <style>/<link> oraz okresowo przez pierwsze dwie minuty.
+  const rescan = () => { if (enabled) scanSheets(); };
+  document.addEventListener('DOMContentLoaded', rescan);
+  window.addEventListener('load', rescan);
+  new MutationObserver((muts) => {
+    if (muts.some((m) => [...m.addedNodes].some((n) => n.nodeName === 'STYLE' || n.nodeName === 'LINK'))) setTimeout(rescan, 50);
+  }).observe(document.documentElement, { childList: true, subtree: true });
+  let ticks = 0;
+  const iv = setInterval(() => { rescan(); if (++ticks >= 40) clearInterval(iv); }, 3000);
 
   function toggle() {
     enabled = !enabled;
