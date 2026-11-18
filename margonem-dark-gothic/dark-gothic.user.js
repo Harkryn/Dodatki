@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.9.1
+// @version      3.10.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -159,8 +159,7 @@ ${HUD} {
     url("${A}nameplate.webp") center bottom / 104% 128% no-repeat;
   border-image: none;
   z-index: 0;
-  /* na tabliczce zostają tylko imię, mapa z koordynatami i świat – złoto i smocze łzy są przy torbach */
-  height: 42px;
+  height: 54px;   /* zagęszczona: imię, mapa ze światem, waluty */
 }
 /* głowy kamiennych posągów po obu stronach imienia – bez szyi, patrzą na zewnątrz
  * (odsunięte, żeby prawej nie zasłaniała ikona powiadomień gry) */
@@ -195,13 +194,13 @@ html.${ON_CLASS}.dg-legend .game-window-positioner .hud-container::before {
 ${R} .top.positioner > .bg::before {
   content: "";
   position: absolute;
-  left: calc(50% - 196px); width: 392px;
-  top: 39px; height: 33px;   /* tuż pod wierszem z mapą i światem (kończy się ok. 38 px) */
+  left: calc(50% - 119px); width: 238px;
+  top: 50px; height: 20px;   /* tuż pod walutami; kamień listwy wchodzi na mapę tylko ok. 7 px */
   z-index: 1;
   /* warstwy: barwa kropli (tryb color), poświata kropli (screen), sama listwa */
   background:
-    radial-gradient(ellipse 5px 8px at 50% 50%, var(--dg-pvp) 0, var(--dg-pvp) 55%, rgba(0,0,0,0) 100%),
-    radial-gradient(ellipse 13px 15px at 50% 50%, var(--dg-pvp-glow) 0, rgba(0,0,0,0) 100%),
+    radial-gradient(ellipse 3px 5px at 50% 50%, var(--dg-pvp) 0, var(--dg-pvp) 55%, rgba(0,0,0,0) 100%),
+    radial-gradient(ellipse 8px 9px at 50% 50%, var(--dg-pvp-glow) 0, rgba(0,0,0,0) 100%),
     url("${A}hud-ornament.webp") center / 100% 100% no-repeat;
   background-blend-mode: color, screen, normal;
   /* przyciemniona, żeby kamień pasował do pierścienia kuli HP */
@@ -214,8 +213,8 @@ ${R} .top.positioner > .bg::before {
 ${R} .top.positioner::after {
   content: "";
   position: absolute;
-  left: calc(50% - 196px); width: 392px;
-  top: 39px; height: 33px;
+  left: calc(50% - 119px); width: 238px;
+  top: 50px; height: 20px;
   z-index: 2;
   background: url("${A}hud-ornament-runes.webp") center / 100% 100% no-repeat;
   mix-blend-mode: screen;
@@ -231,8 +230,8 @@ ${R} .top.positioner:has(.map_ball.red) > .bg::before { --dg-pvp: #b3141c; --dg-
  * („PvP mode…”) i kliknięcie (lista poszukiwanych) działają teraz po najechaniu na kroplę */
 ${HUD} .map_ball {
   opacity: 0;
-  left: calc(50% - 10px); top: 43px;
-  width: 20px; height: 24px;
+  left: calc(50% - 8px); top: 50px;
+  width: 16px; height: 20px;
   z-index: 3;
 }
 ${HUD} .hero-data .heroname {
@@ -256,34 +255,12 @@ ${HUD} .btn-min {
   color: var(--dg-ash);
 }
 ${HUD} .btn-min:hover { color: var(--dg-bone); filter: brightness(1.25); }
-/* ZŁOTO I SMOCZE ŁZY – przeniesione z tabliczki w puste miejsce obok toreb (nad ekwipunkiem).
- * Elementy zostają w swoim kontenerze (podpowiedzi i „+” działają jak w grze); skrypt mierzy
- * położenie paska toreb i podaje przesunięcie w --dg-cx / --dg-cy (html.dg-cur). */
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container :is(.gold-tip, .gold-btn, .herogold, .herogold-difference, .credits-tip, .credits-btn, .herocredits, .herocredits-difference) {
-  --dg-row: 0px;
-  top: calc(var(--dg-cy) + var(--dg-row));
-  z-index: 4;
-}
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container :is(.credits-tip, .credits-btn, .herocredits, .herocredits-difference) { --dg-row: 20px; }
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container :is(.gold-tip, .credits-tip) { left: calc(var(--dg-cx) + 4px); margin-top: 1px; }
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container :is(.herogold, .herocredits) {
-  left: calc(var(--dg-cx) + 22px); width: 58px; margin-top: 3px;
-  text-align: right; overflow: hidden; white-space: nowrap;
-}
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container :is(.gold-btn, .credits-btn) { left: calc(var(--dg-cx) + 83px); width: 18px; height: 18px; margin-top: 1px; }
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container .herogold-difference { left: calc(var(--dg-cx) + 22px); top: calc(var(--dg-cy) - 16px); }
-html.${ON_CLASS}.dg-cur .game-window-positioner .layer.interface-layer .positioner.top .hud-container .herocredits-difference { left: calc(var(--dg-cx) + 22px); top: calc(var(--dg-cy) + 42px); }
-/* kamienna płytka pod walutami – po lewej stronie paska toreb */
-${R} .inventory_wrapper .bags-navigation-bg::before {
-  content: "";
-  position: absolute;
-  right: calc(100% + 3px); top: 0;
-  width: 105px; height: 40px;
-  border-style: solid; border-width: 0;
-  border-image: url("${A}stats-plaque.webp") 46 fill / 9px / 0 stretch;
-  box-shadow: 0 2px 6px rgba(0,0,0,.8);
-  pointer-events: none;
-}
+/* ZAGĘSZCZONA TABLICZKA: imię, pod nim mapa i świat, niżej złoto i smocze łzy – wiersze bliżej siebie,
+ * żeby listwa z medalionem prawie nie wchodziła na mapę */
+${HUD} .map-data, ${HUD} .world-name { transform: translateY(-4px); }
+${HUD} .gold-tip, ${HUD} .gold-btn, ${HUD} .credits-tip, ${HUD} .credits-btn { top: 34px; }
+${HUD} .herogold, ${HUD} .herocredits { top: 37px; }
+${HUD} .herogold-difference, ${HUD} .herocredits-difference { top: 56px; }
 
 /* ═════════════ KULA HP: runiczny pierścień (obraca się, runy pulsują) ═════════════ */
 ${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.3) contrast(1.4); }
@@ -512,13 +489,30 @@ ${R} .button.orange { background-image: linear-gradient(#4a2a0c, #190e04); }
 ${R} .interface-element-item-slot-grid-stretch {
   filter: none;
   background:
-    linear-gradient(90deg, rgba(0,0,0,0) 31px, #2a2427 31px, #2a2427 32px, #020102 32px) 0 0 / 33px 33px,
-    linear-gradient(rgba(0,0,0,0) 31px, #2a2427 31px, #2a2427 32px, #020102 32px) 0 0 / 33px 33px,
-    linear-gradient(90deg, #2a2427 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
-    linear-gradient(#2a2427 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(90deg, rgba(0,0,0,0) 31px, #3b0a0e 31px, #3b0a0e 32px, #020102 32px) 0 0 / 33px 33px,
+    linear-gradient(rgba(0,0,0,0) 31px, #3b0a0e 31px, #3b0a0e 32px, #020102 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, #3b0a0e 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(#3b0a0e 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
     radial-gradient(circle at 50% 42%, #1a1517 0, #0b090a 55%, #040304 100%) 0 0 / 33px 33px,
     #040304;
 }
+/* linie siatki: bardzo ciemna czerwień z lekkim połyskiem – smuga światła przesuwa się powoli
+ * po samych liniach (maska z tego samego wzoru co siatka) */
+${R} .interface-element-item-slot-grid-stretch::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(0,0,0,0) 42%, rgba(190, 36, 40, .7) 50%, rgba(0,0,0,0) 58%) 0 0 / 300% 100% no-repeat;
+  --dg-grid-mask:
+    linear-gradient(90deg, transparent 31px, #000 31px, #000 32px, transparent 32px) 0 0 / 33px 33px,
+    linear-gradient(transparent 31px, #000 31px, #000 32px, transparent 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, #000 1px, transparent 1px) 0 0 / 33px 33px,
+    linear-gradient(#000 1px, transparent 1px) 0 0 / 33px 33px;
+  -webkit-mask: var(--dg-grid-mask);
+  mask: var(--dg-grid-mask);
+  animation: dg-shine 9s linear infinite;
+}
+@keyframes dg-shine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
 ${R} .interface-element-grid-border {
   outline-color: #000;
   box-shadow: 0 0 0 1px #1d191b, 0 0 0 2px #050405;
@@ -698,7 +692,8 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
 @media (prefers-reduced-motion: reduce) {
   ${R} .bottom-panel-pointer-bg::before,
   ${R} .bottom-panel-pointer-bg::after,
-  ${R} .top.positioner::after { animation: none; }
+  ${R} .top.positioner::after,
+  ${R} .interface-element-item-slot-grid-stretch::after { animation: none; }
   html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::after { animation: dg-eyes-burn 7s ease-out forwards; }
   ${R} .hp-indicator .blood, ${R} .hp-indicator .blood::before, ${R} .hp-indicator .blood::after { animation: none; }
 }
@@ -926,30 +921,6 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
   let ticks = 0;
   const iv = setInterval(() => { rescan(); if (++ticks >= 40) clearInterval(iv); }, 3000);
 
-  // Złoto i smocze łzy: przesunięcie z tabliczki HUD obok paska toreb. Liczymy je względem
-  // kontenera HUD (z poprawką na skalę interfejsu) i podajemy w zmiennych CSS – sam DOM gry zostaje nietknięty.
-  let curKey = '';
-  function placeCurrencies() {
-    const root = document.documentElement;
-    const hud = document.querySelector('.game-window-positioner .layer.interface-layer .positioner.top .hud-container');
-    const bags = document.querySelector('.game-window-positioner .inventory_wrapper .bags-navigation-bg');
-    const hr = hud && hud.getBoundingClientRect(), br = bags && bags.getBoundingClientRect();
-    if (!enabled || !hr || !br || !br.width || !hud.offsetWidth) {
-      if (curKey) { root.classList.remove('dg-cur'); curKey = ''; }
-      return;
-    }
-    const k = hr.width / hud.offsetWidth || 1;
-    const cx = Math.round((br.left - 108 - hr.left) / k), cy = Math.round((br.top - hr.top) / k);
-    const key = cx + ',' + cy;
-    if (key === curKey) return;
-    curKey = key;
-    root.style.setProperty('--dg-cx', cx + 'px');
-    root.style.setProperty('--dg-cy', cy + 'px');
-    root.classList.add('dg-cur');
-  }
-  setInterval(placeCurrencies, 1000);
-  window.addEventListener('resize', () => setTimeout(placeCurrencies, 100));
-  placeCurrencies();
 
   /* ─────────────────────────────────────────────────────────────────────────
    * LEGENDA → PŁONĄCE OCZY POSĄGÓW
