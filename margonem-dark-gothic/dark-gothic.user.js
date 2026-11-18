@@ -157,7 +157,7 @@ ${R} .hud-container::after {
   content: "";
   position: absolute;
   left: -116px; right: -116px;
-  top: -4px; height: 68px;
+  top: 0; height: 64px;   /* nie wychodzą poza górną krawędź okna gry */
   pointer-events: none;
 }
 ${R} .hud-container::after {
@@ -413,9 +413,11 @@ ${R} .stats-wrapper.interface-element-background-color-3 {
   background: none;
   border-style: solid;
   border-width: 0;
-  border-image: url("${A}stats-plaque.webp") 46 fill / 18px / 0 stretch;
+  border-image: url("${A}stats-plaque.webp") 46 fill / 13px / 0 stretch;
   box-shadow: 0 4px 10px rgba(0,0,0,.8);
 }
+/* ikonki statystyk pochodzą z przemalowanego atlasu – rozjaśnione, żeby były czytelne na kamieniu */
+${R} .stats-wrapper .stat-icon { filter: brightness(2.3) contrast(1.1) drop-shadow(0 0 2px #000); }
 ${R} .stats-wrapper .header-title-wrapper { margin: 4px 6px 0; }
 ${R} .interface-element-background-color-3,
 ${R} .interface-element-middle-3-background,
