@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.5.0
+// @version      3.6.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -52,6 +52,16 @@
   // Kafle przycisków HUD: każdy pasek zaczyna od innego kafla, żeby sąsiednie przyciski się różniły.
   const BTN = (i) => `url("${A}btn-${String(i).padStart(2, '0')}.webp")`;
   const BAR_OFFSETS = { 'top-left': 0, 'top-right': 4, 'bottom-left': 7, 'bottom-right': 10 };
+  // Bezszwowe faktury krwi do kuli HP (szum SVG, stitchTiles = kafelki bez szwów)
+  const svgNoise = (size, freq, seed, matrix) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'>` +
+    `<filter id='n' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='3' seed='${seed}' stitchTiles='stitch'/>` +
+    `<feColorMatrix values='${matrix}'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`);
+  // jasne smugi: kolor ciepłej czerwieni, przezroczystość z szumu (tylko najjaśniejsze miejsca)
+  const BLOOD_HI = svgNoise(128, '0.035 0.09', 7, '0 0 0 0 0.85  0 0 0 0 0.12  0 0 0 0 0.08  0 0 0 3.2 -1.55');
+  const BLOOD_HI2 = svgNoise(96, '0.06 0.03', 23, '0 0 0 0 1  0 0 0 0 0.35  0 0 0 0 0.2  0 0 0 2.6 -1.45');
+  // ciemne żyłki: prawie czarna czerwień tam, gdzie szum jest niski
+  const BLOOD_DARK = svgNoise(160, '0.022 0.05', 41, '0 0 0 0 0.25  0 0 0 0 0.02  0 0 0 0 0.03  0 0 0 -3 1.75');
   let btnRules = '';
   for (const [bar, off] of Object.entries(BAR_OFFSETS)) {
     for (let k = 1; k <= 12; k++) {
@@ -156,8 +166,8 @@ ${R} .hud-container::before,
 ${R} .hud-container::after {
   content: "";
   position: absolute;
-  left: -116px; right: -116px;
-  top: 0; height: 64px;   /* nie wychodzą poza górną krawędź okna gry */
+  left: -66px; right: -66px;   /* tuż przy tabliczce z imieniem */
+  top: 0; height: 64px;        /* nie wychodzą poza górną krawędź okna gry */
   pointer-events: none;
 }
 ${R} .hud-container::after {
@@ -186,10 +196,24 @@ ${R} .top.positioner > .bg::before {
   left: calc(50% - 190px); width: 380px;
   top: 57px; height: 32px;
   z-index: 1;
-  background: url("${A}hud-ornament.webp") center / 100% 100% no-repeat;
+  /* warstwy: barwa kropli (tryb color), poświata kropli (screen), sama listwa */
+  background:
+    radial-gradient(ellipse 5px 8px at 50% 50%, var(--dg-pvp) 0, var(--dg-pvp) 55%, rgba(0,0,0,0) 100%),
+    radial-gradient(ellipse 13px 15px at 50% 50%, var(--dg-pvp-glow) 0, rgba(0,0,0,0) 100%),
+    url("${A}hud-ornament.webp") center / 100% 100% no-repeat;
+  background-blend-mode: color, screen, normal;
   filter: drop-shadow(0 3px 3px #000);
   pointer-events: none;
+  --dg-pvp: #7a1218;
+  --dg-pvp-glow: rgba(140, 20, 20, .35);
 }
+/* kropla pod imieniem przejmuje kolor kropki PvP mapy (gra oznacza ją klasą green/yellow/orange/red) */
+${R} .top.positioner:has(.map_ball.green) > .bg::before { --dg-pvp: #2f8a3a; --dg-pvp-glow: rgba(60, 170, 80, .35); }
+${R} .top.positioner:has(.map_ball.yellow) > .bg::before { --dg-pvp: #c9a227; --dg-pvp-glow: rgba(220, 180, 50, .35); }
+${R} .top.positioner:has(.map_ball.orange) > .bg::before { --dg-pvp: #d0661c; --dg-pvp-glow: rgba(230, 110, 30, .35); }
+${R} .top.positioner:has(.map_ball.red) > .bg::before { --dg-pvp: #b3141c; --dg-pvp-glow: rgba(210, 30, 30, .4); }
+/* sama kropka znika (zostaje przezroczysta, więc jej podpowiedź po najechaniu nadal działa) */
+${HUD} .map_ball { opacity: 0; }
 ${HUD} .hero-data .heroname {
   color: #a3242a;
   font-family: var(--dg-font-title);
@@ -234,6 +258,41 @@ ${R} .bottom-panel-pointer-bg::after {
   background: url("${A}orb-runes.webp") 0 0 / 100% 100% no-repeat;
   mix-blend-mode: screen;
   animation: dg-spin 120s linear infinite, dg-pulse 6s ease-in-out infinite;
+}
+/* krew w kuli: płynie i pulsuje. Warstwy są przypięte do .blood, którego wysokość = HP,
+ * więc ruch jest tylko w wypełnionej części. Faktura to bezszwowy szum SVG (stitchTiles). */
+${R} .hp-indicator .blood::before,
+${R} .hp-indicator .blood::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* jasne smugi i połyski krwi – płyną skosem w górę */
+${R} .hp-indicator .blood::before {
+  background:
+    url("${BLOOD_HI}") 0 0 / 128px 128px repeat,
+    url("${BLOOD_HI2}") 0 0 / 96px 96px repeat;
+  mix-blend-mode: screen;
+  opacity: .85;
+  animation: dg-blood-flow 9s linear infinite;
+}
+/* ciemne żyłki i skrzepy – płyną wolniej, w drugą stronę (razem dają wirowanie) */
+${R} .hp-indicator .blood::after {
+  background: url("${BLOOD_DARK}") 0 0 / 160px 160px repeat;
+  mix-blend-mode: multiply;
+  opacity: .9;
+  animation: dg-blood-flow2 14s linear infinite;
+}
+/* bicie serca: podwójny puls jasności i nasycenia krwi */
+${R} .hp-indicator .blood { animation: dg-heartbeat 1.6s ease-in-out infinite; }
+@keyframes dg-blood-flow { to { background-position: 128px -128px, -96px -96px; } }
+@keyframes dg-blood-flow2 { to { background-position: -160px -160px; } }
+@keyframes dg-heartbeat {
+  0%, 40%, 100% { filter: brightness(1) saturate(1); }
+  10% { filter: brightness(1.28) saturate(1.25); }
+  20% { filter: brightness(1.05) saturate(1.05); }
+  28% { filter: brightness(1.18) saturate(1.15); }
 }
 ${R} .hp-indicator-wrapper .value {
   color: #e6ddd2;
@@ -525,6 +584,7 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
   ${R} .bottom-panel-pointer-bg::before,
   ${R} .bottom-panel-pointer-bg::after { animation: none; }
   html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::after { animation: dg-eyes-burn 7s ease-out forwards; }
+  ${R} .hp-indicator .blood, ${R} .hp-indicator .blood::before, ${R} .hp-indicator .blood::after { animation: none; }
 }
 `;
 
