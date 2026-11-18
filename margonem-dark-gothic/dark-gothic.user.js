@@ -428,11 +428,11 @@ ${R} .interface-element-middle-2-background-stretch,
 ${R} .interface-element-background-color-2 { background: rgba(7, 6, 7, .94); color: var(--dg-bone); }
 
 /* kafle okna Premium (w grze jaskrawozielone – zieleń to tu tylko domyślny kolor, nie znaczenie) */
-${R} .premium-item {
+${R} .premium-panel .product-kind .premium-item-wrapper .premium-item {
   background-color: #0f0b0d;
   box-shadow: inset 0 0 0 1px #2a2226, inset 0 1px 0 rgba(0,0,0,.75), inset 0 0 14px rgba(0,0,0,.8);
 }
-${R} .premium-item:hover { background-color: #1b0d10; box-shadow: inset 0 0 0 1px #4a1a1f, inset 0 0 14px rgba(0,0,0,.8); }
+${R} .premium-panel .product-kind .premium-item-wrapper .premium-item:hover { background-color: #1b0d10; box-shadow: inset 0 0 0 1px #4a1a1f, inset 0 0 14px rgba(0,0,0,.8); }
 
 /* ═════════════ SKLEP ═════════════ */
 ${R} .shop-background .canopy { filter: grayscale(1) sepia(.6) hue-rotate(-40deg) saturate(1.6) brightness(.32) contrast(1.25); }
