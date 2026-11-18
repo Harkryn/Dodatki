@@ -535,8 +535,9 @@ ${R} .tip-wrapper.normal-tip::before {
   z-index: 2;
 }
 ${R} .tip-wrapper.normal-tip > .content {
-  background: rgba(4, 3, 4, .62);
+  background: rgba(4, 3, 4, .4);
   box-shadow: inset 0 0 18px rgba(0,0,0,.85);
+  text-shadow: 0 1px 2px #000;
 }
 ${R} .tip-wrapper .item-head {
   background:
