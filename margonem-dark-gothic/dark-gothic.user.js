@@ -326,9 +326,9 @@ ${R} .button {
   border-image: url("${A}button.webp") 24 fill / 6px / 0 stretch;
   background-image: none;
   background-color: #070607;
-  box-shadow: none;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(139,0,0,.45), 0 2px 6px rgba(0,0,0,.7);
 }
-${R} .button:hover { border-image-source: url("${A}button-hover.webp"); }
+${R} .button:hover { border-image-source: url("${A}button-hover.webp"); box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(192,38,45,.8), 0 0 10px rgba(139,0,0,.5); }
 ${R} .button::before { box-shadow: none; }
 ${R} .button .label { color: var(--dg-bone); text-shadow: 0 1px 2px #000; }
 /* kolory gry zachowują znaczenie: oprawa bez wypełnienia, pod nią przyciemniony kolor */
@@ -341,7 +341,7 @@ ${R} .button.violet, ${R} .button.purple, ${R} .button.blink-violet { background
 ${R} .button.orange { background-image: linear-gradient(#6a3a0d, #231304); }
 
 /* ═════════════ EKWIPUNEK, TORBY, STATYSTYKI ═════════════ */
-${R} .interface-element-item-slot-grid-stretch { filter: grayscale(1) brightness(.5) contrast(1.25); }
+${R} .interface-element-item-slot-grid-stretch { filter: grayscale(1) brightness(.72) contrast(1.3); }
 ${R} .interface-element-grid-border {
   outline-color: #000;
   box-shadow: 0 0 0 1px #2a2628, 0 0 0 2px #050405, 0 0 0 3px #3a0508;
