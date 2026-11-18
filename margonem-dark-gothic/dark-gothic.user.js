@@ -1,7 +1,7 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.0.0
+// @version      3.1.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -263,7 +263,8 @@ ${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) br
 /* ═════════════ OKNA ═════════════ */
 ${R} .border-window:not(.transparent) {
   border-image: var(--dg-frame) 12 / 6px / 0 round;
-  background: var(--dg-smoke) center bottom / 140% auto no-repeat, var(--dg-void);
+  /* dym przygaszony warstwą czerni – w dużych oknach ma być ledwo widoczny */
+  background: linear-gradient(rgba(5,4,5,.55), rgba(5,4,5,.55)), var(--dg-smoke) center bottom / 140% auto no-repeat, var(--dg-void);
   background-clip: border-box;
   background-origin: border-box;
   box-shadow: 0 10px 26px rgba(0,0,0,.85), 0 0 0 1px #000;
@@ -349,6 +350,7 @@ ${R} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px #1d191b, inse
 ${R} .interface-element-active-card-background-stretch,
 ${R} .interface-element-active-card-border-image {
   border-image: none;
+  border-color: #110d0f;  /* gra zostawia tu 5 px ramki – bez tego przyjęłaby jasny kolor tekstu */
   background: linear-gradient(#1b0a0c, #0b0607);
   box-shadow: inset 0 0 0 1px #2d1a1c, inset 0 -1px 0 var(--dg-red);
 }
@@ -399,6 +401,31 @@ ${R} .dialogue-window .border-image::before {
 }
 ${R} .dialogue-window .dialogue-background-color { background: rgba(4,3,4,.5); }
 ${R} .dialogue-window .content .npc-message { color: var(--dg-bone); }
+
+/* ═════════════ TEKST ROZJAŚNIONY PRZEZ SKANER + POZOSTAŁE TŁA GRY ═════════════ */
+html.${ON_CLASS} .dg-lt { color: var(--dg-c, #cbc2b6) !important; }
+/* zielone panele informacyjne (np. „nie należysz do gildii”) → przygaszona czerń z czerwienią */
+${R} .interface-element-green-box-background,
+${R} .interface-element-green-box-background-stretch {
+  background: linear-gradient(90deg, #070607 0%, #170a0c 30%, #170a0c 70%, #070607 100%);
+  box-shadow: inset 0 0 0 1px #1d191b;
+}
+${R} .interface-element-wood-box-background { background: linear-gradient(#110e10, #070607); box-shadow: inset 0 0 0 1px #1d191b; }
+${R} .interface-element-card-background,
+${R} .interface-element-card-background-stretch { background: linear-gradient(#100d0f, #060506); border-image: none; box-shadow: inset 0 0 0 1px #1a1618; }
+${R} .interface-element-header-1-background,
+${R} .interface-element-header-1-background-stretch,
+${R} .interface-element-header-2-background,
+${R} .interface-element-header-2-background-stretch,
+${R} .interface-element-bottom-bar-background {
+  border-image: none; border-color: transparent;
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(24,8,10,.9) 20%, rgba(24,8,10,.9) 80%, rgba(0,0,0,0));
+  box-shadow: inset 0 -1px 0 var(--dg-line);
+}
+${R} .interface-element-header-1 { color: var(--dg-bone); }
+${R} .interface-element-middle-2-background,
+${R} .interface-element-middle-2-background-stretch,
+${R} .interface-element-background-color-2 { background: rgba(7, 6, 7, .94); color: var(--dg-bone); }
 
 /* ═════════════ SKLEP ═════════════ */
 ${R} .shop-background .canopy { filter: grayscale(1) sepia(.6) hue-rotate(-40deg) saturate(1.6) brightness(.32) contrast(1.25); }
@@ -545,9 +572,53 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
     scanSheets();
   }
 
+  /* ─────────────────────────────────────────────────────────────────────────
+   * CZYTELNOŚĆ TEKSTU W OKNACH
+   * Część okien gry miała ciemny tekst na pergaminie. Na czarnym tle byłby nieczytelny,
+   * więc skaner oznacza elementy z ciemnym tekstem klasą .dg-lt i podaje jaśniejszy
+   * odpowiednik koloru (neutralne → kość, kolorowe → ten sam odcień, rozjaśniony).
+   * ───────────────────────────────────────────────────────────────────────── */
+  const SCOPE = '.border-window, .tip-wrapper, .dialogue-window';
+  const marked = new Set();
+  function parseRgb(v) { const m = /rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)(?:[ ,/]+([\d.]+))?/.exec(v || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
+  function lighter([r, g, b]) {
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    if (mx - mn < 28) return '#cbc2b6';                       // szary/czarny tekst → kość
+    const k = 190 / Math.max(mx, 1);                           // kolorowy → ten sam odcień, jaśniej
+    return `rgb(${Math.min(255, Math.round(r * k + 30))}, ${Math.min(255, Math.round(g * k + 30))}, ${Math.min(255, Math.round(b * k + 30))})`;
+  }
+  function fixText(root) {
+    if (!document.documentElement.classList.contains(ON_CLASS)) return;
+    const els = root.querySelectorAll('*');
+    for (const el of els) {
+      if (el.classList.contains('dg-lt') || el.closest('.item, canvas')) continue;
+      let hasText = false;
+      for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) { hasText = true; break; }
+      if (!hasText) continue;
+      const c = parseRgb(getComputedStyle(el).color);
+      if (!c || c[3] < 0.3) continue;
+      const L = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+      if (L >= 0.36) continue;
+      el.style.setProperty('--dg-c', lighter(c));
+      el.classList.add('dg-lt');
+      marked.add(el);
+    }
+  }
+  function unfixText() {
+    for (const el of marked) { el.classList.remove('dg-lt'); el.style.removeProperty('--dg-c'); }
+    marked.clear();
+  }
+  let pending = new Set(), timer = 0;
+  function queueFix(node) {
+    const w = node.nodeType === 1 ? node.closest(SCOPE) : node.parentElement && node.parentElement.closest(SCOPE);
+    if (!w) return;
+    pending.add(w);
+    if (!timer) timer = setTimeout(() => { timer = 0; const list = [...pending]; pending.clear(); list.forEach(fixText); }, 120);
+  }
+
   function apply(on) {
     document.documentElement.classList.toggle(ON_CLASS, on);
-    if (on) reapplySheets(); else restoreSheets();
+    if (on) { reapplySheets(); document.querySelectorAll(SCOPE).forEach(fixText); } else { restoreSheets(); unfixText(); }
   }
 
   const style = addStyle(css);
@@ -561,7 +632,15 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
   document.addEventListener('DOMContentLoaded', rescan);
   window.addEventListener('load', rescan);
   new MutationObserver((muts) => {
-    if (muts.some((m) => [...m.addedNodes].some((n) => n.nodeName === 'STYLE' || n.nodeName === 'LINK'))) setTimeout(rescan, 50);
+    let sheets = false;
+    for (const m of muts) {
+      for (const n of m.addedNodes) {
+        if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') sheets = true;
+        else if (enabled) queueFix(n);
+      }
+      if (enabled && m.type === 'characterData') queueFix(m.target);
+    }
+    if (sheets) setTimeout(rescan, 50);
   }).observe(document.documentElement, { childList: true, subtree: true });
   let ticks = 0;
   const iv = setInterval(() => { rescan(); if (++ticks >= 40) clearInterval(iv); }, 3000);
