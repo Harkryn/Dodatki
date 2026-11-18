@@ -49,23 +49,12 @@ html.${ON_CLASS} {
 ${R} .border-window:not(.transparent) {
   border-image: var(--dg-frame) 36 / 18px / 0 round;
   background: var(--dg-tex) repeat, var(--dg-bg1);
-  background-clip: padding-box;
+  /* tekstura także pod kratą ramki – inaczej w górnym pasie (32px) prześwituje mapa */
+  background-clip: border-box;
+  background-origin: border-box;
   box-shadow: 0 6px 18px rgba(0,0,0,.75);
   color: var(--dg-bone);
 }
-/* duże narożniki z czaszkami */
-${R} .border-window:not(.transparent)::before,
-${R} .border-window:not(.transparent)::after {
-  content: "";
-  position: absolute;
-  width: 56px; height: 56px;
-  background: url("${A}corner-skull.webp") 0 0 / 100% 100% no-repeat;
-  pointer-events: none;
-  z-index: 3;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.8));
-}
-${R} .border-window:not(.transparent)::before { top: -26px; left: -14px; }
-${R} .border-window:not(.transparent)::after { bottom: -14px; right: -14px; transform: scale(-1, -1); }
 
 ${R} .border-window:not(.transparent) > .content {
   background: rgba(11, 11, 13, .55);
@@ -123,10 +112,11 @@ ${R} .chat-channel-card.active {
 }
 
 /* ───────────── Przyciski ───────────── */
+/* border-width: 0 + jawna border-image-width → oprawa rysuje się na przycisku, nie zmieniając jego układu */
 ${R} .button {
   border-style: solid;
-  border-width: 5px 12px;
-  border-image: url("${A}button.webp") 28 60 / 5px 12px / 0 stretch;
+  border-width: 0;
+  border-image: url("${A}button.webp") 28 60 / 6px 14px / 0 stretch;
   box-shadow: none;
 }
 ${R} .button:hover { border-image-source: url("${A}button-hover.webp"); }
@@ -228,6 +218,13 @@ ${R} .interface-element-progress-bar-1 .inner {
 }
 ${R} .interface-element-progress-bar-0 .value,
 ${R} .interface-element-progress-bar-1 .value { color: #f1ebe0; }
+/* pasek EXP w dolnym panelu: karmazyn zamiast pomarańczu (bez EXP zostaje srebrny) */
+${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
+  background: linear-gradient(#0f0f0f 0%, #c0262d 25%, #8b0000 60%, #0f0f0f 100%);
+}
+${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress.noexp .inner {
+  background: linear-gradient(#0f0f0f 0%, #8a8a90 25%, #8a8a90 60%, #0f0f0f 100%);
+}
 
 /* ───────────── Tooltipy przedmiotów ───────────── */
 ${R} .tip-wrapper.normal-tip {
@@ -253,6 +250,19 @@ ${R} .dialogue-window .border-image {
   box-shadow: 0 8px 22px rgba(0,0,0,.85);
   inset: -12px;
 }
+/* duże kute narożniki z czaszką na górnych rogach dialogu (przykrywają małe czaszki z 9-slice) */
+${R} .dialogue-window .border-image::before,
+${R} .dialogue-window .border-image::after {
+  content: "";
+  position: absolute;
+  top: -24px;
+  width: 72px; height: 72px;
+  background: url("${A}corner-skull.webp") 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.8));
+}
+${R} .dialogue-window .border-image::before { left: -24px; }
+${R} .dialogue-window .border-image::after { right: -24px; transform: scaleX(-1); }
 ${R} .dialogue-window .dialogue-background-color { background: rgba(11,11,13,.72); }
 ${R} .dialogue-window .content .npc-message { color: var(--dg-bone); }
 
