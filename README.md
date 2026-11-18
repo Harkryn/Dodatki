@@ -102,7 +102,7 @@ Mroczny, spójny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z 
 Co jest ostylowane:
 - **tabliczka HUD** (imię, lokacja, waluty) — imię w przygaszonej czerwieni na czerni, **poniszczone maski demonów** po obu stronach,
 - **kula HP** — **runiczny pierścień** ze spękanego żelaza, który powoli się obraca, a żar w rowkach run pulsuje (animacja wyłącza się przy systemowym „ogranicz ruch”); gra dalej pokazuje w środku swój poziom HP i procent,
-- **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, maski demonów po bokach kuli, ciemne sloty,
+- **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, ciemne sloty, a po bokach kuli **głowy kamiennych posągów demonów** patrzące na wprost (w całości w dolnej belce); **gdy w łupie albo w torbie pojawi się nowa legenda, ich oczy płoną na czerwono ogniem przez kilka sekund** (podgląd: **Ctrl+Alt+L**; legenda jest rozpoznawana wyłącznie po wyglądzie przedmiotów, jak w Kociej Nocy),
 - **górna i dolna belka** — czerń z cienką kamienną krawędzią,
 - **przyciski HUD** — **12 kamiennych kafli o różnym stopniu zniszczenia** (każdy pasek zaczyna od innego, więc sąsiednie przyciski się różnią), ikony w szarości, kolor gry (fiolet, niebieski) zostaje jako słaby poblask,
 - **okna z ramką** — cienka (6 px) kamienna ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z subtelnymi narożnikami w kształcie sierpowatych rogów z runą, mocno przygaszona ściana z płaskorzeźbą demona w tle, tytuł kapitalikami na czerni,
@@ -129,4 +129,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (22 pliki WebP, razem ok. 171 KB, każdy poniżej 30 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (24 pliki WebP, razem ok. 181 KB, każdy poniżej 30 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
