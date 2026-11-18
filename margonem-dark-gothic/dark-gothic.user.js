@@ -85,9 +85,11 @@ html.${ON_CLASS} {
 @keyframes dg-pulse { 0%, 100% { opacity: .18; } 50% { opacity: .85; } }
 
 /* ═════════════ GÓRNA I DOLNA BELKA ═════════════ */
+/* position: relative (nie absolute!) – .bg nadaje belce wysokość; pozycjonowanie absolutne zwijało
+ * dolną belkę do zera i wypychało jej tło poza ekran */
 ${R} .top.positioner > .bg,
 ${R} .bottom.positioner > .bg {
-  position: absolute; inset: 0;
+  position: relative;
   background: linear-gradient(#0a0809, #040304);
 }
 /* kamienna krawędź od strony mapy */
