@@ -112,9 +112,12 @@ Co jest ostylowane:
 - **ekwipunek, torby, statystyki, czat** — czarne tło z ledwo widocznym dymem od dołu, aktywne zakładki z cienką czerwoną kreską, kolory kanałów bez zmian,
 - **tooltipy przedmiotów** — cienka kamienna ramka, ciemny nagłówek, kolory rzadkości bez zmian,
 - **przyciski tekstowe** — kamienna oprawa; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie (stonowane),
-- **paski postępu, scrollbary**.
+- **paski postępu, scrollbary**,
+- **wszystkie pozostałe okna gry** (dziennik zadań, gildia, społeczność, ustawienia, Premium, mapa świata i inne) — patrz niżej.
 
-Mapa (canvas) i logika gry pozostają nietknięte — skrypt wstrzykuje wyłącznie CSS.
+**Przemalowanie grafik gry w locie.** Gra rysuje większość interfejsu z kilkudziesięciu plików `/img/gui/*` (sam atlas `buttony.png` jest w ok. 180 regułach CSS). Skrypt pobiera te pliki z serwera gry, przemalowuje je w przeglądarce — drewno, brąz, pergamin i szarości zamienia w okopcony czarny kamień, a kolory znaczeniowe (złoto, zieleń statusów, błękit, czerwone znaczniki, jasne ikony) zostawia — i podmienia je w regułach CSS gry (ok. 320 reguł). Jasne, pergaminowe i szare tła w regułach są przyciemniane, a skaner w oknach rozjaśnia tekst, który był ciemny na pergaminie (neutralny → kość, kolorowy → ten sam odcień, jaśniej). Kopie grafik gry nie trafiają do repo — wszystko dzieje się lokalnie. Kursory, ramki rzadkości przedmiotów, ikony umiejętności i mapy zostają oryginalne. Wyłączenie motywu przywraca oryginalne grafiki i kolory bez przeładowania strony.
+
+Mapa (canvas) i logika gry pozostają nietknięte — skrypt zmienia wyłącznie wygląd (CSS i grafiki interfejsu).
 
 **Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-gothic/dark-gothic.user.js
 
