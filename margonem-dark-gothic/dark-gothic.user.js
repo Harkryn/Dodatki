@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.9.0
+// @version      3.9.1
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -542,10 +542,10 @@ ${R} .stats-wrapper.interface-element-background-color-3 {
 }
 /* własne, proste ikonki statystyk (czytelne w 19 px); lista odsunięta od runicznego brzegu płyty */
 ${R} .stats-wrapper .stat-icon { background-size: 100% 100%; background-position: 0 0; background-repeat: no-repeat; filter: drop-shadow(0 0 2px #000); }
-${R} .stats-wrapper .attack .stat-icon { background-image: url("${A}stat-attack.webp"); }
-${R} .stats-wrapper .attack-speed .stat-icon { background-image: url("${A}stat-speed.webp"); }
-${R} .stats-wrapper .defence .stat-icon { background-image: url("${A}stat-defence.webp"); }
-${R} .stats-wrapper .resists .stat-icon { background-image: url("${A}stat-resist.webp"); }
+${R} .stats-wrapper .attack .stat-icon { background: url("${A}stat-attack.webp") 0 0 / 100% 100% no-repeat; }
+${R} .stats-wrapper .attack-speed .stat-icon { background: url("${A}stat-speed.webp") 0 0 / 100% 100% no-repeat; }
+${R} .stats-wrapper .defence .stat-icon { background: url("${A}stat-defence.webp") 0 0 / 100% 100% no-repeat; }
+${R} .stats-wrapper .resists .stat-icon { background: url("${A}stat-resist.webp") 0 0 / 100% 100% no-repeat; }
 ${R} .stats-wrapper .stats-list { left: 13px; top: 29px; }
 ${R} .stats-wrapper .stats-button { top: 104px; }
 ${R} .stats-wrapper .header-title-wrapper { margin: 6px 11px 0; }
