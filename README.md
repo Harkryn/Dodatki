@@ -100,8 +100,8 @@ Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-
 Mroczny, spójny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **własnych rastrowych grafik**: spękany, okopcony kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP. Prawie wszystko jest czarne, a czerwień to tylko stłumiony akcent. Paleta: `#050405`/`#09080a`/`#110e10`, przygaszona czerwień `#43080c`/`#6e0f14`/`#8f1a1f`, popiół `#8d878c`, kość `#cbc2b6`.
 
 Co jest ostylowane:
-- **tabliczka HUD** (imię, mapa z koordynatami, świat) — imię w przygaszonej czerwieni na spękanym granicie, **poniszczone głowy demonów** po obu stronach, pod napisami ciemna kamienna listwa, w której **runy pulsują na czerwono** jak w pierścieniu kuli HP, a kropla w medalionie przyjmuje kolor trybu PvP mapy,
-- **złoto i smocze łzy** — przeniesione z tabliczki na kamienną płytkę obok toreb (nad ekwipunkiem); „+” i podpowiedzi działają jak w grze,
+- **tabliczka HUD** (imię, mapa z koordynatami, świat, złoto i smocze łzy — zagęszczona, żeby nie zasłaniała mapy) — imię w przygaszonej czerwieni na spękanym granicie, **poniszczone głowy demonów** po obu stronach, pod napisami ciemna kamienna listwa, w której **runy pulsują na czerwono** jak w pierścieniu kuli HP, a kropla w medalionie przyjmuje kolor trybu PvP mapy,
+- **siatka slotów** (torba, sklep) — linie w bardzo ciemnej czerwieni, po których co kilka sekund przesuwa się delikatny połysk,
 - **statystyki** — na runicznej płycie, z własnymi prostymi ikonkami (atak, szybkość ataku, obrona, odporności),
 - **kula HP** — **runiczny pierścień** ze spękanego żelaza, który powoli się obraca, a żar w rowkach run pulsuje (animacja wyłącza się przy systemowym „ogranicz ruch”); gra dalej pokazuje w środku swój poziom HP i procent,
 - **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, ciemne sloty, a po bokach kuli **głowy kamiennych posągów demonów** patrzące na wprost (w całości w dolnej belce); **gdy w łupie albo w torbie pojawi się nowa legenda, ich oczy płoną na czerwono ogniem przez kilka sekund** (podgląd: **Ctrl+Alt+L**; legenda jest rozpoznawana wyłącznie po wyglądzie przedmiotów, jak w Kociej Nocy),
@@ -129,6 +129,8 @@ Instalacja:
 3. Wyłącz w Tampermonkey inne motywy interfejsu (Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
 4. Odśwież grę.
 
+Aktualizacje: Tampermonkey sam pobiera nowe wersje z tego repo (albo ręcznie: Tampermonkey → Panel → „Sprawdź aktualizacje”).
+
 Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (24 pliki WebP, razem ok. 181 KB, każdy poniżej 30 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (38 plików WebP, razem ok. 333 KB, każdy poniżej 40 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
