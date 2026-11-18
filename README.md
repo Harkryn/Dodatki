@@ -105,11 +105,11 @@ Co jest ostylowane:
 - **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, maski demonów po bokach kuli, ciemne sloty,
 - **górna i dolna belka** — czerń z cienką kamienną krawędzią,
 - **przyciski HUD** — **12 kamiennych kafli o różnym stopniu zniszczenia** (każdy pasek zaczyna od innego, więc sąsiednie przyciski się różnią), ikony w szarości, kolor gry (fiolet, niebieski) zostaje jako słaby poblask,
-- **okna z ramką** — cienka (6 px) kamienna ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z subtelnymi narożnikami w kształcie sierpowatych rogów z runą, czyste czarne tło, tytuł kapitalikami na czerni,
+- **okna z ramką** — cienka (6 px) kamienna ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z subtelnymi narożnikami w kształcie sierpowatych rogów z runą, mocno przygaszona ściana z płaskorzeźbą demona w tle, tytuł kapitalikami na czerni,
 - **okna przezroczyste** (śledzone questy, sorter) — czerń z cienką obwódką,
 - **dialog z NPC** — ta sama cienka rama z narożnikami,
 - **sklep** — markiza przyciemniona do brązowej czerni, kamienna krawędź zamiast drewnianej belki,
-- **ekwipunek, torby, statystyki, czat** — czyste czarne tło (bez czerwonej mgły), aktywne zakładki z cienką czerwoną kreską, kolory kanałów bez zmian,
+- **ekwipunek, torby, statystyki, czat** — ciemna ilustracja w tle kolumn (spękana ściana z płaskorzeźbą demona, łańcuchami, runami i czaszkami, przyciemniona tak, by nie przeszkadzała w czytaniu), aktywne zakładki z cienką czerwoną kreską, kolory kanałów bez zmian,
 - **tooltipy przedmiotów** — cienka kamienna ramka, ciemny nagłówek, kolory rzadkości bez zmian,
 - **przyciski tekstowe** — kamienna oprawa; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie (stonowane),
 - **paski postępu, scrollbary**,
@@ -129,4 +129,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (21 plików WebP, razem ok. 156 KB, każdy poniżej 30 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (22 pliki WebP, razem ok. 171 KB, każdy poniżej 30 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).

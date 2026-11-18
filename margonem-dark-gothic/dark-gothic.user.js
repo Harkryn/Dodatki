@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.2.0
+// @version      3.3.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -41,6 +41,7 @@
    *   demon.webp        180×220 poniszczona maska demona
    *   orb-ring.webp     260×260 runiczny pierścień kuli HP (otwór r≈92 px → 46 px)
    *   orb-runes.webp    260×260 sam żar w rowkach run (warstwa pulsująca)
+   *   bg-wall.webp      512×1344 przyciemniona ściana z płaskorzeźbą demona (tło kolumn i okien)
    */
 
   // Kafle przycisków HUD: każdy pasek zaczyna od innego kafla, żeby sąsiednie przyciski się różniły.
@@ -69,6 +70,7 @@ html.${ON_CLASS} {
   --dg-frame: url("${A}frame.webp");
   --dg-edge: url("${A}edge.webp");
   --dg-demon: url("${A}demon.webp");
+  --dg-wall: url("${A}bg-wall.webp");
   --dg-corners:
     url("${A}corner-tl.webp") left top / 26px 26px no-repeat,
     url("${A}corner-tr.webp") right top / 26px 26px no-repeat,
@@ -217,7 +219,8 @@ ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
 
 /* ═════════════ BOCZNE KOLUMNY I CZAT ═════════════ */
 ${R} .layer.interface-layer .main-column {
-  background: linear-gradient(#0a0809, var(--dg-void) 60%);
+  /* ciemna ściana z płaskorzeźbą demona, łańcuchami i czaszkami – u dołu kolumny, góra pod tekstem zostaje ciemna */
+  background: var(--dg-wall) center bottom / 100% auto no-repeat, var(--dg-void);
 }
 ${R} .layer.interface-layer .main-column > .border,
 ${R} .interface-element-vertical-wood {
@@ -260,7 +263,8 @@ ${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) br
 /* ═════════════ OKNA ═════════════ */
 ${R} .border-window:not(.transparent) {
   border-image: var(--dg-frame) 12 / 6px / 0 round;
-  background: linear-gradient(#0b090a, var(--dg-void) 70%);
+  /* ta sama ściana, mocniej przygaszona – w oknach ma być tylko tłem */
+  background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-wall) center / cover no-repeat, var(--dg-void);
   background-clip: border-box;
   background-origin: border-box;
   box-shadow: 0 10px 26px rgba(0,0,0,.85), 0 0 0 1px #000;
@@ -341,7 +345,7 @@ ${R} .interface-element-middle-3-background,
 ${R} .interface-element-middle-3-background-stretch { background: rgba(7, 6, 7, .94); }
 ${R} .interface-element-background-color-1,
 ${R} .interface-element-middle-1-background,
-${R} .interface-element-middle-1-background-stretch { background: var(--dg-void); }
+${R} .interface-element-middle-1-background-stretch { background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-wall) center / cover no-repeat, var(--dg-void); }
 ${R} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px #1d191b, inset 0 0 14px #000; }
 ${R} .interface-element-active-card-background-stretch,
 ${R} .interface-element-active-card-border-image {
@@ -383,7 +387,7 @@ ${R} .tip-wrapper .item-tip-section { border-color: var(--dg-hair) !important; }
 ${R} .dialogue-window .border-image {
   border: 6px solid transparent;
   border-image: var(--dg-frame) 12 / 6px / 0 round;
-  background: linear-gradient(#0b090a, var(--dg-void) 70%);
+  background: linear-gradient(rgba(5,4,5,.6), rgba(5,4,5,.6)), var(--dg-wall) center / cover no-repeat, var(--dg-void);
   background-clip: padding-box;
   box-shadow: 0 10px 26px rgba(0,0,0,.9);
   inset: -4px;
