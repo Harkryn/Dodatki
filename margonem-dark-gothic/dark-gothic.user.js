@@ -220,8 +220,10 @@ ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
 /* ═════════════ BOCZNE KOLUMNY I CZAT ═════════════ */
 ${R} .layer.interface-layer .main-column {
   /* ciemna ściana z płaskorzeźbą demona, łańcuchami i czaszkami – u dołu kolumny, góra pod tekstem zostaje ciemna */
-  background: var(--dg-wall) center bottom / 100% auto no-repeat, var(--dg-void);
+  background: linear-gradient(rgba(5,4,5,.5), rgba(5,4,5,.12) 55%, rgba(5,4,5,0)), var(--dg-wall) center bottom / 100% auto no-repeat, var(--dg-void);
 }
+/* tekst czatu na ilustracji – cień dla czytelności */
+${R} .chat-message-wrapper .scroll-pane { text-shadow: 0 1px 2px #000, 0 0 4px #000; }
 ${R} .layer.interface-layer .main-column > .border,
 ${R} .interface-element-vertical-wood {
   background: none;
