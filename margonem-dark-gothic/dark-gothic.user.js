@@ -547,8 +547,8 @@ ${R} .character_wrapper .stats-wrapper .stats-list li.attack .stat-icon { backgr
 ${R} .character_wrapper .stats-wrapper .stats-list li.attack-speed .stat-icon { background: url("${A}stat-speed.webp") 0 0 / 100% 100% no-repeat; }
 ${R} .character_wrapper .stats-wrapper .stats-list li.defence .stat-icon { background: url("${A}stat-defence.webp") 0 0 / 100% 100% no-repeat; }
 ${R} .character_wrapper .stats-wrapper .stats-list li.resists .stat-icon { background: url("${A}stat-resist.webp") 0 0 / 100% 100% no-repeat; }
-${R} .stats-wrapper .stats-list { left: 13px; top: 29px; }
-${R} .stats-wrapper .stats-button { top: 104px; }
+${R} .character_wrapper .stats-wrapper .stats-list { left: 13px; top: 29px; }
+${R} .character_wrapper .stats-wrapper .stats-button { top: 104px; }
 ${R} .stats-wrapper .header-title-wrapper { margin: 6px 11px 0; }
 ${R} .interface-element-background-color-3,
 ${R} .interface-element-middle-3-background,
