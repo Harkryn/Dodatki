@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.0.0
-// @description  Mroczny, demoniczny motyw interfejsu Margonem z własnych grafik: głowy demonów, czarne żelazo z żarem, krwawy dym, pierścień kuli HP. Tylko wygląd – bez zmian w logice gry.
+// @version      3.0.0
+// @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -29,188 +29,194 @@
   // Każda reguła jest pod html.dg-on i wewnątrz .game-window-positioner:
   // wyłączenie motywu = zdjęcie jednej klasy; forum i strona główna są nietknięte.
   const R = 'html.' + ON_CLASS + ' .game-window-positioner';
-  // Tabliczka HUD: reguły gry mają tu 6 klas, więc pełna ścieżka jest potrzebna, żeby wygrać.
+  // Tabliczka HUD: reguły gry mają tu 6 klas, więc potrzebna jest pełna ścieżka.
   const HUD = R + ' .layer.interface-layer .positioner.top .hud-container';
 
   /*
-   * Geometria grafik (piksele w plikach; wyświetlane w połowie rozmiaru = ostre na ekranach 2x):
-   *   frame.webp      166×166  9-slice, róg 28 px (żelazne guzy z żarem), krawędź = belka z runami
-   *   beam.webp       110×28   kafel belki (powtarzany w poziomie)
-   *   nameplate.webp  680×152  tabliczka HUD z rogami
-   *   header.webp     560×117  baner tytułu okna (końcówki z rogami ~120 px)
-   *   demon.webp      188×220  głowa demona
-   *   orb-ring.webp   334×344  pierścień kuli HP; środek otworu (168.7, 181.3), promień 98
-   *   button.webp     96×96    kafel przycisku (+ button-hover.webp)
-   *   skull.webp      73×96    czaszka demona
-   *   smoke.webp      512×512  krwawy dym (tło, bez powtarzania)
+   * Grafiki (piksele w plikach; wyświetlane w połowie rozmiaru = ostre na ekranach 2x):
+   *   frame.webp        79×79   cienka ramka 9-slice ze spękanego kamienia (róg 12 px → 6 px)
+   *   corner-*.webp     64×64   subtelne narożniki: sierpowate łuki-rogi z runą (tl/tr/bl/br)
+   *   edge.webp         55×12   kafel kamiennej krawędzi belek
+   *   btn-01…12.webp    96×96   12 kamiennych kafli przycisków o różnym stopniu zniszczenia
+   *   demon.webp        180×220 poniszczona maska demona
+   *   orb-ring.webp     260×260 runiczny pierścień kuli HP (otwór r≈92 px → 46 px)
+   *   orb-runes.webp    260×260 sam żar w rowkach run (warstwa pulsująca)
+   *   smoke.webp        512×512 bardzo ciemny krwawy dym (tło, bez powtarzania)
    */
+
+  // Kafle przycisków HUD: każdy pasek zaczyna od innego kafla, żeby sąsiednie przyciski się różniły.
+  const BTN = (i) => `url("${A}btn-${String(i).padStart(2, '0')}.webp")`;
+  const BAR_OFFSETS = { 'top-left': 0, 'top-right': 4, 'bottom-left': 7, 'bottom-right': 10 };
+  let btnRules = '';
+  for (const [bar, off] of Object.entries(BAR_OFFSETS)) {
+    for (let k = 1; k <= 12; k++) {
+      btnRules += `${R} .main-buttons-container.${bar} .widget-button:nth-child(12n+${k}) { --dg-btn: ${BTN(((k - 1 + off) % 12) + 1)}; }\n`;
+    }
+  }
+
   const css = `
 html.${ON_CLASS} {
-  --dg-void: #070607;
-  --dg-bg0: #0b0b0d;
-  --dg-bg1: #141012;
-  --dg-blood: #3a0508;
-  --dg-bordo: #5a0a0f;
-  --dg-red: #8b0000;
-  --dg-ember: #c0262d;
-  --dg-bone: #d8cfc0;
-  --dg-silver: #8a8a90;
-  --dg-line: rgba(139, 0, 0, .55);
+  --dg-void: #050405;
+  --dg-bg0: #09080a;
+  --dg-bg1: #110e10;
+  --dg-blood: #2a0507;
+  --dg-bordo: #43080c;
+  --dg-red: #6e0f14;
+  --dg-ember: #8f1a1f;
+  --dg-bone: #cbc2b6;
+  --dg-ash: #8d878c;
+  --dg-line: rgba(110, 15, 20, .38);
+  --dg-hair: rgba(140, 132, 138, .16);
   --dg-frame: url("${A}frame.webp");
-  --dg-beam: url("${A}beam.webp");
+  --dg-edge: url("${A}edge.webp");
   --dg-smoke: url("${A}smoke.webp");
   --dg-demon: url("${A}demon.webp");
+  --dg-corners:
+    url("${A}corner-tl.webp") left top / 26px 26px no-repeat,
+    url("${A}corner-tr.webp") right top / 26px 26px no-repeat,
+    url("${A}corner-bl.webp") left bottom / 26px 26px no-repeat,
+    url("${A}corner-br.webp") right bottom / 26px 26px no-repeat;
   --dg-font-title: "Cinzel", "Trajan Pro", Georgia, "Times New Roman", serif;
 }
 
-/* ═════════════ GÓRNA BELKA I TABLICZKA HUD ═════════════ */
+@keyframes dg-spin { to { transform: rotate(360deg); } }
+@keyframes dg-pulse { 0%, 100% { opacity: .18; } 50% { opacity: .85; } }
+
+/* ═════════════ GÓRNA I DOLNA BELKA ═════════════ */
 ${R} .top.positioner > .bg,
 ${R} .bottom.positioner > .bg {
-  background:
-    linear-gradient(rgba(58,5,8,.18), rgba(0,0,0,0) 60%),
-    linear-gradient(#0c0a0b, #050405);
+  position: absolute; inset: 0;
+  background: linear-gradient(#0a0809, #040304);
 }
-/* belka z runami na krawędzi od strony mapy */
+/* kamienna krawędź od strony mapy */
 ${R} .top.positioner > .bg::after,
 ${R} .bottom.positioner > .bg::after {
   content: "";
-  position: absolute;
-  left: 0; right: 0;
-  height: 14px;
-  background: var(--dg-beam) repeat-x 0 0 / auto 14px;
-  filter: drop-shadow(0 0 4px rgba(0,0,0,.9));
+  position: absolute; left: 0; right: 0;
+  height: 6px;
+  background: var(--dg-edge) repeat-x 0 0 / auto 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,.9);
   pointer-events: none;
 }
-${R} .top.positioner > .bg::after { bottom: -7px; }
-${R} .bottom.positioner > .bg::after { top: -7px; }
-${R} .top.positioner > .bg, ${R} .bottom.positioner > .bg { position: absolute; inset: 0; }
-
-/* tabliczka z imieniem, lokacją i złotem */
-${HUD} {
-  background: none;
-  z-index: 0;
-}
-/* ikony walut były częścią sprite'a tabliczki – podstawiamy czyste ikony gry */
-${HUD} .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat; filter: drop-shadow(0 0 2px #000); }
-${HUD} .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
-${R} .hud-container::before {
+${R} .top.positioner > .bg::after { bottom: -3px; }
+${R} .bottom.positioner > .bg::after { top: -3px; }
+/* maski demonów po bokach kuli HP (dolny panel jest wyśrodkowany) */
+${R} .bottom.positioner > .bg::before {
   content: "";
   position: absolute;
-  left: -40px; right: -40px;
-  top: -14px; height: 94px;
-  z-index: -1;
+  left: calc(50% - 340px); width: 680px;
+  top: -40px; height: 62px;
   background:
-    url("${A}nameplate.webp") center / 100% 100% no-repeat,
-    linear-gradient(#0d0a0b, #050304) center 52% / 64% 50% no-repeat;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,.9));
+    var(--dg-demon) left center / auto 100% no-repeat,
+    var(--dg-demon) right center / auto 100% no-repeat;
+  filter: drop-shadow(0 3px 4px #000);
   pointer-events: none;
 }
-/* głowy demonów po obu stronach tabliczki */
+
+/* ═════════════ TABLICZKA HUD ═════════════ */
+${HUD} {
+  background: radial-gradient(ellipse 60% 85% at 50% 30%, rgba(30, 5, 7, .55), rgba(0,0,0,0) 72%);
+  z-index: 0;
+}
+/* maski demonów po obu stronach imienia */
 ${R} .hud-container::after {
   content: "";
   position: absolute;
-  left: -104px; right: -104px;
-  top: -6px; height: 70px;
-  z-index: -2;
+  left: -66px; right: -66px;
+  top: -2px; height: 64px;
+  z-index: -1;
   background:
     var(--dg-demon) left center / auto 100% no-repeat,
     var(--dg-demon) right center / auto 100% no-repeat;
-  filter: drop-shadow(0 3px 5px rgba(0,0,0,.95)) brightness(.9);
+  filter: drop-shadow(0 3px 4px #000);
   pointer-events: none;
 }
 ${HUD} .hero-data .heroname {
-  color: var(--dg-ember);
+  color: #a3242a;
   font-family: var(--dg-font-title);
   font-weight: 700;
-  letter-spacing: .03em;
-  text-shadow: 0 0 6px rgba(139,0,0,.75), 0 1px 1px #000;
+  letter-spacing: .04em;
+  text-shadow: 0 0 5px rgba(80, 6, 10, .8), 0 1px 1px #000;
 }
-${HUD} .location,
-${HUD} .coords,
-${HUD} .world-name,
-${HUD} .herogold,
-${HUD} .herocredits {
-  color: #a8a2a6;
+${HUD} .location, ${HUD} .coords, ${HUD} .world-name, ${HUD} .herocredits {
+  color: var(--dg-ash);
   text-shadow: 0 1px 1px #000;
 }
-${HUD} .herogold { color: var(--dg-bone); font-weight: 700; }
+${HUD} .herogold { color: var(--dg-bone); font-weight: 700; text-shadow: 0 1px 1px #000; }
+/* ikony walut były częścią sprite'a tabliczki – podstawiamy czyste ikony gry */
+${HUD} .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat; filter: drop-shadow(0 0 2px #000) brightness(.9); }
+${HUD} .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat; transform: scale(.85); filter: drop-shadow(0 0 2px #000) brightness(.9); }
 ${HUD} .btn-min {
-  background: linear-gradient(#3a0508, #160203);
-  box-shadow: inset 0 0 0 1px #5a0a0f, 0 0 0 1px #000;
-  color: var(--dg-bone);
+  background: ${BTN(12)} center / 100% 100%, #0b090a;
+  box-shadow: 0 0 0 1px #000;
+  color: var(--dg-ash);
 }
+${HUD} .btn-min:hover { color: var(--dg-bone); filter: brightness(1.25); }
 
-/* ═════════════ DOLNY PANEL, KULA HP, EXP ═════════════ */
-/* oryginalna grafika panelu → poczerniałe żelazo */
-${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.42) contrast(1.35); }
-/* pierścień kuli HP i głowy demonów zawieszone na .bottom-panel-pointer-bg (wyśrodkowane nad kulą) */
-${R} .bottom-panel-pointer-bg::before {
-  content: "";
-  position: absolute;
-  /* środek kuli: 120 px od lewej krawędzi tego elementu, 29 px poniżej jego góry */
-  left: calc(120px - 84.35px);
-  top: calc(29px - 90.65px);
-  width: 167px; height: 172px;
-  background: url("${A}orb-ring.webp") 0 0 / 100% 100% no-repeat;
-  z-index: 2;
-  pointer-events: none;
-}
+/* ═════════════ KULA HP: runiczny pierścień (obraca się, runy pulsują) ═════════════ */
+${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.3) contrast(1.4); }
+${R} .bottom-panel-pointer-bg::before,
 ${R} .bottom-panel-pointer-bg::after {
   content: "";
   position: absolute;
-  left: calc(120px - 330px); width: 660px;
-  top: -44px; height: 68px;
-  background:
-    var(--dg-demon) left center / auto 100% no-repeat,
-    var(--dg-demon) right center / auto 100% no-repeat;
-  filter: drop-shadow(0 3px 5px rgba(0,0,0,.95)) brightness(.85);
-  z-index: 0;
+  /* środek kuli: 120 px od lewej krawędzi tego elementu, 29 px poniżej jego góry */
+  left: calc(120px - 65px);
+  top: calc(29px - 65px);
+  width: 130px; height: 130px;
   pointer-events: none;
+  z-index: 2;
+}
+${R} .bottom-panel-pointer-bg::before {
+  background: url("${A}orb-ring.webp") 0 0 / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 4px #000);
+  animation: dg-spin 120s linear infinite;
+}
+${R} .bottom-panel-pointer-bg::after {
+  background: url("${A}orb-runes.webp") 0 0 / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  animation: dg-spin 120s linear infinite, dg-pulse 6s ease-in-out infinite;
 }
 ${R} .hp-indicator-wrapper .value {
-  color: #f1e6dc;
+  color: #e6ddd2;
   font-family: var(--dg-font-title);
   text-shadow: 0 0 6px #000, 0 0 2px #000;
 }
 ${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
-  background: linear-gradient(#0f0f0f 0%, #c0262d 25%, #8b0000 60%, #0f0f0f 100%);
+  background: linear-gradient(#0c0a0b 0%, #7a1419 30%, #560b0f 62%, #0c0a0b 100%);
 }
 ${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress.noexp .inner {
-  background: linear-gradient(#0f0f0f 0%, #8a8a90 25%, #8a8a90 60%, #0f0f0f 100%);
+  background: linear-gradient(#0c0a0b 0%, #6e6a6e 30%, #4d494d 62%, #0c0a0b 100%);
 }
-${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay { filter: grayscale(1) brightness(.6) contrast(1.3); }
+${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay,
 ${R} .bottom-panel-pointer-bg .pointer-exp-graphic,
-${R} .bottom-panel-pointer-bg .pointer-ttl-graphic { filter: grayscale(1) brightness(.5) contrast(1.3); }
+${R} .bottom-panel-pointer-bg .pointer-ttl-graphic { filter: grayscale(1) brightness(.45) contrast(1.3); }
 ${R} .bottom-panel-pointer-bg .pointer-exp,
-${R} .bottom-panel-pointer-bg .pointer-ttl { color: #c9c2c6; text-shadow: 0 1px 2px #000; }
-/* sloty szybkiego użycia */
+${R} .bottom-panel-pointer-bg .pointer-ttl { color: #b3acb1; text-shadow: 0 1px 2px #000; }
 ${R} .interface-element-one-item-slot-2 {
-  background: radial-gradient(circle at 50% 40%, #171214, #070607 75%);
-  border-color: #2a0a0c;
-  outline-color: #050405;
-  box-shadow: inset 0 0 10px #000, inset 0 0 0 1px rgba(139,0,0,.25);
+  background: radial-gradient(circle at 50% 40%, #141113, #060506 75%);
+  border-color: #1d191b;
+  outline-color: #030203;
+  box-shadow: inset 0 0 10px #000;
 }
 
-/* ═════════════ PRZYCISKI HUD (kwadratowe ikony) ═════════════ */
+/* ═════════════ PRZYCISKI HUD: 12 kamiennych kafli ═════════════ */
+${btnRules}
 ${R} .widget-button,
-${R} .widget-button.green,
-${R} .widget-button.blue,
-${R} .widget-button.violet,
-${R} .widget-button.blink-violet,
-${R} .widget-button.red {
-  background: url("${A}button.webp") center / 100% 100% no-repeat, #070607;
+${R} .widget-button.green, ${R} .widget-button.blue, ${R} .widget-button.violet,
+${R} .widget-button.blink-violet, ${R} .widget-button.red, ${R} .widget-button.orange {
+  background: var(--dg-btn, ${BTN(1)}) center / 100% 100% no-repeat, #060506;
   box-shadow: none;
 }
 ${R} .widget-button::before { box-shadow: none; }
-${R} .widget-button:hover { background-image: url("${A}button-hover.webp"); }
-/* kolor przycisku gry zostaje jako delikatna poświata (fiolet = nowość, niebieski = grupa…) */
-${R} .widget-button.violet::before, ${R} .widget-button.blink-violet::before { box-shadow: inset 0 0 10px rgba(150, 80, 190, .55); }
-${R} .widget-button.blue::before { box-shadow: inset 0 0 10px rgba(60, 120, 200, .5); }
-${R} .widget-button .icon { filter: grayscale(1) brightness(1.25) contrast(1.05) drop-shadow(0 1px 1px #000); }
-${R} .widget-button:hover .icon { filter: grayscale(.2) brightness(1.3) drop-shadow(0 0 4px rgba(192,38,45,.7)); }
-${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.55); }
+/* kolor przycisku z gry zostaje jako słaby poblask (fiolet = nowość, niebieski = grupa) */
+${R} .widget-button.violet::before, ${R} .widget-button.blink-violet::before { box-shadow: inset 0 0 9px rgba(120, 70, 160, .45); }
+${R} .widget-button.blue::before { box-shadow: inset 0 0 9px rgba(60, 100, 170, .4); }
+${R} .widget-button .icon { filter: grayscale(1) brightness(1.05) contrast(1.05) drop-shadow(0 1px 1px #000); }
+${R} .widget-button:hover { filter: brightness(1.25); }
+${R} .widget-button:hover .icon { filter: grayscale(.35) brightness(1.15) drop-shadow(0 1px 1px #000); }
+${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
 
-/* ═════════════ BOCZNE KOLUMNY ═════════════ */
+/* ═════════════ BOCZNE KOLUMNY I CZAT ═════════════ */
 ${R} .layer.interface-layer .main-column {
   background: var(--dg-smoke) left bottom / 170% auto no-repeat, var(--dg-void);
 }
@@ -220,76 +226,67 @@ ${R} .interface-element-vertical-wood {
   background: none;
   box-sizing: border-box;
   border-style: solid;
-  border-width: 0 0 0 10px;
-  border-image: var(--dg-frame) 28 / 0 0 0 10px / 0 round;
+  border-width: 0 0 0 6px;
+  border-image: var(--dg-frame) 12 / 0 0 0 6px / 0 round;
 }
-
-/* ═════════════ CZAT ═════════════ */
 ${R} .left-column .new-chat-window,
 ${R} .left-column .chat-input-wrapper { background: transparent; }
 ${R} .left-column .chat-channel-card-wrapper {
-  background: linear-gradient(#0e0b0c, rgba(7,6,7,.6));
-  box-shadow: inset 0 -1px 0 var(--dg-line);
+  background: linear-gradient(#0b090a, rgba(5,4,5,.5));
+  box-shadow: inset 0 -1px 0 var(--dg-hair);
 }
 ${R} .left-column .chat-input-wrapper {
-  background: rgba(5,4,5,.88);
-  box-shadow: inset 0 1px 0 var(--dg-line);
+  background: rgba(4,3,4,.9);
+  box-shadow: inset 0 1px 0 var(--dg-hair);
 }
-${R} .left-column .magic-input-wrapper { background: rgba(0,0,0,.55); }
+${R} .left-column .magic-input-wrapper { background: rgba(0,0,0,.5); }
 
 /* ═════════════ ZAKŁADKI ═════════════ */
 ${R} .tabs-nav .card,
 ${R} .chat-channel-card {
-  background-image: linear-gradient(#141012, #070607);
-  color: #77727a;
-  box-shadow: inset 0 0 0 1px #1e1a1c;
+  background-image: linear-gradient(#100d0f, #060506);
+  color: #6b666a;
+  box-shadow: inset 0 0 0 1px #1a1618;
 }
 ${R} .tabs-nav .card:hover,
 ${R} .chat-channel-card:hover { color: var(--dg-bone); }
 ${R} .tabs-nav .card.active,
 ${R} .chat-channel-card.active {
-  background-image: linear-gradient(#3a0508, #120203);
+  background-image: linear-gradient(#1b0a0c, #0b0607);
   color: var(--dg-bone);
-  box-shadow: inset 0 0 0 1px #6b0d13, inset 0 -2px 0 var(--dg-ember), 0 0 8px rgba(139,0,0,.35);
+  box-shadow: inset 0 0 0 1px #2d1a1c, inset 0 -2px 0 var(--dg-red);
 }
-${R} .chat-channel-card .chat-channel-card-icon { filter: grayscale(1) brightness(1.1); }
-${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(.3) brightness(1.2) drop-shadow(0 0 3px rgba(192,38,45,.6)); }
+${R} .chat-channel-card .chat-channel-card-icon { filter: grayscale(1) brightness(.95); }
+${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) brightness(1.3); }
 
 /* ═════════════ OKNA ═════════════ */
 ${R} .border-window:not(.transparent) {
-  border-image: var(--dg-frame) 28 / 14px / 0 round;
+  border-image: var(--dg-frame) 12 / 6px / 0 round;
   background: var(--dg-smoke) center bottom / 140% auto no-repeat, var(--dg-void);
   background-clip: border-box;
   background-origin: border-box;
-  box-shadow: 0 10px 28px rgba(0,0,0,.85), 0 0 0 1px #000;
+  box-shadow: 0 10px 26px rgba(0,0,0,.85), 0 0 0 1px #000;
   color: var(--dg-bone);
 }
-/* czaszka demona pośrodku dolnej krawędzi */
-${R} .border-window:not(.transparent)::after {
+/* subtelne narożniki: sierpowate łuki-rogi z runą */
+${R} .border-window:not(.transparent)::before {
   content: "";
   position: absolute;
-  left: 50%; bottom: -46px;
-  width: 26px; height: 34px;
-  margin-left: -13px;
-  background: url("${A}skull.webp") 0 0 / 100% 100% no-repeat;
-  filter: drop-shadow(0 2px 3px #000);
+  inset: -32px -20px;
+  background: var(--dg-corners);
   pointer-events: none;
   z-index: 3;
 }
 ${R} .border-window:not(.transparent) > .content {
-  background: rgba(7, 6, 7, .62);
+  background: rgba(5, 4, 5, .6);
   color: var(--dg-bone);
-  box-shadow: inset 0 0 0 1px rgba(139,0,0,.22), inset 0 0 30px rgba(0,0,0,.85);
+  box-shadow: inset 0 0 0 1px var(--dg-hair), inset 0 0 28px rgba(0,0,0,.85);
 }
-${R} .border-window .content a { color: #d0453c; }
-
-/* baner tytułu z rogami (rysowany przez border-image na .header-label, wychodzi na miejsce ozdób) */
+${R} .border-window .content a { color: #b8443d; }
+/* tytuł okna: bez ozdobnych tabliczek – kapitaliki na czerni z cienką kreską */
 ${R} .border-window .header-label-positioner .header-label {
-  background: none;
-  box-shadow: none;
-  border-style: solid;
-  border-width: 0;
-  border-image: url("${A}header.webp") 0 125 fill / 0 30px / 0 46px stretch;
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(20,6,8,.9) 25%, rgba(20,6,8,.9) 75%, rgba(0,0,0,0));
+  box-shadow: inset 0 -1px 0 var(--dg-line);
 }
 ${R} .border-window .header-label-positioner .header-label .left-decor,
 ${R} .border-window .header-label-positioner .header-label .right-decor { background: none; }
@@ -297,127 +294,123 @@ ${R} .border-window .header-label-positioner .header-label .text {
   color: var(--dg-bone);
   font-family: var(--dg-font-title);
   font-variant: small-caps;
-  letter-spacing: .08em;
-  text-shadow: 0 0 6px rgba(139,0,0,.9), 0 1px 1px #000;
+  letter-spacing: .1em;
+  text-shadow: 0 1px 2px #000;
 }
-/* okna przezroczyste (questy, sorter) – lżejsze: bez rogów, tylko kreska */
-${R} .border-window.transparent .header-label-positioner .header-label { border-image: none; }
-${R} .border-window.transparent .header-label-positioner .header-label .text {
-  color: #c9bfb3; font-family: var(--dg-font-title); font-variant: small-caps; letter-spacing: .06em; text-shadow: 0 1px 2px #000;
-}
+${R} .border-window.transparent .header-label-positioner .header-label { background: none; box-shadow: none; }
+${R} .border-window.transparent .header-label-positioner .header-label .text { color: #b9b0a5; }
 ${R} .border-window.transparent .border-image {
-  background: linear-gradient(rgba(10,8,9,.9), rgba(5,4,5,.86));
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(139,0,0,.45), 0 4px 14px rgba(0,0,0,.7);
+  background: linear-gradient(rgba(8,6,7,.92), rgba(4,3,4,.88));
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--dg-hair), 0 4px 14px rgba(0,0,0,.7);
 }
-/* zamknięcie – czerwony krzyżyk bez drewnianego narożnika */
-${R} .border-window:not(.transparent) .close-button-corner-decor { background: none; }
-${R} .border-window:not(.transparent) .close-button-corner-decor .close-button {
-  filter: grayscale(1) sepia(1) hue-rotate(-50deg) saturate(4) brightness(.7);
-}
-${R} .border-window:not(.transparent) .close-button-corner-decor .close-button:hover { filter: grayscale(1) sepia(1) hue-rotate(-50deg) saturate(5) brightness(1.05); }
-/* dolny pasek okien („Need more gold?” itp.) */
-${R} .interface-element-bottom-bar-background-stretch { filter: grayscale(1) brightness(.4) contrast(1.3); }
+/* zamknięcie – przytłumiony krzyżyk bez drewnianego narożnika */
+${R} .border-window:not(.transparent) .close-button-corner-decor { background: none; z-index: 4; }
+${R} .border-window:not(.transparent) .close-button-corner-decor .close-button { filter: grayscale(1) brightness(.75); }
+${R} .border-window:not(.transparent) .close-button-corner-decor .close-button:hover { filter: grayscale(1) sepia(1) hue-rotate(-50deg) saturate(3) brightness(.85); }
+${R} .interface-element-bottom-bar-background-stretch { filter: grayscale(1) brightness(.35) contrast(1.3); }
 
 /* ═════════════ PRZYCISKI TEKSTOWE ═════════════ */
 /* border-width 0 + jawna border-image-width: oprawa nie zmienia układu przycisku */
 ${R} .button {
   border-style: solid;
   border-width: 0;
-  border-image: url("${A}button.webp") 24 fill / 6px / 0 stretch;
+  border-image: ${BTN(12)} 22 fill / 5px / 0 stretch;
   background-image: none;
   background-color: #070607;
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(139,0,0,.45), 0 2px 6px rgba(0,0,0,.7);
+  box-shadow: 0 0 0 1px #000, 0 1px 4px rgba(0,0,0,.7);
 }
-${R} .button:hover { border-image-source: url("${A}button-hover.webp"); box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(192,38,45,.8), 0 0 10px rgba(139,0,0,.5); }
+${R} .button:hover { filter: brightness(1.3); }
 ${R} .button::before { box-shadow: none; }
 ${R} .button .label { color: var(--dg-bone); text-shadow: 0 1px 2px #000; }
-/* kolory gry zachowują znaczenie: oprawa bez wypełnienia, pod nią przyciemniony kolor */
+/* kolory gry zachowują znaczenie – stonowane, pod kamienną oprawą bez wypełnienia */
 ${R} .button.red, ${R} .button.blue, ${R} .button.violet, ${R} .button.purple, ${R} .button.orange, ${R} .button.blink-violet {
-  border-image: url("${A}button.webp") 24 / 6px / 0 stretch;
+  border-image: ${BTN(12)} 22 / 5px / 0 stretch;
 }
-${R} .button.red { background-image: linear-gradient(#7d1017, #2a0406); }
-${R} .button.blue { background-image: linear-gradient(#1d3550, #08111c); }
-${R} .button.violet, ${R} .button.purple, ${R} .button.blink-violet { background-image: linear-gradient(#45284f, #160c1a); }
-${R} .button.orange { background-image: linear-gradient(#6a3a0d, #231304); }
+${R} .button.red { background-image: linear-gradient(#4f0c10, #1c0305); }
+${R} .button.blue { background-image: linear-gradient(#18283a, #070c12); }
+${R} .button.violet, ${R} .button.purple, ${R} .button.blink-violet { background-image: linear-gradient(#2e1d35, #100a13); }
+${R} .button.orange { background-image: linear-gradient(#4a2a0c, #190e04); }
 
 /* ═════════════ EKWIPUNEK, TORBY, STATYSTYKI ═════════════ */
-${R} .interface-element-item-slot-grid-stretch { filter: grayscale(1) brightness(.72) contrast(1.3); }
+${R} .interface-element-item-slot-grid-stretch { filter: grayscale(1) brightness(.62) contrast(1.3); }
 ${R} .interface-element-grid-border {
   outline-color: #000;
-  box-shadow: 0 0 0 1px #2a2628, 0 0 0 2px #050405, 0 0 0 3px #3a0508;
+  box-shadow: 0 0 0 1px #1d191b, 0 0 0 2px #050405;
 }
-${R} .interface-element-one-black-tile { background: linear-gradient(#141012, #050405); }
+${R} .interface-element-one-black-tile { background: linear-gradient(#110e10, #050405); }
 ${R} .interface-element-background-color-3,
 ${R} .interface-element-middle-3-background,
-${R} .interface-element-middle-3-background-stretch { background: rgba(9, 7, 8, .94); }
+${R} .interface-element-middle-3-background-stretch { background: rgba(7, 6, 7, .94); }
 ${R} .interface-element-background-color-1,
 ${R} .interface-element-middle-1-background,
 ${R} .interface-element-middle-1-background-stretch { background: var(--dg-smoke) center bottom / 140% auto no-repeat, var(--dg-void); }
-${R} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px #2a0a0c, inset 0 0 14px #000; }
+${R} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px #1d191b, inset 0 0 14px #000; }
 ${R} .interface-element-active-card-background-stretch,
 ${R} .interface-element-active-card-border-image {
   border-image: none;
-  background: linear-gradient(#3a0508, #120203);
-  box-shadow: inset 0 0 0 1px #6b0d13, inset 0 -2px 0 var(--dg-ember);
+  background: linear-gradient(#1b0a0c, #0b0607);
+  box-shadow: inset 0 0 0 1px #2d1a1c, inset 0 -1px 0 var(--dg-red);
 }
-${R} .stats-wrapper .header-title { color: var(--dg-bone); font-family: var(--dg-font-title); letter-spacing: .08em; }
-${R} .interface-element-line-1-background { background: linear-gradient(90deg, transparent, #5a0a0f 25%, #c0262d 50%, #5a0a0f 75%, transparent); }
+${R} .stats-wrapper .header-title { color: var(--dg-bone); font-family: var(--dg-font-title); letter-spacing: .1em; }
+${R} .interface-element-line-1-background { background: linear-gradient(90deg, transparent, #2d1a1c 25%, #6e0f14 50%, #2d1a1c 75%, transparent); }
 
 /* ═════════════ PASKI POSTĘPU ═════════════ */
 ${R} .interface-element-progress-bar-1,
-${R} .interface-element-progress-bar-0 { background: #050405; box-shadow: inset 0 0 0 1px #2a2628; }
+${R} .interface-element-progress-bar-0 { background: #040304; box-shadow: inset 0 0 0 1px #1d191b; }
 ${R} .interface-element-progress-bar-0 .inner,
 ${R} .interface-element-progress-bar-1 .inner {
-  background: linear-gradient(#c0262d 0%, #8b0000 65%, #5a0a0f 66%);
-  border-color: #c0262d;
+  background: linear-gradient(#7a1419 0%, #560b0f 65%, #3a070a 66%);
+  border-color: #7a1419;
 }
 ${R} .interface-element-progress-bar-0 .value,
-${R} .interface-element-progress-bar-1 .value { color: #f1ebe0; }
+${R} .interface-element-progress-bar-1 .value { color: #e6ddd2; }
 
 /* ═════════════ TOOLTIPY ═════════════ */
 ${R} .tip-wrapper.normal-tip {
-  border: 7px solid transparent;
-  border-image: var(--dg-frame) 28 / 7px / 0 round;
+  border: 6px solid transparent;
+  border-image: var(--dg-frame) 12 / 6px / 0 round;
   background: var(--dg-void);
   background-clip: padding-box;
   box-shadow: 0 8px 18px rgba(0,0,0,.9);
 }
-${R} .tip-wrapper.normal-tip > .content { background: rgba(7,6,7,.94); }
+${R} .tip-wrapper.normal-tip > .content { background: rgba(5,4,5,.95); }
 ${R} .tip-wrapper .item-head {
-  background: linear-gradient(rgba(58,5,8,.75), rgba(20,3,4,.3));
-  box-shadow: inset 0 -1px 0 var(--dg-line);
+  background: linear-gradient(rgba(30,6,8,.85), rgba(10,3,4,.3));
+  box-shadow: inset 0 -1px 0 var(--dg-hair);
 }
-${R} .tip-wrapper .item-tip-section { border-color: rgba(139,0,0,.3) !important; }
+${R} .tip-wrapper .item-tip-section { border-color: var(--dg-hair) !important; }
 
 /* ═════════════ DIALOG Z NPC ═════════════ */
 ${R} .dialogue-window .border-image {
-  border: 14px solid transparent;
-  border-image: var(--dg-frame) 28 / 14px / 0 round;
+  border: 6px solid transparent;
+  border-image: var(--dg-frame) 12 / 6px / 0 round;
   background: var(--dg-smoke) center bottom / 120% auto no-repeat, var(--dg-void);
   background-clip: padding-box;
   box-shadow: 0 10px 26px rgba(0,0,0,.9);
-  inset: -10px;
+  inset: -4px;
 }
-${R} .dialogue-window .dialogue-background-color { background: rgba(5,4,5,.55); }
-${R} .dialogue-window .content .npc-message { color: var(--dg-bone); }
-/* głowa demona nad dialogiem */
 ${R} .dialogue-window .border-image::before {
   content: "";
   position: absolute;
-  left: 50%; top: -52px;
-  width: 44px; height: 52px;
-  margin-left: -22px;
-  background: var(--dg-demon) center / 100% 100% no-repeat;
-  filter: drop-shadow(0 3px 4px #000);
+  inset: -10px;
+  background: var(--dg-corners);
   pointer-events: none;
 }
+${R} .dialogue-window .dialogue-background-color { background: rgba(4,3,4,.5); }
+${R} .dialogue-window .content .npc-message { color: var(--dg-bone); }
 
 /* ═════════════ SKLEP ═════════════ */
-${R} .shop-background .canopy { filter: grayscale(1) sepia(1) hue-rotate(-48deg) saturate(2.6) brightness(.45) contrast(1.2); }
+${R} .shop-background .canopy { filter: grayscale(1) sepia(.6) hue-rotate(-40deg) saturate(1.6) brightness(.32) contrast(1.25); }
 
 /* ═════════════ SCROLLBARY ═════════════ */
-${R} .scrollbar-wrapper .track { background: rgba(0,0,0,.5); box-shadow: inset 0 0 0 1px rgba(139,0,0,.2); }
-${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #3a0508, #8b0000, #3a0508); box-shadow: 0 0 0 1px #000; }
+${R} .scrollbar-wrapper .track { background: rgba(0,0,0,.5); box-shadow: inset 0 0 0 1px var(--dg-hair); }
+${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3a3337, #1d191b); box-shadow: 0 0 0 1px #000; }
+
+/* ═════════════ OGRANICZ RUCH ═════════════ */
+@media (prefers-reduced-motion: reduce) {
+  ${R} .bottom-panel-pointer-bg::before,
+  ${R} .bottom-panel-pointer-bg::after { animation: none; }
+}
 `;
 
   function addStyle(text) {
