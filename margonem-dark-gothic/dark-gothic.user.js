@@ -122,7 +122,8 @@ ${HUD} {
 ${R} .hud-container::after {
   content: "";
   position: absolute;
-  left: -66px; right: -66px;
+  /* odsunięte, żeby prawej maski nie zasłaniała ikona powiadomień gry */
+  left: -112px; right: -112px;
   top: -2px; height: 64px;
   z-index: -1;
   background:
