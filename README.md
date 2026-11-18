@@ -94,3 +94,43 @@ Przełączanie (ikonka skrzyżowanych mieczy w lewym dolnym rogu otwiera panel z
 Ustawienia są zapamiętywane i wracają po przeładowaniu. Interfejs jest rozpoznawany tak samo jak w Kociej Nocy (ciasteczko gry `interface`). Motyw działa na margonem.pl i margonem.com, wyłącznie na stronach światów gry.
 
 Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-variant="crimson"]` i `html[data-ck-variant="green"]` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS` (oznaczone `[GRA]` — sprawdzone w grze, `[KN]` — sprawdzone w Kociej Nocy, `[NOWY]` — do weryfikacji), a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (gotyckie ramy, ozdoby belek, znaki wodne, mgła, czerwony puls przy niskim HP).
+
+## Margonem — Dark Gothic
+
+Mroczny, spójny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **własnych rastrowych grafik**: spękany, okopcony kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP. Prawie wszystko jest czarne, a czerwień to tylko stłumiony akcent. Paleta: `#050405`/`#09080a`/`#110e10`, przygaszona czerwień `#43080c`/`#6e0f14`/`#8f1a1f`, popiół `#8d878c`, kość `#cbc2b6`.
+
+Co jest ostylowane:
+- **tabliczka HUD** (imię, mapa z koordynatami, świat, złoto i smocze łzy — zagęszczona, żeby nie zasłaniała mapy) — imię w przygaszonej czerwieni na spękanym granicie, **poniszczone głowy demonów** po obu stronach, pod napisami ciemna kamienna listwa, w której **runy pulsują na czerwono** jak w pierścieniu kuli HP, a kropla w medalionie przyjmuje kolor trybu PvP mapy,
+- **siatka slotów** (torba, sklep) — linie w bardzo ciemnej czerwieni, po których co kilka sekund przesuwa się delikatny połysk,
+- **statystyki** — na runicznej płycie, z własnymi prostymi ikonkami (atak, szybkość ataku, obrona, odporności),
+- **kula HP** — **runiczny pierścień** ze spękanego żelaza, który powoli się obraca, a żar w rowkach run pulsuje (animacja wyłącza się przy systemowym „ogranicz ruch”); gra dalej pokazuje w środku swój poziom HP i procent,
+- **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, ciemne sloty, a po bokach kuli **głowy kamiennych posągów demonów** patrzące na wprost (w całości w dolnej belce); **gdy w łupie albo w torbie pojawi się nowa legenda, ich oczy płoną na czerwono ogniem przez kilka sekund** (podgląd: **Ctrl+Alt+L**; legenda jest rozpoznawana wyłącznie po wyglądzie przedmiotów, jak w Kociej Nocy),
+- **górna i dolna belka** — czerń z cienką kamienną krawędzią,
+- **przyciski HUD** — **12 kamiennych kafli o różnym stopniu zniszczenia** (każdy pasek zaczyna od innego, więc sąsiednie przyciski się różnią), ikony w szarości, kolor gry (fiolet, niebieski) zostaje jako słaby poblask,
+- **okna z ramką** — cienka (6 px) kamienna ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z subtelnymi narożnikami w kształcie sierpowatych rogów z runą, mocno przygaszona ściana z płaskorzeźbą demona w tle, tytuł kapitalikami na czerni,
+- **okna przezroczyste** (śledzone questy, sorter) — czerń z cienką obwódką,
+- **dialog z NPC** — ta sama cienka rama z narożnikami,
+- **sklep** — markiza przyciemniona do brązowej czerni, kamienna krawędź zamiast drewnianej belki,
+- **ekwipunek, torby, statystyki, czat** — ciemna ilustracja w tle kolumn (spękana ściana z płaskorzeźbą demona, łańcuchami, runami i czaszkami, przyciemniona tak, by nie przeszkadzała w czytaniu), aktywne zakładki z cienką czerwoną kreską, kolory kanałów bez zmian,
+- **tooltipy przedmiotów** — cienka kamienna ramka, ciemny nagłówek, kolory rzadkości bez zmian,
+- **przyciski tekstowe** — kamienna oprawa; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie (stonowane),
+- **paski postępu, scrollbary**,
+- **wszystkie pozostałe okna gry** (dziennik zadań, gildia, społeczność, ustawienia, Premium, mapa świata i inne) — patrz niżej.
+
+**Przemalowanie grafik gry w locie.** Gra rysuje większość interfejsu z kilkudziesięciu plików `/img/gui/*` (sam atlas `buttony.png` jest w ok. 180 regułach CSS). Skrypt pobiera te pliki z serwera gry, przemalowuje je w przeglądarce — drewno, brąz, pergamin i szarości zamienia w okopcony czarny kamień, a kolory znaczeniowe (złoto, zieleń statusów, błękit, czerwone znaczniki, jasne ikony) zostawia — i podmienia je w regułach CSS gry (ok. 320 reguł). Jasne, pergaminowe i szare tła w regułach są przyciemniane, a skaner w oknach rozjaśnia tekst, który był ciemny na pergaminie (neutralny → kość, kolorowy → ten sam odcień, jaśniej). Kopie grafik gry nie trafiają do repo — wszystko dzieje się lokalnie. Kursory, ramki rzadkości przedmiotów, ikony umiejętności i mapy zostają oryginalne. Wyłączenie motywu przywraca oryginalne grafiki i kolory bez przeładowania strony.
+
+Mapa (canvas) i logika gry pozostają nietknięte — skrypt zmienia wyłącznie wygląd (CSS i grafiki interfejsu).
+
+**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-gothic/dark-gothic.user.js
+
+Instalacja:
+1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
+2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
+3. Wyłącz w Tampermonkey inne motywy interfejsu (Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
+4. Odśwież grę.
+
+Aktualizacje: Tampermonkey sam pobiera nowe wersje z tego repo (albo ręcznie: Tampermonkey → Panel → „Sprawdź aktualizacje”).
+
+Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
+
+Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (38 plików WebP, razem ok. 333 KB, każdy poniżej 40 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
