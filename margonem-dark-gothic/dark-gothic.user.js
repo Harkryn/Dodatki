@@ -29,6 +29,8 @@
   // Każda reguła jest pod html.dg-on i wewnątrz .game-window-positioner:
   // wyłączenie motywu = zdjęcie jednej klasy; forum i strona główna są nietknięte.
   const R = 'html.' + ON_CLASS + ' .game-window-positioner';
+  // Tabliczka HUD: reguły gry mają tu 6 klas, więc pełna ścieżka jest potrzebna, żeby wygrać.
+  const HUD = R + ' .layer.interface-layer .positioner.top .hud-container';
 
   /*
    * Geometria grafik (piksele w plikach; wyświetlane w połowie rozmiaru = ostre na ekranach 2x):
@@ -84,10 +86,13 @@ ${R} .bottom.positioner > .bg::after { top: -7px; }
 ${R} .top.positioner > .bg, ${R} .bottom.positioner > .bg { position: absolute; inset: 0; }
 
 /* tabliczka z imieniem, lokacją i złotem */
-${R} .hud-container {
+${HUD} {
   background: none;
   z-index: 0;
 }
+/* ikony walut były częścią sprite'a tabliczki – podstawiamy czyste ikony gry */
+${HUD} .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat; filter: drop-shadow(0 0 2px #000); }
+${HUD} .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
 ${R} .hud-container::before {
   content: "";
   position: absolute;
@@ -113,23 +118,23 @@ ${R} .hud-container::after {
   filter: drop-shadow(0 3px 5px rgba(0,0,0,.95)) brightness(.9);
   pointer-events: none;
 }
-${R} .hud-container .heroname {
+${HUD} .hero-data .heroname {
   color: var(--dg-ember);
   font-family: var(--dg-font-title);
   font-weight: 700;
   letter-spacing: .03em;
   text-shadow: 0 0 6px rgba(139,0,0,.75), 0 1px 1px #000;
 }
-${R} .hud-container .location,
-${R} .hud-container .coords,
-${R} .hud-container .world-name,
-${R} .hud-container .herogold,
-${R} .hud-container .herocredits {
+${HUD} .location,
+${HUD} .coords,
+${HUD} .world-name,
+${HUD} .herogold,
+${HUD} .herocredits {
   color: #a8a2a6;
   text-shadow: 0 1px 1px #000;
 }
-${R} .hud-container .herogold { color: var(--dg-bone); font-weight: 700; }
-${R} .hud-container .btn-min {
+${HUD} .herogold { color: var(--dg-bone); font-weight: 700; }
+${HUD} .btn-min {
   background: linear-gradient(#3a0508, #160203);
   box-shadow: inset 0 0 0 1px #5a0a0f, 0 0 0 1px #000;
   color: var(--dg-bone);
