@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.4.0
+// @version      3.5.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -38,7 +38,10 @@
    *   corner-*.webp     64×64   subtelne narożniki: sierpowate łuki-rogi z runą (tl/tr/bl/br)
    *   edge.webp         55×12   kafel kamiennej krawędzi belek
    *   btn-01…12.webp    96×96   12 kamiennych kafli przycisków o różnym stopniu zniszczenia
-   *   demon.webp        180×220 poniszczona maska demona
+   *   top-head-left/right.webp 120×150 głowy posągów przy imieniu (bez szyi, patrzą na zewnątrz)
+   *   top-eyes-left/right.webp 120×150 ogień w ich oczach (legenda)
+   *   hud-ornament.webp 760×64  kamienna listwa z runami i medalionem pod tabliczką z imieniem
+   *   stats-plaque.webp 256×396 spękana płyta z runicznym obramowaniem pod statystyki (9-slice)
    *   orb-ring.webp     260×260 runiczny pierścień kuli HP (otwór r≈92 px → 46 px)
    *   orb-runes.webp    260×260 sam żar w rowkach run (warstwa pulsująca)
    *   bg-wall.webp      512×1344 przyciemniona ściana z płaskorzeźbą demona (tło kolumn i okien)
@@ -71,7 +74,6 @@ html.${ON_CLASS} {
   --dg-hair: rgba(140, 132, 138, .16);
   --dg-frame: url("${A}frame.webp");
   --dg-edge: url("${A}edge.webp");
-  --dg-demon: url("${A}demon.webp");
   --dg-wall: url("${A}bg-wall.webp");
   --dg-corners:
     url("${A}corner-tl.webp") left top / 26px 26px no-repeat,
@@ -111,7 +113,7 @@ ${R} .bottom.positioner > .bg::before,
 ${R} .bottom.positioner > .bg::after {
   content: "";
   position: absolute;
-  left: calc(50% - 376px); width: 752px;
+  left: calc(50% - 361px); width: 722px;   /* dosunięte do paska EXP (kończy się ok. ±298 px od środka) */
   bottom: 0; height: 84px;
   pointer-events: none;
 }
@@ -148,18 +150,44 @@ ${HUD} {
   background: radial-gradient(ellipse 60% 85% at 50% 30%, rgba(30, 5, 7, .55), rgba(0,0,0,0) 72%);
   z-index: 0;
 }
-/* maski demonów po obu stronach imienia */
+/* głowy kamiennych posągów po obu stronach imienia – bez szyi, patrzą na zewnątrz
+ * (odsunięte, żeby prawej nie zasłaniała ikona powiadomień gry) */
+${R} .hud-container::before,
 ${R} .hud-container::after {
   content: "";
   position: absolute;
-  /* odsunięte, żeby prawej maski nie zasłaniała ikona powiadomień gry */
-  left: -112px; right: -112px;
-  top: -2px; height: 64px;
+  left: -116px; right: -116px;
+  top: -4px; height: 68px;
+  pointer-events: none;
+}
+${R} .hud-container::after {
+  z-index: -2;
+  background:
+    url("${A}top-head-left.webp") left center / auto 100% no-repeat,
+    url("${A}top-head-right.webp") right center / auto 100% no-repeat;
+  filter: drop-shadow(0 3px 4px #000);
+}
+/* ogień w ich oczach – zapala się razem z dolnymi przy legendzie */
+${R} .hud-container::before {
   z-index: -1;
   background:
-    var(--dg-demon) left center / auto 100% no-repeat,
-    var(--dg-demon) right center / auto 100% no-repeat;
-  filter: drop-shadow(0 3px 4px #000);
+    url("${A}top-eyes-left.webp") left center / auto 100% no-repeat,
+    url("${A}top-eyes-right.webp") right center / auto 100% no-repeat;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+html.${ON_CLASS}.dg-legend .game-window-positioner .hud-container::before {
+  animation: dg-eyes-burn 7s ease-out forwards, dg-eyes-flicker .18s steps(2) infinite;
+}
+/* kamienne zdobienie z runami i medalionem pod tabliczką z imieniem */
+${R} .top.positioner > .bg::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 190px); width: 380px;
+  top: 57px; height: 32px;
+  z-index: 1;
+  background: url("${A}hud-ornament.webp") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 3px 3px #000);
   pointer-events: none;
 }
 ${HUD} .hero-data .heroname {
@@ -372,6 +400,23 @@ ${R} .interface-element-grid-border {
   box-shadow: 0 0 0 1px #1d191b, 0 0 0 2px #050405;
 }
 ${R} .interface-element-one-black-tile { background: linear-gradient(#110e10, #050405); }
+/* sloty toreb – wyraźne ramki z kamiennych kafli */
+${R} .inventory_wrapper .bag-slot-wrapper {
+  background: ${BTN(3)} center / 100% 100% no-repeat, #070607;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px #2c2629, inset 0 0 8px #000;
+}
+${R} .inventory_wrapper .bags-navigation-bg {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px #241f22;
+}
+/* pole statystyk na ciemnej, spękanej płycie z runicznym obramowaniem (9-slice, runy się nie rozciągają) */
+${R} .stats-wrapper.interface-element-background-color-3 {
+  background: none;
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${A}stats-plaque.webp") 46 fill / 18px / 0 stretch;
+  box-shadow: 0 4px 10px rgba(0,0,0,.8);
+}
+${R} .stats-wrapper .header-title-wrapper { margin: 4px 6px 0; }
 ${R} .interface-element-background-color-3,
 ${R} .interface-element-middle-3-background,
 ${R} .interface-element-middle-3-background-stretch { background: rgba(7, 6, 7, .94); }
