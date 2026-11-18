@@ -104,14 +104,15 @@ ${R} .top.positioner > .bg::after {
 ${R} .bottom.positioner > .bg {
   background: var(--dg-edge) repeat-x 0 0 / auto 6px, linear-gradient(#0a0809, #040304);
 }
-/* głowy kamiennych posągów demonów po bokach kuli HP – patrzą na wprost i mieszczą się
- * w całości w dolnej belce (60 px); dolny panel gry jest wyśrodkowany, więc liczymy od środka */
+/* głowy kamiennych posągów demonów po bokach kuli HP – patrzą na wprost; dół równo z dolną
+ * krawędzią okna gry (nic nie wystaje poniżej), góra lekko zachodzi na mapę.
+ * Dolny panel gry jest wyśrodkowany, więc liczymy od środka; wewnętrzna krawędź głów omija pasek EXP. */
 ${R} .bottom.positioner > .bg::before,
 ${R} .bottom.positioner > .bg::after {
   content: "";
   position: absolute;
-  left: calc(50% - 356px); width: 712px;
-  top: 2px; height: 58px;
+  left: calc(50% - 376px); width: 752px;
+  bottom: 0; height: 84px;
   pointer-events: none;
 }
 ${R} .bottom.positioner > .bg::before {
