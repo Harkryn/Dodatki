@@ -151,7 +151,12 @@ html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::aft
 /* tabliczka z imieniem: ciemna, mocno zniszczona płyta granitu (pęknięcia, wyszczerbienia,
  * runiczny brzeg, widoczna faktura kamienia); dolną krawędź tworzy listwa z runami i medalionem (niżej) */
 ${HUD} {
-  background: url("${A}nameplate.webp") center / 100% 100% no-repeat;
+  /* płyta jest wyższa niż tabliczka i dosunięta do dołu: postrzępiona, spękana górna krawędź
+   * wychodzi ponad okno i jest ucięta, więc imię i reszta tekstu leżą na litym kamieniu;
+   * pod napisami delikatne przyciemnienie, żeby pęknięcia nie rozbijały liter */
+  background:
+    radial-gradient(ellipse 46% 62% at 50% 42%, rgba(5, 4, 5, .55) 0, rgba(5, 4, 5, .25) 60%, rgba(5, 4, 5, 0) 100%),
+    url("${A}nameplate.webp") center bottom / 104% 128% no-repeat;
   border-image: none;
   z-index: 0;
 }
