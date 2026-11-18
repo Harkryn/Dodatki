@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.6.0
+// @version      3.7.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -52,16 +52,6 @@
   // Kafle przycisków HUD: każdy pasek zaczyna od innego kafla, żeby sąsiednie przyciski się różniły.
   const BTN = (i) => `url("${A}btn-${String(i).padStart(2, '0')}.webp")`;
   const BAR_OFFSETS = { 'top-left': 0, 'top-right': 4, 'bottom-left': 7, 'bottom-right': 10 };
-  // Bezszwowe faktury krwi do kuli HP (szum SVG, stitchTiles = kafelki bez szwów)
-  const svgNoise = (size, freq, seed, matrix) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'>` +
-    `<filter id='n' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='3' seed='${seed}' stitchTiles='stitch'/>` +
-    `<feColorMatrix values='${matrix}'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`);
-  // jasne smugi: kolor ciepłej czerwieni, przezroczystość z szumu (tylko najjaśniejsze miejsca)
-  const BLOOD_HI = svgNoise(128, '0.035 0.09', 7, '0 0 0 0 0.85  0 0 0 0 0.12  0 0 0 0 0.08  0 0 0 3.2 -1.55');
-  const BLOOD_HI2 = svgNoise(96, '0.06 0.03', 23, '0 0 0 0 1  0 0 0 0 0.35  0 0 0 0 0.2  0 0 0 2.6 -1.45');
-  // ciemne żyłki: prawie czarna czerwień tam, gdzie szum jest niski
-  const BLOOD_DARK = svgNoise(160, '0.022 0.05', 41, '0 0 0 0 0.25  0 0 0 0 0.02  0 0 0 0 0.03  0 0 0 -3 1.75');
   let btnRules = '';
   for (const [bar, off] of Object.entries(BAR_OFFSETS)) {
     for (let k = 1; k <= 12; k++) {
@@ -156,8 +146,13 @@ html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::aft
 }
 
 /* ═════════════ TABLICZKA HUD ═════════════ */
+/* tabliczka z imieniem: ciemna, spękana płyta z runicznym brzegiem (bez górnej krawędzi –
+ * tabliczka styka się z górą okna); dolną krawędź tworzy listwa z runami i medalionem (niżej) */
 ${HUD} {
-  background: radial-gradient(ellipse 60% 85% at 50% 30%, rgba(30, 5, 7, .55), rgba(0,0,0,0) 72%);
+  background: none;
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${A}stats-plaque.webp") 46 fill / 0 12px 12px 12px / 0 stretch;
   z-index: 0;
 }
 /* głowy kamiennych posągów po obu stronach imienia – bez szyi, patrzą na zewnątrz
@@ -166,8 +161,8 @@ ${R} .hud-container::before,
 ${R} .hud-container::after {
   content: "";
   position: absolute;
-  left: -66px; right: -66px;   /* tuż przy tabliczce z imieniem */
-  top: 0; height: 64px;        /* nie wychodzą poza górną krawędź okna gry */
+  left: -60px; right: -60px;   /* przy samej tabliczce z imieniem */
+  top: 0; height: 84px;        /* nic ponad oknem gry; dół lekko zachodzi na mapę (jak dolne głowy) */
   pointer-events: none;
 }
 ${R} .hud-container::after {
@@ -189,12 +184,12 @@ ${R} .hud-container::before {
 html.${ON_CLASS}.dg-legend .game-window-positioner .hud-container::before {
   animation: dg-eyes-burn 7s ease-out forwards, dg-eyes-flicker .18s steps(2) infinite;
 }
-/* kamienne zdobienie z runami i medalionem pod tabliczką z imieniem */
+/* listwa z runami i medalionem – dolna krawędź tabliczki z imieniem (szersza niż płyta, ze ściętymi końcami) */
 ${R} .top.positioner > .bg::before {
   content: "";
   position: absolute;
-  left: calc(50% - 190px); width: 380px;
-  top: 57px; height: 32px;
+  left: calc(50% - 196px); width: 392px;
+  top: 52px; height: 33px;
   z-index: 1;
   /* warstwy: barwa kropli (tryb color), poświata kropli (screen), sama listwa */
   background:
@@ -259,8 +254,11 @@ ${R} .bottom-panel-pointer-bg::after {
   mix-blend-mode: screen;
   animation: dg-spin 120s linear infinite, dg-pulse 6s ease-in-out infinite;
 }
-/* krew w kuli: płynie i pulsuje. Warstwy są przypięte do .blood, którego wysokość = HP,
- * więc ruch jest tylko w wypełnionej części. Faktura to bezszwowy szum SVG (stitchTiles). */
+/* KREW W KULI – gęsta, lśniąca krew (wygenerowana faktura blood.webp) zamiast płaskiego sprite'a gry.
+ * Warstwy są przypięte do .blood, którego wysokość = HP, więc krew jest tylko w wypełnionej części.
+ *  ::before – krew powoli przepływa (jedna warstwa faktury),
+ *  ::after  – druga warstwa tej samej faktury płynie w przeciwną stronę i nakłada się miękko (wiry),
+ *             a na wierzchu: menisk (jasna linia powierzchni) i cień kuli przy krawędziach. */
 ${R} .hp-indicator .blood::before,
 ${R} .hp-indicator .blood::after {
   content: "";
@@ -268,31 +266,28 @@ ${R} .hp-indicator .blood::after {
   inset: 0;
   pointer-events: none;
 }
-/* jasne smugi i połyski krwi – płyną skosem w górę */
 ${R} .hp-indicator .blood::before {
-  background:
-    url("${BLOOD_HI}") 0 0 / 128px 128px repeat,
-    url("${BLOOD_HI2}") 0 0 / 96px 96px repeat;
-  mix-blend-mode: screen;
-  opacity: .85;
-  animation: dg-blood-flow 9s linear infinite;
+  background: url("${A}blood.webp") 0 0 / 150px 150px repeat, #3a0306;
+  animation: dg-blood-flow 18s linear infinite;
 }
-/* ciemne żyłki i skrzepy – płyną wolniej, w drugą stronę (razem dają wirowanie) */
 ${R} .hp-indicator .blood::after {
-  background: url("${BLOOD_DARK}") 0 0 / 160px 160px repeat;
-  mix-blend-mode: multiply;
-  opacity: .9;
-  animation: dg-blood-flow2 14s linear infinite;
+  background:
+    linear-gradient(rgba(255, 150, 130, .55), rgba(255, 150, 130, 0) 2px),
+    linear-gradient(rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, .35) 3px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 62% 120% at 50% 0%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .7) 100%),
+    url("${A}blood.webp") 0 0 / 230px 230px repeat;
+  mix-blend-mode: soft-light;
+  animation: dg-blood-flow2 26s linear infinite;
 }
-/* bicie serca: podwójny puls jasności i nasycenia krwi */
-${R} .hp-indicator .blood { animation: dg-heartbeat 1.6s ease-in-out infinite; }
-@keyframes dg-blood-flow { to { background-position: 128px -128px, -96px -96px; } }
-@keyframes dg-blood-flow2 { to { background-position: -160px -160px; } }
+/* bicie serca: delikatny podwójny puls */
+${R} .hp-indicator .blood { animation: dg-heartbeat 1.8s ease-in-out infinite; }
+@keyframes dg-blood-flow { to { background-position: 150px -75px, 0 0; } }
+@keyframes dg-blood-flow2 { to { background-position: 0 0, 0 0, 0 0, -230px 115px; } }
 @keyframes dg-heartbeat {
-  0%, 40%, 100% { filter: brightness(1) saturate(1); }
-  10% { filter: brightness(1.28) saturate(1.25); }
-  20% { filter: brightness(1.05) saturate(1.05); }
-  28% { filter: brightness(1.18) saturate(1.15); }
+  0%, 45%, 100% { filter: brightness(1); }
+  10% { filter: brightness(1.16); }
+  20% { filter: brightness(1.02); }
+  30% { filter: brightness(1.1); }
 }
 ${R} .hp-indicator-wrapper .value {
   color: #e6ddd2;
@@ -453,7 +448,18 @@ ${R} .button.violet, ${R} .button.purple, ${R} .button.blink-violet { background
 ${R} .button.orange { background-image: linear-gradient(#4a2a0c, #190e04); }
 
 /* ═════════════ EKWIPUNEK, TORBY, STATYSTYKI ═════════════ */
-${R} .interface-element-item-slot-grid-stretch { filter: grayscale(1) brightness(.62) contrast(1.3); }
+/* siatka slotów (torba, sklep) – każde pole wygląda jak slot szybkiego użycia na dolnym pasku:
+ * ciemna wnęka z miękkim cieniem, jasniejsza obwódka i czarna fuga (wzór co 33 px, jak siatka gry) */
+${R} .interface-element-item-slot-grid-stretch {
+  filter: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0) 31px, #2a2427 31px, #2a2427 32px, #020102 32px) 0 0 / 33px 33px,
+    linear-gradient(rgba(0,0,0,0) 31px, #2a2427 31px, #2a2427 32px, #020102 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, #2a2427 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(#2a2427 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    radial-gradient(circle at 50% 42%, #1a1517 0, #0b090a 55%, #040304 100%) 0 0 / 33px 33px,
+    #040304;
+}
 ${R} .interface-element-grid-border {
   outline-color: #000;
   box-shadow: 0 0 0 1px #1d191b, 0 0 0 2px #050405;
@@ -507,19 +513,39 @@ ${R} .interface-element-progress-bar-0 .value,
 ${R} .interface-element-progress-bar-1 .value { color: #e6ddd2; }
 
 /* ═════════════ TOOLTIPY ═════════════ */
+/* tooltip jak runiczna tabliczka: ta sama spękana płyta co statystyki i tabliczka z imieniem,
+ * subtelne narożniki z rogami, kamienny pasek pod nagłówkiem przedmiotu */
 ${R} .tip-wrapper.normal-tip {
-  border: 6px solid transparent;
-  border-image: var(--dg-frame) 12 / 6px / 0 round;
-  background: var(--dg-void);
-  background-clip: padding-box;
-  box-shadow: 0 8px 18px rgba(0,0,0,.9);
+  border: 0;
+  border-image: url("${A}stats-plaque.webp") 46 fill / 11px / 0 stretch;
+  background: none;
+  box-shadow: 0 10px 22px rgba(0,0,0,.9), 0 0 0 1px #000;
 }
-${R} .tip-wrapper.normal-tip > .content { background: rgba(5,4,5,.95); }
+${R} .tip-wrapper.normal-tip::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background:
+    url("${A}corner-tl.webp") left top / 20px 20px no-repeat,
+    url("${A}corner-tr.webp") right top / 20px 20px no-repeat,
+    url("${A}corner-bl.webp") left bottom / 20px 20px no-repeat,
+    url("${A}corner-br.webp") right bottom / 20px 20px no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+${R} .tip-wrapper.normal-tip > .content {
+  background: rgba(4, 3, 4, .62);
+  box-shadow: inset 0 0 18px rgba(0,0,0,.85);
+}
 ${R} .tip-wrapper .item-head {
-  background: linear-gradient(rgba(30,6,8,.85), rgba(10,3,4,.3));
-  box-shadow: inset 0 -1px 0 var(--dg-hair);
+  background:
+    var(--dg-edge) repeat-x left bottom / auto 4px,
+    linear-gradient(rgba(22, 8, 10, .9), rgba(8, 5, 6, .55));
+  box-shadow: none;
+  padding-bottom: 5px;
 }
-${R} .tip-wrapper .item-tip-section { border-color: var(--dg-hair) !important; }
+${R} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 0 2px #2a2427; }
+${R} .tip-wrapper .item-tip-section { border-color: rgba(140, 132, 138, .14) !important; }
 
 /* ═════════════ DIALOG Z NPC ═════════════ */
 ${R} .dialogue-window .border-image {
