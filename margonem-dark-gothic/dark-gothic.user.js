@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.11.3
+// @version      3.11.4
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -167,8 +167,8 @@ ${R} .hud-container::before,
 ${R} .hud-container::after {
   content: "";
   position: absolute;
-  left: -34px; right: -34px;   /* nasunięte na kamienną tabliczkę (ok. 33 px), ale nie na napisy (nazwa świata) */
-  top: 0; height: 84px;        /* nic ponad oknem gry; dół lekko zachodzi na mapę (jak dolne głowy) */
+  left: -46px; right: -46px;   /* nasunięte na kamienną tabliczkę (ok. 34 px), ale nie na napisy (nazwa świata) */
+  top: 0; height: 100px;       /* nic ponad oknem gry; dół lekko zachodzi na mapę (jak dolne głowy) */
   pointer-events: none;
 }
 ${R} .hud-container::after {
