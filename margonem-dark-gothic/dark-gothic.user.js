@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.3.0
+// @version      3.4.0
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -42,6 +42,8 @@
    *   orb-ring.webp     260×260 runiczny pierścień kuli HP (otwór r≈92 px → 46 px)
    *   orb-runes.webp    260×260 sam żar w rowkach run (warstwa pulsująca)
    *   bg-wall.webp      512×1344 przyciemniona ściana z płaskorzeźbą demona (tło kolumn i okien)
+   *   statue-head.webp  98×120  głowa kamiennego posągu demona (dolna belka, patrzy na wprost)
+   *   statue-eyes-fire.webp 98×120 ogień w oczach tej głowy (zapala się przy legendzie)
    */
 
   // Kafle przycisków HUD: każdy pasek zaczyna od innego kafla, żeby sąsiednie przyciski się różniły.
@@ -89,28 +91,53 @@ ${R} .bottom.positioner > .bg {
   background: linear-gradient(#0a0809, #040304);
 }
 /* kamienna krawędź od strony mapy */
-${R} .top.positioner > .bg::after,
-${R} .bottom.positioner > .bg::after {
+${R} .top.positioner > .bg::after {
   content: "";
-  position: absolute; left: 0; right: 0;
+  position: absolute; left: 0; right: 0; bottom: -3px;
   height: 6px;
   background: var(--dg-edge) repeat-x 0 0 / auto 6px;
   box-shadow: 0 0 6px rgba(0,0,0,.9);
   pointer-events: none;
 }
-${R} .top.positioner > .bg::after { bottom: -3px; }
-${R} .bottom.positioner > .bg::after { top: -3px; }
-/* maski demonów po bokach kuli HP (dolny panel jest wyśrodkowany) */
-${R} .bottom.positioner > .bg::before {
+${R} .bottom.positioner > .bg {
+  background: var(--dg-edge) repeat-x 0 0 / auto 6px, linear-gradient(#0a0809, #040304);
+}
+/* głowy kamiennych posągów demonów po bokach kuli HP – patrzą na wprost i mieszczą się
+ * w całości w dolnej belce (60 px); dolny panel gry jest wyśrodkowany, więc liczymy od środka */
+${R} .bottom.positioner > .bg::before,
+${R} .bottom.positioner > .bg::after {
   content: "";
   position: absolute;
-  left: calc(50% - 340px); width: 680px;
-  top: -40px; height: 62px;
-  background:
-    var(--dg-demon) left center / auto 100% no-repeat,
-    var(--dg-demon) right center / auto 100% no-repeat;
-  filter: drop-shadow(0 3px 4px #000);
+  left: calc(50% - 356px); width: 712px;
+  top: 2px; height: 58px;
   pointer-events: none;
+}
+${R} .bottom.positioner > .bg::before {
+  background:
+    url("${A}statue-head.webp") left center / auto 100% no-repeat,
+    url("${A}statue-head.webp") right center / auto 100% no-repeat;
+  filter: drop-shadow(0 2px 3px #000);
+}
+/* ogień w oczach – niewidoczny, zapala się po zdobyciu legendy (klasa html.dg-legend) */
+${R} .bottom.positioner > .bg::after {
+  background:
+    url("${A}statue-eyes-fire.webp") left center / auto 100% no-repeat,
+    url("${A}statue-eyes-fire.webp") right center / auto 100% no-repeat;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::after {
+  animation: dg-eyes-burn 7s ease-out forwards, dg-eyes-flicker .18s steps(2) infinite;
+}
+@keyframes dg-eyes-burn {
+  0% { opacity: 0; }
+  5% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes dg-eyes-flicker {
+  0% { filter: brightness(1) saturate(1); transform: translateY(0); }
+  100% { filter: brightness(1.35) saturate(1.2); transform: translateY(-.5px); }
 }
 
 /* ═════════════ TABLICZKA HUD ═════════════ */
@@ -447,6 +474,7 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
 @media (prefers-reduced-motion: reduce) {
   ${R} .bottom-panel-pointer-bg::before,
   ${R} .bottom-panel-pointer-bg::after { animation: none; }
+  html.${ON_CLASS}.dg-legend .game-window-positioner .bottom.positioner > .bg::after { animation: dg-eyes-burn 7s ease-out forwards; }
 }
 `;
 
@@ -671,6 +699,55 @@ ${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1d191b, #3
   }).observe(document.documentElement, { childList: true, subtree: true });
   let ticks = 0;
   const iv = setInterval(() => { rescan(); if (++ticks >= 40) clearInterval(iv); }, 3000);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+   * LEGENDA → PŁONĄCE OCZY POSĄGÓW
+   * Tylko obserwacja DOM (jak w Kociej Nocy): nowy przedmiot z oznaczeniem legendy (t-leg),
+   * którego identyfikatora wcześniej nie widzieliśmy, pojawia się w oknie łupu albo w torbie.
+   * Pierwsze 15 s po wczytaniu to rozgrzewka – zapamiętujemy przedmioty, które już są.
+   * ───────────────────────────────────────────────────────────────────────── */
+  const LEGEND_ITEM = '.item .highlight.t-leg, .item[data-item-type="t-leg"]';
+  const LEGEND_SCOPE = ['.loot-wnd', '.interface-layer'];
+  const seenLegends = new Set();
+  const legendWarmUntil = Date.now() + 15000;
+  let legendTimer = 0, lastLegend = 0;
+
+  function burnEyes(force) {
+    if (!enabled) return;
+    if (!force && Date.now() - lastLegend < 8000) return;
+    lastLegend = Date.now();
+    const root = document.documentElement;
+    root.classList.remove('dg-legend');
+    void root.offsetWidth;            // restart animacji
+    root.classList.add('dg-legend');
+    clearTimeout(legendTimer);
+    legendTimer = setTimeout(() => root.classList.remove('dg-legend'), 7200);
+  }
+  function scanLegends() {
+    const armed = Date.now() > legendWarmUntil;
+    let fire = false;
+    for (const el of document.querySelectorAll(LEGEND_ITEM)) {
+      const item = el.classList.contains('item') ? el : el.closest('.item');
+      if (!item) continue;
+      let id = null;
+      for (const c of item.classList) if (c.startsWith('item-id-')) { id = c; break; }
+      if (!id || seenLegends.has(id)) continue;
+      seenLegends.add(id);
+      if (armed && LEGEND_SCOPE.some((s) => item.closest(s))) fire = true;
+    }
+    if (fire) burnEyes(false);
+  }
+  let legendScheduled = false;
+  new MutationObserver(() => {
+    if (legendScheduled) return;
+    legendScheduled = true;
+    setTimeout(() => { legendScheduled = false; scanLegends(); }, 400);
+  }).observe(document.documentElement, { childList: true, subtree: true });
+
+  // Podgląd efektu: Ctrl+Alt+L
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); burnEyes(true); }
+  }, true);
 
   function toggle() {
     enabled = !enabled;
