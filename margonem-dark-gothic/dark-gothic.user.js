@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.11.0
+// @version      3.11.1
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -354,8 +354,8 @@ ${R} .eq-slot::after {
   content: "";
   position: absolute;
   pointer-events: none;
-  /* jedna smuga dla całego ekranu (tło przypięte do okna), więc przechodzi kolejno przez sloty */
-  background: linear-gradient(115deg, rgba(0,0,0,0) 46%, rgba(190, 36, 40, .7) 50%, rgba(0,0,0,0) 54%) 0 0 / 300vw 100vh no-repeat fixed;
+  /* ta sama smuga co na siatce torby: przesuwa się po obwódce każdego slotu (kolejne sloty z opóźnieniem) */
+  background: linear-gradient(115deg, rgba(0,0,0,0) 42%, rgba(190, 36, 40, .7) 50%, rgba(0,0,0,0) 58%) 0 0 / 300% 100% no-repeat;
   /* tylko obwódka: pełny prostokąt minus wnętrze (1 px linii) */
   padding: 1px;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -365,6 +365,9 @@ ${R} .eq-slot::after {
 }
 ${R} .interface-element-one-item-slot-2::after { inset: -1px; }  /* na ramce gry (border) */
 ${R} .eq-slot::after { inset: 0; }
+${R} .usable-slot-2::after, ${R} .usable-slot-6::after, ${R} .eq-slot:nth-child(4n+2)::after { animation-delay: .35s; }
+${R} .usable-slot-3::after, ${R} .usable-slot-7::after, ${R} .eq-slot:nth-child(4n+3)::after { animation-delay: .7s; }
+${R} .usable-slot-4::after, ${R} .usable-slot-8::after, ${R} .eq-slot:nth-child(4n)::after { animation-delay: 1.05s; }
 
 /* ═════════════ PRZYCISKI HUD: 12 kamiennych kafli ═════════════ */
 ${btnRules}
