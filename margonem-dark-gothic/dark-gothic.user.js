@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Dark Gothic Theme
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      3.11.1
+// @version      3.11.2
 // @description  Mroczny, spójny motyw interfejsu Margonem z własnych grafik: spękany kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP (animowany), stłumiona czerwień. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -566,7 +566,10 @@ ${R} .character_wrapper .stats-wrapper .stats-list li.attack .stat-icon { backgr
 ${R} .character_wrapper .stats-wrapper .stats-list li.attack-speed .stat-icon { background: url("${A}stat-speed.webp") 0 0 / 100% 100% no-repeat; }
 ${R} .character_wrapper .stats-wrapper .stats-list li.defence .stat-icon { background: url("${A}stat-defence.webp") 0 0 / 100% 100% no-repeat; }
 ${R} .character_wrapper .stats-wrapper .stats-list li.resists .stat-icon { background: url("${A}stat-resist.webp") 0 0 / 100% 100% no-repeat; }
-${R} .character_wrapper .stats-wrapper .stats-list { left: 13px; top: 29px; }
+${R} .character_wrapper .stats-wrapper .stats-list { left: 13px; top: 28px; }
+/* mniejsze wiersze (16 px) i ikonki (15 px) – czwarty wiersz nie wchodzi na przycisk „Rozwiń” */
+${R} .character_wrapper .stats-wrapper .stats-list li { height: 16px; line-height: 16px; }
+${R} .character_wrapper .stats-wrapper .stats-list li .stat-icon { width: 15px; height: 15px; margin: 0 2px 0 0; vertical-align: middle; }
 ${R} .character_wrapper .stats-wrapper .stats-button { top: 104px; }
 ${R} .stats-wrapper .header-title-wrapper { margin: 6px 11px 0; }
 ${R} .interface-element-background-color-3,
