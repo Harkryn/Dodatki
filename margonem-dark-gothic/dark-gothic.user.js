@@ -189,7 +189,7 @@ ${R} .top.positioner > .bg::before {
   content: "";
   position: absolute;
   left: calc(50% - 196px); width: 392px;
-  top: 52px; height: 33px;
+  top: 59px; height: 33px;   /* pod wierszem ze złotem (kończy się ok. 60 px) */
   z-index: 1;
   /* warstwy: barwa kropli (tryb color), poświata kropli (screen), sama listwa */
   background:
@@ -268,6 +268,7 @@ ${R} .hp-indicator .blood::after {
 }
 ${R} .hp-indicator .blood::before {
   background: url("${A}blood.webp") 0 0 / 150px 150px repeat, #3a0306;
+  filter: brightness(1.55) saturate(1.2);
   animation: dg-blood-flow 18s linear infinite;
 }
 ${R} .hp-indicator .blood::after {
