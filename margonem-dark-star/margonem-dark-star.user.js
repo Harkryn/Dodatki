@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.15.0
+// @version      1.15.1
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -640,6 +640,20 @@ ${R} #mds-orb-fx .mds-ring {
   filter: drop-shadow(0 0 4px rgba(236, 140, 128, .35));
 }
 ${R} #mds-orb-fx .mds-ring-back .mds-ring { opacity: .75; }
+/* poświata pod kulą i pierścieniem: szeroka, eliptyczna łuna (jak pierścień), delikatnie pulsuje;
+ * pierwsza w DOM i z-index 0 – leży za tylną połową pierścienia i za kulą */
+${R} #mds-orb-fx .mds-orb-glow {
+  left: -125px; top: -62px; width: 250px; height: 124px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(236, 140, 128, .38) 0, rgba(122, 72, 120, .3) 38%, rgba(62, 36, 64, .14) 60%, rgba(62, 36, 64, 0) 72%);
+  filter: blur(4px);
+  z-index: 0;
+  animation: mds-orb-glow 4.5s ease-in-out infinite;
+}
+@keyframes mds-orb-glow {
+  0%, 100% { opacity: .55; transform: scale(.94); }
+  50%      { opacity: 1;   transform: scale(1.05); }
+}
 @keyframes mds-orbit {
   from { transform: rotateZ(-10deg) rotateX(72deg) rotateZ(0deg); }
   to   { transform: rotateZ(-10deg) rotateX(72deg) rotateZ(360deg); }
@@ -740,6 +754,7 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
   ${R} .top.positioner > .bg::after,
   ${R} .top.positioner::after,
   ${R} #mds-orb-fx .mds-ring,
+  ${R} #mds-orb-fx .mds-orb-glow,
   ${R} .hp-indicator::after,
   ${R} .hp-indicator .blood::before { animation: none; }
   ${R} .top.positioner::after { transform: scaleX(-1); opacity: .25; }
@@ -988,10 +1003,13 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
    * obserwator DOM wstawia je ponownie. Tylko wygląd – pointer-events: none. */
   function ensureOrbFx() {
     const host = document.querySelector('.game-window-positioner .bottom-panel-pointer-bg');
-    if (!host || host.querySelector('#mds-orb-fx')) return;
+    if (!host || host.querySelector('#mds-orb-fx .mds-orb-glow')) return;
+    const old = document.getElementById('mds-orb-fx');   // starsza wersja warstw (bez poświaty) – przebudowa
+    if (old) old.remove();
     const fx = document.createElement('div');
     fx.id = 'mds-orb-fx';
     fx.innerHTML =
+      '<div class="mds-orb-glow"></div>' +
       '<div class="mds-ring-half mds-ring-back"><div class="mds-ring"></div></div>' +
       '<div class="mds-ring-half mds-ring-front"><div class="mds-ring"></div></div>';
     host.appendChild(fx);
@@ -1048,7 +1066,7 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
     }
     if (sheets) setTimeout(scanSheets, 50);
     if (!hpWatched || !hpWatched.isConnected) watchHp();
-    if (!document.getElementById('mds-orb-fx')) ensureOrbFx();
+    if (!document.querySelector('#mds-orb-fx .mds-orb-glow')) ensureOrbFx();
   });
   obs.observe(root, { childList: true, subtree: true });
   setTimeout(() => { if (!root.classList.contains('mds-game')) obs.disconnect(); }, 60000);
