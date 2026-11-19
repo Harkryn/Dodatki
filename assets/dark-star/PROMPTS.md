@@ -174,6 +174,14 @@ Inspiracja od użytkownika: kinowa czarna dziura z soczewkowanym dyskiem (bez ko
 
 Odrzucona próba Qwen-Image (seed 371076960): prompt wspominał o tekście czatu i model wpisał w obraz napisy.
 
+## Horyzont kuli HP w nowej palecie (śliwka + łososiowy koral) – wybrany → `horyzont.png`
+
+Paleta według obrazu poglądowego od użytkownika: czerń, przydymiona śliwka, łososiowo-koralowe światło.
+
+- **Wybrany – planeta z pierścieniem** (FLUX.1 Krea, 1024×1024, 24 kroki, seed 1575779788; kluczowanie czerni, próg 16, cały obraz → PNG 340×340; w grze 224 px, kula planety pod kulą gry). Model miał narysować horyzont zdarzeń, a wyszła planeta z pierścieniem – i to ona spodobała się najbardziej:
+  > Professional game UI asset: an event horizon around a perfectly black circular void, a ring of glowing salmon-coral and soft pink fiery plasma wisps hugging the black edge, brighter flaring tendrils sweeping out from the upper left side like solar prominences, faint dusky plum purple haze and fine dust around it, isolated on pure black background, centered and circular, moody cinematic space art, ultra detailed, no text
+- Pozostałe próby tej rundy: pierścień łososiowego ognia w śliwkowym dymie (seed 1024402241) i cienki pierścień z rozbłyskiem wpadającym do środka (seed 225561764).
+
 ## Odrzucone
 
 - Narożnik: FLUX.1 Krea – srebrny filigran z zawijasami (seed 471057449) i odłamki obsydianu (seed 1373239555) – zbyt rozbudowane.
