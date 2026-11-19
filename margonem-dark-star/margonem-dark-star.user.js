@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.14.0
+// @version      1.14.1
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -1029,7 +1029,7 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
   /* Wykrycie gry: od razu (skrypt mógł wejść do już wczytanej strony), przy DOMContentLoaded/load
    * i przy zmianach DOM (z debounce). Po wykryciu: klasa mds-game, skan arkuszy. */
   function detect() {
-    if (root.classList.contains('mds-game')) return true;
+    if (root.classList.contains('mds-game')) { ensureOrbFx(); watchHp(); return true; }
     const iface = detectDom();
     if (!iface) return false;
     setInterface(iface);
