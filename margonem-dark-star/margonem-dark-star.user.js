@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.8.0
+// @version      1.8.1
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -485,19 +485,21 @@ ${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.3) contrast(1.3); 
 ${R} .layer.interface-layer .positioner.top .hud-container {
   background: var(--mds-dust), radial-gradient(100% 120% at 50% 0%, #1a1430, var(--mds-bg0) 75%);
   border-image: none;
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 4px 12px rgba(0, 0, 0, .8);
-  z-index: 1;   /* nad mgławicą – górna połowa mgławicy chowa się za tabliczką */
+  /* bez cienia w dół – zasłaniałby mgławicę pod tabliczką */
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line);
+  z-index: 2;   /* nad mgławicą – górna część mgławicy chowa się za tabliczką */
 }
-/* MGŁAWICA pod tabliczką: wstążka z jasną gwiazdą, gwiazda tuż pod dolną krawędzią tabliczki
- * (tabliczka: 342×65 px, wyśrodkowana; na mapę zachodzi ok. 40 px półprzezroczystej poświaty) */
+/* MGŁAWICA pod tabliczką: wstążka z jasną gwiazdą tuż pod dolną krawędzią tabliczki
+ * (tabliczka: 342×65 px, wyśrodkowana; na mapę zachodzi ok. 50 px półprzezroczystej poświaty).
+ * z-index 1: warstwa mapy (.game-layer) ma z-index 0 i stoi dalej w DOM – przy 0 mgławica byłaby pod mapą. */
 ${R} .top.positioner > .bg::before {
   content: "";
   position: absolute;
   left: calc(50% - 170px); width: 340px;
-  top: 27px; height: 81px;
+  top: 34px; height: 81px;
   background: url("${NEBULA}") center / 100% 100% no-repeat;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   animation: mds-nebula 7s ease-in-out infinite;
 }
 @keyframes mds-nebula { 0%, 100% { opacity: .85; filter: brightness(.95); } 50% { opacity: 1; filter: brightness(1.12); } }
