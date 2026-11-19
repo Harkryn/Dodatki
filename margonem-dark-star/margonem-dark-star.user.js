@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.13.0
+// @version      1.13.1
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -625,14 +625,16 @@ ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
  *  – horyzont: pierścień fioletowego ognia na .bottom-panel-pointer-bg::before, czarny środek wokół kuli,
  *  – osobliwość: wir w .blood::before, wyśrodkowany na środku kuli (26 px nad dołem .blood) i powoli
  *    obracany; .blood przycina go do poziomu HP, więc poziom zdrowia dalej widać jak w grze. */
-/* planeta z pierścieniem: czarna kula planety (promień ok. 22% obrazu) leży dokładnie pod kulą gry (98 px),
- * łososiowy pierścień przecina ją ukośnie; środek kuli = 50% / 50,3% obrazu */
+/* planeta z pierścieniem: czarna kula planety (promień ok. 22% obrazu) leży dokładnie pod kulą gry (98 px).
+ * Kula gry jest w połowie schowana pod dolną krawędzią ekranu (środek ok. 27 px nad nią), więc obraz jest
+ * obrócony o 30° – pierścień leży poziomo jak orbita i jego końce zostają na ekranie zamiast uciekać w dół. */
 ${R} .bottom-panel-pointer-bg::before {
   content: "";
   position: absolute;
   left: calc(120px - 112px); top: calc(29px - 112px);
   width: 224px; height: 224px;
   background: url("${HORIZON}") center / 100% 100% no-repeat;
+  transform: rotate(30deg);
   pointer-events: none;
   z-index: 2;
   animation: mds-breathe 5s ease-in-out infinite;
@@ -644,6 +646,7 @@ ${R} .bottom-panel-pointer-bg::after {
   left: calc(120px - 112px); top: calc(29px - 112px);
   width: 224px; height: 224px;
   background: url("${HORIZON}") center / 100% 100% no-repeat;
+  transform: rotate(30deg);
   mix-blend-mode: screen;
   opacity: .45;
   pointer-events: none;
