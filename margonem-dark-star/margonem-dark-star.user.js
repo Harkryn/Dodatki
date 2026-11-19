@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.0.0
+// @version      1.1.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -251,6 +251,48 @@ ${R} .dialogue-window .content .npc-message { color: var(--mds-text); }
 
 /* ═════════════ SKLEP ═════════════ */
 ${R} .shop-background .canopy { filter: grayscale(1) sepia(.5) hue-rotate(215deg) saturate(1.4) brightness(.3) contrast(1.2); }
+
+/* ═════════════ CZAT I BOCZNE KOLUMNY ═════════════ */
+/* kolumny: czerń z pyłem i bardzo słabą fioletową mgłą u dołu */
+${R} .layer.interface-layer .main-column {
+  background:
+    radial-gradient(140% 40% at 50% 100%, rgba(58, 34, 87, .22), rgba(0,0,0,0) 70%),
+    var(--mds-dust),
+    var(--mds-bg0);
+}
+/* krawędź kolumny od strony mapy: cienka fioletowa linia zamiast drewnianej belki */
+${R} .layer.interface-layer .main-column > .border,
+${R} .interface-element-vertical-wood {
+  background: linear-gradient(90deg, #000, var(--mds-violet-line) 45%, rgba(107, 63, 160, .55) 50%, var(--mds-violet-line) 55%, #000);
+  border-image: none;
+}
+${R} .left-column .new-chat-window { background: transparent; }
+${R} .left-column .chat-channel-card-wrapper {
+  background: linear-gradient(var(--mds-bg1), rgba(7, 6, 11, .6));
+  box-shadow: inset 0 -1px 0 var(--mds-hair);
+}
+${R} .chat-channel-card .chat-channel-card-icon { filter: grayscale(1) brightness(.9); }
+${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) brightness(1.4) drop-shadow(0 0 3px rgba(157, 107, 255, .5)); }
+/* wiadomości: kolory kanałów zostają (ważne w grze) – dodajemy tylko cień dla czytelności na czerni */
+${R} .chat-message-wrapper .scroll-pane { text-shadow: 0 1px 2px #000; }
+${R} .new-chat-window .new-chat-message:hover { background: rgba(107, 63, 160, .07); }
+${R} .left-column .chat-input-wrapper {
+  background: rgba(7, 6, 11, .92);
+  box-shadow: inset 0 1px 0 var(--mds-violet-line);
+}
+${R} .left-column .magic-input-wrapper { background: rgba(0, 0, 0, .55); box-shadow: inset 0 0 0 1px var(--mds-hair); }
+${R} .left-column .magic-input-wrapper:focus-within { box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow-soft); }
+${R} .left-column .magic-input-wrapper .magic-input { color: var(--mds-text); caret-color: var(--mds-violet-hi); }   /* TODO: zweryfikuj selektor (.magic-input) */
+/* SI */
+${S} #chat, ${S} #chattxt {   /* TODO: zweryfikuj selektor (czat SI) */
+  background: var(--mds-dust), rgba(7, 6, 11, .9);
+  text-shadow: 0 1px 2px #000;
+}
+${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
+  background: var(--mds-bg0);
+  color: var(--mds-text);
+  border: 1px solid var(--mds-violet-line);
+}
 
 /* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
 #mds-toggle {
