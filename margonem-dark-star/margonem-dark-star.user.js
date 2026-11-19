@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.9.0
+// @version      1.9.1
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -681,20 +681,6 @@ ${S} #minimap, ${S} #mmap {   /* TODO: zweryfikuj selektor (minimapa SI) */
 /* ═════════════ TEKST ROZJAŚNIONY PRZEZ SKANER ═════════════ */
 html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
 
-/* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
-#mds-toggle {
-  position: fixed; left: 6px; bottom: 6px; z-index: 2147483000;
-  width: 22px; height: 22px; padding: 0; margin: 0;
-  display: none; align-items: center; justify-content: center;
-  border: 1px solid #3a2257; border-radius: 50%;
-  background: radial-gradient(circle at 50% 45%, #1d1530, #07060b 70%);
-  color: #9d6bff; cursor: pointer; opacity: .45;
-}
-html.mds-game #mds-toggle { display: flex; }
-#mds-toggle:hover { opacity: 1; box-shadow: 0 0 10px rgba(157, 107, 255, .45); }
-html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
-#mds-toggle svg { width: 14px; height: 14px; display: block; }
-
 /* ═════════════ OGRANICZ RUCH ═════════════ */
 @media (prefers-reduced-motion: reduce) {
   ${R} .top.positioner > .bg::before,
@@ -932,26 +918,11 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
 
   function apply(on) {
     root.classList.toggle(ON_CLASS, on);
-    const b = document.getElementById('mds-toggle');
-    if (b) b.title = 'Mroczna Gwiazda: ' + (on ? 'włączona' : 'wyłączona') + ' (Ctrl+Alt+D)';
     if (on) { reapplySheets(); document.querySelectorAll(SCOPE).forEach(fixText); } else { restoreSheets(); unfixText(); }
   }
   function toggle() {
     enabled = !enabled;
     set(KEY, enabled);
-    apply(enabled);
-  }
-
-  const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.5l2.1 7.2 7.4.3-6 4.4 2.3 7.1L12 16.2 6.2 20.5l2.3-7.1-6-4.4 7.4-.3z"/></svg>';
-  function ensureButton() {
-    if (!document.body || document.getElementById('mds-toggle')) return;
-    const b = document.createElement('button');
-    b.id = 'mds-toggle';
-    b.type = 'button';
-    b.innerHTML = STAR;
-    b.addEventListener('mousedown', (e) => e.stopPropagation());   // kliknięcie nie trafia do mapy
-    b.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
-    document.body.appendChild(b);
     apply(enabled);
   }
 
@@ -973,14 +944,13 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
   }
 
   /* Wykrycie gry: od razu (skrypt mógł wejść do już wczytanej strony), przy DOMContentLoaded/load
-   * i przy zmianach DOM (z debounce). Po wykryciu: klasa mds-game, przycisk, skan arkuszy. */
+   * i przy zmianach DOM (z debounce). Po wykryciu: klasa mds-game, skan arkuszy. */
   function detect() {
     if (root.classList.contains('mds-game')) return true;
     const iface = detectDom();
     if (!iface) return false;
     setInterface(iface);
     root.classList.add('mds-game');
-    ensureButton();
     apply(enabled);
     return true;
   }
@@ -992,7 +962,7 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
   //  – do wykrycia gry: sprawdzenie interfejsu,
   //  – nowe <style>/<link> gry: ponowny skan arkuszy (przemalowanie grafik),
   //  – nowe elementy w oknach/tooltipach: kolejka poprawy czytelności tekstu,
-  //  – przycisk przełącznika: odtworzenie, gdyby gra przebudowała <body>.
+  //  – kula HP: podpięcie strażnika niskiego HP, gdy gra (prze)buduje pasek krwi.
   // Na stronach, które nie są grą (forum, strona główna), po minucie się odłącza.
   let detectTimer = 0;
   const obs = new MutationObserver((muts) => {
@@ -1009,7 +979,6 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
       if (enabled && m.type === 'characterData') queueFix(m.target);
     }
     if (sheets) setTimeout(scanSheets, 50);
-    if (!document.getElementById('mds-toggle')) ensureButton();
     if (!hpWatched || !hpWatched.isConnected) watchHp();
   });
   obs.observe(root, { childList: true, subtree: true });
@@ -1018,7 +987,7 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
   let ticks = 0;
   const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
 
-  // Wyłączanie: menu Tampermonkey, gwiazdka w lewym dolnym rogu albo Ctrl+Alt+D (wybór jest zapamiętywany).
+  // Wyłączanie (jak w Dark Gothic): menu Tampermonkey albo Ctrl+Alt+D (wybór jest zapamiętywany).
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand('Mroczna Gwiazda: włącz / wyłącz', toggle);
   }

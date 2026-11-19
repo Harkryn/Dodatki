@@ -161,6 +161,6 @@ Instalacja:
 3. Wyłącz w Tampermonkey inne motywy interfejsu (Dark Gothic, Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
 4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
 
-Wyłączanie: **Ctrl+Alt+D**, gwiazdka w lewym dolnym rogu albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
+Wyłączanie: **Ctrl+Alt+D** albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
 
 Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG z przezroczystym tłem, kilka KB każdy) i są dołączane przez `@resource`, więc Tampermonkey aktualizuje je razem ze skryptem. Każdy element powstał w dwóch wariantach, z których wybrany jeden; prompty i parametry obróbki są w [PROMPTS.md](assets/dark-star/PROMPTS.md).
