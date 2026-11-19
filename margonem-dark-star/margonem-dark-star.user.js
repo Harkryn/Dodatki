@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.3.0
+// @version      1.4.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -383,6 +383,34 @@ ${SB} #tip {   /* TODO: zweryfikuj selektor (tooltip SI) */
   color: var(--mds-text);
   border: 1px solid var(--mds-violet-line);
   box-shadow: 0 6px 16px rgba(0, 0, 0, .85);
+}
+
+/* ═════════════ WALKA ═════════════ */
+/* tylko rama okna walki i dziennik; postaci, ich paski HP i efekty zostają jak w grze */
+${R} .battle-controller .border-image,
+${R} .battle-window .border-image {   /* TODO: zweryfikuj selektor (rama okna walki) */
+  border-image: none;
+  background: var(--mds-dust), var(--mds-panel);
+  box-shadow: var(--mds-edge), 0 0 18px rgba(107, 63, 160, .12), var(--mds-shadow);
+}
+${R} .battle-controller .battle-console,
+${R} .battle-controller .battle-log {   /* TODO: zweryfikuj selektor (dziennik walki) */
+  background: rgba(7, 6, 11, .9);
+  color: var(--mds-text);
+  box-shadow: inset 0 0 0 1px var(--mds-hair);
+  text-shadow: 0 1px 1px #000;
+}
+${R} .battle-controller .auto-fight-button.button,
+${R} .battle-controller .button.auto-fight {   /* TODO: zweryfikuj selektor (przycisk „Auto”) */
+  box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 10px var(--mds-glow);
+}
+/* paski postaci w walce (.one-warrior) celowo bez zmian – reguły pasków w sekcji HUD je pomijają */
+${SB} #battle {   /* TODO: zweryfikuj selektor (okno walki SI) */
+  box-shadow: var(--mds-edge), var(--mds-shadow);
+}
+${SB} #battle #battlelog {   /* TODO: zweryfikuj selektor (dziennik walki SI) */
+  background: rgba(7, 6, 11, .9);
+  color: var(--mds-text);
 }
 
 /* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
