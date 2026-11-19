@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.6.0
+// @version      1.7.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -45,6 +45,8 @@
   // SI: kontener starego interfejsu i elementy wiszące bezpośrednio w <body> (okna, tooltipy).
   const S = 'html.' + ON_CLASS + '.mds-si #centerbox';   // TODO: zweryfikuj selektor (główny kontener SI)
   const SB = 'html.' + ON_CLASS + '.mds-si body';        // TODO: zweryfikuj selektor
+  // tabliczka HUD: reguły gry mają tu 6 klas, więc potrzebna jest pełna ścieżka
+  const HUD = R + ' .layer.interface-layer .positioner.top .hud-container';
   // reguły globalne (zaznaczenie, scrollbary) – tylko na stronie gry
   const G = 'html.' + ON_CLASS + '.mds-game';
 
@@ -480,13 +482,16 @@ ${R} .layer.interface-layer .positioner.top .hud-container {
   border-image: none;
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 4px 12px rgba(0, 0, 0, .8);
 }
-${R} .layer.interface-layer .positioner.top .hud-container.hero-data .heroname {
+${HUD} .hero-data .heroname {
   color: var(--mds-white);
   letter-spacing: .05em;
   text-shadow: 0 0 6px rgba(157, 107, 255, .45), 0 1px 1px #000;
 }
-${R} .layer.interface-layer .positioner.top .hud-container.location, ${R} .layer.interface-layer .positioner.top .hud-container.coords, ${R} .layer.interface-layer .positioner.top .hud-container.world-name, ${R} .layer.interface-layer .positioner.top .hud-container.herocredits { color: var(--mds-text-dim); text-shadow: 0 1px 1px #000; }
-${R} .layer.interface-layer .positioner.top .hud-container.herogold { color: var(--mds-text); text-shadow: 0 1px 1px #000; }
+${HUD} .location, ${HUD} .coords, ${HUD} .world-name, ${HUD} .herocredits { color: var(--mds-text-dim); text-shadow: 0 1px 1px #000; }
+${HUD} .herogold { color: var(--mds-text); text-shadow: 0 1px 1px #000; }
+/* ikony walut były częścią grafiki tabliczki – podstawiamy czyste ikony gry (sprawdzone w Dark Gothic) */
+${HUD} .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat; filter: drop-shadow(0 0 2px #000); }
+${HUD} .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
 /* przyciski HUD: ciemne kafle z fioletową obwódką; kolor gry (fiolet = nowość, niebieski = grupa) jako poblask */
 ${R} .widget-button,
 ${R} .widget-button.green, ${R} .widget-button.blue, ${R} .widget-button.violet,
@@ -538,6 +543,9 @@ ${R} .mini-map canvas, ${R} .mini-map img { filter: none; }   /* sama mapa bez z
 ${S} #minimap, ${S} #mmap {   /* TODO: zweryfikuj selektor (minimapa SI) */
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line);
 }
+
+/* ═════════════ TEKST ROZJAŚNIONY PRZEZ SKANER ═════════════ */
+html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
 
 /* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
 #mds-toggle {
@@ -592,6 +600,190 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
   }
 
   /* ─────────────────────────────────────────────────────────────────────────
+   * PRZEMALOWANIE GRAFIK GRY W LOCIE (mechanizm z Dark Gothic, paleta Mrocznej Gwiazdy)
+   * Gra rysuje większość UI z kilkudziesięciu plików /img/gui/* (sam atlas buttony.png jest
+   * w ~180 regułach CSS). Skrypt:
+   *  1) pobiera dany plik z serwera gry (nic nie jest kopiowane do repo),
+   *  2) przemalowuje go na canvasie: drewno/brąz/pergamin/szarości → fioletowa czerń,
+   *     złote i brązowe obszycia → przygaszony fiolet, jasne ikony → lekko lawendowe,
+   *     a kolory znaczeniowe (złoto ikon, zieleń statusów, błękit, czerwone znaczniki) zostają,
+   *  3) podmienia adres w regułach CSS gry na wersję przemalowaną (blob:).
+   * Jasne, pergaminowe tła w regułach są przyciemniane, a ciemny tekst na nich rozjaśniany.
+   * Wyłączenie motywu przywraca oryginalne wartości reguł bez przeładowania.
+   * ───────────────────────────────────────────────────────────────────────── */
+  const GUI_URL = /url\(\s*["']?([^"')]*\/img\/gui\/[^"')]+\.(?:png|gif))(\?[^"')]*)?["']?\s*\)/gi;
+  // nietknięte: kursory, ramki rzadkości, ikony umiejętności/mapy, emotki, animacje slotów…
+  const KEEP = /\/img\/gui\/(?:cursor|item_frames|skills|map-icons|emo|buffs-in-fight|item-slot-anim|line-highlight|X-blackoutline|ok-blackoutline|triangle|search|zoom|battle-|outfit)/i;
+  const IMG_PROPS = ['background-image', 'border-image-source', 'list-style-image'];
+  const blobCache = new Map();   // ścieżka → Promise<blob URL | null>
+  const touched = new Map();     // reguła CSS → { właściwość: [wartość oryginalna, priorytet] }
+
+  function recolorPixels(ctx, w, h) {
+    const id = ctx.getImageData(0, 0, w, h), a = id.data;
+    for (let i = 0; i < a.length; i += 4) {
+      if (a[i + 3] === 0) continue;
+      const r = a[i] / 255, g = a[i + 1] / 255, b = a[i + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+      let s = 0, hue = 0;
+      if (d > 0) {
+        s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+        if (mx === r) hue = (g - b) / d + (g < b ? 6 : 0); else if (mx === g) hue = (b - r) / d + 2; else hue = (r - g) / d + 4;
+        hue *= 60;
+      }
+      const vivid = s > 0.62 && l > 0.3 && l < 0.72;                 // złoto ikon, klejnoty, ogień
+      const green = hue > 70 && hue < 170 && s > 0.3;               // statusy, potwierdzenia
+      const blue = hue > 190 && hue < 255 && s > 0.3;               // mana, informacje
+      const violet = hue >= 255 && hue < 320 && s > 0.3;            // już fioletowe – zostaje
+      const redMark = (hue < 8 || hue > 340) && s > 0.55 && l > 0.25; // powiadomienia, ostrzeżenia
+      if (vivid || green || blue || violet || redMark) continue;
+      const warm = hue >= 8 && hue <= 58;                            // drewno, brąz, pergamin, obszycia
+      if (s < 0.22 && l > 0.6) {                                     // jasne ikony i glify – czytelne, lekko lawendowe
+        a[i] *= 0.86; a[i + 1] *= 0.84; a[i + 2] *= 0.95;
+      } else if (warm && s > 0.35 && l > 0.42) {                     // złote/brązowe obszycia → przygaszony fiolet
+        const k = Math.min(1, (l - 0.3) * 1.6);
+        a[i] = 60 + 55 * k; a[i + 1] = 34 + 36 * k; a[i + 2] = 95 + 80 * k;
+      } else if (warm || s < 0.22) {                                 // powierzchnie → fioletowa czerń
+        const L = 0.02 + Math.pow(l, 1.4) * 0.4;
+        a[i] = Math.min(255, L * 0.95 * 255); a[i + 1] = L * 0.84 * 255; a[i + 2] = Math.min(255, L * 1.3 * 255);
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+  }
+
+  function recolored(path) {
+    if (!blobCache.has(path)) {
+      blobCache.set(path, (async () => {
+        const res = await fetch(path, { credentials: 'same-origin' });
+        if (!res.ok) return null;
+        const bm = await createImageBitmap(await res.blob());
+        const c = document.createElement('canvas');
+        c.width = bm.width; c.height = bm.height;
+        const x = c.getContext('2d', { willReadFrequently: true });
+        x.drawImage(bm, 0, 0);
+        recolorPixels(x, bm.width, bm.height);
+        const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
+        return blob ? URL.createObjectURL(blob) : null;
+      })().catch(() => null));
+    }
+    return blobCache.get(path);
+  }
+
+  function remember(rule, prop) {
+    let m = touched.get(rule);
+    if (!m) { m = {}; touched.set(rule, m); }
+    if (!(prop in m)) m[prop] = [rule.style.getPropertyValue(prop), rule.style.getPropertyPriority(prop)];
+  }
+  function parseRgb(v) { const m = /rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)(?:[ ,/]+([\d.]+))?/.exec(v || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; }
+  // jasność koloru CSS (0–1) albo -1, gdy to nie kolor rgb/rgba lub jest półprzezroczysty
+  function lum(v) { const c = parseRgb(v); if (!c || c[3] < 0.5) return -1; return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255; }
+  function neutral(v) { const c = parseRgb(v); if (!c || c[3] < 0.5) return false; return Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]) < 24; }
+  // szare tło → fioletowa sadza (stany wyróżnienia jaśniejsze, żeby nadal odróżniały się od tła)
+  function soot(v, highlight) {
+    const c = parseRgb(v); const L = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+    const k = Math.round((highlight ? 0.09 + L * 0.26 : 0.03 + L * 0.16) * 255);
+    return `rgba(${k + 2}, ${k}, ${k + 9}, ${c[3]})`;
+  }
+
+  async function processRule(rule) {
+    const st = rule.style;
+    const hl = /:hover|\.active|\.selected|highlight|\.is-active|\.pressed/.test(rule.selectorText);
+    for (const prop of IMG_PROPS) {
+      const v = st.getPropertyValue(prop);
+      if (!v || v.indexOf('/img/gui/') === -1 || v.indexOf('blob:') !== -1) continue;
+      const jobs = [];
+      v.replace(GUI_URL, (all, url) => { const path = url.replace(/^https?:\/\/[^/]+/, ''); if (!KEEP.test(path)) jobs.push([all, recolored(path)]); return all; });
+      if (!jobs.length) continue;
+      let nv = v;
+      for (const [token, p] of jobs) { const u = await p; if (u) nv = nv.split(token).join(`url("${u}")`); }
+      if (nv !== v && root.classList.contains(ON_CLASS)) { remember(rule, prop); st.setProperty(prop, nv, st.getPropertyPriority(prop)); }
+    }
+    // jasne (pergaminowe) tła → czerń; ciemny tekst w tej samej regule → lawendowy
+    const bg = st.getPropertyValue('background-color');
+    if (lum(bg) > 0.72) {
+      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(13, 11, 20, .92)', st.getPropertyPriority('background-color'));
+      const col = st.getPropertyValue('color');
+      if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#c9c3e6', st.getPropertyPriority('color')); }
+    } else if (neutral(bg) && lum(bg) > 0.2) {
+      remember(rule, 'background-color'); st.setProperty('background-color', soot(bg, hl), st.getPropertyPriority('background-color'));
+    }
+    // szare gradienty w tłach → przyciemnione; kolorowe (zielone/czerwone przyciski) zostają
+    const bi = st.getPropertyValue('background-image');
+    if (bi && bi.indexOf('gradient') !== -1 && bi.indexOf('blob:') === -1) {
+      const nb = bi.replace(/rgba?\([^)]*\)/g, (c) => (neutral(c) && lum(c) > 0.2 ? soot(c, hl) : c));
+      if (nb !== bi) { remember(rule, 'background-image'); st.setProperty('background-image', nb, st.getPropertyPriority('background-image')); }
+    }
+  }
+
+  const seenRules = new WeakSet();
+  function walk(rules, out) {
+    for (const r of rules) {
+      if (r.cssRules && !r.selectorText) { walk(r.cssRules, out); continue; }
+      if (!r.style || !r.selectorText || seenRules.has(r) || r.selectorText.indexOf('mds-') !== -1) continue;
+      seenRules.add(r); out.push(r);
+    }
+  }
+  function scanSheets() {
+    if (!enabled || !root.classList.contains('mds-ni')) return;   // SI: TODO – przemalowanie nie było sprawdzone
+    const rules = [];
+    for (const sh of document.styleSheets) { let rr; try { rr = sh.cssRules; } catch (e) { continue; } if (rr) walk(rr, rules); }
+    rules.forEach((r) => { processRule(r); });
+  }
+  function restoreSheets() {
+    for (const [rule, props] of touched) for (const p in props) rule.style.setProperty(p, props[p][0], props[p][1]);
+    touched.clear();
+  }
+  function reapplySheets() {
+    // ponowne włączenie: reguły znów do przetworzenia (przemalowane pliki są już w pamięci)
+    for (const sh of document.styleSheets) {
+      let rr; try { rr = sh.cssRules; } catch (e) { continue; }
+      if (rr) (function w(list) { for (const r of list) { if (r.cssRules && !r.selectorText) w(r.cssRules); else seenRules.delete(r); } })(rr);
+    }
+    scanSheets();
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+   * CZYTELNOŚĆ TEKSTU W OKNACH
+   * Część okien miała ciemny tekst na pergaminie. Skaner oznacza takie elementy klasą .mds-lt
+   * i podaje jaśniejszy odpowiednik koloru (neutralny → lawendowy, kolorowy → ten sam odcień, jaśniej).
+   * ───────────────────────────────────────────────────────────────────────── */
+  const SCOPE = '.border-window, .tip-wrapper, .dialogue-window';
+  const marked = new Set();
+  function lighter([r, g, b]) {
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    if (mx - mn < 28) return '#c9c3e6';
+    const k = 190 / Math.max(mx, 1);
+    return `rgb(${Math.min(255, Math.round(r * k + 30))}, ${Math.min(255, Math.round(g * k + 30))}, ${Math.min(255, Math.round(b * k + 30))})`;
+  }
+  function fixText(scopeEl) {
+    if (!enabled) return;
+    for (const el of scopeEl.querySelectorAll('*')) {
+      if (el.classList.contains('mds-lt') || el.closest('.item, canvas')) continue;
+      let hasText = false;
+      for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) { hasText = true; break; }
+      if (!hasText) continue;
+      const c = parseRgb(getComputedStyle(el).color);
+      if (!c || c[3] < 0.3) continue;
+      if ((0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255 >= 0.36) continue;
+      el.style.setProperty('--mds-c', lighter(c));
+      el.classList.add('mds-lt');
+      marked.add(el);
+    }
+  }
+  function unfixText() {
+    for (const el of marked) { el.classList.remove('mds-lt'); el.style.removeProperty('--mds-c'); }
+    marked.clear();
+  }
+  const pendingFix = new Set();
+  let fixTimer = 0;
+  function queueFix(node) {
+    const el = node.nodeType === 1 ? node : node.parentElement;
+    const w = el && el.closest && el.closest(SCOPE);
+    if (!w) return;
+    pendingFix.add(w);
+    if (!fixTimer) fixTimer = setTimeout(() => { fixTimer = 0; const list = [...pendingFix]; pendingFix.clear(); list.forEach(fixText); }, 150);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
    * WŁĄCZANIE / WYŁĄCZANIE
    * ───────────────────────────────────────────────────────────────────────── */
   let enabled = get(KEY, true);
@@ -600,6 +792,7 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
     root.classList.toggle(ON_CLASS, on);
     const b = document.getElementById('mds-toggle');
     if (b) b.title = 'Mroczna Gwiazda: ' + (on ? 'włączona' : 'wyłączona') + ' (Ctrl+Alt+D)';
+    if (on) { reapplySheets(); document.querySelectorAll(SCOPE).forEach(fixText); } else { restoreSheets(); unfixText(); }
   }
   function toggle() {
     enabled = !enabled;
@@ -623,25 +816,50 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
   addStyle(css);
   apply(enabled);
 
-  // Obserwator DOM z debounce: tylko wykrycie gry i przycisk – reszta to CSS, który sam łapie
-  // dynamicznie dodawane okna. Po wykryciu gry obserwuje już tylko bezpośrednie dzieci <body>.
-  let timer = 0;
-  const startObs = new MutationObserver(() => {
-    if (timer) return;
-    timer = setTimeout(() => {
-      timer = 0;
-      const iface = detectDom();
-      if (!iface) return;
-      setInterface(iface);
-      root.classList.add('mds-game');
-      ensureButton();
-      startObs.disconnect();
-      new MutationObserver(() => { if (!document.getElementById('mds-toggle')) ensureButton(); })
-        .observe(document.body, { childList: true });
-    }, 300);
+  /* Wykrycie gry: od razu (skrypt mógł wejść do już wczytanej strony), przy DOMContentLoaded/load
+   * i przy zmianach DOM (z debounce). Po wykryciu: klasa mds-game, przycisk, skan arkuszy. */
+  function detect() {
+    if (root.classList.contains('mds-game')) return true;
+    const iface = detectDom();
+    if (!iface) return false;
+    setInterface(iface);
+    root.classList.add('mds-game');
+    ensureButton();
+    apply(enabled);
+    return true;
+  }
+  detect();
+  document.addEventListener('DOMContentLoaded', detect);
+  window.addEventListener('load', () => { detect(); scanSheets(); });
+
+  // Jeden obserwator DOM z debounce:
+  //  – do wykrycia gry: sprawdzenie interfejsu,
+  //  – nowe <style>/<link> gry: ponowny skan arkuszy (przemalowanie grafik),
+  //  – nowe elementy w oknach/tooltipach: kolejka poprawy czytelności tekstu,
+  //  – przycisk przełącznika: odtworzenie, gdyby gra przebudowała <body>.
+  // Na stronach, które nie są grą (forum, strona główna), po minucie się odłącza.
+  let detectTimer = 0;
+  const obs = new MutationObserver((muts) => {
+    if (!root.classList.contains('mds-game')) {
+      if (!detectTimer) detectTimer = setTimeout(() => { detectTimer = 0; detect(); }, 300);
+      return;
+    }
+    let sheets = false;
+    for (const m of muts) {
+      for (const n of m.addedNodes) {
+        if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') sheets = true;
+        else if (enabled) queueFix(n);
+      }
+      if (enabled && m.type === 'characterData') queueFix(m.target);
+    }
+    if (sheets) setTimeout(scanSheets, 50);
+    if (!document.getElementById('mds-toggle')) ensureButton();
   });
-  startObs.observe(root, { childList: true, subtree: true });
-  setTimeout(() => { if (!root.classList.contains('mds-game')) startObs.disconnect(); }, 60000);
+  obs.observe(root, { childList: true, subtree: true });
+  setTimeout(() => { if (!root.classList.contains('mds-game')) obs.disconnect(); }, 60000);
+  // arkusze gry dochodzą też później – okresowy skan przez pierwsze dwie minuty
+  let ticks = 0;
+  const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
 
   // Wyłączanie: menu Tampermonkey, gwiazdka w lewym dolnym rogu albo Ctrl+Alt+D (wybór jest zapamiętywany).
   if (typeof GM_registerMenuCommand === 'function') {
