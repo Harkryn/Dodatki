@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.2.0
+// @version      1.3.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -334,6 +334,55 @@ ${R} .stats-wrapper .stats-list li { color: var(--mds-text); }   /* TODO: zweryf
 /* SI */
 ${S} #panel .item, ${S} #bag .item {   /* TODO: zweryfikuj selektor (sloty SI) */
   box-shadow: inset 0 0 0 1px #2a1840;
+}
+
+/* ═════════════ TOOLTIPY ═════════════ */
+/* czarna karta z pyłem i cienką fioletową krawędzią; kolorów nazw i bonusów nie zmieniamy */
+${R} .tip-wrapper.normal-tip {
+  border-image: none;
+  background: var(--mds-dust), linear-gradient(var(--mds-bg2), var(--mds-bg0) 70%);
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 10px 22px rgba(0, 0, 0, .9);
+}
+${R} .tip-wrapper.normal-tip > .content {
+  background: rgba(7, 6, 11, .4);
+  text-shadow: 0 1px 2px #000;
+}
+${R} .tip-wrapper .item-head {
+  background: linear-gradient(rgba(58, 34, 87, .28), rgba(7, 6, 11, 0));
+  box-shadow: inset 0 -1px 0 rgba(107, 63, 160, .35);
+}
+${R} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line); }
+${R} .tip-wrapper .item-tip-section { border-color: rgba(201, 195, 230, .1) !important; }   /* gra ustawia ten kolor w stylu inline */
+/* rzadkość (ramka ikony ma klasę t-…): poświata, linia u góry i obwódka ikony w kolorze z gry */
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-uniupg) { --mds-rar: 255, 251, 0; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-her) { --mds-rar: 56, 184, 235; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-upgraded) { --mds-rar: 255, 89, 175; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-leg) { --mds-rar: 255, 132, 0; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-art) { --mds-rar: 225, 64, 70; }
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(var(--mds-rar), .35), 0 0 16px rgba(var(--mds-rar), .22), 0 10px 22px rgba(0, 0, 0, .9);
+}
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) > .content {
+  box-shadow: inset 0 2px 0 rgba(var(--mds-rar), .55);
+}
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head {
+  background: linear-gradient(rgba(var(--mds-rar), .14), rgba(7, 6, 11, 0) 85%);
+}
+${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head .item {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(var(--mds-rar), .55), 0 0 8px rgba(var(--mds-rar), .4);
+}
+/* tooltipy bez przedmiotu (podpowiedzi przycisków, NPC) */
+${R} .tip-wrapper:not(.normal-tip) {   /* TODO: zweryfikuj selektor (inne typy tooltipów NI) */
+  background: rgba(7, 6, 11, .95);
+  color: var(--mds-text);
+  box-shadow: 0 0 0 1px var(--mds-violet-line), 0 6px 14px rgba(0, 0, 0, .8);
+}
+/* SI */
+${SB} #tip {   /* TODO: zweryfikuj selektor (tooltip SI) */
+  background: var(--mds-dust), linear-gradient(var(--mds-bg2), var(--mds-bg0));
+  color: var(--mds-text);
+  border: 1px solid var(--mds-violet-line);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .85);
 }
 
 /* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
