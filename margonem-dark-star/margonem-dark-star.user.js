@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.10.1
+// @version      1.11.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -20,6 +20,7 @@
 // @resource     horizon   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/horyzont.png
 // @resource     singular  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/osobliwosc.jpg
 // @resource     bg-eq     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-ekwipunek.jpg
+// @resource     bg-chat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-czat.jpg
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // ==/UserScript==
@@ -77,6 +78,7 @@
    *                                          (czarny środek ok. 57% promienia → przy 170 px otwór ok. 97 px = kula gry)
    *   osobliwosc.jpg                 256×256  osobliwość: fioletowy wir z jasnym punktem – wypełnienie kuli HP
    *   tlo-ekwipunek.jpg              576×1344 czarna dziura ze smugami plazmy – tło kolumny ekwipunku
+   *   tlo-czat.jpg                   576×1344 prawie czarne niebo z rzadkimi gwiazdami i pasmem mgławicy u dołu – tło czatu
    */
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/';
   const res = (name, file) => {
@@ -93,6 +95,7 @@
   const HORIZON = res('horizon', 'horyzont.png');
   const SINGULAR = res('singular', 'osobliwosc.jpg');
   const BG_EQ = res('bg-eq', 'tlo-ekwipunek.jpg');
+  const BG_CHAT = res('bg-chat', 'tlo-czat.jpg');
   // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
   const CORNERS = (px) => ['tl:left top', 'tr:right top', 'bl:left bottom', 'br:right bottom']
     .map((s) => { const [k, pos] = s.split(':'); return `url("${CORNER[k]}") ${pos} / ${px}px ${px}px no-repeat`; })
@@ -350,6 +353,13 @@ ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
   background: var(--mds-bg0);
   color: var(--mds-text);
   border: 1px solid var(--mds-violet-line);
+}
+
+/* ═════════════ KOLUMNA CZATU: PRAWIE CZARNE NIEBO ═════════════ */
+/* Rzadkie gwiazdy i delikatne pasmo fioletowej mgławicy u dołu (FLUX.1 Krea), kadrowane od dołu,
+ * żeby mgławica leżała pod wiadomościami; lekko przyciemnione dla czytelności tekstu. */
+${R} .layer.interface-layer .left-column.main-column {
+  background: linear-gradient(rgba(7, 6, 11, .15), rgba(7, 6, 11, .15)), url("${BG_CHAT}") center bottom / cover no-repeat, var(--mds-bg0);
 }
 
 /* ═════════════ KOLUMNA EKWIPUNKU: CZARNA DZIURA W TLE ═════════════ */

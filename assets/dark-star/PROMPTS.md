@@ -165,6 +165,15 @@ Inspiracja od użytkownika: kinowa czarna dziura z soczewkowanym dyskiem (bez ko
 - **B** (Qwen-Image, 9:16, 16 kroków, seed 1166723904; negative: planet, galaxy core, bright light, text, watermark, blurry, low resolution, cartoon stars):
   > Dark moody deep space astrophotography, vertical frame. A rich starry sky full of fine pinpoint stars of varying faint brightness in white and pale blue. Through the middle drifts a very faint, barely outlined wispy nebula in dim violet and dark indigo with soft blurry edges and darker dust lanes, only subtly visible against the black. Overall very dark, mysterious and calm, low contrast, muted colors, no bright objects, photorealistic, high detail.
 
+## Kolumna czatu – prawie czarne, subtelne – wybrany A → `tlo-czat.jpg` (JPEG 576×1344, jakość 82; w grze przyciemnione o 15%, kadrowane od dołu)
+
+- **A – wybrany** (FLUX.1 Krea, 576×1344, 32 kroki, seed 1409226293) – czerń z rzadkimi gwiazdami i delikatnym pasmem fioletowej mgławicy u dołu:
+  > Almost completely black deep space, vertical frame, real astrophotography: very sparse tiny dim pinpoint stars, most barely visible, a few slightly brighter, and an extremely faint ghostly veil of dark violet nebula haze drifting across the lower third, almost invisible against the black, very dark, quiet and minimal, low contrast, muted, no bright objects, no galaxy, no text
+- **B** (Qwen-Image, 9:16, 16 kroków, seed 1448094833; negative: text, letters, words, caption, watermark, bright, colorful, galaxy, planet, large stars, blurry, low resolution, cartoon) – model dorysował szarą ramkę, do wycięcia przy obróbce; w wąskiej kolumnie widać głównie czerń z gwiazdami:
+  > Almost completely black deep space background, vertical frame, photorealistic astrophotography. Sparse tiny dim pinpoint stars evenly scattered, most barely visible. Extremely faint dark violet and indigo cosmic haze spread softly over the whole frame like a thin mist, no distinct shapes, almost invisible against the black. Very dark, quiet, minimal, low contrast, muted colors.
+
+Odrzucona próba Qwen-Image (seed 371076960): prompt wspominał o tekście czatu i model wpisał w obraz napisy.
+
 ## Odrzucone
 
 - Narożnik: FLUX.1 Krea – srebrny filigran z zawijasami (seed 471057449) i odłamki obsydianu (seed 1373239555) – zbyt rozbudowane.
