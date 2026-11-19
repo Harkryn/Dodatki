@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.16.0
+// @version      1.17.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -417,49 +417,54 @@ ${S} #panel .item, ${S} #bag .item {   /* TODO: zweryfikuj selektor (sloty SI) *
 }
 
 /* ═════════════ TOOLTIPY ═════════════ */
-/* czarna karta z pyłem i cienką fioletową krawędzią; kolorów nazw i bonusów nie zmieniamy */
+/* KARTA PRZEDMIOTU – kolor rangi (--mds-rar, „r, g, b”) ustawia skrypt (tintTooltip): odczytuje grafikę ramki,
+ * która faktycznie jest pod przedmiotem (dowolny zestaw ramek z ustawień gry albo z innego dodatku),
+ * i liczy z niej dominujący kolor. Zwykłe przedmioty (szara ramka) dostają stonowaną śliwkę. */
 ${R} .tip-wrapper.normal-tip {
+  --mds-rar: 154, 132, 150;
   border-image: none;
-  background: var(--mds-dust), linear-gradient(var(--mds-bg2), var(--mds-bg0) 70%);
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 10px 22px rgba(0, 0, 0, .9);
+  border-radius: 4px;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(var(--mds-rar), .13), rgba(var(--mds-rar), 0) 70%),
+    var(--mds-dust),
+    linear-gradient(#120b13, #09060a 55%, #050305);
+  box-shadow:
+    0 0 0 1px rgba(var(--mds-rar), .55),
+    0 0 0 2px rgba(0, 0, 0, .9),
+    0 0 18px rgba(var(--mds-rar), .2),
+    0 14px 28px rgba(0, 0, 0, .9);
+  color: var(--mds-text);
+  transition: box-shadow .2s ease;
 }
-/* mniejsze narożniki (40 px → punkt rogu ok. 2,2 px od brzegu grafiki) */
+/* linia rangi u góry karty: jasny środek, zanikające końce, miękka poświata */
 ${R} .tip-wrapper.normal-tip::before {
   content: "";
   position: absolute;
-  inset: -4px;
-  background: var(--mds-corners-sm);
+  left: 10%; right: 10%; top: -1px; height: 2px;
+  background: linear-gradient(90deg, rgba(var(--mds-rar), 0), rgba(var(--mds-rar), .95) 50%, rgba(var(--mds-rar), 0));
+  box-shadow: 0 0 8px rgba(var(--mds-rar), .6);
   pointer-events: none;
   z-index: 2;
 }
 ${R} .tip-wrapper.normal-tip > .content {
-  background: rgba(9, 6, 10, .4);
+  background: transparent;
   text-shadow: 0 1px 2px #000;
 }
-${R} .tip-wrapper .item-head {
-  background: linear-gradient(rgba(66, 36, 66, .28), rgba(9, 6, 10, 0));
-  box-shadow: inset 0 -1px 0 rgba(122, 72, 120, .35);
+/* nagłówek: łuna rangi za ikoną, separator w kolorze rangi zanikający w prawo */
+${R} .tip-wrapper.normal-tip .item-head {
+  background:
+    linear-gradient(90deg, rgba(var(--mds-rar), .5), rgba(var(--mds-rar), .12) 60%, rgba(var(--mds-rar), 0)) left bottom / 100% 1px no-repeat,
+    radial-gradient(90px 60px at 20px 50%, rgba(var(--mds-rar), .2), rgba(var(--mds-rar), 0) 100%);
+  box-shadow: none;
 }
-${R} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line); }
-${R} .tip-wrapper .item-tip-section { border-color: rgba(220, 203, 214, .1) !important; }   /* gra ustawia ten kolor w stylu inline */
-/* rzadkość (ramka ikony ma klasę t-…): poświata, linia u góry i obwódka ikony w kolorze z gry */
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-uniupg) { --mds-rar: 255, 251, 0; }
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-her) { --mds-rar: 56, 184, 235; }
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-upgraded) { --mds-rar: 255, 89, 175; }
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-leg) { --mds-rar: 255, 132, 0; }
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-art) { --mds-rar: 225, 64, 70; }
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) {
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(var(--mds-rar), .35), 0 0 16px rgba(var(--mds-rar), .22), 0 10px 22px rgba(0, 0, 0, .9);
+${R} .tip-wrapper.normal-tip .item-head .item {
+  box-shadow: 0 0 0 1px #000, 0 0 10px rgba(var(--mds-rar), .45);
+  border-radius: 2px;
 }
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) > .content {
-  box-shadow: inset 0 2px 0 rgba(var(--mds-rar), .55);
-}
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head {
-  background: linear-gradient(rgba(var(--mds-rar), .14), rgba(9, 6, 10, 0) 85%);
-}
-${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head .item {
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(var(--mds-rar), .55), 0 0 8px rgba(var(--mds-rar), .4);
-}
+${R} .tip-wrapper.normal-tip .item-name { text-shadow: 0 0 8px rgba(var(--mds-rar), .45), 0 1px 2px #000; }   /* kolor nazwy zostaje z gry */
+${R} .tip-wrapper.normal-tip .item-type { color: var(--mds-text-dim); }
+${R} .tip-wrapper.normal-tip .item-rarity { font-variant: small-caps; letter-spacing: .08em; text-shadow: 0 0 6px rgba(var(--mds-rar), .4), 0 1px 2px #000; }
+${R} .tip-wrapper.normal-tip .item-tip-section { border-color: rgba(220, 203, 214, .08) !important; }   /* gra ustawia ten kolor w stylu inline */
 /* tooltipy bez przedmiotu (podpowiedzi przycisków, NPC) */
 ${R} .tip-wrapper:not(.normal-tip) {   /* TODO: zweryfikuj selektor (inne typy tooltipów NI) */
   background: rgba(9, 6, 10, .95);
@@ -939,6 +944,78 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
     host.appendChild(fx);
   }
 
+  /* KOLOR RANGI W TOOLTIPIE – z ramki, która faktycznie jest pod przedmiotem.
+   * Nie zgadujemy koloru po klasie rangi: bierzemy grafikę ramki (.highlight) tego samego przedmiotu
+   * w torbie/ekwipunku (item-id), wycinamy jej fragment z arkusza tak, jak robi to gra (background-position/size),
+   * i liczymy dominujący nasycony kolor. Dzięki temu kolor zgadza się z każdym zestawem ramek
+   * (ustawienia gry, inne dodatki). Wynik jest zapamiętywany per grafika+pozycja.
+   *  – kolor znaleziony → --mds-rar na tooltipie,
+   *  – ramka szara (zwykły przedmiot) → kolor domyślny z CSS,
+   *  – grafiki nie da się odczytać (obca domena) → kolor nazwy przedmiotu, który gra barwi według rangi. */
+  const rarCache = new Map();
+  function frameColor(el) {
+    const cs = getComputedStyle(el);
+    const m = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage);
+    if (!m) return Promise.resolve(undefined);
+    const w = el.offsetWidth || 32, h = el.offsetHeight || 32;
+    const key = m[1] + '|' + cs.backgroundPosition + '|' + cs.backgroundSize + '|' + w + 'x' + h;
+    if (!rarCache.has(key)) {
+      rarCache.set(key, (async () => {
+        const img = new Image();
+        if (!/^(blob:|data:)/.test(m[1]) && new URL(m[1], location.href).origin !== location.origin) img.crossOrigin = 'anonymous';
+        img.src = m[1];
+        await img.decode();
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const x = c.getContext('2d', { willReadFrequently: true });
+        const pos = cs.backgroundPosition.split(' ').map((v) => (v.endsWith('px') ? parseFloat(v) : 0));
+        const bs = cs.backgroundSize.split(' ');
+        let sw = img.naturalWidth, sh = img.naturalHeight;
+        if (bs[0] && bs[0].endsWith('px')) { sw = parseFloat(bs[0]); sh = bs[1] && bs[1].endsWith('px') ? parseFloat(bs[1]) : sw * img.naturalHeight / img.naturalWidth; }
+        x.drawImage(img, pos[0] || 0, pos[1] || 0, sw, sh);
+        const d = x.getImageData(0, 0, w, h).data;
+        let r = 0, g = 0, b = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] < 160) continue;
+          const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+          const s = (mx - mn) / (mx || 1);
+          if (s < 0.35 || mx < 70) continue;          // szarości i cienie ramki pomijamy
+          r += d[i] * s; g += d[i + 1] * s; b += d[i + 2] * s; n += s;
+        }
+        if (n < 4) return null;                        // ramka szara – zwykły przedmiot
+        r /= n; g /= n; b /= n;
+        const k = 235 / Math.max(r, g, b);             // wyrównanie jasności, żeby poświata była czytelna
+        return `${Math.round(Math.min(255, r * k))}, ${Math.round(Math.min(255, g * k))}, ${Math.round(Math.min(255, b * k))}`;
+      })().catch(() => undefined));
+    }
+    return rarCache.get(key);
+  }
+  function nameColor(tip) {
+    const el = tip.querySelector('.item-name');
+    const c = el && parseRgb(getComputedStyle(el).color);
+    if (!c) return undefined;
+    const mx = Math.max(c[0], c[1], c[2]), mn = Math.min(c[0], c[1], c[2]);
+    return (mx - mn) / (mx || 1) < 0.3 ? null : `${c[0]}, ${c[1]}, ${c[2]}`;
+  }
+  async function tintTooltip(tip) {
+    const item = tip.querySelector('.item-head .item');
+    if (!item) return;
+    const idCls = [...item.classList].find((c) => c.startsWith('item-id-')) || '';
+    tip.dataset.mdsFor = idCls;
+    const source = idCls ? [...document.querySelectorAll('.item.' + idCls)].find((e) => !e.closest('.tip-wrapper')) : null;
+    const frames = [source && source.querySelector('.highlight'), item.querySelector('.highlight')].filter(Boolean);
+    let color;
+    for (const f of frames) { color = await frameColor(f); if (color !== undefined) break; }
+    if (color === undefined) color = nameColor(tip);
+    if (tip.dataset.mdsFor !== idCls) return;          // w międzyczasie tooltip pokazuje już inny przedmiot
+    if (color) tip.style.setProperty('--mds-rar', color); else tip.style.removeProperty('--mds-rar');
+  }
+  const pendingTips = new Set();
+  let tipFrame = 0;
+  function queueTip(tip) {
+    pendingTips.add(tip);
+    if (!tipFrame) tipFrame = requestAnimationFrame(() => { tipFrame = 0; const l = [...pendingTips]; pendingTips.clear(); l.forEach(tintTooltip); });
+  }
+
   let hpWatched = null;
   function watchHp() {
     const blood = document.querySelector('.hp-indicator .blood');
@@ -987,6 +1064,13 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
         else if (enabled) queueFix(n);
       }
       if (enabled && m.type === 'characterData') queueFix(m.target);
+      // tooltip przedmiotu pojawił się albo zmienił zawartość → kolor rangi z ramki
+      if (enabled && m.addedNodes.length) {
+        const t = m.target.nodeType === 1 && (m.target.closest('.tip-wrapper.normal-tip') ||
+          (m.target.classList.contains('tip-wrapper') ? m.target : null));
+        if (t) queueTip(t);
+        else for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('tip-wrapper')) queueTip(n);
+      }
     }
     if (sheets) setTimeout(scanSheets, 50);
     if (!hpWatched || !hpWatched.isConnected) watchHp();
