@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.1
+// @version      1.7.2
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -170,7 +170,9 @@ ${R} .border-window:not(.transparent) {
   border-image: none;
   border-color: transparent;
   background: var(--mds-dust), var(--mds-panel);
-  background-clip: padding-box;
+  /* okno ma przezroczystą ramkę 32 px u góry (tytuł) i 20 px po bokach – tło musi ją wypełniać */
+  background-clip: border-box;
+  background-origin: border-box;
   box-shadow: var(--mds-edge), 0 0 18px rgba(107, 63, 160, .12), var(--mds-shadow);
   color: var(--mds-text);
 }
