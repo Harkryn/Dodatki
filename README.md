@@ -134,3 +134,27 @@ Aktualizacje: Tampermonkey sam pobiera nowe wersje z tego repo (albo ręcznie: T
 Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
 
 Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (38 plików WebP, razem ok. 333 KB, każdy poniżej 40 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
+
+## Margonem — Mroczna Gwiazda
+
+Motyw w klimacie kosmicznej pustki: głęboka czerń, fiolet tylko jako akcent, srebrno-lawendowy tekst i ledwo widoczny gwiezdny pył na panelach. Inspirowany estetyką „mrocznej gwiazdy”, ale wszystkie elementy są własne (CSS/SVG), bez cudzych grafik i logo.
+
+Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`): tła `#07060b` / `#0d0b14` / `#14111f`, fiolet `#6b3fa0` (akcent), `#9d6bff` (podświetlenia), `#3a2257` (obramowania), tekst `#c9c3e6`, oszczędny błękit `#5a7bd8` (mana).
+
+Funkcje:
+- **okna i panele**: czarne tło z gwiezdnym pyłem, cienka fioletowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i fioletową linią,
+- **przyciski**: ciemne, z fioletową obwódką i spokojnie pulsującą poświatą po najechaniu; czerwone, zielone i niebieskie przyciski gry zachowują znaczenie,
+- **zakładki, dialog z NPC, sklep, pola tekstowe, scrollbary, zaznaczenie tekstu** w stylu motywu,
+- animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”.
+
+Interfejsy: **NI** – pełne wsparcie. **SI** – podstawowe (okna, przyciski, pola tekstowe); selektory SI nie były jeszcze sprawdzone w grze i są oznaczone w kodzie `TODO: zweryfikuj selektor`. Mapa i sprite'y postaci nie są zmieniane.
+
+**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
+
+Instalacja:
+1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
+2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
+3. Wyłącz w Tampermonkey inne motywy interfejsu (Dark Gothic, Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
+4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
+
+Wyłączanie: **Ctrl+Alt+D**, gwiazdka w lewym dolnym rogu albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
