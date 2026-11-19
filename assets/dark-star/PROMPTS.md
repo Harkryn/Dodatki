@@ -188,7 +188,7 @@ Planeta z wypalonym pierścieniem nie dała się realistycznie obracać, więc p
 
 - **`pierscien.png`** (FLUX.1 Krea, 1024×1024, 24 kroki, seed 1242295350; przycięcie x/y 64, bok 896; próg 18; PNG 280×280):
   > Professional game UI asset seen from directly above: a perfectly circular flat halo ring made of countless glowing salmon-coral and pale pink plasma particles and fine streaks, bright inner edge fading outward, with a few thin darker gaps like bands, the center of the ring completely empty and black, isolated on pure black background, centered, top-down orthographic view, cinematic space art, ultra detailed, no planet, no sphere, no text
-- **`burza.png`** (FLUX.1 Krea, 1024×1024, 24 kroki, seed 393073744; cały obraz; próg 20; PNG 280×280):
+- **`burza.png` – odrzucona przez użytkownika („tandetna”), usunięta z motywu** (FLUX.1 Krea, 1024×1024, 24 kroki, seed 393073744; cały obraz; próg 20; PNG 280×280):
   > Professional game VFX asset: a circular electric storm of crackling lightning bolts arcing all around an empty black circle, jagged branching bolts in bright pale pink, salmon coral and white, some arcs hugging the circle edge and some forking outward, faint dusky plum glow, the center completely empty and black, isolated on pure black background, centered, top-down view, ultra detailed, no planet, no text
 
 Planeta z pierścieniem (`horyzont.png`, seed 1575779788) – zastąpiona przez powyższe.
