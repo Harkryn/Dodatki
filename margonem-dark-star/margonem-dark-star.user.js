@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.14.2
+// @version      1.15.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -18,7 +18,7 @@
 // @resource     corner-br https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-br.png
 // @resource     nebula    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica.png
 // @resource     ring      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/pierscien.png
-// @resource     singular  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/osobliwosc.jpg
+// @resource     orbneb    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica-kula.png
 // @resource     bg-eq     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-ekwipunek.jpg
 // @resource     bg-chat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-czat.jpg
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
@@ -76,7 +76,7 @@
    *   mglawica.png                   520×124  wstążka fioletowej mgławicy z jasną gwiazdą (pod tabliczką z imieniem)
    *   pierscien.png                  280×280  łososiowy pierścień cząstek widziany z góry (otwór ok. 30% szerokości);
    *                                          w grze 200 px, przechylony w 3D i obracany wokół kuli HP
-   *   osobliwosc.jpg                 256×256  osobliwość: fioletowy wir z jasnym punktem – wypełnienie kuli HP
+   *   mglawica-kula.png              844×88   pasmo subtelnej mgławicy (z lustrzanym odbiciem) przewijane we wnętrzu kuli HP
    *   tlo-ekwipunek.jpg              576×1344 czarna dziura ze smugami plazmy – tło kolumny ekwipunku
    *   tlo-czat.jpg                   576×1344 prawie czarne niebo z rzadkimi gwiazdami i pasmem mgławicy u dołu – tło czatu
    */
@@ -93,7 +93,7 @@
   };
   const NEBULA = res('nebula', 'mglawica.png');
   const RING = res('ring', 'pierscien.png');
-  const SINGULAR = res('singular', 'osobliwosc.jpg');
+  const ORB_NEB = res('orbneb', 'mglawica-kula.png');
   const BG_EQ = res('bg-eq', 'tlo-ekwipunek.jpg');
   const BG_CHAT = res('bg-chat', 'tlo-czat.jpg');
   // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
@@ -624,7 +624,7 @@ ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
  * Skrypt wstawia tam #mds-orb-fx (patrz ensureOrbFx), wspólny kontekst warstw to dolny panel:
  *  – pierścień (pierscien.png, widok z góry) przechylony w 3D i obracany wokół własnej osi; tylna połowa
  *    (z-index 0) idzie za kulą, przednia (z-index 3) przed nią – pierścień naprawdę okrąża kulę,
- *  – osobliwość: wir w .blood::before (niżej); .blood przycina go do poziomu HP. */
+ *  – wnętrze kuli: czerń z przewijaną mgławicą w .blood (niżej); .blood przycina ją do poziomu HP. */
 ${R} #mds-orb-fx { position: absolute; left: 120px; top: 29px; width: 0; height: 0; pointer-events: none; }
 html:not(.${ON_CLASS}) #mds-orb-fx { display: none; }
 ${R} #mds-orb-fx > div { position: absolute; pointer-events: none; }
@@ -646,39 +646,57 @@ ${R} #mds-orb-fx .mds-ring-back .mds-ring { opacity: .75; }
 }
 /* niskie HP (< 30%, klasa ustawiana przez skrypt): pierścień w głębokiej czerwieni */
 html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner #mds-orb-fx { filter: hue-rotate(-12deg) saturate(1.9); }
-/* jądro osobliwości: pulsujący blask w środku kuli (nad wirem, pod liczbą HP) */
-${R} .hp-indicator::after {
-  content: "";
-  position: absolute;
-  left: calc(50% - 30px); bottom: -4px;   /* środek kuli: 26 px nad dołem .hp-indicator */
-  width: 60px; height: 60px;
-  background: radial-gradient(circle, rgba(255, 225, 215, .55) 0, rgba(236, 140, 128, .25) 22%, rgba(122, 72, 120, 0) 60%);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  animation: mds-core 2.8s ease-in-out infinite;
-}
-@keyframes mds-core { 0%, 100% { transform: scale(.75); opacity: .55; } 50% { transform: scale(1.1); opacity: 1; } }
+/* WNĘTRZE KULI: CZARNE JAK CZARNA DZIURA
+ * .blood (wysokość = poziom HP) jest czarne; w nim dwie warstwy subtelnej mgławicy (mglawica-kula.png,
+ * pasmo z lustrzanym odbiciem – przewija się bez szwu) płyną w przeciwne strony z różną prędkością.
+ * Poziom HP pokazuje cienka, jasna linia „powierzchni”. Co ok. 9 s przez kulę przechodzi delikatny rozbłysk. */
 ${R} .hp-indicator .blood {
-  background: #0d070c;   /* sprite krwi gry pod spodem nie jest potrzebny */
+  background: #000;   /* sprite krwi gry nie jest potrzebny */
   overflow: hidden;
 }
 ${R} .hp-indicator .blood::before {
   content: "";
   position: absolute;
-  left: calc(50% - 50px); bottom: -24px;   /* środek wiru = środek kuli */
-  width: 100px; height: 100px;
-  background: url("${SINGULAR}") center / cover no-repeat;
+  left: 0; right: 0; bottom: -20px; height: 92px;   /* pasmo wokół środka kuli (26 px nad dołem .blood) */
+  background:
+    url("${ORB_NEB}") 0 38% / auto 64px repeat-x,
+    url("${ORB_NEB}") 0 72% / auto 44px repeat-x;
+  opacity: .5;
   pointer-events: none;
-  animation: mds-spin 40s linear infinite reverse;
+  animation: mds-orb-neb 70s linear infinite;
+}
+/* przesunięcie = pełna szerokość kafla w danej skali (844×88 → 614 px przy 64 px, 422 px przy 44 px) */
+@keyframes mds-orb-neb {
+  from { background-position: 0 38%, 0 72%; }
+  to   { background-position: -614px 38%, 422px 72%; }
 }
 /* powierzchnia „płynu”: cienka jasna linia na poziomie HP */
 ${R} .hp-indicator .blood::after {
   content: "";
   position: absolute; left: 0; right: 0; top: 0; height: 2px;
-  background: linear-gradient(90deg, rgba(236, 140, 128, 0), rgba(255, 205, 195, .7), rgba(236, 140, 128, 0));
+  background: linear-gradient(90deg, rgba(236, 140, 128, 0), rgba(255, 205, 195, .75), rgba(236, 140, 128, 0));
   pointer-events: none;
 }
-@keyframes mds-spin { to { transform: rotate(360deg); } }
+/* rozbłysk: przez większość czasu niewidoczny, co ok. 9 s krótki, miękki błysk śliwki i koralu */
+${R} .hp-indicator::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 49px); bottom: -23px;   /* cała kula: 98 px, środek 26 px nad dołem .hp-indicator */
+  width: 98px; height: 98px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 40%, rgba(255, 205, 195, .35) 0, rgba(236, 140, 128, .18) 30%, rgba(122, 72, 120, .12) 55%, rgba(122, 72, 120, 0) 72%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  animation: mds-orb-flash 9s ease-in-out infinite;
+}
+@keyframes mds-orb-flash {
+  0%, 78%, 100% { opacity: 0; }
+  82% { opacity: .9; }
+  85% { opacity: .25; }
+  88% { opacity: .6; }
+  94% { opacity: 0; }
+}
 ${R} .hp-indicator-wrapper .value { color: var(--mds-white); text-shadow: 0 0 6px #000, 0 0 2px #000; }
 /* doświadczenie: fiolet od ciemnego do akcentu */
 ${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {

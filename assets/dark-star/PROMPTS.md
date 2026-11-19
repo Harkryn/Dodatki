@@ -193,6 +193,13 @@ Planeta z wypalonym pierścieniem nie dała się realistycznie obracać, więc p
 
 Planeta z pierścieniem (`horyzont.png`, seed 1575779788) – zastąpiona przez powyższe.
 
+## Wnętrze kuli HP – czarna dziura z przewijaną mgławicą – w użyciu → `mglawica-kula.png`
+
+Życzenie użytkownika: wnętrze kuli czarne jak czarna dziura, lekkie rozbłyski co jakiś czas, subtelne przewijające się mgławice. Czerń i rozbłysk są w CSS; mgławica z FLUX.1 Krea (1344×448, 32 kroki, seed 523239201), tło wycięte kluczowaniem czerni (próg 10, pas y 90–370), doklejone lustrzane odbicie, żeby przewijało się bez szwu → PNG 844×88:
+> Seamless horizontally tileable wide texture on pure black background: very faint, soft wisps of nebula gas drifting horizontally, dusky plum purple and mauve with delicate salmon-coral highlights, a few tiny dim stars, mostly empty black space between the wisps, subtle and dark, astrophotography style, ultra detailed, no bright objects, no text
+
+Zastąpione: osobliwość jako wir (`osobliwosc.jpg`, seed 445145582) oraz dwie propozycje osobliwości w nowej palecie (śliwkowy wir, seed 615879176; czarne jądro z koralową krawędzią, seed 1936496055).
+
 ## Odrzucone
 
 - Narożnik: FLUX.1 Krea – srebrny filigran z zawijasami (seed 471057449) i odłamki obsydianu (seed 1373239555) – zbyt rozbudowane.
