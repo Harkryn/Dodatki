@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.11.0
+// @version      1.12.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -62,8 +62,8 @@
       [23, 128, .4, .12], [70, 150, .5, .15], [104, 112, .8, .24], [140, 12, .4, .12], [60, 58, .4, .1],
       [117, 150, .3, .1], [5, 75, .3, .1], [96, 6, .3, .12], [33, 48, .3, .09], [156, 96, .3, .1],
     ];
-    const dots = pts.map(([x, y, r, a]) => `<circle cx='${x}' cy='${y}' r='${r}' fill='rgba(201,195,230,${a})'/>`).join('');
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><circle cx='104' cy='112' r='2.2' fill='rgba(157,107,255,.05)'/>${dots}</svg>`;
+    const dots = pts.map(([x, y, r, a]) => `<circle cx='${x}' cy='${y}' r='${r}' fill='rgba(220,203,214,${a})'/>`).join('');
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><circle cx='104' cy='112' r='2.2' fill='rgba(236,140,128,.05)'/>${dots}</svg>`;
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   })();
 
@@ -104,41 +104,42 @@
   const css = `
 /* ═════════════ ZMIENNE (paleta) ═════════════ */
 :root {
-  --mds-bg0: #07060b;          /* tła – trzy warstwy paneli */
-  --mds-bg1: #0d0b14;
-  --mds-bg2: #14111f;
-  --mds-violet: #6b3fa0;       /* główny akcent */
-  --mds-violet-hi: #9d6bff;    /* podświetlenia, hover */
-  --mds-violet-line: #3a2257;  /* obramowania */
-  --mds-text: #c9c3e6;         /* srebrno-lawendowy tekst */
-  --mds-text-dim: #8d87aa;
+  --mds-bg0: #09060a;          /* tła – trzy warstwy paneli */
+  --mds-bg1: #120b13;
+  --mds-bg2: #1c121e;
+  /* paleta według obrazu poglądowego: czerń → przydymiona śliwka, światło łososiowo-koralowe */
+  --mds-violet: #7a4878;       /* główny akcent: przydymiona śliwka */
+  --mds-violet-hi: #ec8c80;    /* podświetlenia, hover: łososiowy koral */
+  --mds-violet-line: #3e2440;  /* obramowania: ciemna śliwka */
+  --mds-text: #dccbd6;         /* srebrny tekst z różowym odcieniem */
+  --mds-text-dim: #9a8496;
   --mds-white: #ffffff;        /* tylko najważniejsze elementy */
   --mds-blue: #5a7bd8;         /* oszczędny drugi akcent (mana) */
-  --mds-glow: rgba(157, 107, 255, .22);
-  --mds-glow-soft: rgba(157, 107, 255, .10);
-  --mds-hair: rgba(201, 195, 230, .08);
+  --mds-glow: rgba(236, 140, 128, .22);
+  --mds-glow-soft: rgba(236, 140, 128, .10);
+  --mds-hair: rgba(220, 203, 214, .08);
   --mds-shadow: 0 10px 28px rgba(0, 0, 0, .85);
   --mds-dust: ${DUST};
-  --mds-panel: radial-gradient(120% 80% at 50% 0%, rgba(58, 34, 87, .18), rgba(0,0,0,0) 60%), linear-gradient(#0d0b14, #07060b);
-  --mds-edge: 0 0 0 1px #000, 0 0 0 2px #3a2257;
+  --mds-panel: radial-gradient(120% 80% at 50% 0%, rgba(66, 36, 66, .18), rgba(0,0,0,0) 60%), linear-gradient(#120b13, #09060a);
+  --mds-edge: 0 0 0 1px #000, 0 0 0 2px #3e2440;
   --mds-corners: ${CORNERS(64)};
   --mds-corners-sm: ${CORNERS(40)};
 }
 
 @keyframes mds-glow-pulse {
-  0%, 100% { box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 6px rgba(157, 107, 255, .14); }
-  50%      { box-shadow: inset 0 0 0 1px var(--mds-violet-hi), 0 0 12px rgba(157, 107, 255, .3); }
+  0%, 100% { box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 6px rgba(236, 140, 128, .14); }
+  50%      { box-shadow: inset 0 0 0 1px var(--mds-violet-hi), 0 0 12px rgba(236, 140, 128, .3); }
 }
 
 /* ═════════════ BAZOWE: zaznaczenie, scrollbary, pola tekstowe ═════════════ */
-${G} ::selection { background: rgba(107, 63, 160, .55); color: var(--mds-white); }
+${G} ::selection { background: rgba(122, 72, 120, .55); color: var(--mds-white); }
 ${G} ::-webkit-scrollbar { width: 8px; height: 8px; }
 ${G} ::-webkit-scrollbar-track { background: var(--mds-bg0); }
-${G} ::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #1c1630, var(--mds-violet-line)); border: 1px solid var(--mds-bg0); border-radius: 4px; }
+${G} ::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #201320, var(--mds-violet-line)); border: 1px solid var(--mds-bg0); border-radius: 4px; }
 ${G} ::-webkit-scrollbar-thumb:hover { background: var(--mds-violet); }
 /* scrollbary rysowane przez grę */
-${R} .scrollbar-wrapper .track { background: rgba(7, 6, 11, .7); box-shadow: inset 0 0 0 1px var(--mds-hair); }
-${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #1c1630, var(--mds-violet-line), #1c1630); box-shadow: 0 0 0 1px #000, 0 0 6px var(--mds-glow-soft); }
+${R} .scrollbar-wrapper .track { background: rgba(9, 6, 10, .7); box-shadow: inset 0 0 0 1px var(--mds-hair); }
+${R} .scrollbar-wrapper .handle { background: linear-gradient(90deg, #201320, var(--mds-violet-line), #201320); box-shadow: 0 0 0 1px #000, 0 0 6px var(--mds-glow-soft); }
 ${R} .scrollbar-wrapper .handle:hover { background: linear-gradient(90deg, var(--mds-violet-line), var(--mds-violet), var(--mds-violet-line)); }
 
 ${R} input[type="text"], ${R} input[type="number"], ${R} input[type="search"], ${R} input:not([type]), ${R} textarea,
@@ -159,9 +160,9 @@ ${R} input:focus, ${R} textarea:focus, ${S} input:focus, ${S} textarea:focus {
 /* bez border-image i bez zmiany border-width – układ przycisku zostaje jak w grze */
 ${R} .button {
   border-image: none;
-  background-image: linear-gradient(#1a1528, var(--mds-bg1) 55%, var(--mds-bg0));
+  background-image: linear-gradient(#1e1420, var(--mds-bg1) 55%, var(--mds-bg0));
   background-color: var(--mds-bg0);
-  box-shadow: inset 0 0 0 1px var(--mds-violet-line), inset 0 1px 0 rgba(201, 195, 230, .06), 0 1px 4px rgba(0, 0, 0, .7);
+  box-shadow: inset 0 0 0 1px var(--mds-violet-line), inset 0 1px 0 rgba(220, 203, 214, .06), 0 1px 4px rgba(0, 0, 0, .7);
 }
 ${R} .button::before { box-shadow: none; }
 ${R} .button .label { color: var(--mds-text); text-shadow: 0 1px 2px #000; }
@@ -171,10 +172,10 @@ ${R} .button:hover .label { color: var(--mds-white); }
 ${R} .button.red { background-image: linear-gradient(#4a1420, #1d0810); }
 ${R} .button.green { background-image: linear-gradient(#173a28, #08160f); }
 ${R} .button.blue { background-image: linear-gradient(#1c2a55, #0a1024); }
-${R} .button.violet, ${R} .button.purple, ${R} .button.blink-violet { background-image: linear-gradient(#3a2257, #160c25); }
+${R} .button.violet, ${R} .button.purple, ${R} .button.blink-violet { background-image: linear-gradient(#3e2440, #1c0d1c); }
 ${R} .button.orange { background-image: linear-gradient(#4a2c12, #1b1006); }
 ${S} button, ${S} .button {   /* TODO: zweryfikuj selektor (przyciski SI) */
-  background: linear-gradient(#1a1528, var(--mds-bg0));
+  background: linear-gradient(#1e1420, var(--mds-bg0));
   color: var(--mds-text);
   border: 1px solid var(--mds-violet-line);
 }
@@ -189,24 +190,24 @@ ${R} .border-window:not(.transparent) {
   /* okno ma przezroczystą ramkę 32 px u góry (tytuł) i 20 px po bokach – tło musi ją wypełniać */
   background-clip: border-box;
   background-origin: border-box;
-  box-shadow: var(--mds-edge), 0 0 18px rgba(107, 63, 160, .12), var(--mds-shadow);
+  box-shadow: var(--mds-edge), 0 0 18px rgba(122, 72, 120, .12), var(--mds-shadow);
   color: var(--mds-text);
 }
 ${R} .border-window:not(.transparent) > .content {
-  background: rgba(7, 6, 11, .55);
+  background: rgba(9, 6, 10, .55);
   color: var(--mds-text);
   box-shadow: inset 0 0 0 1px var(--mds-hair), inset 0 0 24px rgba(0, 0, 0, .8);
 }
 ${R} .border-window .content a { color: var(--mds-violet-hi); }
 /* tytuł: lekki letter-spacing i poświata, pod nim fioletowa linia zanikająca na końcach */
 ${R} .border-window .header-label-positioner .header-label {
-  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(20, 17, 31, .95) 22%, rgba(20, 17, 31, .95) 78%, rgba(0,0,0,0));
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(28, 17, 29, .95) 22%, rgba(28, 17, 29, .95) 78%, rgba(0,0,0,0));
   box-shadow: none;
 }
 ${R} .border-window .header-label-positioner .header-label::after {
   content: "";
   position: absolute; left: 12%; right: 12%; bottom: 0; height: 1px;
-  background: linear-gradient(90deg, rgba(107, 63, 160, 0), var(--mds-violet), rgba(107, 63, 160, 0));
+  background: linear-gradient(90deg, rgba(122, 72, 120, 0), var(--mds-violet), rgba(122, 72, 120, 0));
   pointer-events: none;
 }
 ${R} .border-window .header-label-positioner .header-label .left-decor,
@@ -214,13 +215,13 @@ ${R} .border-window .header-label-positioner .header-label .right-decor { backgr
 ${R} .border-window .header-label-positioner .header-label .text {
   color: var(--mds-white);
   letter-spacing: .08em;
-  text-shadow: 0 0 6px rgba(157, 107, 255, .35), 0 1px 2px #000;
+  text-shadow: 0 0 6px rgba(236, 140, 128, .35), 0 1px 2px #000;
 }
 /* okna przezroczyste (śledzone questy, sorter) – czerń z cienką obwódką */
 ${R} .border-window.transparent .header-label-positioner .header-label { background: none; box-shadow: none; }
 ${R} .border-window.transparent .header-label-positioner .header-label .text { color: var(--mds-text); }
 ${R} .border-window.transparent .border-image {
-  background: linear-gradient(rgba(13, 11, 20, .92), rgba(7, 6, 11, .88));
+  background: linear-gradient(rgba(18, 11, 19, .92), rgba(9, 6, 10, .88));
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-hair), 0 4px 14px rgba(0, 0, 0, .7);
 }
 /* NAROŻNIKI: fioletowa linia z rombem, romb dokładnie na fioletowej krawędzi okna (box-shadow 2 px na zewnątrz);
@@ -237,7 +238,7 @@ ${R} .dialogue-window .border-image::before {
 /* zamknięcie – szary krzyżyk, przy najechaniu fioletowa poświata */
 ${R} .border-window:not(.transparent) .close-button-corner-decor { background: none; z-index: 4; }
 ${R} .border-window .close-button { filter: grayscale(1) brightness(.8); }
-${R} .border-window .close-button:hover { filter: grayscale(1) brightness(1.2) drop-shadow(0 0 4px rgba(157, 107, 255, .7)); }
+${R} .border-window .close-button:hover { filter: grayscale(1) brightness(1.2) drop-shadow(0 0 4px rgba(236, 140, 128, .7)); }
 ${R} .c-window {   /* TODO: zweryfikuj selektor (z Kociej Nocy, nie sprawdzony w tym motywie) */
   background: var(--mds-dust), var(--mds-panel);
   box-shadow: var(--mds-edge), var(--mds-shadow);
@@ -255,15 +256,15 @@ ${R} .interface-element-middle-1-background,
 ${R} .interface-element-middle-1-background-stretch { background: var(--mds-dust), linear-gradient(var(--mds-bg1), var(--mds-bg0)); }
 ${R} .interface-element-background-color-2,
 ${R} .interface-element-middle-2-background,
-${R} .interface-element-middle-2-background-stretch { background: rgba(13, 11, 20, .94); color: var(--mds-text); }
+${R} .interface-element-middle-2-background-stretch { background: rgba(18, 11, 19, .94); color: var(--mds-text); }
 ${R} .interface-element-background-color-3,
 ${R} .interface-element-middle-3-background,
-${R} .interface-element-middle-3-background-stretch { background: rgba(7, 6, 11, .94); }
+${R} .interface-element-middle-3-background-stretch { background: rgba(9, 6, 10, .94); }
 ${R} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px var(--mds-hair), inset 0 0 14px #000; }
 ${R} .interface-element-wood-box-background { background: linear-gradient(var(--mds-bg2), var(--mds-bg1)); box-shadow: inset 0 0 0 1px var(--mds-hair); }
 ${R} .interface-element-green-box-background,
 ${R} .interface-element-green-box-background-stretch {
-  background: linear-gradient(90deg, var(--mds-bg0), #1a1230 30%, #1a1230 70%, var(--mds-bg0));
+  background: linear-gradient(90deg, var(--mds-bg0), #24131f 30%, #24131f 70%, var(--mds-bg0));
   box-shadow: inset 0 0 0 1px var(--mds-violet-line);
 }
 ${R} .interface-element-header-1-background,
@@ -272,8 +273,8 @@ ${R} .interface-element-header-2-background,
 ${R} .interface-element-header-2-background-stretch,
 ${R} .interface-element-bottom-bar-background {
   border-image: none; border-color: transparent;
-  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(20, 17, 31, .95) 20%, rgba(20, 17, 31, .95) 80%, rgba(0,0,0,0));
-  box-shadow: inset 0 -1px 0 rgba(107, 63, 160, .45);
+  background: linear-gradient(90deg, rgba(0,0,0,0), rgba(28, 17, 29, .95) 20%, rgba(28, 17, 29, .95) 80%, rgba(0,0,0,0));
+  box-shadow: inset 0 -1px 0 rgba(122, 72, 120, .45);
 }
 ${R} .interface-element-header-1 { color: var(--mds-white); letter-spacing: .05em; }
 ${R} .interface-element-bottom-bar-background-stretch { filter: grayscale(1) brightness(.3) contrast(1.2); }
@@ -296,7 +297,7 @@ ${R} .interface-element-active-card-background-stretch,
 ${R} .interface-element-active-card-border-image {
   border-image: none;
   border-color: var(--mds-bg1);   /* gra zostawia tu 5 px ramki – bez tego przyjęłaby jasny kolor tekstu */
-  background: linear-gradient(#1d1530, var(--mds-bg1));
+  background: linear-gradient(#241624, var(--mds-bg1));
   color: var(--mds-white);
   box-shadow: inset 0 0 0 1px var(--mds-violet-line), inset 0 -2px 0 var(--mds-violet);
 }
@@ -305,9 +306,9 @@ ${R} .interface-element-active-card-border-image {
 ${R} .dialogue-window .border-image {
   border-image: none;
   background: var(--mds-dust), var(--mds-panel);
-  box-shadow: var(--mds-edge), 0 0 18px rgba(107, 63, 160, .12), var(--mds-shadow);
+  box-shadow: var(--mds-edge), 0 0 18px rgba(122, 72, 120, .12), var(--mds-shadow);
 }
-${R} .dialogue-window .dialogue-background-color { background: rgba(7, 6, 11, .55); }
+${R} .dialogue-window .dialogue-background-color { background: rgba(9, 6, 10, .55); }
 ${R} .dialogue-window .content .npc-message { color: var(--mds-text); }
 
 /* ═════════════ SKLEP ═════════════ */
@@ -317,28 +318,28 @@ ${R} .shop-background .canopy { filter: grayscale(1) sepia(.5) hue-rotate(215deg
 /* kolumny: czerń z pyłem i bardzo słabą fioletową mgłą u dołu */
 ${R} .layer.interface-layer .main-column {
   background:
-    radial-gradient(140% 40% at 50% 100%, rgba(58, 34, 87, .22), rgba(0,0,0,0) 70%),
+    radial-gradient(140% 40% at 50% 100%, rgba(66, 36, 66, .22), rgba(0,0,0,0) 70%),
     var(--mds-dust),
     var(--mds-bg0);
 }
 /* krawędź kolumny od strony mapy: cienka fioletowa linia zamiast drewnianej belki */
 ${R} .layer.interface-layer .main-column > .border,
 ${R} .interface-element-vertical-wood {
-  background: linear-gradient(90deg, #000, var(--mds-violet-line) 45%, rgba(107, 63, 160, .55) 50%, var(--mds-violet-line) 55%, #000);
+  background: linear-gradient(90deg, #000, var(--mds-violet-line) 45%, rgba(122, 72, 120, .55) 50%, var(--mds-violet-line) 55%, #000);
   border-image: none;
 }
 ${R} .left-column .new-chat-window { background: transparent; }
 ${R} .left-column .chat-channel-card-wrapper {
-  background: linear-gradient(var(--mds-bg1), rgba(7, 6, 11, .6));
+  background: linear-gradient(var(--mds-bg1), rgba(9, 6, 10, .6));
   box-shadow: inset 0 -1px 0 var(--mds-hair);
 }
 ${R} .chat-channel-card .chat-channel-card-icon { filter: grayscale(1) brightness(.9); }
-${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) brightness(1.4) drop-shadow(0 0 3px rgba(157, 107, 255, .5)); }
+${R} .chat-channel-card.active .chat-channel-card-icon { filter: grayscale(1) brightness(1.4) drop-shadow(0 0 3px rgba(236, 140, 128, .5)); }
 /* wiadomości: kolory kanałów zostają (ważne w grze) – dodajemy tylko cień dla czytelności na czerni */
 ${R} .chat-message-wrapper .scroll-pane { text-shadow: 0 1px 2px #000; }
-${R} .new-chat-window .new-chat-message:hover { background: rgba(107, 63, 160, .07); }
+${R} .new-chat-window .new-chat-message:hover { background: rgba(122, 72, 120, .07); }
 ${R} .left-column .chat-input-wrapper {
-  background: rgba(7, 6, 11, .92);
+  background: rgba(9, 6, 10, .92);
   box-shadow: inset 0 1px 0 var(--mds-violet-line);
 }
 ${R} .left-column .magic-input-wrapper { background: rgba(0, 0, 0, .55); box-shadow: inset 0 0 0 1px var(--mds-hair); }
@@ -346,7 +347,7 @@ ${R} .left-column .magic-input-wrapper:focus-within { box-shadow: inset 0 0 0 1p
 ${R} .left-column .magic-input-wrapper .magic-input { color: var(--mds-text); caret-color: var(--mds-violet-hi); }   /* TODO: zweryfikuj selektor (.magic-input) */
 /* SI */
 ${S} #chat, ${S} #chattxt {   /* TODO: zweryfikuj selektor (czat SI) */
-  background: var(--mds-dust), rgba(7, 6, 11, .9);
+  background: var(--mds-dust), rgba(9, 6, 10, .9);
   text-shadow: 0 1px 2px #000;
 }
 ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
@@ -359,7 +360,7 @@ ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
 /* Rzadkie gwiazdy i delikatne pasmo fioletowej mgławicy u dołu (FLUX.1 Krea), kadrowane od dołu,
  * żeby mgławica leżała pod wiadomościami; lekko przyciemnione dla czytelności tekstu. */
 ${R} .layer.interface-layer .left-column.main-column {
-  background: linear-gradient(rgba(7, 6, 11, .15), rgba(7, 6, 11, .15)), url("${BG_CHAT}") center bottom / cover no-repeat, var(--mds-bg0);
+  background: linear-gradient(rgba(9, 6, 10, .15), rgba(9, 6, 10, .15)), url("${BG_CHAT}") center bottom / cover no-repeat, var(--mds-bg0);
 }
 
 /* ═════════════ KOLUMNA EKWIPUNKU: CZARNA DZIURA W TLE ═════════════ */
@@ -367,30 +368,30 @@ ${R} .layer.interface-layer .left-column.main-column {
  * półprzezroczyste – ramki zarysowane w fiolecie z lekką przezroczystością, wnętrza pokazują tło.
  * Reguły mają w ścieżce .right-column, więc są mocniejsze od ogólnych reguł slotów niżej. */
 ${R} .layer.interface-layer .right-column.main-column {
-  background: linear-gradient(rgba(7, 6, 11, .72), rgba(7, 6, 11, .72)), url("${BG_EQ}") center / cover no-repeat, var(--mds-bg0);
+  background: linear-gradient(rgba(9, 6, 10, .72), rgba(9, 6, 10, .72)), url("${BG_EQ}") center / cover no-repeat, var(--mds-bg0);
 }
-${R} .right-column .equipment-outline { background: rgba(7, 6, 11, .22); }
+${R} .right-column .equipment-outline { background: rgba(9, 6, 10, .22); }
 ${R} .right-column .eq-slot {
-  background: radial-gradient(circle at 50% 40%, rgba(40, 30, 64, .32), rgba(7, 6, 11, .18) 75%);
-  box-shadow: inset 0 0 0 1px rgba(107, 63, 160, .55), 0 0 0 1px rgba(0, 0, 0, .5);
+  background: radial-gradient(circle at 50% 40%, rgba(50, 30, 52, .32), rgba(9, 6, 10, .18) 75%);
+  box-shadow: inset 0 0 0 1px rgba(122, 72, 120, .55), 0 0 0 1px rgba(0, 0, 0, .5);
 }
 ${R} .right-column .eq-slot:hover { box-shadow: inset 0 0 0 1px var(--mds-violet-hi), 0 0 0 1px rgba(0, 0, 0, .5), 0 0 8px var(--mds-glow); }
 ${R} .right-column .stats-wrapper.interface-element-background-color-3 {
-  background: rgba(7, 6, 11, .45);
-  box-shadow: inset 0 0 0 1px rgba(107, 63, 160, .45);
+  background: rgba(9, 6, 10, .45);
+  box-shadow: inset 0 0 0 1px rgba(122, 72, 120, .45);
 }
 ${R} .right-column .inventory_wrapper .bag-slot-wrapper {
-  background: radial-gradient(circle at 50% 40%, rgba(40, 30, 64, .35), rgba(7, 6, 11, .2) 75%);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 0 0 2px rgba(107, 63, 160, .5);
+  background: radial-gradient(circle at 50% 40%, rgba(50, 30, 52, .35), rgba(9, 6, 10, .2) 75%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 0 0 2px rgba(122, 72, 120, .5);
 }
 /* siatka torby: linie co 33 px w półprzezroczystym fiolecie, wnętrza pól prawie przezroczyste */
 ${R} .right-column .interface-element-item-slot-grid-stretch {
   background:
-    linear-gradient(90deg, rgba(0,0,0,0) 31px, rgba(107,63,160,.5) 31px, rgba(107,63,160,.5) 32px, rgba(0,0,0,.35) 32px) 0 0 / 33px 33px,
-    linear-gradient(rgba(0,0,0,0) 31px, rgba(107,63,160,.5) 31px, rgba(107,63,160,.5) 32px, rgba(0,0,0,.35) 32px) 0 0 / 33px 33px,
-    linear-gradient(90deg, rgba(107,63,160,.5) 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
-    linear-gradient(rgba(107,63,160,.5) 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
-    radial-gradient(circle at 50% 40%, rgba(40, 30, 64, .28), rgba(7, 6, 11, .12) 75%) 0 0 / 33px 33px;
+    linear-gradient(90deg, rgba(0,0,0,0) 31px, rgba(122,72,120,.5) 31px, rgba(122,72,120,.5) 32px, rgba(0,0,0,.35) 32px) 0 0 / 33px 33px,
+    linear-gradient(rgba(0,0,0,0) 31px, rgba(122,72,120,.5) 31px, rgba(122,72,120,.5) 32px, rgba(0,0,0,.35) 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, rgba(122,72,120,.5) 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(rgba(122,72,120,.5) 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    radial-gradient(circle at 50% 40%, rgba(50, 30, 52, .28), rgba(9, 6, 10, .12) 75%) 0 0 / 33px 33px;
   background-color: transparent;
 }
 
@@ -399,11 +400,11 @@ ${R} .right-column .interface-element-item-slot-grid-stretch {
 ${R} .interface-element-item-slot-grid-stretch {
   filter: none;
   background:
-    linear-gradient(90deg, rgba(0,0,0,0) 31px, #2a1840 31px, #2a1840 32px, #030206 32px) 0 0 / 33px 33px,
-    linear-gradient(rgba(0,0,0,0) 31px, #2a1840 31px, #2a1840 32px, #030206 32px) 0 0 / 33px 33px,
-    linear-gradient(90deg, #2a1840 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
-    linear-gradient(#2a1840 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
-    radial-gradient(circle at 50% 40%, #151122 0, #0b0912 55%, #050409 100%) 0 0 / 33px 33px,
+    linear-gradient(90deg, rgba(0,0,0,0) 31px, #2f1a30 31px, #2f1a30 32px, #050305 32px) 0 0 / 33px 33px,
+    linear-gradient(rgba(0,0,0,0) 31px, #2f1a30 31px, #2f1a30 32px, #050305 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, #2f1a30 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(#2f1a30 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    radial-gradient(circle at 50% 40%, #180f19 0, #0d080d 55%, #070407 100%) 0 0 / 33px 33px,
     var(--mds-bg0);
 }
 ${R} .interface-element-grid-border { outline-color: #000; box-shadow: 0 0 0 1px var(--mds-violet-line), 0 0 0 2px #000; }
@@ -411,16 +412,16 @@ ${R} .interface-element-one-black-tile { background: linear-gradient(var(--mds-b
 /* sloty ekwipunku postaci i paska szybkiego użycia */
 ${R} .eq-slot,
 ${R} .interface-element-one-item-slot-2 {
-  background: radial-gradient(circle at 50% 40%, #151122 0, #0b0912 55%, #050409 100%);
+  background: radial-gradient(circle at 50% 40%, #180f19 0, #0d080d 55%, #070407 100%);
   border-color: var(--mds-violet-line);
   outline-color: #000;
-  box-shadow: inset 0 0 0 1px #2a1840, 0 0 0 1px #000, inset 0 0 8px #000;
+  box-shadow: inset 0 0 0 1px #2f1a30, 0 0 0 1px #000, inset 0 0 8px #000;
 }
 ${R} .eq-slot:hover,
 ${R} .interface-element-one-item-slot-2:hover { box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 0 1px #000, 0 0 8px var(--mds-glow-soft); }
 /* sloty toreb */
 ${R} .inventory_wrapper .bag-slot-wrapper {
-  background: radial-gradient(circle at 50% 40%, #1a1530, var(--mds-bg0) 75%);
+  background: radial-gradient(circle at 50% 40%, #1f1320, var(--mds-bg0) 75%);
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), inset 0 0 8px #000;
 }
 ${R} .inventory_wrapper .bags-navigation-bg { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line); }
@@ -429,11 +430,11 @@ ${R} .stats-wrapper.interface-element-background-color-3 {
   background: var(--mds-dust), linear-gradient(var(--mds-bg1), var(--mds-bg0));
   box-shadow: inset 0 0 0 1px var(--mds-violet-line), 0 4px 10px rgba(0, 0, 0, .8);
 }
-${R} .stats-wrapper .header-title { color: var(--mds-white); letter-spacing: .08em; text-shadow: 0 0 6px rgba(157, 107, 255, .3); }
+${R} .stats-wrapper .header-title { color: var(--mds-white); letter-spacing: .08em; text-shadow: 0 0 6px rgba(236, 140, 128, .3); }
 ${R} .stats-wrapper .stats-list li { color: var(--mds-text); }   /* TODO: zweryfikuj selektor (kolor wartości statystyk) */
 /* SI */
 ${S} #panel .item, ${S} #bag .item {   /* TODO: zweryfikuj selektor (sloty SI) */
-  box-shadow: inset 0 0 0 1px #2a1840;
+  box-shadow: inset 0 0 0 1px #2f1a30;
 }
 
 /* ═════════════ TOOLTIPY ═════════════ */
@@ -453,15 +454,15 @@ ${R} .tip-wrapper.normal-tip::before {
   z-index: 2;
 }
 ${R} .tip-wrapper.normal-tip > .content {
-  background: rgba(7, 6, 11, .4);
+  background: rgba(9, 6, 10, .4);
   text-shadow: 0 1px 2px #000;
 }
 ${R} .tip-wrapper .item-head {
-  background: linear-gradient(rgba(58, 34, 87, .28), rgba(7, 6, 11, 0));
-  box-shadow: inset 0 -1px 0 rgba(107, 63, 160, .35);
+  background: linear-gradient(rgba(66, 36, 66, .28), rgba(9, 6, 10, 0));
+  box-shadow: inset 0 -1px 0 rgba(122, 72, 120, .35);
 }
 ${R} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line); }
-${R} .tip-wrapper .item-tip-section { border-color: rgba(201, 195, 230, .1) !important; }   /* gra ustawia ten kolor w stylu inline */
+${R} .tip-wrapper .item-tip-section { border-color: rgba(220, 203, 214, .1) !important; }   /* gra ustawia ten kolor w stylu inline */
 /* rzadkość (ramka ikony ma klasę t-…): poświata, linia u góry i obwódka ikony w kolorze z gry */
 ${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-uniupg) { --mds-rar: 255, 251, 0; }
 ${R} .tip-wrapper.normal-tip:has(.item-head .highlight.t-her) { --mds-rar: 56, 184, 235; }
@@ -475,14 +476,14 @@ ${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-
   box-shadow: inset 0 2px 0 rgba(var(--mds-rar), .55);
 }
 ${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head {
-  background: linear-gradient(rgba(var(--mds-rar), .14), rgba(7, 6, 11, 0) 85%);
+  background: linear-gradient(rgba(var(--mds-rar), .14), rgba(9, 6, 10, 0) 85%);
 }
 ${R} .tip-wrapper.normal-tip:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-head .item {
   box-shadow: 0 0 0 1px #000, 0 0 0 2px rgba(var(--mds-rar), .55), 0 0 8px rgba(var(--mds-rar), .4);
 }
 /* tooltipy bez przedmiotu (podpowiedzi przycisków, NPC) */
 ${R} .tip-wrapper:not(.normal-tip) {   /* TODO: zweryfikuj selektor (inne typy tooltipów NI) */
-  background: rgba(7, 6, 11, .95);
+  background: rgba(9, 6, 10, .95);
   color: var(--mds-text);
   box-shadow: 0 0 0 1px var(--mds-violet-line), 0 6px 14px rgba(0, 0, 0, .8);
 }
@@ -500,11 +501,11 @@ ${R} .battle-controller .border-image,
 ${R} .battle-window .border-image {   /* TODO: zweryfikuj selektor (rama okna walki) */
   border-image: none;
   background: var(--mds-dust), var(--mds-panel);
-  box-shadow: var(--mds-edge), 0 0 18px rgba(107, 63, 160, .12), var(--mds-shadow);
+  box-shadow: var(--mds-edge), 0 0 18px rgba(122, 72, 120, .12), var(--mds-shadow);
 }
 ${R} .battle-controller .battle-console,
 ${R} .battle-controller .battle-log {   /* TODO: zweryfikuj selektor (dziennik walki) */
-  background: rgba(7, 6, 11, .9);
+  background: rgba(9, 6, 10, .9);
   color: var(--mds-text);
   box-shadow: inset 0 0 0 1px var(--mds-hair);
   text-shadow: 0 1px 1px #000;
@@ -518,7 +519,7 @@ ${SB} #battle {   /* TODO: zweryfikuj selektor (okno walki SI) */
   box-shadow: var(--mds-edge), var(--mds-shadow);
 }
 ${SB} #battle #battlelog {   /* TODO: zweryfikuj selektor (dziennik walki SI) */
-  background: rgba(7, 6, 11, .9);
+  background: rgba(9, 6, 10, .9);
   color: var(--mds-text);
 }
 
@@ -535,7 +536,7 @@ ${R} .bottom.positioner > .bg { box-shadow: inset 0 1px 0 var(--mds-violet-line)
 ${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.3) contrast(1.3); }
 /* tabliczka z imieniem: ciemna płyta z pyłem; reguły gry mają tu 6 klas, stąd pełna ścieżka */
 ${R} .layer.interface-layer .positioner.top .hud-container {
-  background: var(--mds-dust), radial-gradient(100% 120% at 50% 0%, #1a1430, var(--mds-bg0) 75%);
+  background: var(--mds-dust), radial-gradient(100% 120% at 50% 0%, #22131f, var(--mds-bg0) 75%);
   border-image: none;
   /* bez cienia w dół – zasłaniałby mgławicę pod tabliczką */
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line);
@@ -578,9 +579,9 @@ ${R} .top.positioner > .bg::after {
   left: calc(50% - 24px); width: 48px;
   top: calc(34px + 40px - 24px); height: 48px;   /* środek wstążki */
   background:
-    radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(220, 200, 255, .6) 8%, rgba(157, 107, 255, 0) 30%),
-    linear-gradient(90deg, rgba(200, 180, 255, 0), rgba(235, 225, 255, .8) 50%, rgba(200, 180, 255, 0)) center / 100% 1px no-repeat,
-    linear-gradient(rgba(200, 180, 255, 0), rgba(235, 225, 255, .8) 50%, rgba(200, 180, 255, 0)) center / 1px 100% no-repeat;
+    radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(255, 205, 195, .6) 8%, rgba(236, 140, 128, 0) 30%),
+    linear-gradient(90deg, rgba(255, 190, 180, 0), rgba(255, 228, 220, .8) 50%, rgba(255, 190, 180, 0)) center / 100% 1px no-repeat,
+    linear-gradient(rgba(255, 190, 180, 0), rgba(255, 228, 220, .8) 50%, rgba(255, 190, 180, 0)) center / 1px 100% no-repeat;
   mix-blend-mode: screen;
   pointer-events: none;
   z-index: 1;
@@ -594,7 +595,7 @@ ${R} .top.positioner > .bg::after {
 ${HUD} .hero-data .heroname {
   color: var(--mds-white);
   letter-spacing: .05em;
-  text-shadow: 0 0 6px rgba(157, 107, 255, .45), 0 1px 1px #000;
+  text-shadow: 0 0 6px rgba(236, 140, 128, .45), 0 1px 1px #000;
 }
 ${HUD} .location, ${HUD} .coords, ${HUD} .world-name, ${HUD} .herocredits { color: var(--mds-text-dim); text-shadow: 0 1px 1px #000; }
 ${HUD} .herogold { color: var(--mds-text); text-shadow: 0 1px 1px #000; }
@@ -605,16 +606,16 @@ ${HUD} .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-r
 ${R} .widget-button,
 ${R} .widget-button.green, ${R} .widget-button.blue, ${R} .widget-button.violet,
 ${R} .widget-button.blink-violet, ${R} .widget-button.red, ${R} .widget-button.orange {
-  background: radial-gradient(circle at 50% 35%, #1a1530, var(--mds-bg0) 80%);
+  background: radial-gradient(circle at 50% 35%, #1f1320, var(--mds-bg0) 80%);
   box-shadow: inset 0 0 0 1px var(--mds-violet-line), 0 0 0 1px #000;
 }
 ${R} .widget-button::before { box-shadow: none; }
-${R} .widget-button.violet::before, ${R} .widget-button.blink-violet::before { box-shadow: inset 0 0 9px rgba(157, 107, 255, .45); }
+${R} .widget-button.violet::before, ${R} .widget-button.blink-violet::before { box-shadow: inset 0 0 9px rgba(236, 140, 128, .45); }
 ${R} .widget-button.blue::before { box-shadow: inset 0 0 9px rgba(90, 123, 216, .45); }
 ${R} .widget-button.red::before { box-shadow: inset 0 0 9px rgba(200, 60, 70, .45); }
 ${R} .widget-button .icon { filter: grayscale(.6) brightness(1.05) drop-shadow(0 1px 1px #000); }
 ${R} .widget-button:hover { animation: mds-glow-pulse 2.6s ease-in-out infinite; }
-${R} .widget-button:hover .icon { filter: grayscale(0) brightness(1.15) drop-shadow(0 0 3px rgba(157, 107, 255, .5)); }
+${R} .widget-button:hover .icon { filter: grayscale(0) brightness(1.15) drop-shadow(0 0 3px rgba(236, 140, 128, .5)); }
 ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
 
 /* ═════════════ PASKI: HP, MANA, DOŚWIADCZENIE ═════════════ */
@@ -648,7 +649,7 @@ ${R} .bottom-panel-pointer-bg::after {
   animation: mds-spin-rev 55s linear infinite, mds-flicker 3.2s ease-in-out infinite;
 }
 @keyframes mds-spin-rev { from { transform: rotate(140deg) scale(.96); } to { transform: rotate(-220deg) scale(.96); } }
-@keyframes mds-breathe { 0%, 100% { filter: brightness(.95) drop-shadow(0 0 4px rgba(157, 107, 255, .3)); } 50% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(157, 107, 255, .55)); } }
+@keyframes mds-breathe { 0%, 100% { filter: brightness(.95) drop-shadow(0 0 4px rgba(236, 140, 128, .3)); } 50% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(236, 140, 128, .55)); } }
 @keyframes mds-flicker { 0%, 100% { opacity: .3; } 30% { opacity: .55; } 55% { opacity: .38; } 80% { opacity: .6; } }
 /* niskie HP (< 30%, klasa ustawiana przez skrypt): horyzont przechodzi w karmazyn i pulsuje szybciej */
 html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::before,
@@ -662,14 +663,14 @@ ${R} .hp-indicator::after {
   position: absolute;
   left: calc(50% - 30px); bottom: -4px;   /* środek kuli: 26 px nad dołem .hp-indicator */
   width: 60px; height: 60px;
-  background: radial-gradient(circle, rgba(235, 220, 255, .55) 0, rgba(157, 107, 255, .25) 22%, rgba(107, 63, 160, 0) 60%);
+  background: radial-gradient(circle, rgba(255, 225, 215, .55) 0, rgba(236, 140, 128, .25) 22%, rgba(122, 72, 120, 0) 60%);
   mix-blend-mode: screen;
   pointer-events: none;
   animation: mds-core 2.8s ease-in-out infinite;
 }
 @keyframes mds-core { 0%, 100% { transform: scale(.75); opacity: .55; } 50% { transform: scale(1.1); opacity: 1; } }
 ${R} .hp-indicator .blood {
-  background: #0b0714;   /* sprite krwi gry pod spodem nie jest potrzebny */
+  background: #0d070c;   /* sprite krwi gry pod spodem nie jest potrzebny */
   overflow: hidden;
 }
 ${R} .hp-indicator .blood::before {
@@ -685,14 +686,14 @@ ${R} .hp-indicator .blood::before {
 ${R} .hp-indicator .blood::after {
   content: "";
   position: absolute; left: 0; right: 0; top: 0; height: 2px;
-  background: linear-gradient(90deg, rgba(157, 107, 255, 0), rgba(220, 200, 255, .7), rgba(157, 107, 255, 0));
+  background: linear-gradient(90deg, rgba(236, 140, 128, 0), rgba(255, 205, 195, .7), rgba(236, 140, 128, 0));
   pointer-events: none;
 }
 @keyframes mds-spin { to { transform: rotate(360deg); } }
 ${R} .hp-indicator-wrapper .value { color: var(--mds-white); text-shadow: 0 0 6px #000, 0 0 2px #000; }
 /* doświadczenie: fiolet od ciemnego do akcentu */
 ${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
-  background: linear-gradient(#0b0912 0%, #7d4fc0 30%, #4e2c7c 62%, #0b0912 100%);
+  background: linear-gradient(#0d080d 0%, #d07a78 30%, #7a3a55 62%, #0d080d 100%);
 }
 ${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay,
 ${R} .bottom-panel-pointer-bg .pointer-exp-graphic,
@@ -704,7 +705,7 @@ ${R} .interface-element-progress-bar-0:not(.one-warrior *),
 ${R} .interface-element-progress-bar-1:not(.one-warrior *) { background: var(--mds-bg0); box-shadow: inset 0 0 0 1px var(--mds-violet-line); }
 ${R} .interface-element-progress-bar-0:not(.one-warrior *) .inner,
 ${R} .interface-element-progress-bar-1:not(.one-warrior *) .inner {
-  background: linear-gradient(#8a5cd0 0%, #5a3390 65%, #3a2257 66%);
+  background: linear-gradient(#d98a80 0%, #8a4560 65%, #3e2440 66%);
   border-color: var(--mds-violet);
 }
 ${R} .interface-element-progress-bar-0 .value,
@@ -716,7 +717,7 @@ ${R} .mana-indicator .inner, ${R} .mana-bar .inner {   /* TODO: zweryfikuj selek
 
 /* ═════════════ MINIMAPA I RAMKI ═════════════ */
 ${R} .mini-map, ${R} .mini-map-wrapper {   /* TODO: zweryfikuj selektor (minimapa NI) */
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 0 14px rgba(107, 63, 160, .15);
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 0 14px rgba(122, 72, 120, .15);
 }
 ${R} .mini-map canvas, ${R} .mini-map img { filter: none; }   /* sama mapa bez zmian */
 ${S} #minimap, ${S} #mmap {   /* TODO: zweryfikuj selektor (minimapa SI) */
@@ -724,7 +725,7 @@ ${S} #minimap, ${S} #mmap {   /* TODO: zweryfikuj selektor (minimapa SI) */
 }
 
 /* ═════════════ TEKST ROZJAŚNIONY PRZEZ SKANER ═════════════ */
-html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
+html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
 
 /* ═════════════ OGRANICZ RUCH ═════════════ */
 @media (prefers-reduced-motion: reduce) {
@@ -811,13 +812,13 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
       if (vivid || green || blue || violet || redMark) continue;
       const warm = hue >= 8 && hue <= 58;                            // drewno, brąz, pergamin, obszycia
       if (s < 0.22 && l > 0.42) {                                    // szare/jasne ikony i glify (w atlasie l 0,5–0,8) – czytelne, lekko lawendowe
-        a[i] *= 0.9; a[i + 1] *= 0.87; a[i + 2] = Math.min(255, a[i + 2] * 1.02);
-      } else if (warm && s > 0.35 && l > 0.42) {                     // złote/brązowe obszycia → przygaszony fiolet
+        a[i] = Math.min(255, a[i] * 0.98); a[i + 1] *= 0.87; a[i + 2] *= 0.92;   // lekko różowe srebro
+      } else if (warm && s > 0.35 && l > 0.42) {                     // złote/brązowe obszycia → śliwka przechodząca w łososiowy róż
         const k = Math.min(1, (l - 0.3) * 1.6);
-        a[i] = 60 + 55 * k; a[i + 1] = 34 + 36 * k; a[i + 2] = 95 + 80 * k;
+        a[i] = 82 + 120 * k; a[i + 1] = 40 + 62 * k; a[i + 2] = 78 + 40 * k;
       } else if (warm || s < 0.22) {                                 // powierzchnie → fioletowa czerń
         const L = 0.02 + Math.pow(l, 1.4) * 0.4;
-        a[i] = Math.min(255, L * 0.95 * 255); a[i + 1] = L * 0.84 * 255; a[i + 2] = Math.min(255, L * 1.3 * 255);
+        a[i] = Math.min(255, L * 1.12 * 255); a[i + 1] = L * 0.82 * 255; a[i + 2] = Math.min(255, L * 1.12 * 255);   // śliwkowa czerń
       }
     }
     ctx.putImageData(id, 0, 0);
@@ -854,7 +855,7 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
   function soot(v, highlight) {
     const c = parseRgb(v); const L = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
     const k = Math.round((highlight ? 0.09 + L * 0.26 : 0.03 + L * 0.16) * 255);
-    return `rgba(${k + 2}, ${k}, ${k + 9}, ${c[3]})`;
+    return `rgba(${k + 6}, ${k}, ${k + 6}, ${c[3]})`;   // śliwkowa sadza
   }
 
   async function processRule(rule) {
@@ -873,9 +874,9 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
     // jasne (pergaminowe) tła → czerń; ciemny tekst w tej samej regule → lawendowy
     const bg = st.getPropertyValue('background-color');
     if (lum(bg) > 0.72) {
-      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(13, 11, 20, .92)', st.getPropertyPriority('background-color'));
+      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(18, 11, 19, .92)', st.getPropertyPriority('background-color'));
       const col = st.getPropertyValue('color');
-      if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#c9c3e6', st.getPropertyPriority('color')); }
+      if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#dccbd6', st.getPropertyPriority('color')); }
     } else if (neutral(bg) && lum(bg) > 0.2) {
       remember(rule, 'background-color'); st.setProperty('background-color', soot(bg, hl), st.getPropertyPriority('background-color'));
     }
@@ -923,7 +924,7 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #c9c3e6) !important; }
   const marked = new Set();
   function lighter([r, g, b]) {
     const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-    if (mx - mn < 28) return '#c9c3e6';
+    if (mx - mn < 28) return '#dccbd6';
     const k = 190 / Math.max(mx, 1);
     return `rgb(${Math.min(255, Math.round(r * k + 30))}, ${Math.min(255, Math.round(g * k + 30))}, ${Math.min(255, Math.round(b * k + 30))})`;
   }

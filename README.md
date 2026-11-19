@@ -139,7 +139,7 @@ Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (38 plików WebP, ra
 
 Motyw w klimacie kosmicznej pustki: głęboka czerń, fiolet tylko jako akcent, srebrno-lawendowy tekst i ledwo widoczny gwiezdny pył na panelach. Inspirowany estetyką „mrocznej gwiazdy”, ale wszystkie elementy są własne (CSS/SVG), bez cudzych grafik i logo.
 
-Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`): tła `#07060b` / `#0d0b14` / `#14111f`, fiolet `#6b3fa0` (akcent), `#9d6bff` (podświetlenia), `#3a2257` (obramowania), tekst `#c9c3e6`, oszczędny błękit `#5a7bd8` (mana).
+Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`) – czerń przechodząca w przydymioną śliwkę, światło łososiowo-koralowe: tła `#09060a` / `#120b13` / `#1c121e`, śliwka `#7a4878` (akcent), łososiowy koral `#ec8c80` (podświetlenia), ciemna śliwka `#3e2440` (obramowania), tekst `#dccbd6`, oszczędny błękit `#5a7bd8` (mana).
 
 Funkcje:
 - **okna i panele**: czarne tło z gwiezdnym pyłem, cienka fioletowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i fioletową linią,
