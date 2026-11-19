@@ -109,6 +109,62 @@ PNG 96×96 (w grze 22 px).
 - **B – ametystowa gwiazda** (seed 1581221438; przycięcie x/y 90, bok 588; próg 14):
   > Small elegant game UI icon centered on pitch black background: a four-pointed star carved from a single polished amethyst crystal, faceted violet gem with sharp edges, inner light glowing from its core, tiny sparkle highlights on the facets, soft violet glow around it, crisp and polished, lots of empty black space around it, professional game icon design, ultra detailed, no text
 
+Z serii 2 wybrane: horyzont A i osobliwość A. Tło kolumn, gwiezdny pył i ikona z serii 2 – odrzucone (A i B).
+
+## Seria 3 – propozycje (FLUX.1 Krea; pionowe 32 kroki, kwadraty 28)
+
+### Tło kolumn (`tlo-kolumn`) – JPEG 288×672
+- **A – astralna istota jak kosmiczna meduza** (seed 1751797825; Dim 0,5):
+  > Very dark vertical space background for a game UI panel: a faint ethereal astral creature drifting upward like a cosmic jellyfish, its translucent bell made of violet nebula light and long trailing tendrils of starlight, non-human and graceful, the rest of the frame deep black with sparse faint stars, barely visible, muted and very low contrast, dreamy and mysterious, professional cinematic render, no text
+- **B – czarna dziura z boku, światło dysku zakrzywione w aureolę** (seed 150072956; Dim 0,55):
+  > Very dark vertical space background for a game UI panel: in the lower part a black hole seen almost edge-on, a thin bright violet accretion disk crossing it as a horizontal line of light, the disk light gravitationally bent into a glowing halo arching over and under the black sphere, faint lensed stars around it, the upper part deep empty black, muted and low contrast, scientifically inspired, professional cinematic render, no planets, no text
+
+### Gwiezdny pył (`pyl`) – PNG 384×384, próg 10
+- **A – gwiazdy z fioletową mgiełką** (seed 962644222):
+  > Seamless tileable texture on pure black background: very faint wisps of violet cosmic haze mixed with tiny scattered silver stars of different sizes, a few stars with soft glow, the haze barely visible like distant interstellar gas, low density, evenly spread, subtle and elegant, deep space astrophotography, ultra detailed, no large objects, no text
+- **B – ostre iskry gwiazd** (seed 85484618). Pierwsza próba (seed 1129911155) wyglądała jak konfetti – odrzucona:
+  > Seamless tileable deep space texture on pure black background: fine pinpoint sparkles in violet, lavender and white, like distant stars seen through a long exposure, some with tiny four-pointed diffraction glints, a faint barely visible violet dust veil, sparse and evenly spread, crisp, astrophotography quality, ultra detailed, no clouds, no shapes, no text
+
+### Ikona przełącznika (`ikona`) – PNG 96×96, próg 14
+- **A – czarna dziura z dyskiem** (seed 1438547007; przycięcie x/y 50, bok 668). Uwaga: model narysował ją podobnie do planety z pierścieniem:
+  > Small game UI icon on pitch black background: a black hole seen almost edge-on, a perfectly black sphere with a thin glowing violet accretion disk crossing in front of it and the disk light bent into a bright halo arching over the top and under the bottom, crisp, polished, symmetrical, lots of empty black space around it, professional icon design, ultra detailed, no text
+- **B – spiralna galaktyka** (seed 2016677874; przycięcie x/y 190, bok 388):
+  > Small game UI icon on pitch black background: a tiny spiral galaxy seen face-on, two graceful glowing violet and lavender spiral arms full of sparkling stars winding around a bright white-violet core, crisp, polished, lots of empty black space around it, professional icon design, ultra detailed, no text
+
+Seria 3 – odrzucona w całości (A i B). Ikona przełącznika – zrezygnowano z przełącznika na ekranie (jak w Dark Gothic), więc ikona nie jest potrzebna.
+
+## Seria 4 – propozycje z przełamaniem kolorystycznym (FLUX.1 Krea; pionowe 32 kroki, kwadraty 28)
+
+### Tło kolumn (`tlo-kolumn`) – JPEG 288×672
+- **A – czarna dziura z dyskiem: fiolet przechodzi w złoty żar, błękitne gwiazdy** (seed 1891110307; Dim 0,55):
+  > Very dark vertical space background for a game UI panel: in the lower third a black hole with a glowing accretion disk whose outer edge is deep violet and whose inner rim burns hot amber gold, light bent into a thin halo over the black sphere, a few cold blue stars around it, the upper part deep empty black with sparse faint stars, muted and low contrast, elegant and dramatic, professional cinematic render, no planets, no text
+- **B – duch galaktyki: turkusowo-fioletowe wstęgi wokół czarnej dziury** (seed 1185496207; Dim 0,45). Pierwsza próba (seed 1522890022) miała ludzką sylwetkę na ziemi – odrzucona:
+  > Very dark vertical deep space background for a game UI panel: an abstract cosmic entity made only of intertwining ribbons of teal, cyan and violet nebula light spiralling upward around a small dark void with a thin glowing ring, like a spirit of the galaxy, floating in empty space, no human figure, no silhouette, no ground, no landscape, sparse faint stars, muted and low contrast, professional cinematic render, no text
+
+### Gwiezdny pył (`pyl`) – PNG 384×384
+- **A – odległe galaktyki i gwiazdy (złoto, błękit, fiolet)** (seed 626817422; próg 10). Wcześniejsze próby: kreskówkowe gwiazdki (seed 1792056090) i płaskie kropki (seed 854415794) – odrzucone:
+  > Deep field telescope image on pitch black background: hundreds of tiny distant galaxies and faint stars scattered sparsely, minuscule spirals and ellipses in warm gold, icy blue and soft violet, most of them only a few pixels wide, lots of empty black space between them, very subtle, scientific astrophotography, crisp, ultra detailed, no nebula clouds, no text
+- **B – turkusowo-fioletowa smuga pyłu z gwiazdami** (seed 768554935; próg 8). Nie zapętla się jako kafel – nakładana raz na całe okno:
+  > Real astrophotography texture on pitch black sky: extremely faint wisps of interstellar dust glowing softly in teal and violet, like a barely visible veil, sprinkled with tiny round white and pale blue pinpoint stars, sparse, evenly spread, very low contrast and subtle, telescope long exposure, crisp, ultra detailed, no drawn shapes, no text
+
+Seria 4 – odrzucona (tło i pył). Od tej pory jeden element naraz.
+
+## Tła kolumn – osobno czat i ekwipunek – propozycje
+
+Inspiracja od użytkownika: kinowa czarna dziura z soczewkowanym dyskiem (bez kopiowania obrazu). Kolumna ekwipunku: czarna dziura, ciemna i mroczna; kolumna czatu: gwiaździste niebo z lekko zarysowaną mgławicą. Podgląd bezpośrednio w grze.
+
+### Kolumna ekwipunku – czarna dziura – wybrany A → `tlo-ekwipunek.jpg` (JPEG 576×1344, jakość 80; w grze przyciemnione o 25% w CSS)
+- **A – wybrany** (FLUX.1 Krea, 576×1344, 32 kroki, seed 211439419). Pierwsza próba (seed 2062079961) wyglądała jak planeta z pierścieniem – odrzucona:
+  > Scientifically accurate black hole with gravitational lensing, dark cinematic render, vertical frame: the near side of the accretion disk crosses in front of the black shadow as a thin bright tilted band, while the far side of the disk is bent by gravity into a glowing arc rising up and over the top of the black shadow and another arc curving underneath it, forming a luminous halo around the perfectly black center, streaking plasma in dim violet, ember orange and pale white, a few cold blue flares, everything else deep black, very dark and ominous, low-key lighting, ultra detailed, no planet, no text
+- **B** (Qwen-Image `mcp-tools/Qwen-Image`, 9:16, 16 kroków, seed 1043410808; negative: planet, rings, saturn, text, watermark, blurry, low resolution, bright background):
+  > Dark cinematic 3D render of a supermassive black hole with strong gravitational lensing, vertical composition, black hole in the lower half of the frame. A perfectly black round shadow in the center. The near side of the accretion disk crosses in front of the shadow as a thin tilted bright band. The far side of the disk is bent by gravity into a glowing arc that rises over the top of the shadow and a second thinner arc that curves beneath it. The disk is made of fast streaking hot plasma with fine motion lines, colored dim ember orange and pale gold with deep violet edges and a few cold blue flares. Thin bright photon ring around the shadow. Everything else is deep black space with very few faint stars. Very dark, ominous, low-key lighting, muted colors, high detail.
+
+### Kolumna czatu – gwiaździste niebo z mgławicą – odrzucone (A i B)
+- **A** (FLUX.1 Krea, 576×1344, 32 kroki, seed 1708048876) – wyszła raczej galaktyka u dołu niż ledwie zarysowana mgławica:
+  > Dark moody starry night sky in deep space, vertical frame, real astrophotography: a dense field of fine pinpoint stars in white, pale blue and faint gold, and a barely outlined dark violet nebula drifting diagonally through the lower half, its edges soft and faint, dark dust lanes, overall very dark and mysterious, low contrast, no bright spots, ultra detailed, no text
+- **B** (Qwen-Image, 9:16, 16 kroków, seed 1166723904; negative: planet, galaxy core, bright light, text, watermark, blurry, low resolution, cartoon stars):
+  > Dark moody deep space astrophotography, vertical frame. A rich starry sky full of fine pinpoint stars of varying faint brightness in white and pale blue. Through the middle drifts a very faint, barely outlined wispy nebula in dim violet and dark indigo with soft blurry edges and darker dust lanes, only subtly visible against the black. Overall very dark, mysterious and calm, low contrast, muted colors, no bright objects, photorealistic, high detail.
+
 ## Odrzucone
 
 - Narożnik: FLUX.1 Krea – srebrny filigran z zawijasami (seed 471057449) i odłamki obsydianu (seed 1373239555) – zbyt rozbudowane.

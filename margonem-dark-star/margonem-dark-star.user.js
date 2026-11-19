@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.9.1
+// @version      1.10.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -19,6 +19,7 @@
 // @resource     nebula    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica.png
 // @resource     horizon   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/horyzont.png
 // @resource     singular  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/osobliwosc.jpg
+// @resource     bg-eq     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-ekwipunek.jpg
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // ==/UserScript==
@@ -75,6 +76,7 @@
    *   horyzont.png                   220×220  horyzont zdarzeń: pierścień zimnego fioletowego ognia wokół kuli HP
    *                                          (czarny środek ok. 57% promienia → przy 170 px otwór ok. 97 px = kula gry)
    *   osobliwosc.jpg                 256×256  osobliwość: fioletowy wir z jasnym punktem – wypełnienie kuli HP
+   *   tlo-ekwipunek.jpg              576×1344 czarna dziura ze smugami plazmy – tło kolumny ekwipunku
    */
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/';
   const res = (name, file) => {
@@ -90,6 +92,7 @@
   const NEBULA = res('nebula', 'mglawica.png');
   const HORIZON = res('horizon', 'horyzont.png');
   const SINGULAR = res('singular', 'osobliwosc.jpg');
+  const BG_EQ = res('bg-eq', 'tlo-ekwipunek.jpg');
   // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
   const CORNERS = (px) => ['tl:left top', 'tr:right top', 'bl:left bottom', 'br:right bottom']
     .map((s) => { const [k, pos] = s.split(':'); return `url("${CORNER[k]}") ${pos} / ${px}px ${px}px no-repeat`; })
@@ -347,6 +350,38 @@ ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
   background: var(--mds-bg0);
   color: var(--mds-text);
   border: 1px solid var(--mds-violet-line);
+}
+
+/* ═════════════ KOLUMNA EKWIPUNKU: CZARNA DZIURA W TLE ═════════════ */
+/* Tło kolumny: czarna dziura (FLUX.1 Krea) przyciemniona o 25%. Pola ekwipunku, torby i statystyki są
+ * półprzezroczyste – ramki zarysowane w fiolecie z lekką przezroczystością, wnętrza pokazują tło.
+ * Reguły mają w ścieżce .right-column, więc są mocniejsze od ogólnych reguł slotów niżej. */
+${R} .layer.interface-layer .right-column.main-column {
+  background: linear-gradient(rgba(7, 6, 11, .25), rgba(7, 6, 11, .25)), url("${BG_EQ}") center / cover no-repeat, var(--mds-bg0);
+}
+${R} .right-column .equipment-outline { background: rgba(7, 6, 11, .22); }
+${R} .right-column .eq-slot {
+  background: radial-gradient(circle at 50% 40%, rgba(40, 30, 64, .32), rgba(7, 6, 11, .18) 75%);
+  box-shadow: inset 0 0 0 1px rgba(107, 63, 160, .55), 0 0 0 1px rgba(0, 0, 0, .5);
+}
+${R} .right-column .eq-slot:hover { box-shadow: inset 0 0 0 1px var(--mds-violet-hi), 0 0 0 1px rgba(0, 0, 0, .5), 0 0 8px var(--mds-glow); }
+${R} .right-column .stats-wrapper.interface-element-background-color-3 {
+  background: rgba(7, 6, 11, .45);
+  box-shadow: inset 0 0 0 1px rgba(107, 63, 160, .45);
+}
+${R} .right-column .inventory_wrapper .bag-slot-wrapper {
+  background: radial-gradient(circle at 50% 40%, rgba(40, 30, 64, .35), rgba(7, 6, 11, .2) 75%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 0 0 2px rgba(107, 63, 160, .5);
+}
+/* siatka torby: linie co 33 px w półprzezroczystym fiolecie, wnętrza pól prawie przezroczyste */
+${R} .right-column .interface-element-item-slot-grid-stretch {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0) 31px, rgba(107,63,160,.5) 31px, rgba(107,63,160,.5) 32px, rgba(0,0,0,.35) 32px) 0 0 / 33px 33px,
+    linear-gradient(rgba(0,0,0,0) 31px, rgba(107,63,160,.5) 31px, rgba(107,63,160,.5) 32px, rgba(0,0,0,.35) 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, rgba(107,63,160,.5) 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(rgba(107,63,160,.5) 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    radial-gradient(circle at 50% 40%, rgba(40, 30, 64, .28), rgba(7, 6, 11, .12) 75%) 0 0 / 33px 33px;
+  background-color: transparent;
 }
 
 /* ═════════════ EKWIPUNEK, TORBY, SLOTY ═════════════ */
