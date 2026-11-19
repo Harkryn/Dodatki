@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.5.1
+// @version      1.6.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -11,6 +11,11 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
+// @grant        GM_getResourceURL
+// @resource     corner-tl https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-tl.png
+// @resource     corner-tr https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-tr.png
+// @resource     corner-bl https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-bl.png
+// @resource     corner-br https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-br.png
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // ==/UserScript==
@@ -55,6 +60,29 @@
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   })();
 
+  /*
+   * Grafiki: assets/dark-star/ w repo, dołączone przez @resource – Tampermonkey pobiera je razem
+   * ze skryptem i aktualizuje przy każdej nowej wersji (bez zapytań do GitHuba podczas gry).
+   *   okno-naroznik-tl/tr/bl/br.png  256×256  minimalistyczny narożnik: fioletowa linia z rombem
+   *                                          (punkt rogu ok. 14 px od krawędzi pliku → ok. 3,5 px przy 64 px,
+   *                                           2,2 px przy 40 px w tooltipach)
+   */
+  const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/';
+  const res = (name, file) => {
+    try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return u; } } catch (e) { /* ignore */ }
+    return RAW + file;   // awaryjnie: bezpośrednio z repo
+  };
+  const CORNER = {
+    tl: res('corner-tl', 'okno-naroznik-tl.png'),
+    tr: res('corner-tr', 'okno-naroznik-tr.png'),
+    bl: res('corner-bl', 'okno-naroznik-bl.png'),
+    br: res('corner-br', 'okno-naroznik-br.png'),
+  };
+  // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
+  const CORNERS = (px) => ['tl:left top', 'tr:right top', 'bl:left bottom', 'br:right bottom']
+    .map((s) => { const [k, pos] = s.split(':'); return `url("${CORNER[k]}") ${pos} / ${px}px ${px}px no-repeat`; })
+    .join(', ');
+
   const css = `
 /* ═════════════ ZMIENNE (paleta) ═════════════ */
 :root {
@@ -75,6 +103,8 @@
   --mds-dust: ${DUST};
   --mds-panel: radial-gradient(120% 80% at 50% 0%, rgba(58, 34, 87, .18), rgba(0,0,0,0) 60%), linear-gradient(#0d0b14, #07060b);
   --mds-edge: 0 0 0 1px #000, 0 0 0 2px #3a2257;
+  --mds-corners: ${CORNERS(64)};
+  --mds-corners-sm: ${CORNERS(40)};
 }
 
 @keyframes mds-glow-pulse {
@@ -172,6 +202,17 @@ ${R} .border-window.transparent .header-label-positioner .header-label .text { c
 ${R} .border-window.transparent .border-image {
   background: linear-gradient(rgba(13, 11, 20, .92), rgba(7, 6, 11, .88));
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-hair), 0 4px 14px rgba(0, 0, 0, .7);
+}
+/* NAROŻNIKI: fioletowa linia z rombem, romb dokładnie na fioletowej krawędzi okna (box-shadow 2 px na zewnątrz);
+ * punkt rogu leży ok. 3,5 px od brzegu grafiki, więc warstwa wychodzi 5 px poza okno */
+${R} .border-window:not(.transparent)::before,
+${R} .dialogue-window .border-image::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  background: var(--mds-corners);
+  pointer-events: none;
+  z-index: 3;
 }
 /* zamknięcie – szary krzyżyk, przy najechaniu fioletowa poświata */
 ${R} .border-window:not(.transparent) .close-button-corner-decor { background: none; z-index: 4; }
@@ -342,6 +383,15 @@ ${R} .tip-wrapper.normal-tip {
   border-image: none;
   background: var(--mds-dust), linear-gradient(var(--mds-bg2), var(--mds-bg0) 70%);
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 10px 22px rgba(0, 0, 0, .9);
+}
+/* mniejsze narożniki (40 px → punkt rogu ok. 2,2 px od brzegu grafiki) */
+${R} .tip-wrapper.normal-tip::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: var(--mds-corners-sm);
+  pointer-events: none;
+  z-index: 2;
 }
 ${R} .tip-wrapper.normal-tip > .content {
   background: rgba(7, 6, 11, .4);

@@ -143,6 +143,7 @@ Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`): tła `#07060b
 
 Funkcje:
 - **okna i panele**: czarne tło z gwiezdnym pyłem, cienka fioletowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i fioletową linią,
+- **minimalistyczne narożniki** okien, dialogu z NPC i tooltipów: krótka fioletowa linia z małym rombem dokładnie na krawędzi,
 - **przyciski**: ciemne, z fioletową obwódką i spokojnie pulsującą poświatą po najechaniu; czerwone, zielone i niebieskie przyciski gry zachowują znaczenie,
 - **zakładki, dialog z NPC, sklep, pola tekstowe, scrollbary, zaznaczenie tekstu** w stylu motywu,
 - animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”.
@@ -158,3 +159,5 @@ Instalacja:
 4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
 
 Wyłączanie: **Ctrl+Alt+D**, gwiazdka w lewym dolnym rogu albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
+
+Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG z przezroczystym tłem, kilka KB każdy) i są dołączane przez `@resource`, więc Tampermonkey aktualizuje je razem ze skryptem. Każdy element powstał w dwóch wariantach, z których wybrany jeden; prompty i parametry obróbki są w [PROMPTS.md](assets/dark-star/PROMPTS.md).
