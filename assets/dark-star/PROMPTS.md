@@ -153,7 +153,7 @@ Seria 4 – odrzucona (tło i pył). Od tej pory jeden element naraz.
 
 Inspiracja od użytkownika: kinowa czarna dziura z soczewkowanym dyskiem (bez kopiowania obrazu). Kolumna ekwipunku: czarna dziura, ciemna i mroczna; kolumna czatu: gwiaździste niebo z lekko zarysowaną mgławicą. Podgląd bezpośrednio w grze.
 
-### Kolumna ekwipunku – czarna dziura – wybrany A → `tlo-ekwipunek.jpg` (JPEG 576×1344, jakość 80; w grze przyciemnione o 25% w CSS)
+### Kolumna ekwipunku – czarna dziura – wybrany A → `tlo-ekwipunek.jpg` (JPEG 576×1344, jakość 80; w grze przyciemnione o 72% w CSS – prawie czarne, subtelne)
 - **A – wybrany** (FLUX.1 Krea, 576×1344, 32 kroki, seed 211439419). Pierwsza próba (seed 2062079961) wyglądała jak planeta z pierścieniem – odrzucona:
   > Scientifically accurate black hole with gravitational lensing, dark cinematic render, vertical frame: the near side of the accretion disk crosses in front of the black shadow as a thin bright tilted band, while the far side of the disk is bent by gravity into a glowing arc rising up and over the top of the black shadow and another arc curving underneath it, forming a luminous halo around the perfectly black center, streaking plasma in dim violet, ember orange and pale white, a few cold blue flares, everything else deep black, very dark and ominous, low-key lighting, ultra detailed, no planet, no text
 - **B** (Qwen-Image `mcp-tools/Qwen-Image`, 9:16, 16 kroków, seed 1043410808; negative: planet, rings, saturn, text, watermark, blurry, low resolution, bright background):

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.10.0
+// @version      1.10.1
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -353,11 +353,11 @@ ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
 }
 
 /* ═════════════ KOLUMNA EKWIPUNKU: CZARNA DZIURA W TLE ═════════════ */
-/* Tło kolumny: czarna dziura (FLUX.1 Krea) przyciemniona o 25%. Pola ekwipunku, torby i statystyki są
+/* Tło kolumny: czarna dziura (FLUX.1 Krea) przyciemniona o 72% – prawie czarne, subtelne. Pola ekwipunku, torby i statystyki są
  * półprzezroczyste – ramki zarysowane w fiolecie z lekką przezroczystością, wnętrza pokazują tło.
  * Reguły mają w ścieżce .right-column, więc są mocniejsze od ogólnych reguł slotów niżej. */
 ${R} .layer.interface-layer .right-column.main-column {
-  background: linear-gradient(rgba(7, 6, 11, .25), rgba(7, 6, 11, .25)), url("${BG_EQ}") center / cover no-repeat, var(--mds-bg0);
+  background: linear-gradient(rgba(7, 6, 11, .72), rgba(7, 6, 11, .72)), url("${BG_EQ}") center / cover no-repeat, var(--mds-bg0);
 }
 ${R} .right-column .equipment-outline { background: rgba(7, 6, 11, .22); }
 ${R} .right-column .eq-slot {
