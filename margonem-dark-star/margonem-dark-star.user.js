@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.4.0
+// @version      1.5.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -413,6 +413,82 @@ ${SB} #battle #battlelog {   /* TODO: zweryfikuj selektor (dziennik walki SI) */
   color: var(--mds-text);
 }
 
+/* ═════════════ HUD: BELKI, TABLICZKA, PRZYCISKI ═════════════ */
+/* position: relative (nie absolute) – .bg nadaje belce wysokość (sprawdzone w Dark Gothic) */
+${R} .top.positioner > .bg,
+${R} .bottom.positioner > .bg {
+  position: relative;
+  background: var(--mds-dust), linear-gradient(var(--mds-bg1), var(--mds-bg0));
+}
+/* cienka fioletowa linia od strony mapy */
+${R} .top.positioner > .bg { box-shadow: inset 0 -1px 0 var(--mds-violet-line), 0 1px 0 #000; }
+${R} .bottom.positioner > .bg { box-shadow: inset 0 1px 0 var(--mds-violet-line), 0 -1px 0 #000; }
+${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.3) contrast(1.3); }
+/* tabliczka z imieniem: ciemna płyta z pyłem; reguły gry mają tu 6 klas, stąd pełna ścieżka */
+${R} .layer.interface-layer .positioner.top .hud-container {
+  background: var(--mds-dust), radial-gradient(100% 120% at 50% 0%, #1a1430, var(--mds-bg0) 75%);
+  border-image: none;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 4px 12px rgba(0, 0, 0, .8);
+}
+${R} .layer.interface-layer .positioner.top .hud-container.hero-data .heroname {
+  color: var(--mds-white);
+  letter-spacing: .05em;
+  text-shadow: 0 0 6px rgba(157, 107, 255, .45), 0 1px 1px #000;
+}
+${R} .layer.interface-layer .positioner.top .hud-container.location, ${R} .layer.interface-layer .positioner.top .hud-container.coords, ${R} .layer.interface-layer .positioner.top .hud-container.world-name, ${R} .layer.interface-layer .positioner.top .hud-container.herocredits { color: var(--mds-text-dim); text-shadow: 0 1px 1px #000; }
+${R} .layer.interface-layer .positioner.top .hud-container.herogold { color: var(--mds-text); text-shadow: 0 1px 1px #000; }
+/* przyciski HUD: ciemne kafle z fioletową obwódką; kolor gry (fiolet = nowość, niebieski = grupa) jako poblask */
+${R} .widget-button,
+${R} .widget-button.green, ${R} .widget-button.blue, ${R} .widget-button.violet,
+${R} .widget-button.blink-violet, ${R} .widget-button.red, ${R} .widget-button.orange {
+  background: radial-gradient(circle at 50% 35%, #1a1530, var(--mds-bg0) 80%);
+  box-shadow: inset 0 0 0 1px var(--mds-violet-line), 0 0 0 1px #000;
+}
+${R} .widget-button::before { box-shadow: none; }
+${R} .widget-button.violet::before, ${R} .widget-button.blink-violet::before { box-shadow: inset 0 0 9px rgba(157, 107, 255, .45); }
+${R} .widget-button.blue::before { box-shadow: inset 0 0 9px rgba(90, 123, 216, .45); }
+${R} .widget-button.red::before { box-shadow: inset 0 0 9px rgba(200, 60, 70, .45); }
+${R} .widget-button .icon { filter: grayscale(.6) brightness(1.05) drop-shadow(0 1px 1px #000); }
+${R} .widget-button:hover { animation: mds-glow-pulse 2.6s ease-in-out infinite; }
+${R} .widget-button:hover .icon { filter: grayscale(0) brightness(1.15) drop-shadow(0 0 3px rgba(157, 107, 255, .5)); }
+${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
+
+/* ═════════════ PASKI: HP, MANA, DOŚWIADCZENIE ═════════════ */
+/* HP zostaje czerwone (czytelność w walce) – kula gry bez zmian, tylko wartość w kolorze motywu */
+${R} .hp-indicator-wrapper .value { color: var(--mds-white); text-shadow: 0 0 6px #000, 0 0 2px #000; }
+/* doświadczenie: fiolet od ciemnego do akcentu */
+${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
+  background: linear-gradient(#0b0912 0%, #7d4fc0 30%, #4e2c7c 62%, #0b0912 100%);
+}
+${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay,
+${R} .bottom-panel-pointer-bg .pointer-exp-graphic,
+${R} .bottom-panel-pointer-bg .pointer-ttl-graphic { filter: grayscale(1) brightness(.45) contrast(1.3); }
+${R} .bottom-panel-pointer-bg .pointer-exp,
+${R} .bottom-panel-pointer-bg .pointer-ttl { color: var(--mds-text); text-shadow: 0 1px 2px #000; }
+/* paski postępu w oknach (bez pasków postaci w walce) */
+${R} .interface-element-progress-bar-0:not(.one-warrior *),
+${R} .interface-element-progress-bar-1:not(.one-warrior *) { background: var(--mds-bg0); box-shadow: inset 0 0 0 1px var(--mds-violet-line); }
+${R} .interface-element-progress-bar-0:not(.one-warrior *) .inner,
+${R} .interface-element-progress-bar-1:not(.one-warrior *) .inner {
+  background: linear-gradient(#8a5cd0 0%, #5a3390 65%, #3a2257 66%);
+  border-color: var(--mds-violet);
+}
+${R} .interface-element-progress-bar-0 .value,
+${R} .interface-element-progress-bar-1 .value { color: var(--mds-white); text-shadow: 0 1px 2px #000; }
+/* mana – oszczędny błękit */
+${R} .mana-indicator .inner, ${R} .mana-bar .inner {   /* TODO: zweryfikuj selektor (pasek many NI) */
+  background: linear-gradient(#7d97e4 0%, var(--mds-blue) 55%, #2c3f78 100%);
+}
+
+/* ═════════════ MINIMAPA I RAMKI ═════════════ */
+${R} .mini-map, ${R} .mini-map-wrapper {   /* TODO: zweryfikuj selektor (minimapa NI) */
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 0 14px rgba(107, 63, 160, .15);
+}
+${R} .mini-map canvas, ${R} .mini-map img { filter: none; }   /* sama mapa bez zmian */
+${S} #minimap, ${S} #mmap {   /* TODO: zweryfikuj selektor (minimapa SI) */
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line);
+}
+
 /* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
 #mds-toggle {
   position: fixed; left: 6px; bottom: 6px; z-index: 2147483000;
@@ -429,7 +505,8 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
 
 /* ═════════════ OGRANICZ RUCH ═════════════ */
 @media (prefers-reduced-motion: reduce) {
-  ${R} .button:hover { animation: none; box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow); }
+  ${R} .button:hover,
+  ${R} .widget-button:hover { animation: none; box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow); }
 }
 `;
 
