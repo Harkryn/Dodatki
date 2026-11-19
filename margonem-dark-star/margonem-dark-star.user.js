@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.2
+// @version      1.8.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -16,6 +16,7 @@
 // @resource     corner-tr https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-tr.png
 // @resource     corner-bl https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-bl.png
 // @resource     corner-br https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-br.png
+// @resource     nebula    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica.png
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // ==/UserScript==
@@ -68,6 +69,7 @@
    *   okno-naroznik-tl/tr/bl/br.png  256×256  minimalistyczny narożnik: fioletowa linia z rombem
    *                                          (punkt rogu ok. 14 px od krawędzi pliku → ok. 3,5 px przy 64 px,
    *                                           2,2 px przy 40 px w tooltipach)
+   *   mglawica.png                   520×124  wstążka fioletowej mgławicy z jasną gwiazdą (pod tabliczką z imieniem)
    */
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/';
   const res = (name, file) => {
@@ -80,6 +82,7 @@
     bl: res('corner-bl', 'okno-naroznik-bl.png'),
     br: res('corner-br', 'okno-naroznik-br.png'),
   };
+  const NEBULA = res('nebula', 'mglawica.png');
   // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
   const CORNERS = (px) => ['tl:left top', 'tr:right top', 'bl:left bottom', 'br:right bottom']
     .map((s) => { const [k, pos] = s.split(':'); return `url("${CORNER[k]}") ${pos} / ${px}px ${px}px no-repeat`; })
@@ -483,7 +486,21 @@ ${R} .layer.interface-layer .positioner.top .hud-container {
   background: var(--mds-dust), radial-gradient(100% 120% at 50% 0%, #1a1430, var(--mds-bg0) 75%);
   border-image: none;
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 4px 12px rgba(0, 0, 0, .8);
+  z-index: 1;   /* nad mgławicą – górna połowa mgławicy chowa się za tabliczką */
 }
+/* MGŁAWICA pod tabliczką: wstążka z jasną gwiazdą, gwiazda tuż pod dolną krawędzią tabliczki
+ * (tabliczka: 342×65 px, wyśrodkowana; na mapę zachodzi ok. 40 px półprzezroczystej poświaty) */
+${R} .top.positioner > .bg::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 170px); width: 340px;
+  top: 27px; height: 81px;
+  background: url("${NEBULA}") center / 100% 100% no-repeat;
+  pointer-events: none;
+  z-index: 0;
+  animation: mds-nebula 7s ease-in-out infinite;
+}
+@keyframes mds-nebula { 0%, 100% { opacity: .85; filter: brightness(.95); } 50% { opacity: 1; filter: brightness(1.12); } }
 ${HUD} .hero-data .heroname {
   color: var(--mds-white);
   letter-spacing: .05em;
@@ -565,6 +582,7 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
 
 /* ═════════════ OGRANICZ RUCH ═════════════ */
 @media (prefers-reduced-motion: reduce) {
+  ${R} .top.positioner > .bg::before { animation: none; }
   ${R} .button:hover,
   ${R} .widget-button:hover { animation: none; box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow); }
 }

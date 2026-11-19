@@ -144,6 +144,8 @@ Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`): tła `#07060b
 Funkcje:
 - **okna i panele**: czarne tło z gwiezdnym pyłem, cienka fioletowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i fioletową linią,
 - **minimalistyczne narożniki** okien, dialogu z NPC i tooltipów: krótka fioletowa linia z małym rombem dokładnie na krawędzi,
+- **mgławica pod tabliczką z imieniem**: wstążka fioletowej mgławicy z jasną gwiazdą tuż pod tabliczką, delikatnie pulsująca,
+- **przemalowanie grafik gry w locie**: drewno, brąz i pergamin z plików `/img/gui/*` zamieniają się w fioletową czerń, złote obszycia w fiolet; kolory znaczeniowe (złoto, zielone statusy, błękit, czerwone powiadomienia) zostają. Kopie grafik gry nie trafiają do repo,
 - **przyciski**: ciemne, z fioletową obwódką i spokojnie pulsującą poświatą po najechaniu; czerwone, zielone i niebieskie przyciski gry zachowują znaczenie,
 - **zakładki, dialog z NPC, sklep, pola tekstowe, scrollbary, zaznaczenie tekstu** w stylu motywu,
 - animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”.
