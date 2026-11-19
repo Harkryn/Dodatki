@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.1.0
+// @version      1.2.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -292,6 +292,48 @@ ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
   background: var(--mds-bg0);
   color: var(--mds-text);
   border: 1px solid var(--mds-violet-line);
+}
+
+/* ═════════════ EKWIPUNEK, TORBY, SLOTY ═════════════ */
+/* siatka torby i sklepu (wzór co 33 px, jak siatka gry): ciemna wnęka, cienka fioletowa linia, czarna fuga */
+${R} .interface-element-item-slot-grid-stretch {
+  filter: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0) 31px, #2a1840 31px, #2a1840 32px, #030206 32px) 0 0 / 33px 33px,
+    linear-gradient(rgba(0,0,0,0) 31px, #2a1840 31px, #2a1840 32px, #030206 32px) 0 0 / 33px 33px,
+    linear-gradient(90deg, #2a1840 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    linear-gradient(#2a1840 1px, rgba(0,0,0,0) 1px) 0 0 / 33px 33px,
+    radial-gradient(circle at 50% 40%, #151122 0, #0b0912 55%, #050409 100%) 0 0 / 33px 33px,
+    var(--mds-bg0);
+}
+${R} .interface-element-grid-border { outline-color: #000; box-shadow: 0 0 0 1px var(--mds-violet-line), 0 0 0 2px #000; }
+${R} .interface-element-one-black-tile { background: linear-gradient(var(--mds-bg2), var(--mds-bg0)); }
+/* sloty ekwipunku postaci i paska szybkiego użycia */
+${R} .eq-slot,
+${R} .interface-element-one-item-slot-2 {
+  background: radial-gradient(circle at 50% 40%, #151122 0, #0b0912 55%, #050409 100%);
+  border-color: var(--mds-violet-line);
+  outline-color: #000;
+  box-shadow: inset 0 0 0 1px #2a1840, 0 0 0 1px #000, inset 0 0 8px #000;
+}
+${R} .eq-slot:hover,
+${R} .interface-element-one-item-slot-2:hover { box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 0 1px #000, 0 0 8px var(--mds-glow-soft); }
+/* sloty toreb */
+${R} .inventory_wrapper .bag-slot-wrapper {
+  background: radial-gradient(circle at 50% 40%, #1a1530, var(--mds-bg0) 75%);
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), inset 0 0 8px #000;
+}
+${R} .inventory_wrapper .bags-navigation-bg { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line); }
+/* panel statystyk */
+${R} .stats-wrapper.interface-element-background-color-3 {
+  background: var(--mds-dust), linear-gradient(var(--mds-bg1), var(--mds-bg0));
+  box-shadow: inset 0 0 0 1px var(--mds-violet-line), 0 4px 10px rgba(0, 0, 0, .8);
+}
+${R} .stats-wrapper .header-title { color: var(--mds-white); letter-spacing: .08em; text-shadow: 0 0 6px rgba(157, 107, 255, .3); }
+${R} .stats-wrapper .stats-list li { color: var(--mds-text); }   /* TODO: zweryfikuj selektor (kolor wartości statystyk) */
+/* SI */
+${S} #panel .item, ${S} #bag .item {   /* TODO: zweryfikuj selektor (sloty SI) */
+  box-shadow: inset 0 0 0 1px #2a1840;
 }
 
 /* ═════════════ PRZEŁĄCZNIK (gwiazdka w lewym dolnym rogu) ═════════════ */
