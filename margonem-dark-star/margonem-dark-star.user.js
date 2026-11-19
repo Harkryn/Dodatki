@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.13.2
+// @version      1.14.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -17,7 +17,8 @@
 // @resource     corner-bl https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-bl.png
 // @resource     corner-br https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-br.png
 // @resource     nebula    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica.png
-// @resource     horizon   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/horyzont.png
+// @resource     ring      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/pierscien.png
+// @resource     storm     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/burza.png
 // @resource     singular  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/osobliwosc.jpg
 // @resource     bg-eq     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-ekwipunek.jpg
 // @resource     bg-chat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-czat.jpg
@@ -74,8 +75,9 @@
    *                                          (punkt rogu ok. 14 px od krawędzi pliku → ok. 3,5 px przy 64 px,
    *                                           2,2 px przy 40 px w tooltipach)
    *   mglawica.png                   520×124  wstążka fioletowej mgławicy z jasną gwiazdą (pod tabliczką z imieniem)
-   *   horyzont.png                   340×340  planeta z łososiowym pierścieniem wokół kuli HP
-   *                                          (kula planety ok. 44% szerokości → przy 224 px ok. 98 px = kula gry)
+   *   pierscien.png                  280×280  łososiowy pierścień cząstek widziany z góry (otwór ok. 30% szerokości);
+   *                                          w grze 200 px, przechylony w 3D i obracany wokół kuli HP
+   *   burza.png                      280×280  pierścień różowo-koralowych piorunów (otwór ok. 27%); w grze 200 px
    *   osobliwosc.jpg                 256×256  osobliwość: fioletowy wir z jasnym punktem – wypełnienie kuli HP
    *   tlo-ekwipunek.jpg              576×1344 czarna dziura ze smugami plazmy – tło kolumny ekwipunku
    *   tlo-czat.jpg                   576×1344 prawie czarne niebo z rzadkimi gwiazdami i pasmem mgławicy u dołu – tło czatu
@@ -92,7 +94,8 @@
     br: res('corner-br', 'okno-naroznik-br.png'),
   };
   const NEBULA = res('nebula', 'mglawica.png');
-  const HORIZON = res('horizon', 'horyzont.png');
+  const RING = res('ring', 'pierscien.png');
+  const STORM = res('storm', 'burza.png');
   const SINGULAR = res('singular', 'osobliwosc.jpg');
   const BG_EQ = res('bg-eq', 'tlo-ekwipunek.jpg');
   const BG_CHAT = res('bg-chat', 'tlo-czat.jpg');
@@ -123,9 +126,7 @@
   --mds-panel: radial-gradient(120% 80% at 50% 0%, rgba(66, 36, 66, .18), rgba(0,0,0,0) 60%), linear-gradient(#120b13, #09060a);
   --mds-edge: 0 0 0 1px #000, 0 0 0 2px #3e2440;
   --mds-corners: ${CORNERS(64)};
-  --mds-corners-sm: ${CORNERS(40)};
-  --mds-ring-fade: radial-gradient(circle closest-side, #000 62%, rgba(0, 0, 0, .6) 78%, transparent 97%);
-}
+  --mds-corners-sm: ${CORNERS(40)};}
 
 @keyframes mds-glow-pulse {
   0%, 100% { box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 6px rgba(236, 140, 128, .14); }
@@ -620,61 +621,64 @@ ${R} .widget-button:hover .icon { filter: grayscale(0) brightness(1.15) drop-sha
 ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
 
 /* ═════════════ PASKI: HP, MANA, DOŚWIADCZENIE ═════════════ */
-/* KULA HP = OSOBLIWOŚĆ W HORYZONCIE ZDARZEŃ
- * Kula gry: .hp-indicator-wrapper 98×98, okrągła (overflow hidden); .blood ma wysokość = poziom HP.
+/* KULA HP = PLANETA-OSOBLIWOŚĆ Z PIERŚCIENIEM I BURZĄ
+ * Kula gry: .hp-indicator-wrapper 98×98, okrągła (overflow hidden), z-index 1; .blood ma wysokość = poziom HP.
  * Środek kuli: 120 px od lewej i 29 px poniżej góry .bottom-panel-pointer-bg (sprawdzone w grze).
- *  – horyzont: pierścień fioletowego ognia na .bottom-panel-pointer-bg::before, czarny środek wokół kuli,
- *  – osobliwość: wir w .blood::before, wyśrodkowany na środku kuli (26 px nad dołem .blood) i powoli
- *    obracany; .blood przycina go do poziomu HP, więc poziom zdrowia dalej widać jak w grze. */
-/* planeta z pierścieniem: czarna kula planety (promień ok. 22% obrazu) leży dokładnie pod kulą gry (98 px).
- * Kula gry jest w połowie schowana pod dolną krawędzią ekranu (środek ok. 27 px nad nią), więc obraz jest
- * obrócony o 30° – pierścień leży poziomo jak orbita i jego końce zostają na ekranie zamiast uciekać w dół. */
-${R} .bottom-panel-pointer-bg::before {
-  content: "";
-  position: absolute;
-  left: calc(120px - 112px); top: calc(29px - 112px);
-  width: 224px; height: 224px;
-  background: url("${HORIZON}") center / 100% 100% no-repeat;
-  transform: rotate(30deg);
-  /* końce pierścienia w grafice dochodzą do brzegów kadru – miękko je wygaszamy, zamiast urywać */
-  -webkit-mask-image: var(--mds-ring-fade);
-  mask-image: var(--mds-ring-fade);
-  pointer-events: none;
-  z-index: 2;
-  animation: mds-breathe 5s ease-in-out infinite;
+ * Skrypt wstawia tam #mds-orb-fx (patrz ensureOrbFx), wspólny kontekst warstw to dolny panel:
+ *  – pierścień (pierscien.png, widok z góry) przechylony w 3D i obracany wokół własnej osi; tylna połowa
+ *    (z-index 0) idzie za kulą, przednia (z-index 3) przed nią – pierścień naprawdę okrąża kulę,
+ *  – burza (burza.png): dwie warstwy piorunów wokół kuli, obracające się powoli w przeciwne strony
+ *    i rozbłyskujące nieregularnie,
+ *  – osobliwość: wir w .blood::before (niżej); .blood przycina go do poziomu HP. */
+${R} #mds-orb-fx { position: absolute; left: 120px; top: 29px; width: 0; height: 0; pointer-events: none; }
+html:not(.${ON_CLASS}) #mds-orb-fx { display: none; }
+${R} #mds-orb-fx > div { position: absolute; pointer-events: none; }
+/* połówki pierścienia: nieobracane okna przycinające (góra = tył, dół = przód), w środku obracający się pierścień */
+${R} #mds-orb-fx .mds-ring-half { left: -110px; top: -110px; width: 220px; height: 220px; perspective: 520px; }
+${R} #mds-orb-fx .mds-ring-back { clip-path: inset(0 0 50% 0); z-index: 0; }
+${R} #mds-orb-fx .mds-ring-front { clip-path: inset(50% 0 0 0); z-index: 3; }
+${R} #mds-orb-fx .mds-ring {
+  position: absolute; left: 10px; top: 10px; width: 200px; height: 200px;
+  background: url("${RING}") center / 100% 100% no-repeat;
+  transform: rotateZ(-10deg) rotateX(72deg) rotateZ(0deg);
+  animation: mds-orbit 16s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(236, 140, 128, .35));
 }
-/* druga warstwa: ten sam obraz w trybie „screen”, migocze – plazma na pierścieniu iskrzy */
-${R} .bottom-panel-pointer-bg::after {
-  content: "";
-  position: absolute;
-  left: calc(120px - 112px); top: calc(29px - 112px);
-  width: 224px; height: 224px;
-  background: url("${HORIZON}") center / 100% 100% no-repeat;
-  transform: rotate(30deg);
-  -webkit-mask-image: var(--mds-ring-fade);
-  mask-image: var(--mds-ring-fade);
+${R} #mds-orb-fx .mds-ring-back .mds-ring { opacity: .75; }
+@keyframes mds-orbit {
+  from { transform: rotateZ(-10deg) rotateX(72deg) rotateZ(0deg); }
+  to   { transform: rotateZ(-10deg) rotateX(72deg) rotateZ(360deg); }
+}
+/* burza: dwie warstwy piorunów (otwór ok. 55 px – pioruny tuż przy krawędzi kuli) */
+${R} #mds-orb-fx .mds-storm {
+  left: -100px; top: -100px; width: 200px; height: 200px;
+  background: url("${STORM}") center / 100% 100% no-repeat;
   mix-blend-mode: screen;
-  opacity: .45;
-  pointer-events: none;
   z-index: 2;
-  animation: mds-flicker 3.2s ease-in-out infinite;
+  opacity: 0;
 }
-@keyframes mds-spin-rev { from { transform: rotate(140deg) scale(.96); } to { transform: rotate(-220deg) scale(.96); } }
-@keyframes mds-breathe { 0%, 100% { filter: brightness(.95) drop-shadow(0 0 4px rgba(236, 140, 128, .3)); } 50% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(236, 140, 128, .55)); } }
-@keyframes mds-flicker { 0%, 100% { opacity: .3; } 30% { opacity: .55; } 55% { opacity: .38; } 80% { opacity: .6; } }
-/* niskie HP (< 30%, klasa ustawiana przez skrypt): horyzont przechodzi w karmazyn i pulsuje szybciej */
-html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::before,
-html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::after {
-  filter: hue-rotate(-12deg) saturate(1.9) brightness(.95);   /* koral → głęboka czerwień */
-  animation-duration: 1.4s;
+${R} #mds-orb-fx .mds-storm-a { animation: mds-storm-spin 38s linear infinite, mds-storm-flash 2.7s steps(1, end) infinite; }
+${R} #mds-orb-fx .mds-storm-b { animation: mds-storm-spin 52s linear infinite reverse, mds-storm-flash 3.9s steps(1, end) infinite 1.3s; }
+${R} #mds-orb-fx .mds-storm-b { transform: rotate(140deg) scale(.92); }
+@keyframes mds-storm-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
+/* nieregularne rozbłyski: krótkie, jasne błyski przeplatane przygaśnięciem */
+@keyframes mds-storm-flash {
+  0%   { opacity: .15; }
+  8%   { opacity: .95; }
+  11%  { opacity: .3; }
+  14%  { opacity: .85; }
+  20%  { opacity: .2; }
+  47%  { opacity: .1; }
+  52%  { opacity: .7; }
+  55%  { opacity: .18; }
+  78%  { opacity: .55; }
+  82%  { opacity: .12; }
+  100% { opacity: .15; }
 }
-html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::before {
-  animation: mds-breathe-low 1.4s ease-in-out infinite;
-}
-@keyframes mds-breathe-low {
-  0%, 100% { filter: hue-rotate(-12deg) saturate(1.9) brightness(.9) drop-shadow(0 0 4px rgba(200, 30, 40, .35)); }
-  50% { filter: hue-rotate(-12deg) saturate(2.1) brightness(1.2) drop-shadow(0 0 12px rgba(220, 30, 40, .7)); }
-}
+/* niskie HP (< 30%, klasa ustawiana przez skrypt): pierścień i burza w głębokiej czerwieni, burza szaleje */
+html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner #mds-orb-fx { filter: hue-rotate(-12deg) saturate(1.9); }
+html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner #mds-orb-fx .mds-storm-a { animation-duration: 38s, 1.1s; }
+html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner #mds-orb-fx .mds-storm-b { animation-duration: 52s, 1.5s; }
 /* jądro osobliwości: pulsujący blask w środku kuli (nad wirem, pod liczbą HP) */
 ${R} .hp-indicator::after {
   content: "";
@@ -750,10 +754,10 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
   ${R} .top.positioner > .bg::before,
   ${R} .top.positioner > .bg::after,
   ${R} .top.positioner::after,
-  ${R} .bottom-panel-pointer-bg::before,
-  ${R} .bottom-panel-pointer-bg::after,
+  ${R} #mds-orb-fx .mds-ring,
   ${R} .hp-indicator::after,
   ${R} .hp-indicator .blood::before { animation: none; }
+  ${R} #mds-orb-fx .mds-storm { animation: none; opacity: .35; }
   ${R} .top.positioner::after { transform: scaleX(-1); opacity: .25; }
   ${R} .button:hover,
   ${R} .widget-button:hover { animation: none; box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow); }
@@ -995,6 +999,21 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
 
   /* NISKIE HP: ResizeObserver na pasku krwi (.blood ma wysokość = poziom HP) – bez pętli i bez odpytywania.
    * Poniżej 30% na <html> pojawia się klasa mds-lowhp (horyzont kuli w karmazynie, szybszy puls). */
+  /* KULA HP – warstwy efektów: tylna połowa pierścienia, dwie warstwy burzy, przednia połowa pierścienia.
+   * Wstawiane do .bottom-panel-pointer-bg (wspólny kontekst warstw z kulą gry); gdy gra przebuduje panel,
+   * obserwator DOM wstawia je ponownie. Tylko wygląd – pointer-events: none. */
+  function ensureOrbFx() {
+    const host = document.querySelector('.game-window-positioner .bottom-panel-pointer-bg');
+    if (!host || host.querySelector('#mds-orb-fx')) return;
+    const fx = document.createElement('div');
+    fx.id = 'mds-orb-fx';
+    fx.innerHTML =
+      '<div class="mds-ring-half mds-ring-back"><div class="mds-ring"></div></div>' +
+      '<div class="mds-storm mds-storm-a"></div><div class="mds-storm mds-storm-b"></div>' +
+      '<div class="mds-ring-half mds-ring-front"><div class="mds-ring"></div></div>';
+    host.appendChild(fx);
+  }
+
   let hpWatched = null;
   function watchHp() {
     const blood = document.querySelector('.hp-indicator .blood');
@@ -1016,6 +1035,8 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
     setInterface(iface);
     root.classList.add('mds-game');
     apply(enabled);
+    ensureOrbFx();
+    watchHp();
     return true;
   }
   detect();
@@ -1044,6 +1065,7 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
     }
     if (sheets) setTimeout(scanSheets, 50);
     if (!hpWatched || !hpWatched.isConnected) watchHp();
+    if (!document.getElementById('mds-orb-fx')) ensureOrbFx();
   });
   obs.observe(root, { childList: true, subtree: true });
   setTimeout(() => { if (!root.classList.contains('mds-game')) obs.disconnect(); }, 60000);
