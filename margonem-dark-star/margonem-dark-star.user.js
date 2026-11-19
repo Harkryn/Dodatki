@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.13.1
+// @version      1.13.2
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -124,6 +124,7 @@
   --mds-edge: 0 0 0 1px #000, 0 0 0 2px #3e2440;
   --mds-corners: ${CORNERS(64)};
   --mds-corners-sm: ${CORNERS(40)};
+  --mds-ring-fade: radial-gradient(circle closest-side, #000 62%, rgba(0, 0, 0, .6) 78%, transparent 97%);
 }
 
 @keyframes mds-glow-pulse {
@@ -635,6 +636,9 @@ ${R} .bottom-panel-pointer-bg::before {
   width: 224px; height: 224px;
   background: url("${HORIZON}") center / 100% 100% no-repeat;
   transform: rotate(30deg);
+  /* końce pierścienia w grafice dochodzą do brzegów kadru – miękko je wygaszamy, zamiast urywać */
+  -webkit-mask-image: var(--mds-ring-fade);
+  mask-image: var(--mds-ring-fade);
   pointer-events: none;
   z-index: 2;
   animation: mds-breathe 5s ease-in-out infinite;
@@ -647,6 +651,8 @@ ${R} .bottom-panel-pointer-bg::after {
   width: 224px; height: 224px;
   background: url("${HORIZON}") center / 100% 100% no-repeat;
   transform: rotate(30deg);
+  -webkit-mask-image: var(--mds-ring-fade);
+  mask-image: var(--mds-ring-fade);
   mix-blend-mode: screen;
   opacity: .45;
   pointer-events: none;
