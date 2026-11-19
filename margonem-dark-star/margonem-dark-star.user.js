@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.12.0
+// @version      1.13.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -74,8 +74,8 @@
    *                                          (punkt rogu ok. 14 px od krawędzi pliku → ok. 3,5 px przy 64 px,
    *                                           2,2 px przy 40 px w tooltipach)
    *   mglawica.png                   520×124  wstążka fioletowej mgławicy z jasną gwiazdą (pod tabliczką z imieniem)
-   *   horyzont.png                   220×220  horyzont zdarzeń: pierścień zimnego fioletowego ognia wokół kuli HP
-   *                                          (czarny środek ok. 57% promienia → przy 170 px otwór ok. 97 px = kula gry)
+   *   horyzont.png                   340×340  planeta z łososiowym pierścieniem wokół kuli HP
+   *                                          (kula planety ok. 44% szerokości → przy 224 px ok. 98 px = kula gry)
    *   osobliwosc.jpg                 256×256  osobliwość: fioletowy wir z jasnym punktem – wypełnienie kuli HP
    *   tlo-ekwipunek.jpg              576×1344 czarna dziura ze smugami plazmy – tło kolumny ekwipunku
    *   tlo-czat.jpg                   576×1344 prawie czarne niebo z rzadkimi gwiazdami i pasmem mgławicy u dołu – tło czatu
@@ -625,28 +625,30 @@ ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
  *  – horyzont: pierścień fioletowego ognia na .bottom-panel-pointer-bg::before, czarny środek wokół kuli,
  *  – osobliwość: wir w .blood::before, wyśrodkowany na środku kuli (26 px nad dołem .blood) i powoli
  *    obracany; .blood przycina go do poziomu HP, więc poziom zdrowia dalej widać jak w grze. */
+/* planeta z pierścieniem: czarna kula planety (promień ok. 22% obrazu) leży dokładnie pod kulą gry (98 px),
+ * łososiowy pierścień przecina ją ukośnie; środek kuli = 50% / 50,3% obrazu */
 ${R} .bottom-panel-pointer-bg::before {
   content: "";
   position: absolute;
-  left: calc(120px - 85px); top: calc(29px - 85px);
-  width: 170px; height: 170px;
+  left: calc(120px - 112px); top: calc(29px - 112px);
+  width: 224px; height: 224px;
   background: url("${HORIZON}") center / 100% 100% no-repeat;
   pointer-events: none;
   z-index: 2;
-  animation: mds-spin 90s linear infinite, mds-breathe 5s ease-in-out infinite;
+  animation: mds-breathe 5s ease-in-out infinite;
 }
-/* druga warstwa ognia: ten sam pierścień, obrócony i kręcący się w przeciwną stronę – płomienie migoczą */
+/* druga warstwa: ten sam obraz w trybie „screen”, migocze – plazma na pierścieniu iskrzy */
 ${R} .bottom-panel-pointer-bg::after {
   content: "";
   position: absolute;
-  left: calc(120px - 85px); top: calc(29px - 85px);
-  width: 170px; height: 170px;
+  left: calc(120px - 112px); top: calc(29px - 112px);
+  width: 224px; height: 224px;
   background: url("${HORIZON}") center / 100% 100% no-repeat;
   mix-blend-mode: screen;
   opacity: .45;
   pointer-events: none;
   z-index: 2;
-  animation: mds-spin-rev 55s linear infinite, mds-flicker 3.2s ease-in-out infinite;
+  animation: mds-flicker 3.2s ease-in-out infinite;
 }
 @keyframes mds-spin-rev { from { transform: rotate(140deg) scale(.96); } to { transform: rotate(-220deg) scale(.96); } }
 @keyframes mds-breathe { 0%, 100% { filter: brightness(.95) drop-shadow(0 0 4px rgba(236, 140, 128, .3)); } 50% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(236, 140, 128, .55)); } }
@@ -654,8 +656,15 @@ ${R} .bottom-panel-pointer-bg::after {
 /* niskie HP (< 30%, klasa ustawiana przez skrypt): horyzont przechodzi w karmazyn i pulsuje szybciej */
 html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::before,
 html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::after {
-  filter: hue-rotate(75deg) saturate(1.6);
-  animation-duration: 90s, 1.4s;
+  filter: hue-rotate(-12deg) saturate(1.9) brightness(.95);   /* koral → głęboka czerwień */
+  animation-duration: 1.4s;
+}
+html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::before {
+  animation: mds-breathe-low 1.4s ease-in-out infinite;
+}
+@keyframes mds-breathe-low {
+  0%, 100% { filter: hue-rotate(-12deg) saturate(1.9) brightness(.9) drop-shadow(0 0 4px rgba(200, 30, 40, .35)); }
+  50% { filter: hue-rotate(-12deg) saturate(2.1) brightness(1.2) drop-shadow(0 0 12px rgba(220, 30, 40, .7)); }
 }
 /* jądro osobliwości: pulsujący blask w środku kuli (nad wirem, pod liczbą HP) */
 ${R} .hp-indicator::after {
