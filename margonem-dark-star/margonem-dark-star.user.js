@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.8.1
+// @version      1.9.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -17,6 +17,8 @@
 // @resource     corner-bl https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-bl.png
 // @resource     corner-br https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-br.png
 // @resource     nebula    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica.png
+// @resource     horizon   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/horyzont.png
+// @resource     singular  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/osobliwosc.jpg
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // ==/UserScript==
@@ -70,6 +72,9 @@
    *                                          (punkt rogu ok. 14 px od krawędzi pliku → ok. 3,5 px przy 64 px,
    *                                           2,2 px przy 40 px w tooltipach)
    *   mglawica.png                   520×124  wstążka fioletowej mgławicy z jasną gwiazdą (pod tabliczką z imieniem)
+   *   horyzont.png                   220×220  horyzont zdarzeń: pierścień zimnego fioletowego ognia wokół kuli HP
+   *                                          (czarny środek ok. 57% promienia → przy 170 px otwór ok. 97 px = kula gry)
+   *   osobliwosc.jpg                 256×256  osobliwość: fioletowy wir z jasnym punktem – wypełnienie kuli HP
    */
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/';
   const res = (name, file) => {
@@ -83,6 +88,8 @@
     br: res('corner-br', 'okno-naroznik-br.png'),
   };
   const NEBULA = res('nebula', 'mglawica.png');
+  const HORIZON = res('horizon', 'horyzont.png');
+  const SINGULAR = res('singular', 'osobliwosc.jpg');
   // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
   const CORNERS = (px) => ['tl:left top', 'tr:right top', 'bl:left bottom', 'br:right bottom']
     .map((s) => { const [k, pos] = s.split(':'); return `url("${CORNER[k]}") ${pos} / ${px}px ${px}px no-repeat`; })
@@ -503,6 +510,42 @@ ${R} .top.positioner > .bg::before {
   animation: mds-nebula 7s ease-in-out infinite;
 }
 @keyframes mds-nebula { 0%, 100% { opacity: .85; filter: brightness(.95); } 50% { opacity: 1; filter: brightness(1.12); } }
+/* druga warstwa mgławicy: lustrzane odbicie, powoli dryfuje w bok – obłoki „płyną” */
+${R} .top.positioner::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 170px); width: 340px;
+  top: 34px; height: 81px;
+  background: url("${NEBULA}") center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 1;
+  animation: mds-drift 14s ease-in-out infinite;
+}
+@keyframes mds-drift {
+  0%, 100% { transform: scaleX(-1) translateX(-8px); opacity: .18; }
+  50% { transform: scaleX(-1) translateX(8px); opacity: .42; }
+}
+/* migocząca gwiazda w środku mgławicy: krzyż promieni i jasne jądro */
+${R} .top.positioner > .bg::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 24px); width: 48px;
+  top: calc(34px + 40px - 24px); height: 48px;   /* środek wstążki */
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(220, 200, 255, .6) 8%, rgba(157, 107, 255, 0) 30%),
+    linear-gradient(90deg, rgba(200, 180, 255, 0), rgba(235, 225, 255, .8) 50%, rgba(200, 180, 255, 0)) center / 100% 1px no-repeat,
+    linear-gradient(rgba(200, 180, 255, 0), rgba(235, 225, 255, .8) 50%, rgba(200, 180, 255, 0)) center / 1px 100% no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 1;
+  animation: mds-twinkle 4.5s ease-in-out infinite;
+}
+@keyframes mds-twinkle {
+  0%, 100% { transform: scale(.6) rotate(0deg); opacity: .5; }
+  45% { transform: scale(1.15) rotate(45deg); opacity: 1; }
+  55% { transform: scale(1) rotate(45deg); opacity: .9; }
+}
 ${HUD} .hero-data .heroname {
   color: var(--mds-white);
   letter-spacing: .05em;
@@ -530,7 +573,77 @@ ${R} .widget-button:hover .icon { filter: grayscale(0) brightness(1.15) drop-sha
 ${R} .widget-button.disabled .icon { filter: grayscale(1) brightness(.5); }
 
 /* ═════════════ PASKI: HP, MANA, DOŚWIADCZENIE ═════════════ */
-/* HP zostaje czerwone (czytelność w walce) – kula gry bez zmian, tylko wartość w kolorze motywu */
+/* KULA HP = OSOBLIWOŚĆ W HORYZONCIE ZDARZEŃ
+ * Kula gry: .hp-indicator-wrapper 98×98, okrągła (overflow hidden); .blood ma wysokość = poziom HP.
+ * Środek kuli: 120 px od lewej i 29 px poniżej góry .bottom-panel-pointer-bg (sprawdzone w grze).
+ *  – horyzont: pierścień fioletowego ognia na .bottom-panel-pointer-bg::before, czarny środek wokół kuli,
+ *  – osobliwość: wir w .blood::before, wyśrodkowany na środku kuli (26 px nad dołem .blood) i powoli
+ *    obracany; .blood przycina go do poziomu HP, więc poziom zdrowia dalej widać jak w grze. */
+${R} .bottom-panel-pointer-bg::before {
+  content: "";
+  position: absolute;
+  left: calc(120px - 85px); top: calc(29px - 85px);
+  width: 170px; height: 170px;
+  background: url("${HORIZON}") center / 100% 100% no-repeat;
+  pointer-events: none;
+  z-index: 2;
+  animation: mds-spin 90s linear infinite, mds-breathe 5s ease-in-out infinite;
+}
+/* druga warstwa ognia: ten sam pierścień, obrócony i kręcący się w przeciwną stronę – płomienie migoczą */
+${R} .bottom-panel-pointer-bg::after {
+  content: "";
+  position: absolute;
+  left: calc(120px - 85px); top: calc(29px - 85px);
+  width: 170px; height: 170px;
+  background: url("${HORIZON}") center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  opacity: .45;
+  pointer-events: none;
+  z-index: 2;
+  animation: mds-spin-rev 55s linear infinite, mds-flicker 3.2s ease-in-out infinite;
+}
+@keyframes mds-spin-rev { from { transform: rotate(140deg) scale(.96); } to { transform: rotate(-220deg) scale(.96); } }
+@keyframes mds-breathe { 0%, 100% { filter: brightness(.95) drop-shadow(0 0 4px rgba(157, 107, 255, .3)); } 50% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(157, 107, 255, .55)); } }
+@keyframes mds-flicker { 0%, 100% { opacity: .3; } 30% { opacity: .55; } 55% { opacity: .38; } 80% { opacity: .6; } }
+/* niskie HP (< 30%, klasa ustawiana przez skrypt): horyzont przechodzi w karmazyn i pulsuje szybciej */
+html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::before,
+html.${ON_CLASS}.mds-ni.mds-lowhp .game-window-positioner .bottom-panel-pointer-bg::after {
+  filter: hue-rotate(75deg) saturate(1.6);
+  animation-duration: 90s, 1.4s;
+}
+/* jądro osobliwości: pulsujący blask w środku kuli (nad wirem, pod liczbą HP) */
+${R} .hp-indicator::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 30px); bottom: -4px;   /* środek kuli: 26 px nad dołem .hp-indicator */
+  width: 60px; height: 60px;
+  background: radial-gradient(circle, rgba(235, 220, 255, .55) 0, rgba(157, 107, 255, .25) 22%, rgba(107, 63, 160, 0) 60%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: mds-core 2.8s ease-in-out infinite;
+}
+@keyframes mds-core { 0%, 100% { transform: scale(.75); opacity: .55; } 50% { transform: scale(1.1); opacity: 1; } }
+${R} .hp-indicator .blood {
+  background: #0b0714;   /* sprite krwi gry pod spodem nie jest potrzebny */
+  overflow: hidden;
+}
+${R} .hp-indicator .blood::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 50px); bottom: -24px;   /* środek wiru = środek kuli */
+  width: 100px; height: 100px;
+  background: url("${SINGULAR}") center / cover no-repeat;
+  pointer-events: none;
+  animation: mds-spin 40s linear infinite reverse;
+}
+/* powierzchnia „płynu”: cienka jasna linia na poziomie HP */
+${R} .hp-indicator .blood::after {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, rgba(157, 107, 255, 0), rgba(220, 200, 255, .7), rgba(157, 107, 255, 0));
+  pointer-events: none;
+}
+@keyframes mds-spin { to { transform: rotate(360deg); } }
 ${R} .hp-indicator-wrapper .value { color: var(--mds-white); text-shadow: 0 0 6px #000, 0 0 2px #000; }
 /* doświadczenie: fiolet od ciemnego do akcentu */
 ${R} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
@@ -584,7 +697,14 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
 
 /* ═════════════ OGRANICZ RUCH ═════════════ */
 @media (prefers-reduced-motion: reduce) {
-  ${R} .top.positioner > .bg::before { animation: none; }
+  ${R} .top.positioner > .bg::before,
+  ${R} .top.positioner > .bg::after,
+  ${R} .top.positioner::after,
+  ${R} .bottom-panel-pointer-bg::before,
+  ${R} .bottom-panel-pointer-bg::after,
+  ${R} .hp-indicator::after,
+  ${R} .hp-indicator .blood::before { animation: none; }
+  ${R} .top.positioner::after { transform: scaleX(-1); opacity: .25; }
   ${R} .button:hover,
   ${R} .widget-button:hover { animation: none; box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow); }
 }
@@ -838,6 +958,20 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
   addStyle(css);
   apply(enabled);
 
+  /* NISKIE HP: ResizeObserver na pasku krwi (.blood ma wysokość = poziom HP) – bez pętli i bez odpytywania.
+   * Poniżej 30% na <html> pojawia się klasa mds-lowhp (horyzont kuli w karmazynie, szybszy puls). */
+  let hpWatched = null;
+  function watchHp() {
+    const blood = document.querySelector('.hp-indicator .blood');
+    if (!blood || blood === hpWatched || typeof ResizeObserver !== 'function') return;
+    hpWatched = blood;
+    const box = blood.parentElement;
+    new ResizeObserver(() => {
+      const full = box.offsetHeight;
+      root.classList.toggle('mds-lowhp', full > 0 && blood.offsetHeight / full < 0.3);
+    }).observe(blood);
+  }
+
   /* Wykrycie gry: od razu (skrypt mógł wejść do już wczytanej strony), przy DOMContentLoaded/load
    * i przy zmianach DOM (z debounce). Po wykryciu: klasa mds-game, przycisk, skan arkuszy. */
   function detect() {
@@ -876,6 +1010,7 @@ html:not(.${ON_CLASS}) #mds-toggle { color: #6c6880; border-color: #2a2833; }
     }
     if (sheets) setTimeout(scanSheets, 50);
     if (!document.getElementById('mds-toggle')) ensureButton();
+    if (!hpWatched || !hpWatched.isConnected) watchHp();
   });
   obs.observe(root, { childList: true, subtree: true });
   setTimeout(() => { if (!root.classList.contains('mds-game')) obs.disconnect(); }, 60000);
