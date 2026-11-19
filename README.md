@@ -137,19 +137,17 @@ Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (38 plików WebP, ra
 
 ## Margonem — Mroczna Gwiazda
 
-Motyw w klimacie kosmicznej pustki: głęboka czerń, fiolet tylko jako akcent, srebrno-lawendowy tekst i ledwo widoczny gwiezdny pył na panelach. Inspirowany estetyką „mrocznej gwiazdy”, ale wszystkie elementy są własne (CSS/SVG), bez cudzych grafik i logo.
+Motyw w klimacie kosmicznej pustki: głęboka czerń przechodząca w przydymioną śliwkę, łososiowo-koralowe światło jako akcent, srebrny tekst z różowym odcieniem i ledwo widoczny gwiezdny pył na panelach. Inspirowany estetyką „mrocznej gwiazdy”, bez cudzych grafik i logo – grafiki są wygenerowane na Hugging Face (FLUX.1 Krea).
 
 Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`) – czerń przechodząca w przydymioną śliwkę, światło łososiowo-koralowe: tła `#09060a` / `#120b13` / `#1c121e`, śliwka `#7a4878` (akcent), łososiowy koral `#ec8c80` (podświetlenia), ciemna śliwka `#3e2440` (obramowania), tekst `#dccbd6`, oszczędny błękit `#5a7bd8` (mana).
 
 Funkcje:
-- **okna i panele**: czarne tło z gwiezdnym pyłem, cienka fioletowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i fioletową linią,
-- **minimalistyczne narożniki** okien, dialogu z NPC i tooltipów: krótka fioletowa linia z małym rombem dokładnie na krawędzi,
-- **mgławica pod tabliczką z imieniem**: wstążka fioletowej mgławicy z jasną gwiazdą tuż pod tabliczką; obłoki powoli dryfują, a gwiazda migocze promieniami,
-- **kolumna czatu**: prawie czarne niebo z rzadkimi gwiazdami i delikatnym pasmem fioletowej mgławicy pod wiadomościami (kolory kanałów bez zmian),
-- **kolumna ekwipunku na tle czarnej dziury**: prawie czarna, ledwie zarysowana czarna dziura ze smugami fioletowej i pomarańczowej plazmy; pola ekwipunku, torby i statystyki są półprzezroczyste z lekko przezroczystymi fioletowymi ramkami, więc tło prześwituje,
+- **okna i panele**: czarne tło z gwiezdnym pyłem, cienka śliwkowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i śliwkową linią,
+- **minimalistyczne narożniki** okien, dialogu z NPC i tooltipów: krótka linia z małym rombem dokładnie na krawędzi,
+- **kolumna ekwipunku**: pola ekwipunku, torby i statystyki są półprzezroczyste z lekko przezroczystymi ramkami w śliwce,
 - **kula HP jako czarna dziura**: wnętrze kuli jest czarne, płyną w nim dwie warstwy subtelnej mgławicy w śliwce i łososiowym koralu, a co kilka sekund przechodzi przez nie delikatny rozbłysk; poziom HP pokazuje cienka, jasna linia; wokół kuli w 3D krąży łososiowy pierścień cząstek (tylna połowa za kulą, przednia przed nią); przy HP poniżej 30% pierścień przechodzi w głęboką czerwień,
-- **przemalowanie grafik gry w locie**: drewno, brąz i pergamin z plików `/img/gui/*` zamieniają się w fioletową czerń, złote obszycia w fiolet; kolory znaczeniowe (złoto, zielone statusy, błękit, czerwone powiadomienia) zostają. Kopie grafik gry nie trafiają do repo,
-- **przyciski**: ciemne, z fioletową obwódką i spokojnie pulsującą poświatą po najechaniu; czerwone, zielone i niebieskie przyciski gry zachowują znaczenie,
+- **przemalowanie grafik gry w locie**: drewno, brąz i pergamin z plików `/img/gui/*` zamieniają się w śliwkową czerń, złote obszycia w śliwkę przechodzącą w róż; kolory znaczeniowe (złoto, zielone statusy, błękit, czerwone powiadomienia) zostają. Kopie grafik gry nie trafiają do repo,
+- **przyciski**: ciemne, ze śliwkową obwódką i spokojnie pulsującą koralową poświatą po najechaniu; czerwone, zielone i niebieskie przyciski gry zachowują znaczenie,
 - **zakładki, dialog z NPC, sklep, pola tekstowe, scrollbary, zaznaczenie tekstu** w stylu motywu,
 - animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”.
 
@@ -165,4 +163,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+D** albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG z przezroczystym tłem, kilka KB każdy) i są dołączane przez `@resource`, więc Tampermonkey aktualizuje je razem ze skryptem. Każdy element powstał w dwóch wariantach, z których wybrany jeden; prompty i parametry obróbki są w [PROMPTS.md](assets/dark-star/PROMPTS.md).
+Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG, do ok. 100 KB każdy) i są dołączane przez `@resource`, więc Tampermonkey aktualizuje je razem ze skryptem. Każdy element powstał w dwóch wariantach, z których wybrany jeden; prompty i parametry obróbki są w [PROMPTS.md](assets/dark-star/PROMPTS.md).

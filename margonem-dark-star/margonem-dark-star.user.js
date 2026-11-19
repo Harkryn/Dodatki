@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Mroczna Gwiazda
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.15.1
+// @version      1.16.0
 // @description  Motyw interfejsu Margonem w klimacie kosmicznej pustki: głęboka czerń, fiolet jako akcent, srebrno-lawendowy tekst, ledwo widoczny gwiezdny pył. Tylko wygląd – bez zmian w logice gry i mapie.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -16,11 +16,8 @@
 // @resource     corner-tr https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-tr.png
 // @resource     corner-bl https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-bl.png
 // @resource     corner-br https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/okno-naroznik-br.png
-// @resource     nebula    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica.png
 // @resource     ring      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/pierscien.png
 // @resource     orbneb    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/mglawica-kula.png
-// @resource     bg-eq     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-ekwipunek.jpg
-// @resource     bg-chat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/tlo-czat.jpg
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
 // ==/UserScript==
@@ -73,12 +70,9 @@
    *   okno-naroznik-tl/tr/bl/br.png  256×256  minimalistyczny narożnik: fioletowa linia z rombem
    *                                          (punkt rogu ok. 14 px od krawędzi pliku → ok. 3,5 px przy 64 px,
    *                                           2,2 px przy 40 px w tooltipach)
-   *   mglawica.png                   520×124  wstążka fioletowej mgławicy z jasną gwiazdą (pod tabliczką z imieniem)
    *   pierscien.png                  280×280  łososiowy pierścień cząstek widziany z góry (otwór ok. 30% szerokości);
    *                                          w grze 200 px, przechylony w 3D i obracany wokół kuli HP
    *   mglawica-kula.png              844×88   pasmo subtelnej mgławicy (z lustrzanym odbiciem) przewijane we wnętrzu kuli HP
-   *   tlo-ekwipunek.jpg              576×1344 czarna dziura ze smugami plazmy – tło kolumny ekwipunku
-   *   tlo-czat.jpg                   576×1344 prawie czarne niebo z rzadkimi gwiazdami i pasmem mgławicy u dołu – tło czatu
    */
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/dark-star/';
   const res = (name, file) => {
@@ -91,11 +85,8 @@
     bl: res('corner-bl', 'okno-naroznik-bl.png'),
     br: res('corner-br', 'okno-naroznik-br.png'),
   };
-  const NEBULA = res('nebula', 'mglawica.png');
   const RING = res('ring', 'pierscien.png');
   const ORB_NEB = res('orbneb', 'mglawica-kula.png');
-  const BG_EQ = res('bg-eq', 'tlo-ekwipunek.jpg');
-  const BG_CHAT = res('bg-chat', 'tlo-czat.jpg');
   // cztery rogi jako warstwy jednego tła o zadanym rozmiarze (px)
   const CORNERS = (px) => ['tl:left top', 'tr:right top', 'bl:left bottom', 'br:right bottom']
     .map((s) => { const [k, pos] = s.split(':'); return `url("${CORNER[k]}") ${pos} / ${px}px ${px}px no-repeat`; })
@@ -355,20 +346,9 @@ ${S} #inpchat {   /* TODO: zweryfikuj selektor (pole czatu SI) */
   border: 1px solid var(--mds-violet-line);
 }
 
-/* ═════════════ KOLUMNA CZATU: PRAWIE CZARNE NIEBO ═════════════ */
-/* Rzadkie gwiazdy i delikatne pasmo fioletowej mgławicy u dołu (FLUX.1 Krea), kadrowane od dołu,
- * żeby mgławica leżała pod wiadomościami; lekko przyciemnione dla czytelności tekstu. */
-${R} .layer.interface-layer .left-column.main-column {
-  background: linear-gradient(rgba(9, 6, 10, .15), rgba(9, 6, 10, .15)), url("${BG_CHAT}") center bottom / cover no-repeat, var(--mds-bg0);
-}
-
-/* ═════════════ KOLUMNA EKWIPUNKU: CZARNA DZIURA W TLE ═════════════ */
-/* Tło kolumny: czarna dziura (FLUX.1 Krea) przyciemniona o 72% – prawie czarne, subtelne. Pola ekwipunku, torby i statystyki są
- * półprzezroczyste – ramki zarysowane w fiolecie z lekką przezroczystością, wnętrza pokazują tło.
+/* ═════════════ KOLUMNA EKWIPUNKU: PÓŁPRZEZROCZYSTE POLA ═════════════ */
+/* Pola ekwipunku, torby i statystyki mają półprzezroczyste wnętrza i lekko przezroczyste ramki w śliwce.
  * Reguły mają w ścieżce .right-column, więc są mocniejsze od ogólnych reguł slotów niżej. */
-${R} .layer.interface-layer .right-column.main-column {
-  background: linear-gradient(rgba(9, 6, 10, .72), rgba(9, 6, 10, .72)), url("${BG_EQ}") center / cover no-repeat, var(--mds-bg0);
-}
 ${R} .right-column .equipment-outline { background: rgba(9, 6, 10, .22); }
 ${R} .right-column .eq-slot {
   background: radial-gradient(circle at 50% 40%, rgba(50, 30, 52, .32), rgba(9, 6, 10, .18) 75%);
@@ -537,59 +517,7 @@ ${R} .bottom-panel-graphic { filter: grayscale(1) brightness(.3) contrast(1.3); 
 ${R} .layer.interface-layer .positioner.top .hud-container {
   background: var(--mds-dust), radial-gradient(100% 120% at 50% 0%, #22131f, var(--mds-bg0) 75%);
   border-image: none;
-  /* bez cienia w dół – zasłaniałby mgławicę pod tabliczką */
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line);
-  z-index: 2;   /* nad mgławicą – górna część mgławicy chowa się za tabliczką */
-}
-/* MGŁAWICA pod tabliczką: wstążka z jasną gwiazdą tuż pod dolną krawędzią tabliczki
- * (tabliczka: 342×65 px, wyśrodkowana; na mapę zachodzi ok. 50 px półprzezroczystej poświaty).
- * z-index 1: warstwa mapy (.game-layer) ma z-index 0 i stoi dalej w DOM – przy 0 mgławica byłaby pod mapą. */
-${R} .top.positioner > .bg::before {
-  content: "";
-  position: absolute;
-  left: calc(50% - 170px); width: 340px;
-  top: 34px; height: 81px;
-  background: url("${NEBULA}") center / 100% 100% no-repeat;
-  pointer-events: none;
-  z-index: 1;
-  animation: mds-nebula 7s ease-in-out infinite;
-}
-@keyframes mds-nebula { 0%, 100% { opacity: .85; filter: brightness(.95); } 50% { opacity: 1; filter: brightness(1.12); } }
-/* druga warstwa mgławicy: lustrzane odbicie, powoli dryfuje w bok – obłoki „płyną” */
-${R} .top.positioner::after {
-  content: "";
-  position: absolute;
-  left: calc(50% - 170px); width: 340px;
-  top: 34px; height: 81px;
-  background: url("${NEBULA}") center / 100% 100% no-repeat;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 1;
-  animation: mds-drift 14s ease-in-out infinite;
-}
-@keyframes mds-drift {
-  0%, 100% { transform: scaleX(-1) translateX(-8px); opacity: .18; }
-  50% { transform: scaleX(-1) translateX(8px); opacity: .42; }
-}
-/* migocząca gwiazda w środku mgławicy: krzyż promieni i jasne jądro */
-${R} .top.positioner > .bg::after {
-  content: "";
-  position: absolute;
-  left: calc(50% - 24px); width: 48px;
-  top: calc(34px + 40px - 24px); height: 48px;   /* środek wstążki */
-  background:
-    radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(255, 205, 195, .6) 8%, rgba(236, 140, 128, 0) 30%),
-    linear-gradient(90deg, rgba(255, 190, 180, 0), rgba(255, 228, 220, .8) 50%, rgba(255, 190, 180, 0)) center / 100% 1px no-repeat,
-    linear-gradient(rgba(255, 190, 180, 0), rgba(255, 228, 220, .8) 50%, rgba(255, 190, 180, 0)) center / 1px 100% no-repeat;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: 1;
-  animation: mds-twinkle 4.5s ease-in-out infinite;
-}
-@keyframes mds-twinkle {
-  0%, 100% { transform: scale(.6) rotate(0deg); opacity: .5; }
-  45% { transform: scale(1.15) rotate(45deg); opacity: 1; }
-  55% { transform: scale(1) rotate(45deg); opacity: .9; }
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--mds-violet-line), 0 4px 12px rgba(0, 0, 0, .8);
 }
 ${HUD} .hero-data .heroname {
   color: var(--mds-white);
@@ -750,14 +678,10 @@ html.${ON_CLASS} .mds-lt { color: var(--mds-c, #dccbd6) !important; }
 
 /* ═════════════ OGRANICZ RUCH ═════════════ */
 @media (prefers-reduced-motion: reduce) {
-  ${R} .top.positioner > .bg::before,
-  ${R} .top.positioner > .bg::after,
-  ${R} .top.positioner::after,
   ${R} #mds-orb-fx .mds-ring,
   ${R} #mds-orb-fx .mds-orb-glow,
   ${R} .hp-indicator::after,
   ${R} .hp-indicator .blood::before { animation: none; }
-  ${R} .top.positioner::after { transform: scaleX(-1); opacity: .25; }
   ${R} .button:hover,
   ${R} .widget-button:hover { animation: none; box-shadow: inset 0 0 0 1px var(--mds-violet), 0 0 8px var(--mds-glow); }
 }

@@ -43,7 +43,7 @@ Tekstura wypełnienia kuli (gra przycina ją do poziomu HP). JPEG 256×256, jako
 - **B – soczewkowanie gwiazd wokół czarnego jądra** (seed 2077652041; przycięcie x/y 262, bok 500):
   > Square texture filling the entire frame: a singularity made of starlight bent by extreme gravitational lensing, red and violet stars stretched into curved arcs spiralling inward toward a dark crimson core rimmed by a thin glowing red ring, blood red and deep purple dominant, astrophotography render, ultra detailed, no borders, no text
 
-## Mgławica pod tabliczką z imieniem (`mglawica`) – wybrany B
+## Mgławica pod tabliczką z imieniem (`mglawica`) – była w użyciu (wariant B), usunięta na życzenie użytkownika
 
 - **A – szeroka wstęga mgławicy** (seed 1794657247; wycinek x 0, y 80, 1344×290; próg 8; 496 px szerokości PNG):
   > A long thin horizontal band of breathtaking cosmic nebula floating on pure black background, soft glowing violet and deep purple gas clouds dominant, delicate lavender highlights and a whisper of blue, tiny bright stars embedded in the clouds, intricate dust lanes, the band fades smoothly into black at both ends and at top and bottom, professional astrophotography, ultra detailed, wide panoramic, no text
@@ -153,7 +153,7 @@ Seria 4 – odrzucona (tło i pył). Od tej pory jeden element naraz.
 
 Inspiracja od użytkownika: kinowa czarna dziura z soczewkowanym dyskiem (bez kopiowania obrazu). Kolumna ekwipunku: czarna dziura, ciemna i mroczna; kolumna czatu: gwiaździste niebo z lekko zarysowaną mgławicą. Podgląd bezpośrednio w grze.
 
-### Kolumna ekwipunku – czarna dziura – wybrany A → `tlo-ekwipunek.jpg` (JPEG 576×1344, jakość 80; w grze przyciemnione o 72% w CSS – prawie czarne, subtelne)
+### Kolumna ekwipunku – czarna dziura – był w użyciu wariant A, tło usunięte na życzenie użytkownika → `tlo-ekwipunek.jpg` (JPEG 576×1344, jakość 80; w grze przyciemnione o 72% w CSS – prawie czarne, subtelne)
 - **A – wybrany** (FLUX.1 Krea, 576×1344, 32 kroki, seed 211439419). Pierwsza próba (seed 2062079961) wyglądała jak planeta z pierścieniem – odrzucona:
   > Scientifically accurate black hole with gravitational lensing, dark cinematic render, vertical frame: the near side of the accretion disk crosses in front of the black shadow as a thin bright tilted band, while the far side of the disk is bent by gravity into a glowing arc rising up and over the top of the black shadow and another arc curving underneath it, forming a luminous halo around the perfectly black center, streaking plasma in dim violet, ember orange and pale white, a few cold blue flares, everything else deep black, very dark and ominous, low-key lighting, ultra detailed, no planet, no text
 - **B** (Qwen-Image `mcp-tools/Qwen-Image`, 9:16, 16 kroków, seed 1043410808; negative: planet, rings, saturn, text, watermark, blurry, low resolution, bright background):
@@ -165,7 +165,7 @@ Inspiracja od użytkownika: kinowa czarna dziura z soczewkowanym dyskiem (bez ko
 - **B** (Qwen-Image, 9:16, 16 kroków, seed 1166723904; negative: planet, galaxy core, bright light, text, watermark, blurry, low resolution, cartoon stars):
   > Dark moody deep space astrophotography, vertical frame. A rich starry sky full of fine pinpoint stars of varying faint brightness in white and pale blue. Through the middle drifts a very faint, barely outlined wispy nebula in dim violet and dark indigo with soft blurry edges and darker dust lanes, only subtly visible against the black. Overall very dark, mysterious and calm, low contrast, muted colors, no bright objects, photorealistic, high detail.
 
-## Kolumna czatu – prawie czarne, subtelne – wybrany A → `tlo-czat.jpg` (JPEG 576×1344, jakość 82; w grze przyciemnione o 15%, kadrowane od dołu)
+## Kolumna czatu – prawie czarne, subtelne – był w użyciu wariant A, tło usunięte na życzenie użytkownika → `tlo-czat.jpg` (JPEG 576×1344, jakość 82; w grze przyciemnione o 15%, kadrowane od dołu)
 
 - **A – wybrany** (FLUX.1 Krea, 576×1344, 32 kroki, seed 1409226293) – czerń z rzadkimi gwiazdami i delikatnym pasmem fioletowej mgławicy u dołu:
   > Almost completely black deep space, vertical frame, real astrophotography: very sparse tiny dim pinpoint stars, most barely visible, a few slightly brighter, and an extremely faint ghostly veil of dark violet nebula haze drifting across the lower third, almost invisible against the black, very dark, quiet and minimal, low contrast, muted, no bright objects, no galaxy, no text
