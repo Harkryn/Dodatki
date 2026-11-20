@@ -170,16 +170,19 @@ Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG, do ok. 100 KB każ
 Motyw interfejsu w barwach czarnej dziury: czerń kosmosu, głęboki fiolet i różowo-magentowa korona zaćmienia wokół okien. Tekst, ikony przedmiotów, paski i czat zostają czytelne. Grafiki wygenerowane na Hugging Face (FLUX.1 Krea, seed 666) i obrobione lokalnie.
 
 Co jest ostylowane:
-- **okna z ramką** — cienka ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z różową poświatą na krawędzi, tło z gwiezdnym pyłem i fioletową mgiełką, nagłówek z rozbłyskiem zaćmienia i czaszkami po bokach, fioletowy przycisk zamknięcia, zakładki, panele wewnętrzne, dolny pasek okna,
+- **okna z ramką** — cienka ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z różową poświatą na krawędzi, tło z gwiezdnym pyłem i fioletową mgiełką, obsydianowa tabliczka tytułu z pierścieniem zaćmienia (9-slice z outsetem, układ okna bez zmian) i czaszkami po bokach, fioletowy przycisk zamknięcia, zakładki, panele wewnętrzne, dolny pasek okna,
 - **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — fioletowa obwódka z poświatą,
-- **przyciski** — obsydianowa płytka z różowo-fioletowym obrysem i jaśniejszym stanem po najechaniu; przyciski widgetów w fiolecie; czerwone, złote i smocze przyciski gry bez zmian,
-- **górna i dolna belka, kolumny czatu i ekwipunku** — czerń z gwiazdami, świecąca linia na krawędzi kolumny,
-- **ekwipunek, torba, statystyki** — fioletowe obramowania, przyciemniona siatka slotów,
-- **paski** — HP w szkarłacie, EXP w magencie (także dolny pasek EXP); kula HP bez zmian,
+- **przyciski** — obsydianowa płytka z różowo-fioletowym obrysem i jaśniejszym stanem po najechaniu; przyciski widgetów jako świecące obsydianowe kafle (normal/hover); czerwone, złote i smocze przyciski gry bez zmian,
+- **górna i dolna belka** — obsydian z fioletowymi żyłkami i różową linią światła,
+- **kolumny czatu i ekwipunku** — ilustracja czarnej dziury z mgławicą spływającą w dół (przygaszona, pod czatem dodatkowo przyciemniona), świecąca linia na krawędzi kolumny,
+- **ekwipunek, torba, statystyki** — fioletowe obramowania, własne sloty (obsydianowe wnęki z fioletowym obrysem),
+- **paski** — HP w szkarłacie, EXP w magencie (także dolny pasek EXP),
+- **kula HP** — pulsująca różowo-fioletowa korona zaćmienia wokół kuli (sama kula i jej poziom bez zmian; animacja wyłącza się przy „ogranicz ruch”),
+- **ekran ładowania** — czarna dziura z koroną zaćmienia, logo gry w jej środku, fioletowy pasek postępu,
 - **tooltipy przedmiotów** — ciemna karta z fioletową obwódką, kolory rzadkości bez zmian,
-- **suwaki** i wspólne elementy `interface-element-*` (nagłówki tabel, linie, karty, kafle).
+- **suwaki** i wspólne elementy `interface-element-*` (nagłówki tabel i sekcji, linie, karty, kafle).
 
-Nie ruszane: kula HP, ikony gry, sloty pod przedmiotami w ekwipunku, wnętrze sklepu (pergamin). Dialog z NPC i sklep nie były jeszcze sprawdzone w grze. Mapa (canvas) i logika gry pozostają nietknięte.
+Nie ruszane: wnętrze kuli HP, ikony gry, wnętrze sklepu (pergamin). Dialog z NPC i sklep nie były jeszcze sprawdzone w grze. Mapa (canvas) i logika gry pozostają nietknięte.
 
 **Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-czarna-dziura/czarna-dziura.user.js
 
@@ -191,4 +194,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (7 plików WebP, razem ok. 13 KB) i są ładowane przez jsDelivr. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
+Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (15 plików WebP, razem ok. 63 KB) i są ładowane przez jsDelivr. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).

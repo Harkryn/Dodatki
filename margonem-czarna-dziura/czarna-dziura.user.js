@@ -2,7 +2,7 @@
 // @name         Margonem – Czarna Dziura
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.0.0
+// @version      1.1.0
 // @description  Motyw interfejsu Margonem w barwach czarnej dziury: czerń, głęboki fiolet i różowo-magentowa korona zaćmienia. Tylko wygląd – bez zmian w logice gry i mapie.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -24,7 +24,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   // Grafiki: assets/czarna-dziura/ w repo, serwowane przez jsDelivr.
   const A = `https://cdn.jsdelivr.net/gh/Harkryn/Dodatki@main/assets/czarna-dziura`;
   const ON_CLASS = 'cdz-on';
@@ -58,8 +58,13 @@ html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) > .content {
 }
 /* nagłówek okna */
 html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .header-label-positioner .header-label {
-  background: url("${A}/header.webp") center / 100% 100% no-repeat, #0b0612 !important;
-  box-shadow: 0 0 0 1px #000, 0 0 10px rgba(230, 95, 210, .45) !important;
+  /* 9-slice z outsetem: tabliczka rysuje się poza elementem, układ okna bez zmian */
+  background: none !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${A}/title-plate.webp") 30 80 30 80 fill / 9px 30px 9px 30px / 7px 30px 5px 30px stretch !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 6px rgba(230, 95, 210, .45));
 }
 html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .header-label-positioner .header-label .text {
   color: var(--cdz-title) !important;
@@ -117,19 +122,41 @@ html.${ON_CLASS} .button.green:not(.background-gold):not(.background-draconite):
 html.${ON_CLASS} .button.green::before { box-shadow: none !important; }
 html.${ON_CLASS} .button.green .label { color: #f6e9ff !important; text-shadow: 0 0 4px rgba(230, 95, 210, .8), 0 1px 1px #000; }
 html.${ON_CLASS} .widget-button.green {
-  background-image: linear-gradient(#4a1c5c, #14061e) !important;
-  box-shadow: inset 0 0 1px 1px rgba(230, 160, 240, .7), inset 0 0 0 3px #0c0610 !important;
+  background: url("${A}/widget.webp") center / 100% 100% no-repeat, #07040d !important;
+  box-shadow: none !important;
 }
-html.${ON_CLASS} .widget-button.green::before { box-shadow: inset 0 0 1px 1px rgba(230, 95, 210, .55) !important; }
-html.${ON_CLASS} .widget-button.green:not(.disabled):hover { filter: brightness(1.25) drop-shadow(0 0 4px rgba(230, 95, 210, .7)); }
+html.${ON_CLASS} .widget-button.green::before { box-shadow: none !important; }
+html.${ON_CLASS} .widget-button.green:not(.disabled):hover {
+  background-image: url("${A}/widget-hover.webp") !important;
+  filter: drop-shadow(0 0 4px rgba(230, 95, 210, .7));
+}
+html.${ON_CLASS} .widget-button.green.window-is-open::before { background-color: rgba(230, 95, 210, .12) !important; }
 
 /* ===== Górny i dolny pasek interfejsu ===== */
 html.${ON_CLASS} .interface-layer > .top.positioner > .bg {
-  background: url("${A}/separator.webp") bottom center / 100% 6px no-repeat, var(--cdz-tex), var(--cdz-bg) !important;
+  background: url("${A}/bar-top.webp") left bottom / auto 100% repeat-x, var(--cdz-bg) !important;
 }
 html.${ON_CLASS} .interface-layer > .bottom.positioner > .bg {
-  background: url("${A}/separator.webp") top center / 100% 6px no-repeat, var(--cdz-tex), var(--cdz-bg) !important;
+  background: url("${A}/bar-bottom.webp") left top / auto 100% repeat-x, var(--cdz-bg) !important;
 }
+/* korona zaćmienia wokół kuli HP (sama kula bez zmian) */
+html.${ON_CLASS} .bottom-panel-of-bottom-positioner .glass {
+  filter: drop-shadow(0 0 6px rgba(230, 95, 210, .75)) drop-shadow(0 0 14px rgba(120, 50, 170, .55));
+  animation: cdz-corona 4s ease-in-out infinite;
+}
+@keyframes cdz-corona {
+  50% { filter: drop-shadow(0 0 9px rgba(240, 110, 225, .95)) drop-shadow(0 0 20px rgba(140, 60, 200, .7)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.${ON_CLASS} .bottom-panel-of-bottom-positioner .glass { animation: none; }
+}
+
+/* ===== Ekran ładowania ===== */
+html.${ON_CLASS} .layer.loader-layer {
+  background: url("${A}/loading.webp") center / cover no-repeat, #000 !important;
+}
+html.${ON_CLASS} .layer.loader-layer .progress-bar .progress-bar-and-image-wrapper .inner-wrapper { background: #2a1036 !important; }
+html.${ON_CLASS} .layer.loader-layer .progress-bar .progress-bar-and-image-wrapper .inner-wrapper .inner { background: #e65fd2 !important; }
 html.${ON_CLASS} .interface-layer .bottom-panel-graphic,
 html.${ON_CLASS} .interface-layer .hud-container {
   filter: sepia(.35) hue-rotate(235deg) saturate(1.5) brightness(.9);
@@ -137,7 +164,7 @@ html.${ON_CLASS} .interface-layer .hud-container {
 
 /* ===== Prawa kolumna (postać, ekwipunek, torby) ===== */
 html.${ON_CLASS} .interface-layer > .right-column.main-column {
-  background: var(--cdz-haze), var(--cdz-tex), var(--cdz-bg) !important;
+  background: url("${A}/column.webp") center top / 100% auto no-repeat, var(--cdz-tex), var(--cdz-bg) !important;
 }
 html.${ON_CLASS} .interface-layer > .right-column.main-column > .border {
   background: linear-gradient(to right, #050208 0, #2a0f33 35%, var(--cdz-pink) 50%, #2a0f33 65%, #050208 100%) !important;
@@ -176,7 +203,7 @@ html.${ON_CLASS} .interface-layer .exp-bar-wrapper .exp-progress .progress .inne
 /* ===== Czat (lewa kolumna) ===== */
 html.${ON_CLASS} .interface-layer > .left-column.main-column,
 html.${ON_CLASS} .new-chat-window {
-  background: var(--cdz-haze), var(--cdz-tex), var(--cdz-bg) !important;
+  background: url("${A}/column.webp") center top / 100% auto no-repeat, var(--cdz-tex), var(--cdz-bg) !important;
 }
 html.${ON_CLASS} .new-chat-window .chat-message-wrapper {
   border-top-color: var(--cdz-line) !important;
@@ -219,6 +246,11 @@ html.${ON_CLASS} .interface-element-middle-4-background {
   background-image: none !important;
   box-shadow: inset 0 0 0 1px rgba(150, 90, 200, .35), inset 0 0 12px rgba(0, 0, 0, .8);
 }
+html.${ON_CLASS} .interface-element-header-3,
+html.${ON_CLASS} .interface-element-table-header-3-background {
+  background: linear-gradient(90deg, #1c0b26, #4e2161 50%, #1c0b26) !important;
+  box-shadow: inset 0 -1px 0 rgba(230, 95, 210, .5);
+}
 html.${ON_CLASS} .interface-element-vertical-wood {
   background: linear-gradient(to right, #050208, #2a0f33 35%, rgba(230, 95, 210, .9) 50%, #2a0f33 65%, #050208) !important;
 }
@@ -253,8 +285,9 @@ html.${ON_CLASS} .interface-element-active-card-border-image {
   box-shadow: inset 0 0 0 1px rgba(230, 95, 210, .55);
 }
 /* tło siatki slotów w torbie (osobna warstwa pod przedmiotami) */
-html.${ON_CLASS} .interface-element-item-slot-grid-stretch {
-  filter: sepia(.5) hue-rotate(230deg) saturate(1.6) brightness(.75);
+html.${ON_CLASS} .interface-element-item-slot-grid-stretch,
+html.${ON_CLASS} .interface-element-one-item-slot-background-to-repeat {
+  background-image: url("${A}/slot.webp") !important;
 }
 /* suwaki */
 html.${ON_CLASS} .scrollbar-wrapper .track { background: rgba(5, 2, 10, .6) !important; }
