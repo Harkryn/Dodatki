@@ -2,7 +2,7 @@
 // @name         Margonem – Czarna Dziura
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.2.0
+// @version      1.2.1
 // @description  Mroczny motyw interfejsu Margonem w barwach czarnej dziury: głęboka czerń, popiel i przygaszona śliwka. Tylko wygląd – bez zmian w logice gry i mapie.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -24,7 +24,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
   // Grafiki: assets/czarna-dziura/ w repo, serwowane przez jsDelivr spod tagu wersji
   // (tag czarna-dziura-X.Y.Z), żeby po aktualizacji CDN nie podawał starych plików z cache @main.
   const A = `https://cdn.jsdelivr.net/gh/Harkryn/Dodatki@czarna-dziura-${VERSION}/assets/czarna-dziura`;
@@ -107,6 +107,19 @@ html.${ON_CLASS} .dialogue-window .content .npc-dialogue-wrapper .h_content { co
 html.${ON_CLASS} .dialogue-window .content .answers li { border-bottom-color: var(--cdz-line) !important; }
 html.${ON_CLASS} .dialogue-window .content .answers li:hover { background: rgba(90, 50, 85, .22) !important; }
 
+/* ===== Sklep ===== */
+/* biało-zielona markiza → ciemne, popielate pasy */
+html.${ON_CLASS} .shop-wrapper .shop-background .canopy {
+  filter: grayscale(1) brightness(.32) contrast(1.15);
+}
+html.${ON_CLASS} .shop-wrapper .shop-background .paper-1,
+html.${ON_CLASS} .shop-wrapper .shop-background .paper-2 {
+  background: #0a080b !important;
+  box-shadow: inset 0 0 6px #000, inset 0 0 0 1px rgba(70, 50, 68, .55) !important;
+}
+html.${ON_CLASS} .shop-wrapper .shop-content .items-grid .label { background: #0d0a0d !important; color: #b9afb5 !important; }
+html.${ON_CLASS} .shop-wrapper .shop-content .shop-balance::after { background: var(--cdz-line) !important; }
+
 /* ===== Przyciski ===== */
 html.${ON_CLASS} .button.green:not(.background-gold):not(.background-draconite) {
   background: url("${A}/button.webp") center / 100% 100% no-repeat, #070608 !important;
@@ -163,8 +176,8 @@ html.${ON_CLASS} .interface-layer > .right-column.main-column {
 html.${ON_CLASS} .interface-layer > .right-column.main-column > .border {
   background: linear-gradient(to right, #020102, #140c13 35%, #4a2a45 50%, #140c13 65%, #020102) !important;
 }
-html.${ON_CLASS} .interface-layer .interface-element-grid-border,
-html.${ON_CLASS} .interface-layer .interface-element-grid-border-light {
+html.${ON_CLASS} .interface-element-grid-border,
+html.${ON_CLASS} .interface-element-grid-border-light {
   outline-color: #050405 !important;
   box-shadow: 0 0 0 1px rgba(70, 50, 68, .8), 0 0 0 2px #0a080b, 0 0 0 3px rgba(50, 34, 48, .8) !important;
 }

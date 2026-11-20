@@ -180,9 +180,10 @@ Co jest ostylowane:
 - **kula HP** — ledwo widoczna, wolno pulsująca poświata wokół kuli (sama kula i jej poziom bez zmian; animacja wyłącza się przy „ogranicz ruch”),
 - **ekran ładowania** — przyciemniona czarna dziura z koroną zaćmienia, logo gry w jej środku, śliwkowy pasek postępu,
 - **tooltipy przedmiotów** — czarna karta z cienką śliwkową obwódką, kolory rzadkości bez zmian,
+- **sklep** — markiza przyciemniona do popielatych pasów, ciemne siatki koszyka i towarów (sprawdzone w grze).
 - **suwaki** i wspólne elementy `interface-element-*` (nagłówki tabel i sekcji, linie, karty, kafle).
 
-Nie ruszane: wnętrze kuli HP, ikony gry, wnętrze sklepu (pergamin). Dialog z NPC i sklep nie były jeszcze sprawdzone w grze. Mapa (canvas) i logika gry pozostają nietknięte.
+Nie ruszane: wnętrze kuli HP, ikony gry, podświetlenia przedmiotów do zadań. Dialog z NPC nie był jeszcze sprawdzony w grze. Mapa (canvas) i logika gry pozostają nietknięte.
 
 **Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-czarna-dziura/czarna-dziura.user.js
 
