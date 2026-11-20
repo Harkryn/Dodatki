@@ -167,25 +167,23 @@ Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG, do ok. 100 KB każ
 
 ## Margonem — Czarna Dziura
 
-Mroczny motyw interfejsu w barwach czarnej dziury: głęboka czerń, popiel i przygaszona śliwka jako jedyny akcent, bez jaskrawych poświat. Tekst, ikony przedmiotów, paski i czat zostają czytelne. Grafiki wygenerowane na Hugging Face (FLUX.1 Krea, seed 666) i obrobione lokalnie.
+Mroczny motyw interfejsu: głęboka czerń z lekkimi fioletowymi akcentami, kula HP jako czarna dziura z animowanym horyzontem zdarzeń, a w wybranych miejscach naturalny kamień z pęknięciami, które mienią się na fioletowo. Tekst, ikony przedmiotów, paski i czat zostają czytelne. Grafiki wygenerowane na Hugging Face (FLUX.1 Krea, seed 666) i obrobione lokalnie.
 
 Co jest ostylowane:
-- **okna z ramką** — cienka ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) w ciemnej śliwce, tło z ledwo widocznym gwiezdnym pyłem, ciemna tabliczka tytułu z przygaszonym pierścieniem zaćmienia (9-slice z outsetem, układ okna bez zmian), przycisk zamknięcia jako obsydianowy dysk z wygrawerowanym „X”, zakładki, panele wewnętrzne, dolny pasek okna,
-- **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — czerń z cienką śliwkową obwódką,
-- **przyciski** — czarna, szklista obsydianowa płytka z cienkim śliwkowym brzegiem i jaśniejszym stanem po najechaniu (także fioletowe przyciski gry, np. „Kup złoto”); przyciski widgetów jako ciemne obsydianowe kafle (normal/hover); czerwone, złote i smocze przyciski gry bez zmian,
-- **górna i dolna belka** — czarny obsydian z ledwo widocznymi żyłkami i przygaszoną linią światła,
-- **tabliczka z imieniem (HUD)** — cienka obsydianowa rama z ornamentem w rogach (9-slice), przyciski walut odbarwione,
-- **dolny panel** — obsydianowa listwa ze skrzydłami i pierścień w ciemnej śliwce wokół kuli HP (pierścień rysowany przez `border-image-outset`, etykiety obok kuli zostają widoczne),
-- **kolumny czatu i ekwipunku** — mocno przygaszona ilustracja czarnej dziury z mgławicą spływającą w dół (pod czatem dodatkowo przyciemniona), ciemna linia na krawędzi kolumny,
-- **ekwipunek, torba, statystyki** — ciemne obramowania, własne sloty (obsydianowe wnęki z cienkim obrysem),
-- **paski** — HP w ciemnym szkarłacie, EXP w przygaszonej śliwce (także dolny pasek EXP),
-- **kula HP** — ledwo widoczna, wolno pulsująca poświata wokół kuli (sama kula i jej poziom bez zmian; animacja wyłącza się przy „ogranicz ruch”),
-- **ekran ładowania** — przyciemniona czarna dziura z koroną zaćmienia, logo gry w jej środku, śliwkowy pasek postępu,
-- **tooltipy przedmiotów** — czarna karta z cienką śliwkową obwódką, kolory rzadkości bez zmian,
-- **sklep** — markiza przyciemniona do popielatych pasów, ciemne siatki koszyka i towarów (sprawdzone w grze).
+- **kula HP** — sama kula jest cieniem czarnej dziury; wokół niej różowa korona, pierścień fotonowy i dysk akrecyjny widziany z boku. Bez obrotu: światło płynie wzdłuż dysku, jedna strona jaśnieje (efekt Dopplera), korona migocze. Poziom HP świeci w kuli jako ciemnoczerwona plazma, procent zostaje czytelny,
+- **naturalny kamień** — przyciski HUD (górny i dolny pasek) to kafle szorstkiej skały, a statystyki leżą na kamiennej płycie; w szczelinach przesuwa się fioletowy błysk (każdy przycisk w innej fazie),
+- **okna z ramką** — cienka ramka 9-slice, czarne tło z ledwo widocznym pyłem, ciemna tabliczka tytułu (9-slice z outsetem, układ okna bez zmian), obsydianowy dysk zamykania z „X”, zakładki, panele, dolny pasek okna,
+- **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — czerń z cienką fioletową obwódką,
+- **przyciski tekstowe** — czarna, szklista płytka z cienkim brzegiem (także fioletowe przyciski gry, np. „Kup złoto”); czerwone, złote i smocze przyciski gry bez zmian,
+- **górna i dolna belka**, **tabliczka z imieniem (HUD)**, **listwa dolnego panelu** — czarny obsydian,
+- **kolumny czatu i ekwipunku** — przygaszona ilustracja czarnej dziury z mgławicą (pod czatem dodatkowo przyciemniona),
+- **ekwipunek, torba, sklep** — własne sloty, ciemne siatki, markiza sklepu przyciemniona do popielatych pasów,
+- **paski** — HP w ciemnym szkarłacie, EXP w przygaszonym fiolecie (także dolny pasek EXP),
+- **tooltipy przedmiotów** — czarna karta z cienką obwódką, kolory rzadkości bez zmian,
+- **ekran ładowania** — przyciemniona czarna dziura z koroną zaćmienia, logo gry w jej środku,
 - **suwaki** i wspólne elementy `interface-element-*` (nagłówki tabel i sekcji, linie, karty, kafle).
 
-Nie ruszane: wnętrze kuli HP, ikony gry, podświetlenia przedmiotów do zadań. Dialog z NPC nie był jeszcze sprawdzony w grze. Mapa (canvas) i logika gry pozostają nietknięte.
+Animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”. Nie ruszane: ikony gry, podświetlenia przedmiotów do zadań. Dialog z NPC nie był jeszcze sprawdzony w grze. Mapa (canvas) i logika gry pozostają nietknięte.
 
 **Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-czarna-dziura/czarna-dziura.user.js
 
@@ -197,4 +195,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (18 plików WebP, razem ok. 52 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
+Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (20 plików WebP, razem ok. 105 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).

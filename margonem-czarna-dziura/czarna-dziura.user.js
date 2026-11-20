@@ -2,8 +2,8 @@
 // @name         Margonem – Czarna Dziura
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.3.0
-// @description  Mroczny motyw interfejsu Margonem w barwach czarnej dziury: głęboka czerń, popiel i przygaszona śliwka. Tylko wygląd – bez zmian w logice gry i mapie.
+// @version      2.0.0
+// @description  Mroczny motyw interfejsu Margonem: czerń z lekkim fioletem, kula HP jako czarna dziura z horyzontem zdarzeń, naturalny kamień z mieniącymi się pęknięciami w przyciskach HUD i pod statystykami. Tylko wygląd – bez zmian w logice gry i mapie.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -24,7 +24,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.3.0';
+  const VERSION = '2.0.0';
   // Grafiki: assets/czarna-dziura/ w repo, serwowane przez jsDelivr spod tagu wersji
   // (tag czarna-dziura-X.Y.Z), żeby po aktualizacji CDN nie podawał starych plików z cache @main.
   const A = `https://cdn.jsdelivr.net/gh/Harkryn/Dodatki@czarna-dziura-${VERSION}/assets/czarna-dziura`;
@@ -36,12 +36,23 @@
   --cdz-bg: #040305;
   --cdz-panel: rgba(7, 6, 9, .94);
   --cdz-plum: #3a2238;
-  --cdz-mauve: #6a3d63;
-  --cdz-glow: rgba(120, 50, 105, .22);
-  --cdz-line: rgba(95, 65, 90, .4);
+  --cdz-mauve: #6e4fa8;
+  --cdz-glow: rgba(120, 80, 200, .22);
+  --cdz-line: rgba(100, 80, 140, .4);
   --cdz-text: #cfc7cc;
   --cdz-title: #d8ccd3;
   --cdz-tex: url("${A}/panel-bg.webp");
+  /* naturalny kamień (przyciski HUD, statystyki) */
+  --cdz-stone-tile: url("${A}/stone-tile.webp");
+  --cdz-stone-tile-cracks: url("${A}/stone-tile-cracks.webp");
+  --cdz-stone-slab: url("${A}/stone-slab.webp");
+  --cdz-stone-slab-cracks: url("${A}/stone-slab-cracks.webp");
+  --cdz-shimmer: linear-gradient(110deg, rgba(130, 70, 240, .75) 0 32%, rgba(250, 235, 255, 1) 45%, rgba(190, 130, 255, 1) 51%, rgba(130, 70, 240, .75) 66% 100%);
+  /* kula HP – horyzont zdarzeń (wariant A: róż i biel) */
+  --cdz-eh: url("${A}/orb-eh-a.webp");
+  --cdz-eh-glow: rgba(240, 120, 210, .55);
+  --cdz-eh-flow: rgba(255, 235, 250, .55);
+  --cdz-eh-doppler: rgba(255, 220, 245, .55);
   --cdz-haze: radial-gradient(ellipse 90% 55% at 50% 0%, rgba(70, 30, 65, .16), transparent 70%);
 }
 
@@ -142,13 +153,58 @@ html.${ON_CLASS} .button.purple:not(.green)::before { box-shadow: none !importan
 html.${ON_CLASS} .button.purple:not(.green) .label { color: #d9c6d3 !important; text-shadow: 0 1px 2px #000; }
 html.${ON_CLASS} .button.green::before { box-shadow: none !important; }
 html.${ON_CLASS} .button.green .label { color: #ddd4d9 !important; text-shadow: 0 1px 2px #000; }
+/* ===== Naturalny kamień z mieniącymi się pęknięciami – tylko przyciski HUD i podstawka statystyk =====
+   kamień = tło elementu; mienienie = pseudo-element z przesuwającym się fioletowym błyskiem,
+   przycięty maską pęknięć (osobny plik *-cracks.webp), więc świeci tylko w szczelinach */
 html.${ON_CLASS} .widget-button.green {
-  background: url("${A}/widget.webp") center / 100% 100% no-repeat, #050405 !important;
+  background: var(--cdz-stone-tile) center / 100% 100% no-repeat, #050405 !important;
   box-shadow: none !important;
 }
-html.${ON_CLASS} .widget-button.green::before { box-shadow: none !important; }
-html.${ON_CLASS} .widget-button.green:not(.disabled):hover { background-image: url("${A}/widget-hover.webp") !important; }
-html.${ON_CLASS} .widget-button.green.window-is-open::before { background-color: rgba(90, 50, 85, .18) !important; }
+html.${ON_CLASS} .widget-button.green::before {
+  inset: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--cdz-shimmer) !important;
+  background-size: 300% 100% !important;
+  -webkit-mask: var(--cdz-stone-tile-cracks) center / 100% 100% no-repeat;
+  mask: var(--cdz-stone-tile-cracks) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  animation: cdz-crack 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+html.${ON_CLASS} .widget-button.green:nth-child(3n+1)::before { animation-delay: -1.8s; }
+html.${ON_CLASS} .widget-button.green:nth-child(3n+2)::before { animation-delay: -3.7s; }
+html.${ON_CLASS} .widget-button.green:not(.disabled):hover { filter: brightness(1.25); }
+html.${ON_CLASS} .widget-button.green.window-is-open { filter: brightness(1.15); }
+html.${ON_CLASS} .interface-layer .stats-wrapper {
+  background: var(--cdz-stone-slab) center / 100% 100% no-repeat !important;
+  box-shadow: none !important;
+  outline: none !important;
+  z-index: 0;
+}
+html.${ON_CLASS} .interface-layer .stats-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--cdz-shimmer);
+  background-size: 300% 100%;
+  -webkit-mask: var(--cdz-stone-slab-cracks) center / 100% 100% no-repeat;
+  mask: var(--cdz-stone-slab-cracks) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  animation: cdz-crack 7s ease-in-out infinite;
+  pointer-events: none;
+}
+html.${ON_CLASS} .interface-layer .stats-wrapper * { text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+@keyframes cdz-crack {
+  0% { background-position: 110% 0; opacity: .8; }
+  45% { opacity: 1; }
+  100% { background-position: -60% 0; opacity: .8; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.${ON_CLASS} .widget-button.green::before,
+  html.${ON_CLASS} .interface-layer .stats-wrapper::before { animation: none; }
+}
 
 /* ===== Górny i dolny pasek interfejsu ===== */
 html.${ON_CLASS} .interface-layer > .top.positioner > .bg {
@@ -169,21 +225,67 @@ html.${ON_CLASS} .interface-layer .hud-container .btn-min { filter: grayscale(.9
 html.${ON_CLASS} .interface-layer .bottom-panel-graphic {
   background: url("${A}/orb-wings.webp") center 8px / 590px 88px no-repeat !important;
 }
+/* ===== Kula HP: czarna dziura – kula jest cieniem horyzontu zdarzeń (jedyny jaśniejszy element motywu) =====
+   wokół kuli: pierścień fotonowy z koroną, dysk akrecyjny widziany z boku rozchodzący się wzdłuż paska.
+   Bez obrotu – światło płynie wzdłuż dysku, jedna strona jaśnieje (efekt Dopplera), korona delikatnie migocze.
+   Warstwy leżą w pseudo-elementach oprawy dolnego panelu (pod kulą), środek obrazu = środek kuli. */
 html.${ON_CLASS} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper {
-  border-style: solid !important;
-  border-width: 0 !important;
-  border-image: url("${A}/orb-ring.webp") 0 fill / 0 / 10px stretch !important;
+  background: radial-gradient(circle at 50% 45%, #000 0 60%, #070206 82%, #12040e 100%) !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .9), 0 0 8px 1px var(--cdz-eh-glow);
+  animation: cdz-corona 5.5s ease-in-out infinite;
 }
-/* ledwo widoczna, wolno pulsująca poświata wokół kuli HP (sama kula bez zmian) */
-html.${ON_CLASS} .bottom-panel-of-bottom-positioner .glass {
-  filter: drop-shadow(0 0 6px rgba(110, 40, 95, .45));
-  animation: cdz-corona 5s ease-in-out infinite;
+html.${ON_CLASS} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
+  filter: saturate(1.1) brightness(.85);
+  opacity: .5;
+  mix-blend-mode: screen;
+}
+html.${ON_CLASS} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
+  color: #fff !important;
+  text-shadow: 0 0 4px #000, 0 0 8px #000, 0 1px 2px #000 !important;
+}
+html.${ON_CLASS} .bottom-panel-of-bottom-positioner .glass { opacity: .3; }
+/* obraz horyzontu: pierścień fotonowy, korona i dysk */
+html.${ON_CLASS} .interface-layer .bottom-panel-graphic::before,
+html.${ON_CLASS} .interface-layer .bottom-panel-graphic::after {
+  content: "";
+  position: absolute;
+  left: 74px;
+  top: -51px;
+  width: 440px;
+  height: 220px;
+  pointer-events: none;
+}
+html.${ON_CLASS} .interface-layer .bottom-panel-graphic::before {
+  background: var(--cdz-eh) center / 100% 100% no-repeat;
+  animation: cdz-shimmer 6s ease-in-out infinite;
+}
+/* światło płynące wzdłuż dysku i łuków (maska = kształt horyzontu) + jaśniejsza strona nadlatująca */
+html.${ON_CLASS} .interface-layer .bottom-panel-graphic::after {
+  background:
+    radial-gradient(ellipse 22% 30% at 30% 58%, var(--cdz-eh-doppler), transparent 70%),
+    repeating-linear-gradient(98deg, transparent 0 34px, var(--cdz-eh-flow) 46px, transparent 58px 92px);
+  background-size: 100% 100%, 92px 100%;
+  -webkit-mask: var(--cdz-eh) center / 100% 100% no-repeat;
+  mask: var(--cdz-eh) center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  animation: cdz-flow 3.2s linear infinite, cdz-doppler 7s ease-in-out infinite;
+}
+@keyframes cdz-flow { from { background-position: 0 0, 0 0; } to { background-position: 0 0, 92px 0; } }
+@keyframes cdz-doppler { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes cdz-shimmer {
+  0%, 100% { filter: brightness(1); }
+  18% { filter: brightness(1.08); }
+  34% { filter: brightness(.96); }
+  52% { filter: brightness(1.14); }
+  71% { filter: brightness(1.02); }
 }
 @keyframes cdz-corona {
-  50% { filter: drop-shadow(0 0 9px rgba(130, 50, 110, .6)); }
+  50% { box-shadow: 0 0 0 1px rgba(0, 0, 0, .9), 0 0 14px 3px var(--cdz-eh-glow); }
 }
 @media (prefers-reduced-motion: reduce) {
-  html.${ON_CLASS} .bottom-panel-of-bottom-positioner .glass { animation: none; }
+  html.${ON_CLASS} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper,
+  html.${ON_CLASS} .interface-layer .bottom-panel-graphic::before,
+  html.${ON_CLASS} .interface-layer .bottom-panel-graphic::after { animation: none; }
 }
 
 /* ===== Ekran ładowania ===== */
@@ -205,7 +307,6 @@ html.${ON_CLASS} .interface-element-grid-border-light {
   outline-color: #050405 !important;
   box-shadow: 0 0 0 1px rgba(70, 50, 68, .8), 0 0 0 2px #0a080b, 0 0 0 3px rgba(50, 34, 48, .8) !important;
 }
-html.${ON_CLASS} .interface-layer .stats-wrapper { background-color: rgba(8, 7, 9, .94) !important; }
 html.${ON_CLASS} .interface-layer .equipment-outline-2,
 html.${ON_CLASS} .interface-layer .equipment-outline-3 { background-color: #2b222a !important; }
 
