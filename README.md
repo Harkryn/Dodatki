@@ -194,4 +194,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (15 plików WebP, razem ok. 63 KB) i są ładowane przez jsDelivr. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
+Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (15 plików WebP, razem ok. 50 KB) i są ładowane przez jsDelivr. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
