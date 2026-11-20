@@ -164,3 +164,31 @@ Instalacja:
 Wyłączanie: **Ctrl+Alt+D** albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
 
 Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG, do ok. 100 KB każdy) i są dołączane przez `@resource`, więc Tampermonkey aktualizuje je razem ze skryptem. Każdy element powstał w dwóch wariantach, z których wybrany jeden; prompty i parametry obróbki są w [PROMPTS.md](assets/dark-star/PROMPTS.md).
+
+## Margonem — Czarna Dziura
+
+Motyw interfejsu w barwach czarnej dziury: czerń kosmosu, głęboki fiolet i różowo-magentowa korona zaćmienia wokół okien. Tekst, ikony przedmiotów, paski i czat zostają czytelne. Grafiki wygenerowane na Hugging Face (FLUX.1 Krea, seed 666) i obrobione lokalnie.
+
+Co jest ostylowane:
+- **okna z ramką** — cienka ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z różową poświatą na krawędzi, tło z gwiezdnym pyłem i fioletową mgiełką, nagłówek z rozbłyskiem zaćmienia i czaszkami po bokach, fioletowy przycisk zamknięcia, zakładki, panele wewnętrzne, dolny pasek okna,
+- **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — fioletowa obwódka z poświatą,
+- **przyciski** — obsydianowa płytka z różowo-fioletowym obrysem i jaśniejszym stanem po najechaniu; przyciski widgetów w fiolecie; czerwone, złote i smocze przyciski gry bez zmian,
+- **górna i dolna belka, kolumny czatu i ekwipunku** — czerń z gwiazdami, świecąca linia na krawędzi kolumny,
+- **ekwipunek, torba, statystyki** — fioletowe obramowania, przyciemniona siatka slotów,
+- **paski** — HP w szkarłacie, EXP w magencie (także dolny pasek EXP); kula HP bez zmian,
+- **tooltipy przedmiotów** — ciemna karta z fioletową obwódką, kolory rzadkości bez zmian,
+- **suwaki** i wspólne elementy `interface-element-*` (nagłówki tabel, linie, karty, kafle).
+
+Nie ruszane: kula HP, ikony gry, sloty pod przedmiotami w ekwipunku, wnętrze sklepu (pergamin). Dialog z NPC i sklep nie były jeszcze sprawdzone w grze. Mapa (canvas) i logika gry pozostają nietknięte.
+
+**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-czarna-dziura/czarna-dziura.user.js
+
+Instalacja:
+1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
+2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
+3. Wyłącz w Tampermonkey inne motywy interfejsu (Dark Gothic, Mroczna Gwiazda, Crimson Knight, Kocia Noc) — zmieniają te same elementy.
+4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
+
+Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
+
+Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (7 plików WebP, razem ok. 13 KB) i są ładowane przez jsDelivr. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
