@@ -2,7 +2,7 @@
 // @name         Margonem – Czarna Dziura
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      2.0.0
+// @version      2.1.0
 // @description  Mroczny motyw interfejsu Margonem: czerń z lekkim fioletem, kula HP jako czarna dziura z horyzontem zdarzeń, naturalny kamień z mieniącymi się pęknięciami w przyciskach HUD i pod statystykami. Tylko wygląd – bez zmian w logice gry i mapie.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -24,7 +24,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '2.0.0';
+  const VERSION = '2.1.0';
   // Grafiki: assets/czarna-dziura/ w repo, serwowane przez jsDelivr spod tagu wersji
   // (tag czarna-dziura-X.Y.Z), żeby po aktualizacji CDN nie podawał starych plików z cache @main.
   const A = `https://cdn.jsdelivr.net/gh/Harkryn/Dodatki@czarna-dziura-${VERSION}/assets/czarna-dziura`;
@@ -157,7 +157,7 @@ html.${ON_CLASS} .button.green .label { color: #ddd4d9 !important; text-shadow: 
    kamień = tło elementu; mienienie = pseudo-element z przesuwającym się fioletowym błyskiem,
    przycięty maską pęknięć (osobny plik *-cracks.webp), więc świeci tylko w szczelinach */
 html.${ON_CLASS} .widget-button.green {
-  background: var(--cdz-stone-tile) center / 100% 100% no-repeat, #050405 !important;
+  background: var(--cdz-t, var(--cdz-stone-tile)) center / 100% 100% no-repeat, #050405 !important;
   box-shadow: none !important;
 }
 html.${ON_CLASS} .widget-button.green::before {
@@ -166,12 +166,35 @@ html.${ON_CLASS} .widget-button.green::before {
   box-shadow: none !important;
   background: var(--cdz-shimmer) !important;
   background-size: 300% 100% !important;
-  -webkit-mask: var(--cdz-stone-tile-cracks) center / 100% 100% no-repeat;
-  mask: var(--cdz-stone-tile-cracks) center / 100% 100% no-repeat;
+  -webkit-mask: var(--cdz-tc, var(--cdz-stone-tile-cracks)) center / 100% 100% no-repeat;
+  mask: var(--cdz-tc, var(--cdz-stone-tile-cracks)) center / 100% 100% no-repeat;
   mix-blend-mode: screen;
   animation: cdz-crack 5.5s ease-in-out infinite;
   pointer-events: none;
 }
+/* każdy przycisk HUD ma własny kamień (18 wariantów: 9 skał × obrót o 180°); nieznane przyciski – cyklicznie */
+html.${ON_CLASS} .widget-button.green:nth-child(6n+1) { --cdz-t: url("${A}/hud/07.webp"); --cdz-tc: url("${A}/hud/07-c.webp"); }
+html.${ON_CLASS} .widget-button.green:nth-child(6n+2) { --cdz-t: url("${A}/hud/14.webp"); --cdz-tc: url("${A}/hud/14-c.webp"); }
+html.${ON_CLASS} .widget-button.green:nth-child(6n+3) { --cdz-t: url("${A}/hud/01.webp"); --cdz-tc: url("${A}/hud/01-c.webp"); }
+html.${ON_CLASS} .widget-button.green:nth-child(6n+4) { --cdz-t: url("${A}/hud/10.webp"); --cdz-tc: url("${A}/hud/10-c.webp"); }
+html.${ON_CLASS} .widget-button.green:nth-child(6n+5) { --cdz-t: url("${A}/hud/03.webp"); --cdz-tc: url("${A}/hud/03-c.webp"); }
+html.${ON_CLASS} .widget-button.green:nth-child(6n+6) { --cdz-t: url("${A}/hud/16.webp"); --cdz-tc: url("${A}/hud/16-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="exit"] { --cdz-t: url("${A}/hud/01.webp"); --cdz-tc: url("${A}/hud/01-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="world-icon"] { --cdz-t: url("${A}/hud/08.webp"); --cdz-tc: url("${A}/hud/08-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="config"] { --cdz-t: url("${A}/hud/15.webp"); --cdz-tc: url("${A}/hud/15-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="clans"] { --cdz-t: url("${A}/hud/04.webp"); --cdz-tc: url("${A}/hud/04-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="globe"] { --cdz-t: url("${A}/hud/11.webp"); --cdz-tc: url("${A}/hud/11-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="inventory-browser-icon"] { --cdz-t: url("${A}/hud/18.webp"); --cdz-tc: url("${A}/hud/18-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="matchmaking-icon"] { --cdz-t: url("${A}/hud/06.webp"); --cdz-tc: url("${A}/hud/06-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="chat"] { --cdz-t: url("${A}/hud/13.webp"); --cdz-tc: url("${A}/hud/13-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="photo"] { --cdz-t: url("${A}/hud/02.webp"); --cdz-tc: url("${A}/hud/02-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="portable-map-icon"] { --cdz-t: url("${A}/hud/09.webp"); --cdz-tc: url("${A}/hud/09-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="compass"] { --cdz-t: url("${A}/hud/16.webp"); --cdz-tc: url("${A}/hud/16-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="loot-filter-icon"] { --cdz-t: url("${A}/hud/05.webp"); --cdz-tc: url("${A}/hud/05-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="timer-icon"] { --cdz-t: url("${A}/hud/12.webp"); --cdz-tc: url("${A}/hud/12-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="skills"] { --cdz-t: url("${A}/hud/03.webp"); --cdz-tc: url("${A}/hud/03-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="friends"] { --cdz-t: url("${A}/hud/10.webp"); --cdz-tc: url("${A}/hud/10-c.webp"); }
+html.${ON_CLASS} .widget-button.green[widget-name="scroll"] { --cdz-t: url("${A}/hud/17.webp"); --cdz-tc: url("${A}/hud/17-c.webp"); }
 html.${ON_CLASS} .widget-button.green:nth-child(3n+1)::before { animation-delay: -1.8s; }
 html.${ON_CLASS} .widget-button.green:nth-child(3n+2)::before { animation-delay: -3.7s; }
 html.${ON_CLASS} .widget-button.green:not(.disabled):hover { filter: brightness(1.25); }

@@ -171,7 +171,7 @@ Mroczny motyw interfejsu: głęboka czerń z lekkimi fioletowymi akcentami, kula
 
 Co jest ostylowane:
 - **kula HP** — sama kula jest cieniem czarnej dziury; wokół niej różowa korona, pierścień fotonowy i dysk akrecyjny widziany z boku. Bez obrotu: światło płynie wzdłuż dysku, jedna strona jaśnieje (efekt Dopplera), korona migocze. Poziom HP świeci w kuli jako ciemnoczerwona plazma, procent zostaje czytelny,
-- **naturalny kamień** — przyciski HUD (górny i dolny pasek) to kafle szorstkiej skały, a statystyki leżą na kamiennej płycie; w szczelinach przesuwa się fioletowy błysk (każdy przycisk w innej fazie),
+- **naturalny kamień** — każdy przycisk HUD (górny i dolny pasek) ma własny kafel szorstkiej skały z innym układem pęknięć (18 wariantów), a statystyki leżą na kamiennej płycie; w szczelinach przesuwa się fioletowy błysk (każdy przycisk w innej fazie),
 - **okna z ramką** — cienka ramka 9-slice, czarne tło z ledwo widocznym pyłem, ciemna tabliczka tytułu (9-slice z outsetem, układ okna bez zmian), obsydianowy dysk zamykania z „X”, zakładki, panele, dolny pasek okna,
 - **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — czerń z cienką fioletową obwódką,
 - **przyciski tekstowe** — czarna, szklista płytka z cienkim brzegiem (także fioletowe przyciski gry, np. „Kup złoto”); czerwone, złote i smocze przyciski gry bez zmian,
@@ -195,4 +195,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (20 plików WebP, razem ok. 105 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
+Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (56 plików WebP, razem ok. 140 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
