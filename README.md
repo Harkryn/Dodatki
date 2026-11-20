@@ -170,10 +170,12 @@ Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG, do ok. 100 KB każ
 Mroczny motyw interfejsu w barwach czarnej dziury: głęboka czerń, popiel i przygaszona śliwka jako jedyny akcent, bez jaskrawych poświat. Tekst, ikony przedmiotów, paski i czat zostają czytelne. Grafiki wygenerowane na Hugging Face (FLUX.1 Krea, seed 666) i obrobione lokalnie.
 
 Co jest ostylowane:
-- **okna z ramką** — cienka ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) w ciemnej śliwce, tło z ledwo widocznym gwiezdnym pyłem, ciemna tabliczka tytułu z przygaszonym pierścieniem zaćmienia (9-slice z outsetem, układ okna bez zmian), przycisk zamknięcia w grafitowym kolorze, zakładki, panele wewnętrzne, dolny pasek okna,
+- **okna z ramką** — cienka ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) w ciemnej śliwce, tło z ledwo widocznym gwiezdnym pyłem, ciemna tabliczka tytułu z przygaszonym pierścieniem zaćmienia (9-slice z outsetem, układ okna bez zmian), przycisk zamknięcia jako obsydianowy dysk z wygrawerowanym „X”, zakładki, panele wewnętrzne, dolny pasek okna,
 - **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — czerń z cienką śliwkową obwódką,
-- **przyciski** — ciemna obsydianowa płytka z przygaszonym obrysem i jaśniejszym stanem po najechaniu; przyciski widgetów jako ciemne obsydianowe kafle (normal/hover); czerwone, złote i smocze przyciski gry bez zmian,
+- **przyciski** — czarna, szklista obsydianowa płytka z cienkim śliwkowym brzegiem i jaśniejszym stanem po najechaniu (także fioletowe przyciski gry, np. „Kup złoto”); przyciski widgetów jako ciemne obsydianowe kafle (normal/hover); czerwone, złote i smocze przyciski gry bez zmian,
 - **górna i dolna belka** — czarny obsydian z ledwo widocznymi żyłkami i przygaszoną linią światła,
+- **tabliczka z imieniem (HUD)** — cienka obsydianowa rama z ornamentem w rogach (9-slice), przyciski walut odbarwione,
+- **dolny panel** — obsydianowa listwa ze skrzydłami i pierścień w ciemnej śliwce wokół kuli HP (pierścień rysowany przez `border-image-outset`, etykiety obok kuli zostają widoczne),
 - **kolumny czatu i ekwipunku** — mocno przygaszona ilustracja czarnej dziury z mgławicą spływającą w dół (pod czatem dodatkowo przyciemniona), ciemna linia na krawędzi kolumny,
 - **ekwipunek, torba, statystyki** — ciemne obramowania, własne sloty (obsydianowe wnęki z cienkim obrysem),
 - **paski** — HP w ciemnym szkarłacie, EXP w przygaszonej śliwce (także dolny pasek EXP),
@@ -195,4 +197,4 @@ Instalacja:
 
 Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
 
-Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (14 plików WebP, razem ok. 30 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
+Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (18 plików WebP, razem ok. 52 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).

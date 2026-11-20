@@ -2,7 +2,7 @@
 // @name         Margonem – Czarna Dziura
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.2.1
+// @version      1.3.0
 // @description  Mroczny motyw interfejsu Margonem w barwach czarnej dziury: głęboka czerń, popiel i przygaszona śliwka. Tylko wygląd – bez zmian w logice gry i mapie.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -24,7 +24,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.2.1';
+  const VERSION = '1.3.0';
   // Grafiki: assets/czarna-dziura/ w repo, serwowane przez jsDelivr spod tagu wersji
   // (tag czarna-dziura-X.Y.Z), żeby po aktualizacji CDN nie podawał starych plików z cache @main.
   const A = `https://cdn.jsdelivr.net/gh/Harkryn/Dodatki@czarna-dziura-${VERSION}/assets/czarna-dziura`;
@@ -73,12 +73,15 @@ html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .header-label
 html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .header-label-positioner .header-label .right-decor {
   background: none !important;
 }
-/* przycisk zamknięcia: oryginalny „X”, przygaszony do grafitu */
+/* przycisk zamknięcia: obsydianowy dysk z wygrawerowanym „X” (bez ozdobnego narożnika gry) */
 html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .close-button-corner-decor {
-  filter: grayscale(.9) brightness(.7) contrast(1.1);
+  background: none !important;
+}
+html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .close-button-corner-decor .close-button {
+  background: url("${A}/close.webp") center / 100% 100% no-repeat !important;
 }
 html.${ON_CLASS} .border-window:not(.transparent):not(.tip-window) .close-button-corner-decor .close-button:hover {
-  filter: brightness(1.4);
+  filter: brightness(1.5) drop-shadow(0 0 3px rgba(130, 70, 120, .7));
 }
 /* zakładki */
 html.${ON_CLASS} .border-window .card {
@@ -129,6 +132,14 @@ html.${ON_CLASS} .button.green:not(.background-gold):not(.background-draconite):
   background-image: url("${A}/button-hover.webp") !important;
   box-shadow: 0 0 0 1px #000, 0 0 6px var(--cdz-glow) !important;
 }
+/* fioletowe przyciski gry (np. „Kup złoto”) – ten sam obsydian, śliwkowy obrys zostaje jako wyróżnik */
+html.${ON_CLASS} .button.purple:not(.green) {
+  background: url("${A}/button.webp") center / 100% 100% no-repeat, #070608 !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgba(110, 60, 100, .55) !important;
+}
+html.${ON_CLASS} .button.purple:not(.green):hover { background-image: url("${A}/button-hover.webp") !important; }
+html.${ON_CLASS} .button.purple:not(.green)::before { box-shadow: none !important; background: none !important; }
+html.${ON_CLASS} .button.purple:not(.green) .label { color: #d9c6d3 !important; text-shadow: 0 1px 2px #000; }
 html.${ON_CLASS} .button.green::before { box-shadow: none !important; }
 html.${ON_CLASS} .button.green .label { color: #ddd4d9 !important; text-shadow: 0 1px 2px #000; }
 html.${ON_CLASS} .widget-button.green {
@@ -146,9 +157,22 @@ html.${ON_CLASS} .interface-layer > .top.positioner > .bg {
 html.${ON_CLASS} .interface-layer > .bottom.positioner > .bg {
   background: url("${A}/bar-bottom.webp") left top / auto 100% repeat-x, var(--cdz-bg) !important;
 }
-html.${ON_CLASS} .interface-layer .bottom-panel-graphic,
+/* tabliczka z imieniem: obsydianowa rama 9-slice */
 html.${ON_CLASS} .interface-layer .hud-container {
-  filter: grayscale(.75) brightness(.72) contrast(1.05);
+  background: none !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${A}/hud-plate.webp") 40 90 40 90 fill / 14px 32px 14px 32px / 0 stretch !important;
+}
+html.${ON_CLASS} .interface-layer .hud-container .btn-min { filter: grayscale(.9) brightness(.75); }
+/* dolny panel: obsydianowe skrzydła listwy, pierścień kuli rysowany osobno */
+html.${ON_CLASS} .interface-layer .bottom-panel-graphic {
+  background: url("${A}/orb-wings.webp") center 8px / 590px 88px no-repeat !important;
+}
+html.${ON_CLASS} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper {
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${A}/orb-ring.webp") 0 fill / 0 / 10px stretch !important;
 }
 /* ledwo widoczna, wolno pulsująca poświata wokół kuli HP (sama kula bez zmian) */
 html.${ON_CLASS} .bottom-panel-of-bottom-positioner .glass {
