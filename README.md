@@ -218,7 +218,7 @@ Funkcje:
 - **pasek doświadczenia** — kapsuły „% doświadczenia” i „czas” w pierwotnym miejscu, wsunięte pod pierścień kuli (liczby odsunięte tak, by kamień ich nie zasłaniał); ciemny fiolet pustki z jaśniejszą krawędzią i linią energii, po którym wolno przepływa połysk (w obu paskach w stronę kuli), czarne koryto z wewnętrznym cieniem; paski i kapsuły „% doświadczenia” i „czas” w cienkiej ramie z wulkanicznego szkła z ametystami, tej samej co okna — bez metalowych skrzydeł i ozdób gry wokół kuli,
 - **paski** — HP zostaje czerwone (czytelność w walce), druga belka w przygaszonym fiolecie, grafitowa listwa; paski nad postaciami w walce bez zmian,
 - **ikona pingu** — ten sam półokrągły wskaźnik co w grze, w kolorach motywu: odbity w pionie, segmenty zapalają się od góry wraz z lagiem (fiolet, przy dużym lagu magenta),
-- **ekran wczytywania** — pęknięty bazaltowy monolit w pustce z fioletem sączącym się z pęknięć, logo gry przebarwione na ametyst, pasek postępu w fiolecie w ramie okien,
+- **ekran wczytywania** — grota z czarnego wulkanicznego szkła z ledwie świecącymi ametystami po bokach i pustym, ciemnym środkiem, logo gry przebarwione na ametyst, pasek postępu w fiolecie w ramie okien,
 - **walka** — panel walki w ramie z wulkanicznego szkła jak okna, z ametystem na górnej krawędzi, pasek czasu tury w fiolecie, daty i licznik puli w kolorach motywu, ikony przygaszone do fioletu; plansza walki, wpisy dziennika i kolory stron walki bez zmian,
 - **minimapa** — sama mapa bez zmian, grafitowa ramka,
 - **przyciski** — grafitowe płytki, przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,

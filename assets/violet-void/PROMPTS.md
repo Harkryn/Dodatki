@@ -78,7 +78,7 @@ FLUX.1 Krea-dev, 1536×256, obróbka jak przy kamieniach (czerń → przezroczys
 - **A** (seed 1491346784): Game UI asset, orthographic flat front view, a wide long thin horizontal carved lintel of rough charred black basalt stone, a row of small dark pyramid crystal studs along it, a single small glowing amethyst crystal set in the exact center, faint violet light in two thin cracks, isolated on pure solid black background #000000, extremely dark, no text
 - **B** (seed 1436142511): Game UI asset, orthographic flat front view, a thin dark iron chain strung horizontally across the full width near the top, small sharp amethyst crystal shards hanging from it at even intervals pointing down, alternating long and short shards, a few shards with faint violet inner glow, isolated on pure solid black background #000000, very dark, no text
 
-## Ekran wczytywania — tło (wybrana A → loading.webp, 1600×900)
+## Ekran wczytywania — tło (od 1.24.1 wybrana B → loading.webp, 1600×900; wcześniej A)
 
 FLUX.1 Krea-dev, 1536×864 → 1600×900 WebP (jasność 82%, A przycięte z białego passe-partout):
 - **A** (seed 1934192933): Dark fantasy wide landscape, a huge cracked black basalt monolith floating in an endless dark void, faint violet light seeping from deep cracks in the stone, tiny broken stone shards drifting around it, very faint distant stars, mist at the bottom, extremely dark low key cinematic lighting, mostly black with violet accents, empty dark center area, no text, no characters, no planets

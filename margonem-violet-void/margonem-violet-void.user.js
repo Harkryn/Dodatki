@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.24.0
+// @version      1.24.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -40,7 +40,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.24.0';
+  const VERSION = '1.24.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -71,7 +71,7 @@
     orbFx: res('vvOrbCracks', 'orb-cracks.mp4'),    // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
     ring: res('vvOrbRing', 'orb-ring.webp'),        // 256×256, kamienny pierścień wokół kuli (wewn. promień = 0,367 szerokości)
     lintel: res('vvShopLintel', 'shop-lintel.webp'), // 960×65, bazaltowe nadproże sklepu (w miejscu markizy)
-    loading: res('vvLoading', 'loading.webp')        // 1600×900, tło ekranu wczytywania (pęknięty bazaltowy monolit)
+    loading: res('vvLoading', 'loading.webp')        // 1600×900, tło ekranu wczytywania (grota z wulkanicznego szkła z ametystami)
   };
 
   // Przydział kafli przyciskom HUD w kolejności, w jakiej stoją na belkach – sąsiednie dostają inne kamienie
@@ -761,7 +761,7 @@ ${N} .shop-wrapper .total-price { color: var(--vv-text) !important; font-variant
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-edge) !important; }
 
 /* --- ekran wczytywania ---
-   Tło: pęknięty bazaltowy monolit w pustce (cover), logo gry przebarwione ze złota na ametyst z poświatą,
+   Tło: grota z czarnego wulkanicznego szkła z ametystami po bokach (cover), logo gry przebarwione ze złota na ametyst z poświatą,
    pasek postępu (272×7) jak pasek doświadczenia – fiolet z jasną krawędzią na czarnym korycie w ramie okien. */
 ${N} .layer.loader-layer {
   background: radial-gradient(ellipse 60% 45% at 50% 50%, rgb(0 0 0 / .45), transparent 70%),
