@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.3.0
+// @version      1.4.0
 // @description  Mroczny, fioletowy motyw interfejsu Margonem w klimacie kosmicznej otchłani: świecące krawędzie, poświata pustki, gwiezdne iskry. Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -31,7 +31,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -496,8 +496,120 @@ ${S} #tip, ${S} .tip {   /* TODO: zweryfikuj selektor (tooltip SI) */
   box-shadow: 0 0 calc(10px * var(--vv-k)) var(--vv-glow), 0 6px 18px rgb(0 0 0 / .85) !important;
 }
 `;
-  const cssBattle = ``;
-  const cssAnim = ``;
+  /* =====================================================================
+   * === WALKA, PASKI, MINIMAPA ===
+   * HP zostaje czerwone (czytelność w walce), fiolet dostają mana/druga belka i doświadczenie.
+   * Paski nad postaciami w walce (.one-warrior) celowo nietknięte.
+   * ===================================================================== */
+  const cssBattle = `
+/* paski HP / many / doświadczenia */
+${N} .interface-element-progress-bar-1:not(.one-warrior *) {
+  background: var(--vv-bg-0) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-line);
+}
+${N} .interface-element-progress-bar-1:not(.one-warrior *) .inner {
+  background: linear-gradient(#c0283f 65%, #8a1a2c 65%) !important;
+  border-color: #d6405a !important;
+}
+${N} .interface-element-progress-bar-1.green:not(.one-warrior *) .inner {
+  background: linear-gradient(var(--vv-v-3) 65%, var(--vv-v-2) 65%) !important;
+  border-color: var(--vv-e-1) !important;
+}
+${N} .interface-element-progress-bar-1 .value { color: #fff !important; text-shadow: 0 0 3px #000, 0 1px 1px #000 !important; }
+/* dolny pasek doświadczenia: pomarańcz → energia pustki */
+${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner {
+  filter: hue-rotate(240deg) saturate(1.1) brightness(.95);
+}
+/* obudowa kuli HP – świecący pierścień (krew w kuli zostaje czerwona) */
+${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(12px * var(--vv-k)) var(--vv-glow-strong);
+}
+${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
+  color: #fff !important;
+  text-shadow: 0 0 4px #000, 0 1px 2px #000 !important;
+}
+${N} .interface-layer .bottom-panel-graphic { filter: hue-rotate(230deg) saturate(.8) brightness(.6); }   /* TODO: zweryfikuj selektor (listwa wokół kuli) */
+
+/* okno walki i dziennik (kolory wpisów dziennika zostają z gry) */
+${N} .battle-controller .border-image,
+${N} .battle-window .border-image {   /* TODO: zweryfikuj selektor (rama okna walki) */
+  background: var(--vv-void-light), rgb(11 6 20 / .9) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(16px * var(--vv-k)) var(--vv-glow) !important;
+}
+${N} .battle-controller .battle-console,
+${N} .battle-controller .battle-log {   /* TODO: zweryfikuj selektor (dziennik walki) */
+  background: rgb(11 6 20 / .95) !important;
+  color: var(--vv-text) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+}
+${N} .battle-controller .auto-fight-button.button,
+${N} .battle-controller .button.auto-fight {   /* TODO: zweryfikuj selektor (przycisk „Auto”) */
+  box-shadow: 0 0 0 1px #000, 0 0 calc(8px * var(--vv-k)) var(--vv-glow-strong) !important;
+}
+
+/* minimapa: sama mapa bez zmian, tylko ramka */
+${N} .mini-map, ${N} .minimap-window .content {   /* TODO: zweryfikuj selektor (minimapa) */
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+}
+
+/* --- SI --- */
+${S} #battle {   /* TODO: zweryfikuj selektor (okno walki SI) */
+  box-shadow: 0 0 0 2px var(--vv-v-2), 0 0 calc(16px * var(--vv-k)) var(--vv-glow) !important;
+}
+${S} #battle #battlelog {   /* TODO: zweryfikuj selektor (dziennik walki SI) */
+  background: rgb(11 6 20 / .95) !important;
+  color: var(--vv-text) !important;
+}
+`;
+
+  /* =====================================================================
+   * === ANIMACJE ===
+   * Tylko transform/opacity/box-shadow na kilku elementach. Wszystko wyłączane przy prefers-reduced-motion.
+   * ===================================================================== */
+  const cssAnim = `
+/* wir za tytułem okna: obracający się stożkowy gradient spłaszczony do elipsy */
+${W} .header-label-positioner { isolation: isolate; }
+${W} .header-label-positioner::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgb(143 69 230 / .55), transparent 25%, rgb(181 124 255 / .45), transparent 50%,
+                                         rgb(143 69 230 / .55), transparent 75%, rgb(181 124 255 / .45), transparent);
+  -webkit-mask: radial-gradient(circle, transparent 0 14%, #000 30%, transparent 70%);
+  mask: radial-gradient(circle, transparent 0 14%, #000 30%, transparent 70%);
+  opacity: calc(.75 * var(--vv-k));
+  transform: translate(-50%, -50%) scaleY(.3) rotate(0deg);
+  animation: vv-vortex 14s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+@keyframes vv-vortex {
+  to { transform: translate(-50%, -50%) scaleY(.3) rotate(360deg); }
+}
+/* pulsująca energia na aktywnych elementach */
+${N} .widget-button.green.window-is-open,
+${N} .border-window .card.active,
+${N} .new-chat-window .chat-channel-card.active {
+  animation: vv-pulse 3.4s ease-in-out infinite;
+}
+@keyframes vv-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.22) drop-shadow(0 0 calc(3px * var(--vv-k)) var(--vv-e-1)); }
+}
+/* łagodne pojawienie się poświaty przy najechaniu */
+${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-shadow .2s ease, filter .2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  ${W} .header-label-positioner::before,
+  ${N} .widget-button.green.window-is-open,
+  ${N} .border-window .card.active,
+  ${N} .new-chat-window .chat-channel-card.active { animation: none !important; }
+  ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: none !important; }
+  #vv-toggle, #vv-toast { transition: none !important; }
+}
+`;
 
   /* =====================================================================
    * === PRZEŁĄCZNIK (przycisk, skróty, menu Tampermonkey) ===
