@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.0.0
+// @version      1.1.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -65,27 +65,31 @@
   const FRAME = (() => {
     const pl = [];
     for (let x = 16; x < 48; x += 8) {
-      pl.push(`<rect x='${x + .6}' y='2' width='6.8' height='10' rx='1.6' fill='url(#pv)'/>`);
-      pl.push(`<rect x='${x + .6}' y='52' width='6.8' height='10' rx='1.6' fill='url(#pv)'/>`);
-      pl.push(`<rect x='2' y='${x + .6}' width='10' height='6.8' ry='1.6' fill='url(#ph)'/>`);
-      pl.push(`<rect x='52' y='${x + .6}' width='10' height='6.8' ry='1.6' fill='url(#ph)'/>`);
-      // sznurowanie: krótkie ściegi w szczelinach między płytkami
-      pl.push(`<path d='M${x} 4.5V9.5M${x} 54.5V59.5M4.5 ${x}H9.5M54.5 ${x}H59.5' stroke='#7a1212' stroke-width='1.3'/>`);
+      // płytki z połyskiem lakieru u góry
+      for (const [X, Y, Wd, Ht, g] of [[x + .5, 2, 7, 10, 'pv'], [x + .5, 52, 7, 10, 'pv'], [2, x + .5, 10, 7, 'ph'], [52, x + .5, 10, 7, 'ph']]) {
+        pl.push(`<rect x='${X}' y='${Y}' width='${Wd}' height='${Ht}' rx='1.8' fill='url(#${g})' stroke='#000' stroke-width='.7'/>`);
+      }
+      pl.push(`<path d='M${x + 4} 3.2V5M${x + 4} 59V60.8M3.2 ${x + 4}H5M59 ${x + 4}H60.8' stroke='#c9a46a' stroke-opacity='.18' stroke-width='.6'/>`);
     }
-    const lace = `<path d='M16 7H48M16 57H48M7 16V48M57 16V48' stroke='#5c0d0d' stroke-width='1.6' stroke-opacity='.9'/>` +
-      `<path d='M16 6.4H48M16 56.4H48M6.4 16V48M56.4 16V48' stroke='#9e1b1b' stroke-width='.5' stroke-opacity='.55'/>`;
+    // sznur odoshi przez środek płytek i ściegi na krzyż na stykach
+    let lace = `<path d='M16 8.6H48M16 55.4H48M8.6 16V48M55.4 16V48' stroke='#000' stroke-width='2.6'/>` +
+      `<path d='M16 8.6H48M16 55.4H48M8.6 16V48M55.4 16V48' stroke='#5c0d0d' stroke-width='1.5'/>` +
+      `<path d='M16 8.1H48M16 54.9H48M8.1 16V48M54.9 16V48' stroke='#9e1b1b' stroke-opacity='.45' stroke-width='.4'/>`;
+    for (let x = 16; x <= 48; x += 8) {
+      lace += `<path d='M${x - 1.3} 7.2L${x + 1.3} 10M${x + 1.3} 7.2L${x - 1.3} 10M${x - 1.3} 54L${x + 1.3} 56.8M${x + 1.3} 54L${x - 1.3} 56.8` +
+        `M7.2 ${x - 1.3}L10 ${x + 1.3}M7.2 ${x + 1.3}L10 ${x - 1.3}M54 ${x - 1.3}L56.8 ${x + 1.3}M54 ${x + 1.3}L56.8 ${x - 1.3}' stroke='#7a1212' stroke-width='.9'/>`;
+    }
     // okucie narożnika: litera L z mosiądzu i nit
     const corner = (tx) => `<g transform='${tx}'><path d='M1 1H15V5.5H5.5V15H1Z' fill='url(#br)' stroke='#000' stroke-width='.8'/>` +
       `<circle cx='3.6' cy='3.6' r='1.4' fill='#2a1f12'/><circle cx='3.3' cy='3.3' r='.5' fill='#c9a46a' fill-opacity='.7'/></g>`;
     const s = `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>` +
-      `<defs><linearGradient id='pv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2b1f1c'/><stop offset='.25' stop-color='#1a1312'/><stop offset='1' stop-color='#090606'/></linearGradient>` +
-      `<linearGradient id='ph' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#2b1f1c'/><stop offset='.25' stop-color='#1a1312'/><stop offset='1' stop-color='#090606'/></linearGradient>` +
+      `<defs><linearGradient id='pv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3e2f2b'/><stop offset='.2' stop-color='#241a18'/><stop offset='1' stop-color='#0b0707'/></linearGradient>` +
+      `<linearGradient id='ph' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#3e2f2b'/><stop offset='.2' stop-color='#241a18'/><stop offset='1' stop-color='#0b0707'/></linearGradient>` +
       `<linearGradient id='br' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#a8854c'/><stop offset='.5' stop-color='#8a6a3a'/><stop offset='1' stop-color='#4a3820'/></linearGradient></defs>` +
-      `<path d='M0 0H64V64H0Z M14 14V50H50V14Z' fill='#0b0808' fill-rule='evenodd'/>` +
-      `<rect x='.5' y='.5' width='63' height='63' fill='none' stroke='#000'/>` +
+      `<path d='M0 0H64V64H0Z M14 14V50H50V14Z' fill='#070505' fill-rule='evenodd'/>` +
       pl.join('') + lace +
-      `<rect x='13.5' y='13.5' width='37' height='37' fill='none' stroke='#5c0d0d'/>` +
-      `<rect x='14.5' y='14.5' width='35' height='35' fill='none' stroke='#000' stroke-opacity='.8'/>` +
+      `<rect x='13.5' y='13.5' width='37' height='37' fill='none' stroke='#3a1010'/>` +
+      `<rect x='.5' y='.5' width='63' height='63' fill='none' stroke='#000'/>` +
       corner('') + corner('translate(64 0) scale(-1 1)') + corner('translate(0 64) scale(1 -1)') + corner('translate(64 64) scale(-1 -1)') +
       '</svg>';
     return svgUrl(s);
@@ -479,6 +483,86 @@ ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
 `;
 
   /* =====================================================================
+   * === CZAT ===
+   * Pod wiadomościami prawie nieprzezroczysta czerń (#070505 / 93%): kolory kanałów zostają z gry,
+   * tekst washi ma kontrast ~15:1, przygaszone znaczniki czasu ~5:1 (WCAG AA).
+   * ===================================================================== */
+  const cssChat = `
+${N} .interface-layer > .left-column.main-column,
+${N} .new-chat-window { background: var(--oni-k0) !important; }
+/* listwy kolumn: pionowa belka czarnego lakieru z czerwonym sznurem pośrodku */
+${N} .interface-layer > .left-column.main-column > .border,
+${N} .interface-layer > .right-column.main-column > .border {
+  background:
+    linear-gradient(90deg, transparent 45%, var(--oni-r1) 45% 55%, transparent 55%),
+    linear-gradient(90deg, #000, var(--oni-edge-hi) 30%, var(--oni-k2) 50%, var(--oni-edge-hi) 70%, #000) !important;
+  border-image: none !important;
+}
+/* wiadomości */
+${N} .new-chat-window .chat-message-wrapper {
+  background: radial-gradient(ellipse 120% 70px at 50% 0, rgb(122 18 18 / .1), transparent), rgb(7 5 5 / .93) !important;
+  border-top-color: var(--oni-edge) !important;
+  border-bottom-color: var(--oni-edge) !important;
+  box-shadow: inset 0 0 14px 2px rgb(0 0 0 / .85) !important;
+}
+${N} .new-chat-window .new-chat-message { text-shadow: 0 1px 1px rgb(0 0 0 / .95); }
+${N} .new-chat-window .new-chat-message .ts-section { color: var(--oni-dim) !important; }
+${N} .new-chat-window .new-chat-message .author-section.click-able:hover { text-decoration: underline; text-decoration-color: var(--oni-r3); }
+/* pasek zakładek kanałów: lakier, pod nim pędzlowa kreska */
+${N} .new-chat-window .chat-channel-card-wrapper {
+  background: var(--oni-brush-dim) center bottom / 96% 3px no-repeat, linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
+  border-image: none !important;
+  box-shadow: 0 2px 6px rgb(0 0 0 / .8);
+}
+${N} .new-chat-window .chat-channel-card { background: none !important; border-color: transparent !important; box-shadow: none !important; }
+${N} .new-chat-window .chat-channel-card .chat-channel-card-icon {
+  filter: grayscale(1) sepia(.25) brightness(.6);
+  transition: filter .2s ease;
+}
+${N} .new-chat-window .chat-channel-card:hover .chat-channel-card-icon { filter: grayscale(1) sepia(.3) brightness(.95); }
+${N} .new-chat-window .chat-channel-card.active {
+  background: var(--oni-brush) center bottom 1px / 80% 3px no-repeat !important;
+}
+${N} .new-chat-window .chat-channel-card.active .chat-channel-card-icon {
+  filter: grayscale(1) sepia(.35) brightness(1.15) drop-shadow(0 0 3px rgb(196 42 42 / .55));
+}
+${N} .new-chat-window .chat-channel-card.channel-disabled .chat-channel-card-icon { filter: grayscale(1) brightness(.28); }
+/* licznik nieprzeczytanych – jedno z niewielu miejsc z jasną czerwienią (#fff na #c42a2a ≈ 5:1) */
+${N} .new-chat-window .chat-channel-not-read-counter {
+  background: var(--oni-hi) !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 1px #000, 0 0 6px rgb(196 42 42 / .6);
+}
+/* pasek pod wiadomościami i pole wpisywania */
+${N} .new-chat-window .chat-input-wrapper {
+  background: linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
+  box-shadow: inset 0 1px 0 var(--oni-r1) !important;
+}
+${N} .new-chat-window .chat-input-wrapper .chat-info-wrapper,
+${N} .new-chat-window .chat-input-wrapper .chat-config-wrapper { filter: grayscale(1) sepia(.3) brightness(.8); }
+${N} .new-chat-window .chat-input-wrapper .chat-info-wrapper:hover,
+${N} .new-chat-window .chat-input-wrapper .chat-config-wrapper:hover { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(.95); }
+${N} .new-chat-window .magic-input-wrapper { padding: 0 4px 4px; }
+${N} .new-chat-window .magic-input {
+  background: var(--oni-k0) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  color: var(--oni-text) !important;
+  caret-color: var(--oni-hi);
+}
+${N} .new-chat-window .magic-input-placeholder { color: var(--oni-dim) !important; }
+/* menu kanału (lista wyboru nad polem) i powiadomienia czatu */
+${N} .new-chat-window .control-wrapper .card-list,
+${N} .new-chat-window .menu-card {
+  background: rgb(14 10 10 / .97) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--oni-edge) !important;
+  color: var(--oni-text) !important;
+}
+${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
+`;
+
+  /* =====================================================================
    * === ANIMACJE (lekkie; wyłączane przy prefers-reduced-motion) ===
    * ===================================================================== */
   const cssAnim = `
@@ -696,7 +780,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssAnim, cssToggle].join('\n'));
+  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'oni-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
