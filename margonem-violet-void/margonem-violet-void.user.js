@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.5.1
+// @version      1.6.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -15,6 +15,10 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
+// @grant        GM_getResourceURL
+// @resource     vvFrame      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/frame.webp
+// @resource     vvTitlePlate https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-plate.webp
+// @resource     vvTitleGem   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-gem.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // ==/UserScript==
@@ -31,7 +35,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.5.1';
+  const VERSION = '1.6.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -47,6 +51,19 @@
   const G = `html.${ON}.vv-game`;
   // okno „zwykłe” NI (bez przezroczystych i bez okien-dymków)
   const W = `${N} .border-window:not(.transparent):not(.tip-window)`;
+
+  // Grafiki: @resource (Tampermonkey pobiera je przy instalacji/aktualizacji i trzyma lokalnie).
+  // Bez GM_getResourceURL (inne menedżery) – raw link do repo.
+  const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/';
+  const res = (name, file) => {
+    try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return u; } } catch (e) { /* brak zasobu */ }
+    return RAW + file;
+  };
+  const IMG = {
+    frame: res('vvFrame', 'frame.webp'),            // 192×192, 9-slice: wycinek 30 px
+    plate: res('vvTitlePlate', 'title-plate.webp'), // 360×35, końce 46 px
+    gem: res('vvTitleGem', 'title-gem.webp')        // 20×36
+  };
 
   /* =====================================================================
    * === ZMIENNE (paleta i intensywność świecenia) ===
@@ -124,27 +141,41 @@ ${N} .scrollbar-wrapper .handle:hover { background: var(--vv-v-2) !important; }
    * === OKNA (NI: zwykłe, przezroczyste, dialog NPC, wspólne panele, przyciski; SI: podstawy) ===
    * ===================================================================== */
   const cssWindows = `
-/* --- okno zwykłe: czerń, grafitowa krawędź, cienka fioletowa linia u góry, słaba poświata --- */
+/* --- okno zwykłe: czerń w krystalicznej ramie z wulkanicznego szkła, ametystowe kryształy w narożnikach ---
+   Rama 9-slice (border-image) – border-width zostaje 0, więc układ okna się nie zmienia;
+   outset 3 px wysuwa pas tuż na krawędź okna, kryształy w narożnikach lekko wystają. */
 ${W} {
-  border-image: none !important;
-  border-radius: 3px;
+  border-image: url("${IMG.frame}") 30 / 15px / 3px stretch !important;
+  border-radius: 0;
   background: var(--vv-void-light), linear-gradient(var(--vv-bg-2), var(--vv-bg-1) 40px, var(--vv-bg-0)) !important;
-  /* krawędź rysowana cieniem, nie „border” – nie zmienia wymiarów okna */
+  background-clip: border-box !important;
   box-shadow:
-    inset 0 1px 0 var(--vv-v-2),
-    inset 0 0 0 1px var(--vv-edge),
     0 0 0 1px #000,
     0 0 calc(10px * var(--vv-k)) var(--vv-glow),
     0 10px 28px rgb(0 0 0 / .85) !important;
 }
 ${W} > .content { background: transparent !important; color: var(--vv-text); }
 
-/* nagłówek: tytuł na czarnej plakietce z fioletową linią u dołu */
+/* nagłówek: kamienna tabliczka z krystalicznymi ćwiekami na końcach (9-slice w poziomie, wysunięta
+   o 34 px w boki, więc tytuł ma wokół siebie miejsce), na środku u góry mały ametyst */
 ${W} .header-label-positioner .header-label {
-  background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
-  border-image: none !important;
-  border-radius: 3px;
-  box-shadow: inset 0 -1px 0 var(--vv-v-2), inset 0 0 0 1px var(--vv-edge), 0 2px 6px rgb(0 0 0 / .8) !important;
+  background: none !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 37px / 0 34px stretch !important;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+${W} .header-label-positioner::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: -15px;
+  width: 11px; height: 20px;
+  transform: translateX(-50%);
+  background: url("${IMG.gem}") center / contain no-repeat;
+  filter: drop-shadow(0 0 calc(4px * var(--vv-k)) var(--vv-glow-strong));
+  pointer-events: none;
+  z-index: 2;
 }
 ${W} .header-label-positioner .header-label .text {
   color: var(--vv-text) !important;

@@ -204,7 +204,7 @@ Mroczny motyw interfejsu w klimacie kosmicznej otchłani. Powierzchnie są prawi
 Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#060509` / `#0c0a10` / `#141119` / `#1c1824`, krawędzie `#2a2433` / `#3b3346`, akcenty fioletu `#4a1f7a` / `#6d2fb3` / `#8f45e6`, energia `#b57cff` / `#d9b8ff` (focus, najechanie), oszczędna magenta `#ff4fd8` (nowe wiadomości), tekst `#e6e0ee` i przygaszony `#9a93a8`.
 
 Funkcje:
-- **okna** — czerń z grafitową krawędzią i cienką fioletową linią u góry, ledwie widoczna poświata (krawędź rysowana cieniem, układ okien bez zmian), czarna plakietka tytułu z fioletową kreską, grafitowy przycisk zamknięcia (fiolet przy najechaniu), zakładki,
+- **okna** — czerń w cienkiej ramie z ciemnego wulkanicznego szkła z ametystowymi kryształami w narożnikach (9-slice, układ okien bez zmian), ledwie widoczna poświata, tytuł na kamiennej tabliczce z krystalicznymi ćwiekami i małym ametystem pośrodku, grafitowy przycisk zamknięcia (fiolet przy najechaniu), zakładki,
 - **okna przezroczyste** (minimapa, obserwowane zadania, zegar, ping) i **dialog z NPC** — półprzezroczysta czerń z grafitową obwódką, podświetlenie odpowiedzi fioletową kreską,
 - **czat** — jednolita czerń pod wiadomościami (kolory kanałów bez zmian, kontrast AA), listwy kolumn z cienką fioletową żyłą, aktywny kanał z fioletową kreską, magentowy znacznik nowych wiadomości, pole wpisywania z fioletowym focusem,
 - **tooltipy przedmiotów** — prawie nieprzezroczysta czarna karta (kontrast tekstu ~16:1), kolor rzadkości na nazwie, górnej krawędzi i w słabej poświacie; kolory rzadkości czytelne i rozpoznawalne jak w grze,
@@ -235,3 +235,5 @@ Skróty:
 - **Ctrl+Alt+I** — intensywność świecenia (niska → średnia → wysoka).
 
 Ruchu jest minimum (puls krawędzi otwartych widżetów, przejścia przy najechaniu) i wyłącza się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).
+
+Grafiki (ramka okna, tabliczka tytułu, ametyst) leżą w [assets/violet-void/](assets/violet-void/) (3 pliki WebP, razem ok. 18 KB). Wygenerowano je modelem FLUX.1 Krea na Hugging Face i obrobiono lokalnie; prompty są w [PROMPTS.md](assets/violet-void/PROMPTS.md). Skrypt ładuje je przez `@resource`, więc Tampermonkey pobiera je raz, razem z aktualizacją.
