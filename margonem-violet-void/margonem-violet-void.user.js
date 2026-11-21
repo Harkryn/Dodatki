@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.12.1
+// @version      1.13.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.12.1';
+  const VERSION = '1.13.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -417,10 +417,48 @@ ${N} .interface-layer > .top.positioner > .bg {
 ${N} .interface-layer > .bottom.positioner > .bg {
   background: linear-gradient(var(--vv-v-1), transparent 1px), linear-gradient(var(--vv-bg-0), var(--vv-bg-1)) !important;
 }
+/* tabliczka z imieniem / lokacją / złotem (342×65): ta sama rama z wulkanicznego szkła co okna (9-slice,
+   border-width 0 – układ bez zmian), cienka linia pod imieniem, pod spodem zwisa ametyst (jak nad tytułami okien) */
 ${N} .interface-layer .hud-container {
-  background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
-  border-image: none !important;
-  box-shadow: inset 0 -1px 0 var(--vv-v-2), inset 0 0 0 1px var(--vv-edge), 0 2px 8px rgb(0 0 0 / .8) !important;
+  background:
+    linear-gradient(90deg, transparent 8%, rgb(143 69 230 / .45) 50%, transparent 92%) 0 21px / 100% 1px no-repeat,
+    var(--vv-void-light),
+    linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.frame}") 30 / 9px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .85), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+  color: var(--vv-text) !important;
+}
+${N} .interface-layer .hud-container::after {
+  content: "";
+  position: absolute; left: 50%; bottom: -13px;
+  width: 10px; height: 18px;
+  transform: translateX(-50%) scaleY(-1);
+  background: url("${IMG.gem}") center / contain no-repeat;
+  filter: drop-shadow(0 0 calc(4px * var(--vv-k)) var(--vv-glow-strong));
+  pointer-events: none;
+}
+${N} .interface-layer .hud-container .location,
+${N} .interface-layer .hud-container .coords,
+${N} .interface-layer .hud-container .world-name,
+${N} .interface-layer .hud-container .herogold,
+${N} .interface-layer .hud-container .herocredits { color: var(--vv-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .interface-layer .hud-container .coords,
+${N} .interface-layer .hud-container .world-name { color: var(--vv-text-dim) !important; }
+${N} .interface-layer .hud-container .heroname { text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .8); }
+/* przyciski „+” (kup złoto / smocze łzy): zamiast jaskrawej zieleni – grafitowa płytka z fioletowym plusem */
+${N} .interface-layer .hud-container .btn-min {
+  background: linear-gradient(#211c29, #0c0a10) !important;
+  border-color: #000 !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge-hi) !important;
+  color: var(--vv-e-1) !important;
+  text-shadow: 0 0 4px rgb(143 69 230 / .6);
+  filter: none !important;
+}
+${N} .interface-layer .hud-container .btn-min:hover {
+  box-shadow: inset 0 0 0 1px var(--vv-v-3), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
+  color: var(--vv-e-2) !important;
 }
 /* przyciski HUD (widżety): zwęglony bazalt z pęknięciem, przez które sączy się fiolet.
    Atlas 4×6 kafli (6 kamieni × 4 obroty) – każdy przycisk dostaje inny kafel (--vv-hx = obrót, --vv-hy = kamień). */
