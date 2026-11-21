@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.17.0
+// @version      1.18.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.17.0';
+  const VERSION = '1.18.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -238,19 +238,52 @@ ${N} .border-window.transparent .border-image {
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), inset 0 1px 0 var(--vv-v-1) !important;
 }
 
-/* --- dialog NPC --- */
+/* --- dialog NPC (664×222 u dołu ekranu) ---
+   Rama z wulkanicznego szkła jak okna, ametyst pośrodku górnej krawędzi (jak nad tytułami okien),
+   imię NPC w jasnym fiolecie, cienka fioletowa linia między wypowiedzią a odpowiedziami.
+   Odpowiedzi: ikony gry przygaszone do fioletu, przy najechaniu fioletowa kreska i łuna; kolory odpowiedzi
+   (np. pomarańczowe „wyjście”) zostają z gry. */
 ${N} .dialogue-window .border-image {
-  background: var(--vv-void-light), rgb(6 5 9 / .92);
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+  background: var(--vv-void-light), linear-gradient(rgb(20 17 25 / .95), rgb(6 5 9 / .94) 70px) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.frame}") 30 / 10px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 0 calc(12px * var(--vv-k)) var(--vv-glow), 0 10px 26px rgb(0 0 0 / .85) !important;
+}
+${N} .dialogue-window .border-image::after {
+  content: "";
+  position: absolute; left: 50%; top: -12px;
+  width: 11px; height: 20px;
+  transform: translateX(-50%);
+  background: url("${IMG.gem}") center / contain no-repeat;
+  filter: drop-shadow(0 0 calc(4px * var(--vv-k)) var(--vv-glow-strong));
+  pointer-events: none;
 }
 ${N} .dialogue-window .dialogue-background-color { background: rgb(6 5 9 / .8) !important; }
 ${N} .dialogue-window .content { color: var(--vv-text); }
-${N} .dialogue-window .content .npc-dialogue-wrapper .h_content { color: var(--vv-text) !important; }
-${N} .dialogue-window .content .answers li { border-bottom-color: var(--vv-edge) !important; }
-${N} .dialogue-window .content .answers li:hover {
-  background: linear-gradient(90deg, rgb(143 69 230 / .16), transparent) !important;
-  box-shadow: inset 2px 0 0 var(--vv-v-3);
+${N} .dialogue-window .content .npc-dialogue-wrapper .h_content {
+  color: var(--vv-e-2) !important;
+  font-weight: bold;
+  letter-spacing: .03em;
+  text-shadow: 0 0 6px rgb(143 69 230 / .5), 0 1px 2px #000 !important;
 }
+${N} .dialogue-window .content .npc-message { color: var(--vv-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .dialogue-window .content .answers-scroll::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: -5px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(143 69 230 / .55) 30%, rgb(143 69 230 / .55) 70%, transparent);
+}
+${N} .dialogue-window .content .answers li {
+  border-bottom-color: rgb(42 36 51 / .8) !important;
+  border-radius: 2px;
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+${N} .dialogue-window .content .answers li .icon { filter: grayscale(1) brightness(.8) sepia(.4) hue-rotate(220deg) saturate(1.5); }
+${N} .dialogue-window .content .answers li:hover {
+  background: linear-gradient(90deg, rgb(143 69 230 / .2), rgb(143 69 230 / .05) 60%, transparent) !important;
+  box-shadow: inset 2px 0 0 var(--vv-v-3) !important;
+}
+${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) brightness(1.05) sepia(.5) hue-rotate(220deg) saturate(2); }
 
 /* --- wspólne panele wnętrz okien (interface-element-*) --- */
 ${N} .interface-element-middle-1-background,
