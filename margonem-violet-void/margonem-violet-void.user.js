@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.9.0
+// @version      1.10.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.9.0';
+  const VERSION = '1.10.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -519,10 +519,26 @@ ${N} .interface-element-progress-bar-1.green:not(.one-warrior *) .inner {
   border-color: var(--vv-v-3) !important;
 }
 ${N} .interface-element-progress-bar-1 .value { color: #fff !important; text-shadow: 0 0 3px #000, 0 1px 1px #000 !important; }
-/* dolny pasek doświadczenia: pomarańcz → przygaszony fiolet */
-${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner {
-  filter: hue-rotate(240deg) saturate(.9) brightness(.8);
+/* ===== Pasek doświadczenia (dwa paski po bokach kuli, 235×11) =====
+   Koryto: czerń z wewnętrznym cieniem. Wypełnienie: ciemny fiolet pustki z jaśniejszą górną krawędzią i
+   cienką linią energii, po którym wolno przesuwa się połysk (pseudo-element, długość paska ustawia gra). */
+${N} .interface-layer .exp-bar-wrapper .exp-progress .progress {
+  background: #050407 !important;
+  box-shadow: inset 0 1px 3px #000, inset 0 0 0 1px rgb(42 36 51 / .8);
 }
+${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner {
+  position: relative; overflow: hidden;
+  background: linear-gradient(#b57cff 0 1px, #6d2fb3 1px, #4a1f7a 45%, #2a1046 80%, #12081f) !important;
+  box-shadow: 1px 0 4px rgb(181 124 255 / calc(.6 * var(--vv-k)));
+  filter: none !important;
+}
+${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 0 40%, rgb(217 184 255 / .28) 50%, transparent 60% 100%) 0 0 / 240px 100% repeat-x;
+  animation: vv-exp-flow 4.5s linear infinite;
+}
+@keyframes vv-exp-flow { from { background-position: -240px 0; } to { background-position: 240px 0; } }
+${N} .interface-layer .exp-bar-wrapper .exp-progress.right .progress .inner::after { animation-direction: reverse; }
 /* ===== Kula HP: obsydian z linią energii =====
    Wnętrze czarne; poziom HP wyznacza jasna fioletowa tafla na górze „krwi” (wysokość .blood ustawia gra = prawdziwe HP).
    Tło .blood z !important wygrywa z pozycją klatki sprite'a, którą gra wpisuje inline co klatkę. */
@@ -611,7 +627,8 @@ ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-s
 @media (prefers-reduced-motion: reduce) {
   ${N} .widget-button.green.window-is-open,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before,
-  ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after { animation: none !important; }
+  ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after,
+  ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner::after { animation: none !important; }
   ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: none !important; }
   #vv-toggle, #vv-toast { transition: none !important; }
 }
