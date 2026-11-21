@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.15.2
+// @version      1.16.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.15.2';
+  const VERSION = '1.16.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -575,39 +575,51 @@ ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-edg
   /* =====================================================================
    * === TOOLTIPY ===
    * Karta prawie nieprzezroczysta (#0b0a0f / 97%) – tekst #e6e0ee ma kontrast ~16:1, przygaszony ~6.5:1.
-   * Kolor rzadkości: nazwa przedmiotu + górna krawędź karty + delikatna poświata w tym kolorze.
-   * Kolory rzadkości mają na tle karty kontrast ≥ 4.5:1 i są rozpoznawalne jak w grze.
+   * Kolor rangi (--vv-rar, „r g b”) ustawia skrypt (tintTooltip) dla każdej karty przedmiotu: z grafiki ramki,
+   * która FAKTYCZNIE jest pod przedmiotem – więc działa z każdym zestawem ramek (ustawienia gry, inne dodatki).
+   * W tym kolorze: obwódka i górna linia karty, poświata, łuna za ikoną, separator nagłówka i nazwa przedmiotu.
+   * Kolor jest wyrównywany do jasności 235, więc nazwa ma na tle karty kontrast ≥ 4.5:1.
+   * Zwykłe przedmioty (szara ramka) i karty bez przedmiotu – stonowany grafit / fiolet.
    * ===================================================================== */
-  const RARITY = {
-    't-norm': '#ece6f5',       // zwykły
-    't-uniupg': '#f2d75a',     // unikatowy
-    't-her': '#4fb4ff',        // heroiczny
-    't-upgraded': '#c58bff',   // ulepszony
-    't-leg': '#ff8c1a',        // legendarny
-    't-art': '#ff5a5a'         // artefakt – TODO: zweryfikuj selektor (wartość data-item-type)
-  };
   const cssTooltips = `
-${N} .tip-wrapper { --vv-rar: var(--vv-edge-hi); }
-${Object.entries(RARITY).map(([t, c]) => `${N} .tip-wrapper[data-item-type="${t}"] { --vv-rar: ${c}; }
-${N} .tip-wrapper[data-item-type="${t}"] .item-name { color: ${c} !important; }`).join('\n')}
+${N} .tip-wrapper { --vv-rar: 109 47 179; }
+${N} .tip-wrapper.normal-tip { --vv-rar: 92 82 108; }
 ${N} .tip-wrapper .content {
-  background: linear-gradient(rgb(20 17 25 / .97), rgb(11 10 15 / .97) 60px) !important;
+  background:
+    radial-gradient(120% 55% at 50% 0%, rgb(var(--vv-rar) / .12), transparent 70%),
+    linear-gradient(rgb(20 17 25 / .97), rgb(11 10 15 / .97) 60px) !important;
   color: var(--vv-text) !important;
+  text-shadow: 0 1px 2px #000;
 }
 ${N} .tip-wrapper {
   box-shadow:
-    0 0 0 1px #000,
-    0 0 0 2px var(--vv-edge),
-    inset 0 2px 0 var(--vv-rar),
-    0 0 calc(10px * var(--vv-k)) color-mix(in srgb, var(--vv-rar) 30%, transparent),
-    0 8px 22px rgb(0 0 0 / .85) !important;
+    0 0 0 1px rgb(var(--vv-rar) / .7),
+    0 0 0 2px #000,
+    0 0 calc(14px * var(--vv-k)) rgb(var(--vv-rar) / .28),
+    0 10px 24px rgb(0 0 0 / .88) !important;
+  transition: box-shadow .2s ease;
 }
-${N} .tip-wrapper:not([data-item-type]) { --vv-rar: var(--vv-v-2); }
+/* górna linia rangi: jasny środek, zanikające końce, miękka poświata */
+${N} .tip-wrapper.normal-tip::before {
+  content: "";
+  position: absolute; left: 10%; right: 10%; top: -1px; height: 2px;
+  background: linear-gradient(90deg, rgb(var(--vv-rar) / 0), rgb(var(--vv-rar) / .95) 50%, rgb(var(--vv-rar) / 0));
+  box-shadow: 0 0 8px rgb(var(--vv-rar) / .6);
+  pointer-events: none; z-index: 2;
+}
+/* nagłówek: łuna rangi za ikoną, separator w kolorze rangi zanikający w prawo */
 ${N} .tip-wrapper .item-head {
-  background: radial-gradient(ellipse 90% 100% at 50% 0%, color-mix(in srgb, var(--vv-rar) 10%, transparent), transparent 75%) !important;
+  background:
+    linear-gradient(90deg, rgb(var(--vv-rar) / .55), rgb(var(--vv-rar) / .12) 60%, transparent) left bottom / 100% 1px no-repeat,
+    radial-gradient(90px 60px at 20px 50%, rgb(var(--vv-rar) / .22), transparent 100%) !important;
+  box-shadow: none !important;
 }
-${N} .tip-wrapper .item-name { text-shadow: 0 1px 2px #000 !important; }
-${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-edge) !important; }
+${N} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 10px rgb(var(--vv-rar) / .45); border-radius: 2px; }
+${N} .tip-wrapper .item-name { text-shadow: 0 0 8px rgb(var(--vv-rar) / .45), 0 1px 2px #000 !important; }
+/* nazwa w kolorze ramki tylko wtedy, gdy kolor odczytano z ramki (inaczej zostaje kolor nazwy z gry) */
+${N} .tip-wrapper.vv-rar-frame .item-name { color: rgb(var(--vv-rar)) !important; }
+${N} .tip-wrapper .item-type { color: var(--vv-text-dim) !important; }
+${N} .tip-wrapper .item-tip-section { border-color: rgb(var(--vv-rar) / .14) !important; }   /* gra ustawia ten kolor inline */
 
 `;
 
@@ -922,6 +934,91 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
   const orbObs = new MutationObserver(() => { clearTimeout(orbDebounce); orbDebounce = setTimeout(ensureOrbFx, 300); });
   document.addEventListener('visibilitychange', ensureOrbFx);
 
+  /* --- kolor rangi w tooltipie: z ramki, która faktycznie jest pod przedmiotem ---
+     Nie zgadujemy koloru po klasie rangi: bierzemy grafikę ramki (.highlight) tego samego przedmiotu
+     w torbie/ekwipunku (po item-id; zapasowo – kopię w nagłówku tooltipa), wycinamy jej fragment z arkusza
+     tak jak gra (background-position/size) i liczymy dominujący nasycony kolor. Dzięki temu kolor zgadza się
+     z każdym zestawem ramek (ustawienia gry, inne dodatki). Wynik jest zapamiętywany per grafika+pozycja.
+       – kolor znaleziony → --vv-rar na tooltipie + klasa vv-rar-frame (nazwa w tym kolorze),
+       – ramka szara (zwykły przedmiot) → kolor domyślny z CSS,
+       – grafiki nie da się odczytać (obca domena bez CORS) → kolor nazwy przedmiotu z gry. */
+  const rarCache = new Map();
+  const frameColor = (el) => {
+    const cs = getComputedStyle(el);
+    const m = /url\("?([^")]+)"?\)/.exec(cs.backgroundImage);
+    if (!m) return Promise.resolve(undefined);
+    const w = el.offsetWidth || 32, h = el.offsetHeight || 32;
+    const key = `${m[1]}|${cs.backgroundPosition}|${cs.backgroundSize}|${w}x${h}`;
+    if (!rarCache.has(key)) {
+      rarCache.set(key, (async () => {
+        const img = new Image();
+        if (!/^(blob:|data:)/.test(m[1]) && new URL(m[1], location.href).origin !== location.origin) img.crossOrigin = 'anonymous';
+        img.src = m[1];
+        await img.decode();
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const x = c.getContext('2d', { willReadFrequently: true });
+        const pos = cs.backgroundPosition.split(' ').map((v) => (v.endsWith('px') ? parseFloat(v) : 0));
+        const bs = cs.backgroundSize.split(' ');
+        let sw = img.naturalWidth, sh = img.naturalHeight;
+        if (bs[0] && bs[0].endsWith('px')) { sw = parseFloat(bs[0]); sh = bs[1] && bs[1].endsWith('px') ? parseFloat(bs[1]) : sw * img.naturalHeight / img.naturalWidth; }
+        x.drawImage(img, pos[0] || 0, pos[1] || 0, sw, sh);
+        const d = x.getImageData(0, 0, w, h).data;
+        let r = 0, g = 0, b = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i + 3] < 160) continue;
+          const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+          const s = (mx - mn) / (mx || 1);
+          if (s < 0.35 || mx < 70) continue;           // szarości i cienie ramki pomijamy
+          r += d[i] * s; g += d[i + 1] * s; b += d[i + 2] * s; n += s;
+        }
+        if (n < 4) return null;                         // ramka szara – zwykły przedmiot
+        r /= n; g /= n; b /= n;
+        const k = 235 / Math.max(r, g, b);              // wyrównanie jasności – czytelna nazwa i poświata
+        return `${Math.round(Math.min(255, r * k))} ${Math.round(Math.min(255, g * k))} ${Math.round(Math.min(255, b * k))}`;
+      })().catch(() => undefined));
+    }
+    return rarCache.get(key);
+  };
+  const nameColor = (tip) => {
+    const el = tip.querySelector('.item-name');
+    const c = el && /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(el).color);
+    if (!c) return undefined;
+    const [r, g, b] = [+c[1], +c[2], +c[3]];
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    return (mx - mn) / (mx || 1) < 0.3 ? null : `${r} ${g} ${b}`;
+  };
+  const tintTooltip = async (tip) => {
+    const item = tip.querySelector('.item-head .item');
+    if (!item) return;
+    const idCls = [...item.classList].find((c) => c.startsWith('item-id-')) || '';
+    tip.dataset.vvFor = idCls;
+    const source = idCls ? [...document.querySelectorAll('.item.' + idCls)].find((e) => !e.closest('.tip-wrapper')) : null;
+    const frames = [source && source.querySelector('.highlight'), item.querySelector('.highlight')].filter(Boolean);
+    let color, fromFrame = false;
+    for (const f of frames) { color = await frameColor(f); if (color !== undefined) { fromFrame = !!color; break; } }
+    if (color === undefined) color = nameColor(tip);
+    if (tip.dataset.vvFor !== idCls) return;            // w międzyczasie tooltip pokazuje już inny przedmiot
+    if (color) tip.style.setProperty('--vv-rar', color); else tip.style.removeProperty('--vv-rar');
+    tip.classList.toggle('vv-rar-frame', fromFrame);
+  };
+  const pendingTips = new Set();
+  let tipFrame = 0;
+  const queueTip = (tip) => {
+    pendingTips.add(tip);
+    if (!tipFrame) tipFrame = requestAnimationFrame(() => { tipFrame = 0; const l = [...pendingTips]; pendingTips.clear(); l.forEach(tintTooltip); });
+  };
+  // tooltip pojawił się albo zmienił zawartość (gra używa ponownie tych samych elementów) → kolor z ramki
+  const tipObs = new MutationObserver((muts) => {
+    if (!enabled()) return;
+    for (const m of muts) {
+      if (!m.addedNodes.length) continue;
+      const t = m.target.nodeType === 1 && (m.target.closest('.tip-wrapper.normal-tip') || (m.target.classList.contains('tip-wrapper') ? m.target : null));
+      if (t) queueTip(t);
+      else for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('tip-wrapper')) queueTip(n);
+    }
+  });
+
   // Strona gry rozpoznana → klasa vv-game (reguły globalne) + przycisk. Obserwator z debounce,
   // odłączany, gdy interfejs zostanie potwierdzony (albo po 60 s – np. strona logowania).
   let debounce = 0;
@@ -933,6 +1030,7 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     const layer = document.querySelector('.interface-layer') || document.body;
     orbObs.observe(layer, { childList: true, subtree: true });
     ensureOrbFx();
+    tipObs.observe(document.body, { childList: true, subtree: true });
   };
   const check = () => {
     const iface = detectDom();
