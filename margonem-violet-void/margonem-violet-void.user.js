@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.11.0
+// @version      1.12.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.11.0';
+  const VERSION = '1.12.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -499,12 +499,38 @@ ${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-edge) !impor
 
 `;
 
+  /* Ikona pingu (16×26, stany lag-0 … lag-5) – ten sam półokrągły wachlarz segmentów co w oryginale gry,
+     w kolorach motywu: segmenty zapalają się od dołu wraz z lagiem; zgaszone grafitowe, zapalone fioletowe,
+     dwa górne (duży lag) w magencie. Rysowane w SVG w kodzie (bez plików). */
+  const PING_CSS = (() => {
+    const f = (n) => +n.toFixed(2);
+    const sector = (cx, cy, r1, r2, a0, a1) => {
+      const p = (r, a) => `${f(cx + Math.cos(a * Math.PI / 180) * r)} ${f(cy + Math.sin(a * Math.PI / 180) * r)}`;
+      return `M${p(r2, a0)} A${r2} ${r2} 0 0 1 ${p(r2, a1)} L${p(r1, a1)} A${r1} ${r1} 0 0 0 ${p(r1, a0)}Z`;
+    };
+    const SEG = [0, 1, 2, 3, 4].map((i) => [95 + i * 34, 125 + i * 34]);   // od dołu (95°) do góry (265°)
+    const LIT = ['#8f45e6', '#9d55f0', '#b57cff', '#ff4fd8', '#ff4fd8'];
+    const svg = (n) => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 26' width='16' height='26'><defs>` +
+      `<filter id='f' x='-50%' y='-50%' width='200%' height='200%'><feGaussianBlur stdDeviation='.7' result='b'/><feMerge><feMergeNode in='b'/><feMergeNode in='SourceGraphic'/></feMerge></filter>` +
+      `<radialGradient id='bg' cx='1' cy='.5' r='1'><stop offset='0' stop-color='#1c1824'/><stop offset='1' stop-color='#08070b'/></radialGradient></defs>` +
+      `<path d='M15 0.8 A12.2 12.2 0 0 0 15 25.2 Z' fill='url(#bg)' stroke='#000' stroke-width='.8'/>` +
+      `<path d='M15 1.6 A11.4 11.4 0 0 0 15 24.4' fill='none' stroke='#3b3346' stroke-width='.6'/>` +
+      SEG.map(([a0, a1], i) => (i < n
+        ? `<path d='${sector(15, 13, 4.6, 10.6, a0, a1)}' fill='${LIT[i]}' stroke='#000' stroke-width='.5' filter='url(#f)'/>`
+        : `<path d='${sector(15, 13, 4.6, 10.6, a0, a1)}' fill='#211c29' stroke='#2a2433' stroke-width='.5'/>`)).join('') +
+      `<circle cx='15' cy='13' r='2.2' fill='#0c0a10' stroke='#3b3346' stroke-width='.6'/></svg>`;
+    return [0, 1, 2, 3, 4, 5].map((n) => `${N} .bottom-panel-of-bottom-positioner .lagmeter .lag.lag-${n} {
+  background: url("data:image/svg+xml;utf8,${encodeURIComponent(svg(n))}") center / 16px 26px no-repeat !important;
+}`).join('\n');
+  })();
+
   /* =====================================================================
    * === WALKA, PASKI, MINIMAPA ===
    * HP zostaje czerwone (czytelność w walce), fiolet dostają druga belka i doświadczenie.
    * Paski nad postaciami w walce (.one-warrior) celowo nietknięte.
    * ===================================================================== */
   const cssBattle = `
+${PING_CSS}
 /* paski HP / many / doświadczenia */
 ${N} .interface-element-progress-bar-1:not(.one-warrior *) {
   background: var(--vv-bg-0) !important;
