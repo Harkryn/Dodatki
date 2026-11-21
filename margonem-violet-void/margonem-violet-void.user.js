@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.32.0
+// @version      1.32.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -107,8 +107,8 @@
     `<path d="M0 ${8 - amp} Q${w / 4} ${8 + amp} ${w / 2} ${8 - amp} T${w} ${8 - amp} V16 H0Z" fill="url(#g)"/>` +
     (stroke ? `<path d="M0 ${8 - amp} Q${w / 4} ${8 + amp} ${w / 2} ${8 - amp} T${w} ${8 - amp}" fill="none" stroke="${stroke}" stroke-width="1.6"/>` : '') +
     '</svg>');
-  const ORB_WAVE_BACK = wave(42, 3.2, '#5b26a0', '#8f45e6');
-  const ORB_WAVE_FRONT = wave(60, 2.6, '#9a55f0', '#e2ccff');
+  const ORB_WAVE_BACK = wave(42, 1.4, '#5b26a0', '#8f45e6');
+  const ORB_WAVE_FRONT = wave(60, 1.1, '#9a55f0', '#e2ccff');
 
   // Popękania nadproża sklepu: poszarpane szczeliny z odgałęzieniami w układzie grafiki nadproża (960×65),
   // z pominięciem ametystu pośrodku (x ≈ 455–525). Ciemny rdzeń szczeliny + fiolet z poświatą + jasna żyłka.
@@ -1121,23 +1121,21 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
   background: linear-gradient(rgb(143 69 230 / .55), rgb(28 14 44 / .9) 10px, #0b0712 60%, #060509) !important;
 }
 /* tafla cieczy: dwie fale płynące w przeciwne strony (tylna ciemniejsza z fioletową krawędzią, przednia z jasną
-   krawędzią i łuną), grzbiety do ~6 px nad poziomem HP; tafla kołysze się na boki jak ciecz w naczyniu
+   krawędzią i łuną), niskie grzbiety (~2–3 px nad poziomem HP); tafla lekko kołysze się na boki jak ciecz w naczyniu
    (szersza od kuli, żeby przy przechyle nie odsłaniała rogów) i pulsuje światłem */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before {
   content: "";
   position: absolute; left: -12px; right: -12px; top: -8px; height: 16px;
-  background: ${ORB_WAVE_FRONT} 0 0 / 60px 16px repeat-x, ${ORB_WAVE_BACK} 0 -2px / 42px 16px repeat-x;
-  filter: drop-shadow(0 0 calc(4px * var(--vv-k)) rgb(181 124 255 / .9));
-  animation: vv-orb-wave 2.4s linear infinite, vv-orb-line 3.2s ease-in-out infinite, vv-orb-slosh 5.6s ease-in-out infinite;
+  background: ${ORB_WAVE_FRONT} 0 0 / 60px 16px repeat-x, ${ORB_WAVE_BACK} 0 -1px / 42px 16px repeat-x;
+  filter: drop-shadow(0 0 calc(3px * var(--vv-k)) rgb(181 124 255 / .8));
+  animation: vv-orb-wave 3.4s linear infinite, vv-orb-line 3.2s ease-in-out infinite, vv-orb-slosh 5.6s ease-in-out infinite;
   pointer-events: none; z-index: 1;
 }
-@keyframes vv-orb-wave { to { background-position: 60px 0, -42px -2px; } }
+@keyframes vv-orb-wave { to { background-position: 60px 0, -42px -1px; } }
 @keyframes vv-orb-line { 50% { opacity: .75; } }
 @keyframes vv-orb-slosh {
-  0%, 100% { transform: rotate(-3deg) translateY(0); }
-  25% { transform: rotate(0deg) translateY(-1px); }
-  50% { transform: rotate(3deg) translateY(0); }
-  75% { transform: rotate(0deg) translateY(1px); }
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
 }
 /* poświata tuż pod taflą */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::after {
