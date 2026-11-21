@@ -205,7 +205,7 @@ Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#060509` / `#0c0a10`
 
 Funkcje:
 - **okna** — czerń w cienkiej ramie z ciemnego wulkanicznego szkła z ametystowymi kryształami w narożnikach (9-slice, układ okien bez zmian), ledwie widoczna poświata, tytuł na kamiennej tabliczce z krystalicznymi ćwiekami i małym ametystem pośrodku, grafitowy przycisk zamknięcia (fiolet przy najechaniu), zakładki,
-- **okna przezroczyste** (minimapa, obserwowane zadania, zegar, ping) — półprzezroczysta czerń z grafitową obwódką,
+- **okna przezroczyste** (minimapa, obserwowane zadania, zegar, ping, sorter) — półprzezroczysta czerń w ramie z wulkanicznego szkła jak okna, tytuł w kolorach motywu,
 - **dialog z NPC** — rama z wulkanicznego szkła jak okna z ametystem pośrodku górnej krawędzi, imię NPC w jasnym fiolecie, cienka fioletowa linia nad odpowiedziami, ikony odpowiedzi przygaszone do fioletu, przy najechaniu fioletowa kreska i łuna; kolory odpowiedzi (np. wyjście) zostają z gry,
 - **czat** — czerń pod wiadomościami z ledwie widoczną poświatą u góry (kolory kanałów i wiadomości bez zmian, kontrast AA), pasek zakładek na kamiennej tabliczce, ikony kanałów przygaszone do fioletu (aktywny kanał jaśniejszy, z poświatą i fioletową kreską), magentowy licznik nieprzeczytanych, pole wpisywania w miniaturze ramy okien, listwy kolumn z cienką fioletową żyłą,
 - **tooltipy przedmiotów** — prawie nieprzezroczysta czarna karta (kontrast tekstu ~16:1) formatowana kolorem **ramki, którą przedmiot faktycznie ma na ekranie**: obwódka i górna linia karty, poświata, łuna za ikoną, separator nagłówka i nazwa. Kolor jest odczytywany z grafiki ramki, więc pasuje do każdego zestawu ramek (ustawienia gry, inne dodatki); zwykłe przedmioty dostają stonowany grafit, a gdy grafiki nie da się odczytać – kolor nazwy z gry,
@@ -220,7 +220,7 @@ Funkcje:
 - **ikona pingu** — ten sam półokrągły wskaźnik co w grze, w kolorach motywu: odbity w pionie, segmenty zapalają się od góry wraz z lagiem (fiolet, przy dużym lagu magenta),
 - **ekran wczytywania** — grota z czarnego wulkanicznego szkła z ledwie świecącymi ametystami po bokach i pustym, ciemnym środkiem, logo gry przebarwione na ametyst, pasek postępu w fiolecie w ramie okien,
 - **walka** — panel walki w ramie z wulkanicznego szkła jak okna, z ametystem na górnej krawędzi, pasek czasu tury w fiolecie, daty i licznik puli w kolorach motywu, ikony przygaszone do fioletu; plansza walki, wpisy dziennika i kolory stron walki bez zmian,
-- **minimapa** — sama mapa bez zmian, grafitowa ramka,
+- **minimapa** — sama mapa bez zmian, rama przezroczystych okien, cienka grafitowa krawędź i lekka winieta wokół mapy,
 - **przyciski** — grafitowe płytki, przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,
 - **wspólne panele** `interface-element-*` (nagłówki, karty, linie, dolne paski okien),
 - **scrollbary, zaznaczenie tekstu, focus pól tekstowych, przełączniki** (czarne kwadraty, zaznaczone w fiolecie z poświatą) w kolorach motywu; w listach z grupami (ustawienia, dziennik zadań, rzemiosło) wybrana pozycja z fioletową kreską, nagłówki grup z grafitową ramką; tabele (np. karty zadań) z ciemnym nagłówkiem z fioletową kreską i grafitowymi liniami, poziom zadania w fiolecie,

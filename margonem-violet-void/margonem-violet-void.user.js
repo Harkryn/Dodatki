@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.27.0
+// @version      1.28.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -40,7 +40,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.27.0';
+  const VERSION = '1.28.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -356,10 +356,19 @@ ${N} .border-window .card.active {
   box-shadow: inset 0 -2px 0 var(--vv-v-3);
 }
 
-/* --- okna przezroczyste (minimapa, obserwowane zadania, zegar, ping) – ramka bez zasłaniania treści --- */
+/* --- okna przezroczyste (minimapa, obserwowane zadania, zegar, ping, sorter…) – półprzezroczysta czerń w tej samej
+   ramie z wulkanicznego szkła co zwykłe okna (9-slice wewnątrz krawędzi, układ bez zmian), tytuł w kolorach motywu --- */
 ${N} .border-window.transparent .border-image {
   background: rgb(6 5 9 / .72);
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), inset 0 1px 0 var(--vv-v-1) !important;
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${IMG.frame}") 30 / 8px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
+}
+${N} .border-window.transparent .header-label .text {
+  color: var(--vv-text) !important;
+  text-shadow: 0 1px 2px #000 !important;
+  letter-spacing: .04em;
 }
 
 /* --- dialog NPC (664×222 u dołu ekranu) ---
@@ -1100,8 +1109,16 @@ ${N} .battle-controller .battle-msg.txt {
 }
 ${N} .battle-controller .turn-prediction__item { border-color: var(--vv-edge) !important; }
 
-/* minimapa: sama mapa bez zmian, tylko ramka */
+/* minimapa: sama mapa (canvas) bez zmian; wokół niej cienka grafitowa krawędź i lekka winieta (nad mapą,
+   bez przechwytywania kliknięć) – okno ma ramę przezroczystych okien */
 ${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge) !important; }
+${N} .handheld-mini-map { position: relative; }
+${N} .handheld-mini-map::after {
+  content: "";
+  position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px var(--vv-edge), inset 0 0 18px rgb(0 0 0 / .75);
+}
 
 `;
 
