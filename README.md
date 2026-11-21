@@ -199,23 +199,22 @@ Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (56 plików WebP
 
 ## Margonem — Fioletowa Pustka (Violet Void)
 
-Mroczny motyw interfejsu w klimacie kosmicznej otchłani, w którym fiolet dominuje w całym UI: warstwy fioletowych teł, światło sączące się z wnętrza pustki (gradienty radialne w oknach), świecące krawędzie paneli i delikatne gwiezdne iskry w tle. Wszystkie elementy są oryginalne, bez grafik i motywów z innych gier. Najważniejsza jest czytelność: tekst czatu i tooltipów ma kontrast co najmniej WCAG AA, a poświaty nie leżą na treści.
+Mroczny motyw interfejsu w klimacie kosmicznej otchłani. Powierzchnie są prawie czarne, krawędzie grafitowe, a fiolet pustki występuje **tylko jako akcent**: cienkie linie, aktywne zakładki, focus pól i poświata przy najechaniu. Bez wirów i bez zalewania okien kolorem. Wszystkie elementy są oryginalne, bez grafik i motywów z innych gier. Najważniejsza jest czytelność: tekst czatu i tooltipów ma kontrast co najmniej WCAG AA, a poświaty nie leżą na treści.
 
-Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#0b0614` / `#140a24` / `#1c0f33`, fiolety `#4a1f7a` / `#6d2fb3` / `#8f45e6`, energia `#b57cff` / `#d9b8ff`, oszczędny akcent `#ff4fd8`, tekst `#e8ddff` i przygaszony `#9d8cc2`.
+Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#060509` / `#0c0a10` / `#141119` / `#1c1824`, krawędzie `#2a2433` / `#3b3346`, akcenty fioletu `#4a1f7a` / `#6d2fb3` / `#8f45e6`, energia `#b57cff` / `#d9b8ff` (focus, najechanie), oszczędna magenta `#ff4fd8` (nowe wiadomości), tekst `#e6e0ee` i przygaszony `#9a93a8`.
 
 Funkcje:
-- **okna** — fioletowe warstwy z poświatą od góry i od dołu, gwiezdne iskry, świecąca krawędź (rysowana cieniem, układ okien bez zmian), plakietka tytułu z poświatą, okrągły przycisk zamknięcia, zakładki,
-- **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — półprzezroczysta pustka z fioletową obwódką, podświetlenie odpowiedzi,
-- **czat** — prawie jednolita pustka pod wiadomościami (kolory kanałów bez zmian, kontrast AA), świecąca listwa kolumny, zakładki kanałów z aktywną krawędzią energii, magentowy znacznik nowych wiadomości, pole wpisywania z fioletowym focusem,
-- **tooltipy przedmiotów** — prawie nieprzezroczysta karta pustki (kontrast tekstu ~15:1), kolor rzadkości na nazwie, górnej krawędzi i w poświacie karty; kolory rzadkości czytelne i rozpoznawalne jak w grze,
-- **ekwipunek, postać, torby** — pustka z iskrami w prawej kolumnie, ciemne sloty z fioletową krawędzią, świecące obrysy siatek, podstawka statystyk; ikony i ramki rzadkości bez zmian,
-- **HUD** — belki z linią energii, tabliczka z imieniem, okrągłe przyciski widżetów (otwarte okno = jaśniejszy krąg),
-- **sklep** — markiza przemalowana na fiolet, tła pustki zamiast papieru,
-- **paski i kula HP** — HP zostaje czerwone (czytelność w walce), druga belka i doświadczenie w fiolecie, świecący pierścień kuli HP; paski nad postaciami w walce bez zmian,
-- **walka** — okno i dziennik walki w pustce (kolory wpisów z gry), podświetlony przycisk „Auto”,
-- **minimapa** — sama mapa bez zmian, świecąca ramka,
-- **animacje** — obracający się wir pustki za tytułem okna, pulsowanie aktywnych zakładek i otwartych widżetów; wszystko wyłączane przy „ogranicz ruch”,
-- **przyciski** — fioletowe płytki, które przy najechaniu rozświetlają się energią; czerwone, złote i smocze przyciski gry bez zmian,
+- **okna** — czerń z grafitową krawędzią i cienką fioletową linią u góry, ledwie widoczna poświata (krawędź rysowana cieniem, układ okien bez zmian), czarna plakietka tytułu z fioletową kreską, grafitowy przycisk zamknięcia (fiolet przy najechaniu), zakładki,
+- **okna przezroczyste** (minimapa, obserwowane zadania, zegar, ping) i **dialog z NPC** — półprzezroczysta czerń z grafitową obwódką, podświetlenie odpowiedzi fioletową kreską,
+- **czat** — jednolita czerń pod wiadomościami (kolory kanałów bez zmian, kontrast AA), listwy kolumn z cienką fioletową żyłą, aktywny kanał z fioletową kreską, magentowy znacznik nowych wiadomości, pole wpisywania z fioletowym focusem,
+- **tooltipy przedmiotów** — prawie nieprzezroczysta czarna karta (kontrast tekstu ~16:1), kolor rzadkości na nazwie, górnej krawędzi i w słabej poświacie; kolory rzadkości czytelne i rozpoznawalne jak w grze,
+- **ekwipunek, postać, torby** — czarna kolumna, ciemne sloty z grafitowymi liniami, obrysy siatek, podstawka statystyk; ikony i ramki rzadkości bez zmian,
+- **HUD** — czarne belki z cienką fioletową linią, tabliczka z imieniem, okrągłe grafitowe przyciski widżetów (otwarte okno = fioletowa krawędź, delikatnie pulsująca),
+- **sklep** — markiza przyciemniona do grafitowych pasów, czarne tła zamiast papieru,
+- **paski i kula HP** — HP zostaje czerwone (czytelność w walce), druga belka i doświadczenie w przygaszonym fiolecie, cienki fioletowy pierścień kuli HP, grafitowa listwa; paski nad postaciami w walce bez zmian,
+- **walka** — okno i dziennik walki w czerni (kolory wpisów z gry), przycisk „Auto” z fioletową krawędzią,
+- **minimapa** — sama mapa bez zmian, grafitowa ramka,
+- **przyciski** — grafitowe płytki, przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,
 - **wspólne panele** `interface-element-*` (nagłówki, karty, linie, dolne paski okien),
 - **scrollbary, zaznaczenie tekstu, focus pól tekstowych** w kolorach motywu,
 - **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
@@ -235,4 +234,4 @@ Skróty:
 - **Ctrl+Alt+V** — włącz/wyłącz motyw,
 - **Ctrl+Alt+I** — intensywność świecenia (niska → średnia → wysoka).
 
-Animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).
+Ruchu jest minimum (puls krawędzi otwartych widżetów, przejścia przy najechaniu) i wyłącza się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).

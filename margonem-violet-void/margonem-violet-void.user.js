@@ -2,8 +2,8 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.4.0
-// @description  Mroczny, fioletowy motyw interfejsu Margonem w klimacie kosmicznej otchłani: świecące krawędzie, poświata pustki, gwiezdne iskry. Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
+// @version      1.5.0
+// @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -21,7 +21,7 @@
 
 /*
  * @run-at document-start: styl i klasa na <html> są nakładane, zanim gra narysuje pierwszy kadr,
- * więc nie widać mignięcia oryginalnego (brązowego) interfejsu. Sam CSS nie potrzebuje gotowego DOM –
+ * więc nie widać mignięcia oryginalnego interfejsu. Sam CSS nie potrzebuje gotowego DOM –
  * reguły zaczynają działać na elementach gry w chwili, gdy się pojawią. Elementy wymagające DOM
  * (przycisk przełącznika, wykrywanie interfejsu) czekają na <body> przez MutationObserver.
  */
@@ -31,7 +31,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.5.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -48,49 +48,39 @@
   // okno „zwykłe” NI (bez przezroczystych i bez okien-dymków)
   const W = `${N} .border-window:not(.transparent):not(.tip-window)`;
 
-  // Gwiezdne iskry: kilkanaście drobnych punktów na kaflu 180×180 (inline SVG, < 1 KB), bardzo niska alfa.
-  const SPARKS = (() => {
-    const pts = [
-      [14, 22, .7, .5], [52, 96, .5, .35], [91, 31, .9, .55], [136, 74, .5, .3], [158, 148, .7, .45],
-      [27, 133, .4, .3], [74, 160, .6, .35], [109, 118, 1, .6], [149, 14, .5, .3], [63, 59, .4, .25],
-      [121, 163, .35, .25], [6, 80, .35, .25], [99, 6, .35, .3], [37, 48, .3, .2], [171, 101, .35, .25]
-    ];
-    const dots = pts.map(([x, y, r, a]) => `<circle cx='${x}' cy='${y}' r='${r}' fill='%23d9b8ff' fill-opacity='${a}'/>`).join('');
-    return `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>${dots}</svg>")`;
-  })();
-
   /* =====================================================================
    * === ZMIENNE (paleta i intensywność świecenia) ===
+   * Motyw jest głównie mroczny: powierzchnie prawie czarne, krawędzie grafitowe.
+   * Fiolet pustki to wyłącznie akcent – cienkie linie, stany aktywne, focus i najechanie.
    * ===================================================================== */
   const cssVars = `
 :root {
-  /* tła – warstwy paneli z fioletowym odcieniem */
-  --vv-bg-0: #0b0614;
-  --vv-bg-1: #140a24;
-  --vv-bg-2: #1c0f33;
-  /* fiolety główne */
+  /* tła – prawie czerń z ledwie wyczuwalnym fioletem */
+  --vv-bg-0: #060509;
+  --vv-bg-1: #0c0a10;
+  --vv-bg-2: #141119;
+  --vv-bg-3: #1c1824;            /* aktywna zakładka, podniesiona płytka */
+  /* krawędzie powierzchni – neutralny grafit */
+  --vv-edge: #2a2433;
+  --vv-edge-hi: #3b3346;
+  /* fiolety – akcenty */
   --vv-v-1: #4a1f7a;
   --vv-v-2: #6d2fb3;
   --vv-v-3: #8f45e6;
-  /* energia i podświetlenia */
+  /* energia – najjaśniejsze akcenty (focus, najechanie) */
   --vv-e-1: #b57cff;
   --vv-e-2: #d9b8ff;
-  /* głęboki akcent – oszczędnie (krytyczne komunikaty) */
+  /* głęboki akcent – oszczędnie (nowe wiadomości) */
   --vv-accent: #ff4fd8;
   /* tekst */
-  --vv-text: #e8ddff;
-  --vv-text-dim: #9d8cc2;
-  /* linie i obrysy */
-  --vv-line: rgb(143 69 230 / .45);
-  --vv-line-soft: rgb(143 69 230 / .22);
+  --vv-text: #e6e0ee;
+  --vv-text-dim: #9a93a8;
   /* mnożnik świecenia (zmieniany przełącznikiem intensywności) */
   --vv-k: .8;
-  --vv-glow: rgb(181 124 255 / calc(.5 * var(--vv-k)));
-  --vv-glow-strong: rgb(181 124 255 / calc(.8 * var(--vv-k)));
-  --vv-sparks: ${SPARKS};
-  /* światło z wnętrza pustki */
-  --vv-void-light: radial-gradient(ellipse 120% 70% at 50% 0%, rgb(109 47 179 / calc(.34 * var(--vv-k))), transparent 62%),
-                   radial-gradient(ellipse 80% 60% at 50% 115%, rgb(74 31 122 / calc(.4 * var(--vv-k))), transparent 70%);
+  --vv-glow: rgb(143 69 230 / calc(.35 * var(--vv-k)));
+  --vv-glow-strong: rgb(181 124 255 / calc(.6 * var(--vv-k)));
+  /* ledwie widoczna fioletowa poświata od góry okna – bez zalewania tła kolorem */
+  --vv-void-light: radial-gradient(ellipse 110% 45% at 50% 0%, rgb(109 47 179 / calc(.12 * var(--vv-k))), transparent 70%);
 }
 html[data-vv-glow="low"]  { --vv-k: .45; }
 html[data-vv-glow="mid"]  { --vv-k: .8; }
@@ -102,15 +92,11 @@ html[data-vv-glow="high"] { --vv-k: 1.25; }
    * ===================================================================== */
   const cssBase = `
 ${G} ::selection { background: var(--vv-v-2); color: #fff; }
-${G} * { scrollbar-color: var(--vv-v-2) var(--vv-bg-0); }
+${G} * { scrollbar-color: var(--vv-edge-hi) var(--vv-bg-0); }
 ${G} ::-webkit-scrollbar { width: 9px; height: 9px; }
-${G} ::-webkit-scrollbar-track { background: var(--vv-bg-0); box-shadow: inset 0 0 0 1px var(--vv-line-soft); }
-${G} ::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, var(--vv-v-1), var(--vv-v-3), var(--vv-v-1));
-  border-radius: 5px;
-  border: 1px solid var(--vv-bg-0);
-}
-${G} ::-webkit-scrollbar-thumb:hover { background: linear-gradient(90deg, var(--vv-v-2), var(--vv-e-1), var(--vv-v-2)); }
+${G} ::-webkit-scrollbar-track { background: var(--vv-bg-0); }
+${G} ::-webkit-scrollbar-thumb { background: var(--vv-edge-hi); border-radius: 5px; border: 1px solid var(--vv-bg-0); }
+${G} ::-webkit-scrollbar-thumb:hover { background: var(--vv-v-2); }
 ${G} ::-webkit-scrollbar-corner { background: var(--vv-bg-0); }
 
 /* pola tekstowe */
@@ -118,76 +104,74 @@ ${G} input[type="text"], ${G} input[type="number"], ${G} input[type="search"], $
 ${G} input:not([type]), ${G} textarea {
   background-color: var(--vv-bg-0) !important;
   color: var(--vv-text) !important;
-  border-color: var(--vv-line) !important;
+  border-color: var(--vv-edge) !important;
   caret-color: var(--vv-e-1);
 }
 ${G} input:focus, ${G} textarea:focus, ${G} [contenteditable="true"]:focus {
   outline: none !important;
-  border-color: var(--vv-e-1) !important;
-  box-shadow: 0 0 0 1px var(--vv-e-1), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
+  border-color: var(--vv-v-3) !important;
+  box-shadow: 0 0 0 1px var(--vv-v-3), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${G} input::placeholder, ${G} textarea::placeholder { color: var(--vv-text-dim) !important; opacity: 1; }
 
 /* NI – suwaki gry (własne, nie natywne) */
-${N} .scrollbar-wrapper .track { background: var(--vv-bg-0) !important; box-shadow: inset 0 0 0 1px var(--vv-line-soft); }
-${N} .scrollbar-wrapper .handle {
-  background: linear-gradient(90deg, var(--vv-v-1), var(--vv-v-3), var(--vv-v-1)) !important;
-  box-shadow: 0 0 calc(5px * var(--vv-k)) var(--vv-glow) !important;
-}
+${N} .scrollbar-wrapper .track { background: var(--vv-bg-0) !important; box-shadow: inset 0 0 0 1px var(--vv-edge); }
+${N} .scrollbar-wrapper .handle { background: var(--vv-edge-hi) !important; box-shadow: none !important; }
+${N} .scrollbar-wrapper .handle:hover { background: var(--vv-v-2) !important; }
 `;
 
   /* =====================================================================
-   * === OKNA (NI: zwykłe, przezroczyste, dialog NPC, sklep, wspólne panele; SI: podstawy) ===
+   * === OKNA (NI: zwykłe, przezroczyste, dialog NPC, wspólne panele, przyciski; SI: podstawy) ===
    * ===================================================================== */
   const cssWindows = `
-/* --- okno zwykłe: warstwy fioletu, światło z wnętrza, iskry, świecąca krawędź --- */
+/* --- okno zwykłe: czerń, grafitowa krawędź, cienka fioletowa linia u góry, słaba poświata --- */
 ${W} {
   border-image: none !important;
-  border-radius: 4px;
-  background: var(--vv-void-light), var(--vv-sparks), linear-gradient(var(--vv-bg-2), var(--vv-bg-1) 30%, var(--vv-bg-0)) !important;
+  border-radius: 3px;
+  background: var(--vv-void-light), linear-gradient(var(--vv-bg-2), var(--vv-bg-1) 40px, var(--vv-bg-0)) !important;
   /* krawędź rysowana cieniem, nie „border” – nie zmienia wymiarów okna */
   box-shadow:
-    inset 0 0 0 1px var(--vv-v-2),
-    inset 0 0 0 2px rgb(217 184 255 / .07),
+    inset 0 1px 0 var(--vv-v-2),
+    inset 0 0 0 1px var(--vv-edge),
     0 0 0 1px #000,
-    0 0 calc(14px * var(--vv-k)) var(--vv-glow),
+    0 0 calc(10px * var(--vv-k)) var(--vv-glow),
     0 10px 28px rgb(0 0 0 / .85) !important;
 }
 ${W} > .content { background: transparent !important; color: var(--vv-text); }
 
-/* nagłówek: tytuł na ciemnej plakietce z poświatą (wir dochodzi w sekcji ANIMACJE) */
+/* nagłówek: tytuł na czarnej plakietce z fioletową linią u dołu */
 ${W} .header-label-positioner .header-label {
-  background: radial-gradient(ellipse 60% 120% at 50% 50%, rgb(143 69 230 / calc(.45 * var(--vv-k))), transparent 75%),
-              linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
   border-image: none !important;
   border-radius: 3px;
-  box-shadow: inset 0 0 0 1px var(--vv-line), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
+  box-shadow: inset 0 -1px 0 var(--vv-v-2), inset 0 0 0 1px var(--vv-edge), 0 2px 6px rgb(0 0 0 / .8) !important;
 }
 ${W} .header-label-positioner .header-label .text {
-  color: var(--vv-e-2) !important;
-  text-shadow: 0 1px 2px #000, 0 0 2px #000 !important;
+  color: var(--vv-text) !important;
+  text-shadow: 0 1px 2px #000 !important;
   letter-spacing: .03em;
 }
 ${W} .header-label-positioner .header-label .left-decor,
 ${W} .header-label-positioner .header-label .right-decor { background: none !important; }
 
-/* przycisk zamknięcia: fioletowy krąg z „×” */
+/* przycisk zamknięcia: grafitowy krąg z „×”, fiolet dopiero przy najechaniu */
 ${W} .close-button-corner-decor { background: none !important; }
 ${W} .close-button-corner-decor .close-button {
-  background: radial-gradient(circle, var(--vv-bg-2) 55%, var(--vv-v-1) 56% 66%, transparent 68%) !important;
+  background: radial-gradient(circle, var(--vv-bg-2) 55%, var(--vv-edge-hi) 56% 66%, transparent 68%) !important;
   border-radius: 50%;
 }
 ${W} .close-button-corner-decor .close-button::after {
   content: "×";
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  color: var(--vv-e-2); font: bold 15px/1 sans-serif;
+  color: var(--vv-text-dim); font: bold 15px/1 sans-serif;
   pointer-events: none;
 }
 ${W} .close-button-corner-decor .close-button:hover {
-  background: radial-gradient(circle, var(--vv-v-1) 55%, var(--vv-e-1) 56% 66%, transparent 68%) !important;
-  box-shadow: 0 0 calc(8px * var(--vv-k)) var(--vv-glow-strong);
+  background: radial-gradient(circle, var(--vv-bg-2) 55%, var(--vv-v-3) 56% 66%, transparent 68%) !important;
+  box-shadow: 0 0 calc(6px * var(--vv-k)) var(--vv-glow-strong);
 }
+${W} .close-button-corner-decor .close-button:hover::after { color: var(--vv-e-2); }
 
 /* zakładki w oknach */
 ${N} .border-window .card {
@@ -196,29 +180,29 @@ ${N} .border-window .card {
 }
 ${N} .border-window .card:hover { color: var(--vv-text) !important; }
 ${N} .border-window .card.active {
-  background-image: linear-gradient(var(--vv-v-1), var(--vv-bg-1)) !important;
+  background-image: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
   color: var(--vv-text) !important;
-  box-shadow: inset 0 -2px 0 var(--vv-e-1), 0 0 calc(6px * var(--vv-k)) var(--vv-glow);
+  box-shadow: inset 0 -2px 0 var(--vv-v-3);
 }
 
-/* --- okna przezroczyste (minimapa, obserwowane zadania) – ramka bez zasłaniania treści --- */
+/* --- okna przezroczyste (minimapa, obserwowane zadania, zegar, ping) – ramka bez zasłaniania treści --- */
 ${N} .border-window.transparent .border-image {
-  background: rgb(11 6 20 / .7);
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-1), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+  background: rgb(6 5 9 / .72);
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), inset 0 1px 0 var(--vv-v-1) !important;
 }
 
 /* --- dialog NPC --- */
 ${N} .dialogue-window .border-image {
-  background: var(--vv-void-light), rgb(11 6 20 / .9);
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(14px * var(--vv-k)) var(--vv-glow) !important;
+  background: var(--vv-void-light), rgb(6 5 9 / .92);
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
 }
-${N} .dialogue-window .dialogue-background-color { background: rgb(11 6 20 / .78) !important; }
-${N} .dialogue-window .content .npc-dialogue-wrapper .h_content { color: var(--vv-e-2) !important; }
+${N} .dialogue-window .dialogue-background-color { background: rgb(6 5 9 / .8) !important; }
 ${N} .dialogue-window .content { color: var(--vv-text); }
-${N} .dialogue-window .content .answers li { border-bottom-color: var(--vv-line-soft) !important; }
+${N} .dialogue-window .content .npc-dialogue-wrapper .h_content { color: var(--vv-text) !important; }
+${N} .dialogue-window .content .answers li { border-bottom-color: var(--vv-edge) !important; }
 ${N} .dialogue-window .content .answers li:hover {
-  background: linear-gradient(90deg, rgb(143 69 230 / .3), transparent) !important;
-  box-shadow: inset 2px 0 0 var(--vv-e-1);
+  background: linear-gradient(90deg, rgb(143 69 230 / .16), transparent) !important;
+  box-shadow: inset 2px 0 0 var(--vv-v-3);
 }
 
 /* --- wspólne panele wnętrz okien (interface-element-*) --- */
@@ -228,8 +212,8 @@ ${N} .interface-element-middle-3-background-stretch,
 ${N} .interface-element-middle-4-background {
   border-image: none !important;
   border-color: var(--vv-bg-0) !important;
-  background: rgb(20 10 36 / .92) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line-soft), inset 0 0 16px rgb(0 0 0 / .7);
+  background: rgb(12 10 16 / .94) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge), inset 0 0 16px rgb(0 0 0 / .7);
 }
 ${N} .interface-element-header-1-background,
 ${N} .interface-element-header-1-background-stretch,
@@ -237,32 +221,32 @@ ${N} .interface-element-table-header-1-background,
 ${N} .interface-element-header-2-background {
   border-image: none !important;
   border-color: transparent !important;
-  background: linear-gradient(90deg, var(--vv-bg-0), var(--vv-v-1) 50%, var(--vv-bg-0)) !important;
-  box-shadow: inset 0 -1px 0 var(--vv-line), inset 0 1px 0 rgb(217 184 255 / .08);
+  background: linear-gradient(90deg, var(--vv-bg-0), var(--vv-bg-3) 50%, var(--vv-bg-0)) !important;
+  box-shadow: inset 0 -1px 0 var(--vv-v-1);
 }
 ${N} .interface-element-header-3,
 ${N} .interface-element-table-header-3-background {
   background: linear-gradient(90deg, var(--vv-bg-1), var(--vv-bg-2) 50%, var(--vv-bg-1)) !important;
-  box-shadow: inset 0 -1px 0 var(--vv-line);
+  box-shadow: inset 0 -1px 0 var(--vv-edge);
 }
 ${N} .interface-element-bottom-bar-background,
 ${N} .interface-element-bottom-bar-background-stretch {
   border-image: none !important;
   border-color: transparent !important;
-  background: linear-gradient(90deg, transparent, var(--vv-v-3) 50%, transparent) top / 100% 1px no-repeat,
+  background: linear-gradient(90deg, transparent, var(--vv-v-1) 50%, transparent) top / 100% 1px no-repeat,
               linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
 }
 ${N} .interface-element-line-1-background {
-  background: linear-gradient(90deg, transparent, var(--vv-v-3) 50%, transparent) !important;
+  background: linear-gradient(90deg, transparent, var(--vv-edge-hi) 50%, transparent) !important;
 }
 ${N} .interface-element-vertical-wood {
-  background: linear-gradient(to right, var(--vv-bg-0), var(--vv-v-1) 50%, var(--vv-bg-0)) !important;
+  background: linear-gradient(to right, var(--vv-bg-0), var(--vv-edge) 50%, var(--vv-bg-0)) !important;
 }
 ${N} .interface-element-background-color-1,
 ${N} .interface-element-background-color-3 { background: var(--vv-bg-1) !important; }
 ${N} .interface-element-wood-box-background {
-  background: var(--vv-void-light), rgb(20 10 36 / .95) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+  background: rgb(12 10 16 / .96) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge);
 }
 ${N} .interface-element-card-background,
 ${N} .interface-element-card-background-stretch { background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important; }
@@ -270,76 +254,72 @@ ${N} .interface-element-active-card-background,
 ${N} .interface-element-active-card-background-stretch,
 ${N} .interface-element-active-card-border-image {
   border-image: none !important;
-  background: linear-gradient(var(--vv-v-1), var(--vv-bg-1)) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line);
+  background: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
+  box-shadow: inset 0 -2px 0 var(--vv-v-3), inset 0 0 0 1px var(--vv-edge);
 }
 
-/* --- przyciski --- */
+/* --- przyciski: grafitowa płytka; fiolet = krawędź przy najechaniu --- */
 ${N} .button.green:not(.background-gold):not(.background-draconite),
 ${N} .button.purple:not(.green) {
-  background: linear-gradient(var(--vv-v-2), var(--vv-v-1) 55%, #2a1046) !important;
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(217 184 255 / .25) !important;
+  background: linear-gradient(#211c29, #121017 55%, #0b0a0e) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-edge-hi), inset 0 1px 0 rgb(255 255 255 / .05) !important;
 }
+/* fioletowy przycisk gry (np. „Kup złoto”) zachowuje fioletowy obrys jako wyróżnik */
+${N} .button.purple:not(.green) { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-2) !important; }
 ${N} .button.green::before, ${N} .button.purple::before { box-shadow: none !important; background: none !important; }
 ${N} .button.green .label, ${N} .button.purple .label { color: var(--vv-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .button.green:not(.background-gold):not(.background-draconite):not(.disable):not(.no-hover):hover,
 ${N} .button.purple:not(.green):not(.disable):hover {
-  background: linear-gradient(var(--vv-v-3), var(--vv-v-2) 55%, var(--vv-v-1)) !important;
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-e-2), 0 0 calc(9px * var(--vv-k)) var(--vv-glow-strong) !important;
+  background: linear-gradient(#2a2234, #16121c 55%, #0d0b11) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-3), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${N} .button.disable { filter: grayscale(.6) brightness(.7); }
 
 /* --- SI (stary interfejs): podstawowe okna --- */
 ${S} #dlgwin, ${S} .dlgwin {   /* TODO: zweryfikuj selektor (dialog NPC SI) */
-  background: var(--vv-void-light), var(--vv-bg-1) !important;
+  background: var(--vv-bg-1) !important;
   color: var(--vv-text) !important;
-  border: 1px solid var(--vv-v-2) !important;
-  box-shadow: 0 0 calc(12px * var(--vv-k)) var(--vv-glow) !important;
+  border: 1px solid var(--vv-edge) !important;
+  box-shadow: inset 0 1px 0 var(--vv-v-2), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${S} #shop, ${S} #bagc, ${S} #panel {   /* TODO: zweryfikuj selektor (sklep / torby / panel SI) */
   background-color: var(--vv-bg-1) !important;
-  box-shadow: 0 0 0 1px var(--vv-v-1), 0 0 calc(10px * var(--vv-k)) var(--vv-glow);
+  box-shadow: 0 0 0 1px var(--vv-edge);
 }
 `;
 
-  /* Kolejne sekcje (czat, ekwipunek, tooltipy, walka, animacje) dochodzą w następnych wersjach. */
   /* =====================================================================
    * === CZAT ===
-   * Tło pod wiadomościami jest prawie jednolite (#0b0614 ≈ 96%), bez iskier i gradientów na treści –
-   * kanały zachowują kolory gry, a tekst ma kontrast ≥ 4.5:1 (WCAG AA).
+   * Pod wiadomościami jednolita czerń (#060509 / 96%) – kanały zachowują kolory gry,
+   * a tekst ma kontrast ≥ 4.5:1 (WCAG AA).
    * ===================================================================== */
   const cssChat = `
-/* lewa kolumna i okno czatu: pustka z poświatą tylko u góry i na dole (poza tekstem) */
 ${N} .interface-layer > .left-column.main-column,
-${N} .new-chat-window {
-  background: radial-gradient(ellipse 140% 18% at 50% 0%, rgb(109 47 179 / calc(.4 * var(--vv-k))), transparent 70%),
-              radial-gradient(ellipse 140% 14% at 50% 100%, rgb(74 31 122 / calc(.45 * var(--vv-k))), transparent 70%),
-              var(--vv-bg-0) !important;
-}
+${N} .new-chat-window { background: var(--vv-bg-0) !important; }
+/* listwy kolumn: grafit z cienką fioletową żyłą pośrodku */
 ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
-  background: linear-gradient(to right, #050209, var(--vv-v-1) 45%, var(--vv-e-1) 50%, var(--vv-v-1) 55%, #050209) !important;
-  box-shadow: 0 0 calc(8px * var(--vv-k)) var(--vv-glow);
+  background: linear-gradient(to right, #000, var(--vv-edge) 40%, var(--vv-v-2) 50%, var(--vv-edge) 60%, #000) !important;
 }
 ${N} .new-chat-window .chat-message-wrapper {
-  background: rgb(11 6 20 / .96) !important;
-  border-top-color: var(--vv-line) !important;
-  border-bottom-color: var(--vv-line) !important;
+  background: rgb(6 5 9 / .96) !important;
+  border-top-color: var(--vv-edge) !important;
+  border-bottom-color: var(--vv-edge) !important;
   box-shadow: inset 0 0 12px 2px rgb(0 0 0 / .8) !important;
 }
 ${N} .new-chat-window .new-chat-message { text-shadow: 0 1px 1px rgb(0 0 0 / .9); }
 /* zakładki kanałów */
-${N} .new-chat-window .chat-channel-card {   /* TODO: zweryfikuj selektor (zakładki kanałów czatu) */
+${N} .new-chat-window .chat-channel-card {
   background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
-  border-color: var(--vv-line-soft) !important;
+  border-color: var(--vv-edge) !important;
   color: var(--vv-text-dim) !important;
   box-shadow: none !important;
 }
 ${N} .new-chat-window .chat-channel-card:hover { color: var(--vv-text) !important; }
 ${N} .new-chat-window .chat-channel-card.active {
-  background: linear-gradient(var(--vv-v-1), var(--vv-bg-1)) !important;
+  background: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
   color: var(--vv-text) !important;
-  box-shadow: inset 0 -2px 0 var(--vv-e-1), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
+  box-shadow: inset 0 -2px 0 var(--vv-v-3) !important;
 }
 /* nowa wiadomość na nieaktywnym kanale – jedno z niewielu miejsc z akcentem magenty */
 ${N} .new-chat-window .chat-channel-card .new-message,
@@ -349,56 +329,55 @@ ${N} .new-chat-window .chat-channel-card.new-message {   /* TODO: zweryfikuj sel
 /* pole wpisywania */
 ${N} .new-chat-window .chat-input-wrapper {
   background: linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
-  box-shadow: inset 0 1px 0 var(--vv-line);
+  box-shadow: inset 0 1px 0 var(--vv-edge);
 }
 ${N} .new-chat-window .chat-input-wrapper input,
 ${N} .new-chat-window .chat-input-wrapper textarea,
 ${N} .new-chat-window .chat-input-wrapper [contenteditable="true"] {   /* TODO: zweryfikuj selektor (pole czatu NI) */
-  background: rgb(11 6 20 / .95) !important;
+  background: rgb(6 5 9 / .95) !important;
   color: var(--vv-text) !important;
   caret-color: var(--vv-e-1);
 }
 
 /* --- SI --- */
 ${S} #chat, ${S} #chattxt {   /* TODO: zweryfikuj selektor (czat SI) */
-  background: rgb(11 6 20 / .96) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+  background: rgb(6 5 9 / .96) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge);
 }
 ${S} #inpchat, ${S} #chat input {   /* TODO: zweryfikuj selektor (pole czatu SI) */
   background: var(--vv-bg-0) !important;
   color: var(--vv-text) !important;
-  border-color: var(--vv-line) !important;
+  border-color: var(--vv-edge) !important;
 }
 `;
+
   /* =====================================================================
    * === EKWIPUNEK (prawa kolumna, postać, torby, sloty, sklep, belki i tabliczka HUD) ===
    * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
    * ===================================================================== */
   const cssInventory = `
-${N} .interface-layer > .right-column.main-column {
-  background: var(--vv-void-light), var(--vv-sparks), var(--vv-bg-0) !important;
-}
+${N} .interface-layer > .right-column.main-column { background: var(--vv-bg-0) !important; }
 /* obrys siatek ekwipunku i torby */
 ${N} .interface-element-grid-border,
 ${N} .interface-element-grid-border-light {
   outline-color: var(--vv-bg-0) !important;
-  box-shadow: 0 0 0 1px var(--vv-v-1), 0 0 0 2px var(--vv-bg-0), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
+  box-shadow: 0 0 0 1px var(--vv-edge), 0 0 0 2px #000 !important;
 }
 ${N} .interface-layer .equipment-outline-2,
-${N} .interface-layer .equipment-outline-3 { background-color: var(--vv-v-1) !important; }
-/* sloty: ciemna komórka z fioletową krawędzią (warstwa pod przedmiotami) */
+${N} .interface-layer .equipment-outline-3 { background-color: var(--vv-edge) !important; }
+/* sloty: ciemna komórka z grafitową linią (warstwa pod przedmiotami) */
 ${N} .interface-element-item-slot-grid-stretch,
 ${N} .interface-element-one-item-slot-background-to-repeat {
   background-image:
-    linear-gradient(rgb(143 69 230 / .35), rgb(143 69 230 / .35)),
-    radial-gradient(circle at 50% 45%, var(--vv-bg-2), var(--vv-bg-0) 75%) !important;
+    linear-gradient(var(--vv-edge), var(--vv-edge)),
+    radial-gradient(circle at 50% 45%, #121017, var(--vv-bg-0) 75%) !important;
   background-size: 32px 1px, 32px 32px !important;   /* TODO: zweryfikuj selektor (rozmiar kratki 32 px) */
   background-repeat: repeat !important;
-  box-shadow: inset 1px 0 0 rgb(143 69 230 / .25);
+  box-shadow: inset 1px 0 0 var(--vv-edge);
 }
 ${N} .interface-element-one-item-slot-2 {
-  background: radial-gradient(circle at 50% 45%, var(--vv-bg-2), var(--vv-bg-0) 75%) !important;
-  border-color: var(--vv-v-1) !important;
+  background: radial-gradient(circle at 50% 45%, #121017, var(--vv-bg-0) 75%) !important;
+  border-color: var(--vv-edge) !important;
   outline-color: var(--vv-bg-0) !important;
 }
 ${N} .interface-element-one-black-tile { background: linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important; }
@@ -406,56 +385,57 @@ ${N} .interface-element-one-gray-tile { background: linear-gradient(var(--vv-bg-
 
 /* górna i dolna belka interfejsu, tabliczka z imieniem / lokacją / złotem */
 ${N} .interface-layer > .top.positioner > .bg {
-  background: linear-gradient(transparent calc(100% - 1px), var(--vv-v-3)), linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
+  background: linear-gradient(transparent calc(100% - 1px), var(--vv-v-1)), linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
 }
 ${N} .interface-layer > .bottom.positioner > .bg {
-  background: linear-gradient(var(--vv-v-3), transparent 1px), linear-gradient(var(--vv-bg-0), var(--vv-bg-1)) !important;
+  background: linear-gradient(var(--vv-v-1), transparent 1px), linear-gradient(var(--vv-bg-0), var(--vv-bg-1)) !important;
 }
 ${N} .interface-layer .hud-container {
-  background: var(--vv-void-light), linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
   border-image: none !important;
-  box-shadow: inset 0 0 0 1px var(--vv-v-2), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+  box-shadow: inset 0 -1px 0 var(--vv-v-2), inset 0 0 0 1px var(--vv-edge), 0 2px 8px rgb(0 0 0 / .8) !important;
 }
 /* przyciski HUD (widżety) */
 ${N} .widget-button.green {
-  background: radial-gradient(circle at 50% 40%, var(--vv-v-1), var(--vv-bg-0) 80%) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-v-2) !important;
+  background: radial-gradient(circle at 50% 35%, #1d1925, var(--vv-bg-0) 85%) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge) !important;
 }
 ${N} .widget-button.green::before { box-shadow: none !important; }
 ${N} .widget-button.green:not(.disabled):hover {
-  box-shadow: inset 0 0 0 1px var(--vv-e-1), 0 0 calc(8px * var(--vv-k)) var(--vv-glow-strong) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-v-3), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${N} .widget-button.green.window-is-open {
-  background: radial-gradient(circle at 50% 40%, var(--vv-v-2), var(--vv-bg-1) 80%) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-e-2), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
+  background: radial-gradient(circle at 50% 35%, #241d2e, var(--vv-bg-0) 85%) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-v-2) !important;
 }
 /* podstawka statystyk postaci */
 ${N} .interface-layer .stats-wrapper {
-  background: var(--vv-void-light), rgb(20 10 36 / .94) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line) !important;
+  background: rgb(12 10 16 / .95) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge) !important;
 }
 ${N} .interface-layer .stats-wrapper * { text-shadow: 0 1px 2px #000; }
 
-/* sklep: markiza przemalowana na fiolet, papierowe tła na pustkę */
-${N} .shop-wrapper .shop-background .canopy { filter: hue-rotate(200deg) saturate(.7) brightness(.45); }
+/* sklep: markiza przyciemniona do grafitowych pasów, papierowe tła na czerń */
+${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) brightness(.3) contrast(1.15); }
 ${N} .shop-wrapper .shop-background .paper-1,
 ${N} .shop-wrapper .shop-background .paper-2 {
   background: var(--vv-bg-1) !important;
-  box-shadow: inset 0 0 8px #000, inset 0 0 0 1px var(--vv-line-soft) !important;
+  box-shadow: inset 0 0 8px #000, inset 0 0 0 1px var(--vv-edge) !important;
 }
 ${N} .shop-wrapper .shop-content .items-grid .label { background: var(--vv-bg-0) !important; color: var(--vv-text) !important; }
-${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-line) !important; }
+${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-edge) !important; }
 
 /* --- SI --- */
 ${S} #panel .item, ${S} #bag .item, ${S} #bagc .item {   /* TODO: zweryfikuj selektor (sloty SI) */
-  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+  box-shadow: inset 0 0 0 1px var(--vv-edge);
 }
 `;
+
   /* =====================================================================
    * === TOOLTIPY ===
-   * Karta prawie nieprzezroczysta (#0b0614 / 97%) – tekst #e8ddff ma kontrast ~15:1, przygaszony ~6.6:1.
+   * Karta prawie nieprzezroczysta (#0b0a0f / 97%) – tekst #e6e0ee ma kontrast ~16:1, przygaszony ~6.5:1.
    * Kolor rzadkości: nazwa przedmiotu + górna krawędź karty + delikatna poświata w tym kolorze.
-   * Kolory rzadkości są dobrane tak, żeby na tle karty miały kontrast ≥ 4.5:1 i były rozpoznawalne jak w grze.
+   * Kolory rzadkości mają na tle karty kontrast ≥ 4.5:1 i są rozpoznawalne jak w grze.
    * ===================================================================== */
   const RARITY = {
     't-norm': '#ece6f5',       // zwykły
@@ -466,146 +446,117 @@ ${S} #panel .item, ${S} #bag .item, ${S} #bagc .item {   /* TODO: zweryfikuj sel
     't-art': '#ff5a5a'         // artefakt – TODO: zweryfikuj selektor (wartość data-item-type)
   };
   const cssTooltips = `
-${N} .tip-wrapper { --vv-rar: var(--vv-v-3); }
+${N} .tip-wrapper { --vv-rar: var(--vv-edge-hi); }
 ${Object.entries(RARITY).map(([t, c]) => `${N} .tip-wrapper[data-item-type="${t}"] { --vv-rar: ${c}; }
 ${N} .tip-wrapper[data-item-type="${t}"] .item-name { color: ${c} !important; }`).join('\n')}
 ${N} .tip-wrapper .content {
-  background: linear-gradient(rgb(28 15 51 / .97), rgb(11 6 20 / .97) 60px) !important;
+  background: linear-gradient(rgb(20 17 25 / .97), rgb(11 10 15 / .97) 60px) !important;
   color: var(--vv-text) !important;
 }
 ${N} .tip-wrapper {
   box-shadow:
     0 0 0 1px #000,
-    0 0 0 2px var(--vv-v-1),
+    0 0 0 2px var(--vv-edge),
     inset 0 2px 0 var(--vv-rar),
-    0 0 calc(12px * var(--vv-k)) color-mix(in srgb, var(--vv-rar) 45%, transparent),
+    0 0 calc(10px * var(--vv-k)) color-mix(in srgb, var(--vv-rar) 30%, transparent),
     0 8px 22px rgb(0 0 0 / .85) !important;
 }
 ${N} .tip-wrapper:not([data-item-type]) { --vv-rar: var(--vv-v-2); }
 ${N} .tip-wrapper .item-head {
-  background: radial-gradient(ellipse 90% 100% at 50% 0%, color-mix(in srgb, var(--vv-rar) 16%, transparent), transparent 75%) !important;
+  background: radial-gradient(ellipse 90% 100% at 50% 0%, color-mix(in srgb, var(--vv-rar) 10%, transparent), transparent 75%) !important;
 }
 ${N} .tip-wrapper .item-name { text-shadow: 0 1px 2px #000 !important; }
-${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-line-soft) !important; }
+${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-edge) !important; }
 
 /* --- SI --- */
 ${S} #tip, ${S} .tip {   /* TODO: zweryfikuj selektor (tooltip SI) */
-  background: rgb(11 6 20 / .97) !important;
+  background: rgb(11 10 15 / .97) !important;
   color: var(--vv-text) !important;
-  border: 1px solid var(--vv-v-2) !important;
-  box-shadow: 0 0 calc(10px * var(--vv-k)) var(--vv-glow), 0 6px 18px rgb(0 0 0 / .85) !important;
+  border: 1px solid var(--vv-edge) !important;
+  box-shadow: inset 0 1px 0 var(--vv-v-2), 0 6px 18px rgb(0 0 0 / .85) !important;
 }
 `;
+
   /* =====================================================================
    * === WALKA, PASKI, MINIMAPA ===
-   * HP zostaje czerwone (czytelność w walce), fiolet dostają mana/druga belka i doświadczenie.
+   * HP zostaje czerwone (czytelność w walce), fiolet dostają druga belka i doświadczenie.
    * Paski nad postaciami w walce (.one-warrior) celowo nietknięte.
    * ===================================================================== */
   const cssBattle = `
 /* paski HP / many / doświadczenia */
 ${N} .interface-element-progress-bar-1:not(.one-warrior *) {
   background: var(--vv-bg-0) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line);
+  box-shadow: inset 0 0 0 1px var(--vv-edge);
 }
 ${N} .interface-element-progress-bar-1:not(.one-warrior *) .inner {
-  background: linear-gradient(#c0283f 65%, #8a1a2c 65%) !important;
-  border-color: #d6405a !important;
+  background: linear-gradient(#b3243a 65%, #7e1828 65%) !important;
+  border-color: #c9374f !important;
 }
 ${N} .interface-element-progress-bar-1.green:not(.one-warrior *) .inner {
-  background: linear-gradient(var(--vv-v-3) 65%, var(--vv-v-2) 65%) !important;
-  border-color: var(--vv-e-1) !important;
+  background: linear-gradient(var(--vv-v-2) 65%, var(--vv-v-1) 65%) !important;
+  border-color: var(--vv-v-3) !important;
 }
 ${N} .interface-element-progress-bar-1 .value { color: #fff !important; text-shadow: 0 0 3px #000, 0 1px 1px #000 !important; }
-/* dolny pasek doświadczenia: pomarańcz → energia pustki */
+/* dolny pasek doświadczenia: pomarańcz → przygaszony fiolet */
 ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner {
-  filter: hue-rotate(240deg) saturate(1.1) brightness(.95);
+  filter: hue-rotate(240deg) saturate(.9) brightness(.8);
 }
-/* obudowa kuli HP – świecący pierścień (krew w kuli zostaje czerwona) */
+/* obudowa kuli HP – cienki fioletowy pierścień (krew w kuli zostaje czerwona) */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper {
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(12px * var(--vv-k)) var(--vv-glow-strong);
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-1), 0 0 calc(8px * var(--vv-k)) var(--vv-glow);
 }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
   color: #fff !important;
   text-shadow: 0 0 4px #000, 0 1px 2px #000 !important;
 }
-${N} .interface-layer .bottom-panel-graphic { filter: hue-rotate(230deg) saturate(.8) brightness(.6); }   /* TODO: zweryfikuj selektor (listwa wokół kuli) */
+/* listwa wokół kuli: grafit zamiast brązu */
+${N} .interface-layer .bottom-panel-graphic { filter: grayscale(1) brightness(.45) contrast(1.1); }
 
 /* okno walki i dziennik (kolory wpisów dziennika zostają z gry) */
 ${N} .battle-controller .border-image,
 ${N} .battle-window .border-image {   /* TODO: zweryfikuj selektor (rama okna walki) */
-  background: var(--vv-void-light), rgb(11 6 20 / .9) !important;
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(16px * var(--vv-k)) var(--vv-glow) !important;
+  background: rgb(6 5 9 / .92) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${N} .battle-controller .battle-console,
 ${N} .battle-controller .battle-log {   /* TODO: zweryfikuj selektor (dziennik walki) */
-  background: rgb(11 6 20 / .95) !important;
+  background: rgb(6 5 9 / .95) !important;
   color: var(--vv-text) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+  box-shadow: inset 0 0 0 1px var(--vv-edge);
 }
 ${N} .battle-controller .auto-fight-button.button,
 ${N} .battle-controller .button.auto-fight {   /* TODO: zweryfikuj selektor (przycisk „Auto”) */
-  box-shadow: 0 0 0 1px #000, 0 0 calc(8px * var(--vv-k)) var(--vv-glow-strong) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-3), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
 }
 
 /* minimapa: sama mapa bez zmian, tylko ramka */
-${N} .mini-map, ${N} .minimap-window .content {   /* TODO: zweryfikuj selektor (minimapa) */
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-2), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
-}
+${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge) !important; }
 
 /* --- SI --- */
 ${S} #battle {   /* TODO: zweryfikuj selektor (okno walki SI) */
-  box-shadow: 0 0 0 2px var(--vv-v-2), 0 0 calc(16px * var(--vv-k)) var(--vv-glow) !important;
+  box-shadow: 0 0 0 2px var(--vv-edge), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${S} #battle #battlelog {   /* TODO: zweryfikuj selektor (dziennik walki SI) */
-  background: rgb(11 6 20 / .95) !important;
+  background: rgb(6 5 9 / .95) !important;
   color: var(--vv-text) !important;
 }
 `;
 
   /* =====================================================================
    * === ANIMACJE ===
-   * Tylko transform/opacity/box-shadow na kilku elementach. Wszystko wyłączane przy prefers-reduced-motion.
+   * Minimum ruchu: puls fioletowej krawędzi otwartych widżetów i przejścia przy najechaniu.
+   * Wszystko wyłączane przy prefers-reduced-motion.
    * ===================================================================== */
   const cssAnim = `
-/* wir za tytułem okna: obracający się stożkowy gradient spłaszczony do elipsy */
-${W} .header-label-positioner { isolation: isolate; }
-${W} .header-label-positioner::before {
-  content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent, rgb(143 69 230 / .55), transparent 25%, rgb(181 124 255 / .45), transparent 50%,
-                                         rgb(143 69 230 / .55), transparent 75%, rgb(181 124 255 / .45), transparent);
-  -webkit-mask: radial-gradient(circle, transparent 0 14%, #000 30%, transparent 70%);
-  mask: radial-gradient(circle, transparent 0 14%, #000 30%, transparent 70%);
-  opacity: calc(.75 * var(--vv-k));
-  transform: translate(-50%, -50%) scaleY(.3) rotate(0deg);
-  animation: vv-vortex 14s linear infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-@keyframes vv-vortex {
-  to { transform: translate(-50%, -50%) scaleY(.3) rotate(360deg); }
-}
-/* pulsująca energia na aktywnych elementach */
-${N} .widget-button.green.window-is-open,
-${N} .border-window .card.active,
-${N} .new-chat-window .chat-channel-card.active {
-  animation: vv-pulse 3.4s ease-in-out infinite;
-}
+${N} .widget-button.green.window-is-open { animation: vv-pulse 3.6s ease-in-out infinite; }
 @keyframes vv-pulse {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.22) drop-shadow(0 0 calc(3px * var(--vv-k)) var(--vv-e-1)); }
+  0%, 100% { box-shadow: inset 0 0 0 1px var(--vv-v-2); }
+  50% { box-shadow: inset 0 0 0 1px var(--vv-e-1), 0 0 calc(7px * var(--vv-k)) var(--vv-glow-strong); }
 }
-/* łagodne pojawienie się poświaty przy najechaniu */
-${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-shadow .2s ease, filter .2s ease; }
+${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-shadow .2s ease, background-color .2s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  ${W} .header-label-positioner::before,
-  ${N} .widget-button.green.window-is-open,
-  ${N} .border-window .card.active,
-  ${N} .new-chat-window .chat-channel-card.active { animation: none !important; }
+  ${N} .widget-button.green.window-is-open { animation: none !important; }
   ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: none !important; }
   #vv-toggle, #vv-toast { transition: none !important; }
 }
@@ -617,19 +568,19 @@ ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-s
   const cssToggle = `
 #vv-toggle {
   position: fixed; left: 8px; bottom: 8px; z-index: 2147483000;
-  width: 24px; height: 24px; padding: 0; border-radius: 50%;
-  border: 1px solid #6d2fb3; cursor: pointer;
-  background: radial-gradient(circle at 50% 50%, #000 0 26%, #4a1f7a 34%, #140a24 70%);
-  box-shadow: 0 0 6px rgb(181 124 255 / .55);
-  opacity: .55; transition: opacity .2s, box-shadow .2s;
+  width: 22px; height: 22px; padding: 0; border-radius: 50%;
+  border: 1px solid #3b3346; cursor: pointer;
+  background: radial-gradient(circle at 50% 50%, #8f45e6 0 14%, #2a2433 24%, #0c0a10 70%);
+  box-shadow: 0 0 0 1px #000;
+  opacity: .5; transition: opacity .2s, box-shadow .2s, border-color .2s;
 }
-#vv-toggle:hover, #vv-toggle:focus-visible { opacity: 1; box-shadow: 0 0 10px rgb(181 124 255 / .9); outline: none; }
+#vv-toggle:hover, #vv-toggle:focus-visible { opacity: 1; border-color: #8f45e6; box-shadow: 0 0 8px rgb(143 69 230 / .6); outline: none; }
 html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
 #vv-toast {
-  position: fixed; left: 40px; bottom: 10px; z-index: 2147483000;
-  padding: 4px 10px; border-radius: 4px; pointer-events: none;
-  font: 12px/1.4 sans-serif; color: #e8ddff; background: #140a24;
-  border: 1px solid #6d2fb3; box-shadow: 0 0 8px rgb(181 124 255 / .5);
+  position: fixed; left: 38px; bottom: 9px; z-index: 2147483000;
+  padding: 4px 10px; border-radius: 3px; pointer-events: none;
+  font: 12px/1.4 sans-serif; color: #e6e0ee; background: #0c0a10;
+  border: 1px solid #3b3346; box-shadow: inset 0 -1px 0 #6d2fb3, 0 4px 12px rgb(0 0 0 / .8);
   opacity: 0; transition: opacity .25s;
 }
 #vv-toast.show { opacity: 1; }
