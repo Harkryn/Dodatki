@@ -214,7 +214,7 @@ Funkcje:
 - **kula HP** — wnętrze z czarnego obsydianu, poziom HP wyznacza jasna, delikatnie pulsująca fioletowa tafla (prawdziwy poziom z gry, procent zostaje biały i czytelny); kula oprawiona w **pierścień ze spękanego bazaltu**, który bardzo wolno krąży (fioletowa szczelina wędruje wokół kuli), a spod niego wychodzą **pęknięcia**, przez które przebiega i trzaska fioletowa energia — zapętlona animacja wygenerowana na Hugging Face (FLUX + Wan 2.2), wstrzymywana w ukrytej karcie i przy „ogranicz ruch”,
 - **pasek doświadczenia** — ciemny fiolet pustki z jaśniejszą krawędzią i linią energii, po którym wolno przepływa połysk (w obu paskach w stronę kuli), czarne koryto z wewnętrznym cieniem; paski i kapsuły „% doświadczenia” i „czas” w cienkiej ramie z wulkanicznego szkła z ametystami, tej samej co okna — bez metalowych skrzydeł i ozdób gry wokół kuli,
 - **paski** — HP zostaje czerwone (czytelność w walce), druga belka w przygaszonym fiolecie, grafitowa listwa; paski nad postaciami w walce bez zmian,
-- **ikona pingu** — ten sam półokrągły wskaźnik co w grze, w kolorach motywu: segmenty zapalają się od dołu wraz z lagiem (fiolet, przy dużym lagu magenta),
+- **ikona pingu** — ten sam półokrągły wskaźnik co w grze, w kolorach motywu: odbity w pionie, segmenty zapalają się od góry wraz z lagiem (fiolet, przy dużym lagu magenta),
 - **walka** — okno i dziennik walki w czerni (kolory wpisów z gry), przycisk „Auto” z fioletową krawędzią,
 - **minimapa** — sama mapa bez zmian, grafitowa ramka,
 - **przyciski** — grafitowe płytki, przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,

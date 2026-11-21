@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.12.0
+// @version      1.12.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.12.0';
+  const VERSION = '1.12.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -521,7 +521,9 @@ ${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-edge) !impor
       `<circle cx='15' cy='13' r='2.2' fill='#0c0a10' stroke='#3b3346' stroke-width='.6'/></svg>`;
     return [0, 1, 2, 3, 4, 5].map((n) => `${N} .bottom-panel-of-bottom-positioner .lagmeter .lag.lag-${n} {
   background: url("data:image/svg+xml;utf8,${encodeURIComponent(svg(n))}") center / 16px 26px no-repeat !important;
-}`).join('\n');
+}`).join('\n') + `
+/* odbita w pionie – segmenty zapalają się od góry */
+${N} .bottom-panel-of-bottom-positioner .lagmeter .lag { transform: scaleY(-1); }`;
   })();
 
   /* =====================================================================
