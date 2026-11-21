@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.20.3
+// @version      1.21.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.20.3';
+  const VERSION = '1.21.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -116,6 +116,50 @@
       `<g stroke='#050208' stroke-width='3.2'>${all}</g>` +
       `<g stroke='#b57cff' stroke-width='1.4'>${all}</g>` +
       `<g stroke='#f0e4ff' stroke-width='.5' stroke-opacity='.8'>${all}</g></g></svg>`;
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+  })();
+
+  // Pęknięcia pierścienia wokół kuli HP: w układzie grafiki pierścienia (512×512, środek 256, kamień między
+  // promieniem ~190 a ~246). Szczeliny biegną w poprzek pierścienia z drobnym zygzakiem i odgałęzieniami,
+  // kilka krótkich rys wzdłuż obwodu. Ten sam styl co nadproże sklepu (ciemny rdzeń, fiolet, poświata, żyłka).
+  const RING_CRACKS = (() => {
+    let seed = 13;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const f = (n) => Math.round(n * 10) / 10;
+    const P = (r, a) => `${f(256 + Math.cos(a) * r)} ${f(256 + Math.sin(a) * r)}`;
+    const R0 = 192, R1 = 244;
+    const paths = [];
+    for (let i = 0; i < 11; i++) {
+      const a0 = (i / 11) * Math.PI * 2 + (rnd() - 0.5) * 0.35;
+      const fromIn = rnd() > 0.5;
+      const len = 0.55 + rnd() * 0.45;                 // jaką część szerokości pierścienia przecina
+      const steps = 4;
+      let d = `M${P(fromIn ? R0 : R1, a0)}`, a = a0;
+      for (let s = 1; s <= steps; s++) {
+        const t = (s / steps) * len;
+        a += (rnd() - 0.5) * 0.07;
+        const r = fromIn ? R0 + (R1 - R0) * t : R1 - (R1 - R0) * t;
+        d += ` L${P(r, a)}`;
+        if (s === 2 && rnd() > 0.4) {
+          const ba = a + (rnd() > 0.5 ? 1 : -1) * (0.05 + rnd() * 0.06);
+          const br = r + (fromIn ? 1 : -1) * (8 + rnd() * 10);
+          paths.push(`M${P(r, a)} L${P(br, ba)}`);
+        }
+      }
+      paths.push(d);
+    }
+    for (let i = 0; i < 4; i++) {                       // rysy wzdłuż obwodu
+      const a0 = rnd() * Math.PI * 2, r = R0 + 14 + rnd() * 30;
+      paths.push(`M${P(r, a0)} L${P(r + (rnd() - 0.5) * 6, a0 + 0.08)} L${P(r + (rnd() - 0.5) * 6, a0 + 0.16)}`);
+    }
+    const all = paths.map((d) => `<path d='${d}'/>`).join('');
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='512' height='512'>` +
+      `<defs><filter id='g' x='-10%' y='-10%' width='120%' height='120%'><feGaussianBlur stdDeviation='4'/></filter></defs>` +
+      `<g fill='none' stroke-linecap='round' stroke-linejoin='round'>` +
+      `<g stroke='#8f45e6' stroke-width='12' stroke-opacity='.55' filter='url(#g)'>${all}</g>` +
+      `<g stroke='#050208' stroke-width='5'>${all}</g>` +
+      `<g stroke='#b57cff' stroke-width='2.4'>${all}</g>` +
+      `<g stroke='#f0e4ff' stroke-width='.9' stroke-opacity='.85'>${all}</g></g></svg>`;
     return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
   })();
 
@@ -885,7 +929,17 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after {
   animation: vv-orb-ring 90s linear infinite;
   pointer-events: none; z-index: 1;
 }
+/* pęknięcia na pierścieniu: osobna warstwa w tym samym miejscu, obraca się razem z kamieniem (ta sama animacja,
+   startuje w tej samej chwili) i dodatkowo pulsuje fioletem; z-index 2 – nad kamieniem */
+${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::before {
+  content: "";
+  position: absolute; left: 268px; top: -7px; width: 124px; height: 124px;
+  background: ${RING_CRACKS} center / 100% 100% no-repeat;
+  animation: vv-orb-ring 90s linear infinite, vv-ring-glow 4s ease-in-out infinite;
+  pointer-events: none; z-index: 2;
+}
 @keyframes vv-orb-ring { to { transform: rotate(360deg); } }
+@keyframes vv-ring-glow { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
 ${N} .bottom-panel-of-bottom-positioner .bottom-panel-pointer-bg { z-index: 2; }
 /* metalowe skrzydła i ozdoby gry wokół kuli – usunięte (kulę oprawia bazaltowy pierścień, paski – rama okien) */
 ${N} .interface-layer .bottom-panel-graphic { background: none !important; filter: none !important; }
@@ -940,6 +994,7 @@ ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-s
   ${N} .widget-button.green.window-is-open,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after,
+  ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::before,
   ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner::after { animation: none !important; }
   ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: none !important; }
   #vv-toggle, #vv-toast { transition: none !important; }
