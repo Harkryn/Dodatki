@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.19.0
+// @version      1.19.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.19.0';
+  const VERSION = '1.19.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -608,17 +608,13 @@ ${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat {
 ${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px #000, 0 0 3px #000 !important; }
 
 /* --- sklep ---
-   Markiza przygaszona do grafitu z nutą fioletu i cienką fioletową linią pod spodem. Siatka towarów oraz pola
-   „kup” i „sprzedaj” w ramach z wulkanicznego szkła z polami jak w torbie (ciemne przerwy między komórkami).
-   Ramy wystają ~9 px, więc napisy „Buy”/„Sell” są podniesione nad ramy, a opis sklepu opuszczony pod ramę.
-   Kolory bilansu (zielony/czerwony) zostają z gry. */
-${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) brightness(.33) contrast(1.2) sepia(.35) hue-rotate(220deg) saturate(1.3) !important; }
-${N} .shop-wrapper .shop-background::after {
-  content: "";
-  position: absolute; left: 0; right: 0; top: 37px; height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(143 69 230 / .55) 25%, rgb(143 69 230 / .55) 75%, transparent);
-  pointer-events: none;
-}
+   Bez markizy (daszka). Siatka towarów oraz pola „kup” i „sprzedaj” w ramach z wulkanicznego szkła z polami
+   jak w torbie (ciemne przerwy między komórkami). Ramy wystają ~9 px, więc napisy „Buy”/„Sell” są podniesione
+   nad ramy, a opis sklepu opuszczony pod ramę. Kolory bilansu (zielony/czerwony) zostają z gry. */
+${N} .shop-wrapper .shop-background .canopy { display: none !important; }
+/* skrzynia złota i napis „Need more gold?” w dolnym pasku okien – ukryte; przyciski „Buy gold” i „Recover items” zostają */
+${N} .premium-footer__chest,
+${N} .premium-footer__label { display: none !important; }
 ${N} .shop-wrapper .shop-background .paper-1,
 ${N} .shop-wrapper .shop-background .paper-2 {
   background: var(--vv-bg-1) !important;
