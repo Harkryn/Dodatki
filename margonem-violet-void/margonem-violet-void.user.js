@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.7.0
+// @version      1.8.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -20,6 +20,7 @@
 // @resource     vvTitlePlate https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-plate.webp
 // @resource     vvTitleGem   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-gem.webp
 // @resource     vvHudButtons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/hud-buttons.webp
+// @resource     vvOrbCracks  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-cracks.mp4
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // ==/UserScript==
@@ -36,7 +37,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.7.0';
+  const VERSION = '1.8.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -63,7 +64,8 @@
     frame: res('vvFrame', 'frame.webp'),            // 192×192, 9-slice: wycinek 30 px
     plate: res('vvTitlePlate', 'title-plate.webp'), // 360×35, końce 46 px
     gem: res('vvTitleGem', 'title-gem.webp'),       // 20×36
-    hud: res('vvHudButtons', 'hud-buttons.webp')    // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
+    hud: res('vvHudButtons', 'hud-buttons.webp'),   // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
+    orbFx: res('vvOrbCracks', 'orb-cracks.mp4')     // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
   };
 
   // Przydział kafli przyciskom HUD w kolejności, w jakiej stoją na belkach – sąsiednie dostają inne kamienie
@@ -519,14 +521,38 @@ ${N} .interface-element-progress-bar-1 .value { color: #fff !important; text-sha
 ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner {
   filter: hue-rotate(240deg) saturate(.9) brightness(.8);
 }
-/* obudowa kuli HP – cienki fioletowy pierścień (krew w kuli zostaje czerwona) */
+/* ===== Kula HP: obsydian z linią energii =====
+   Wnętrze czarne; poziom HP wyznacza jasna fioletowa tafla na górze „krwi” (wysokość .blood ustawia gra = prawdziwe HP).
+   Tło .blood z !important wygrywa z pozycją klatki sprite'a, którą gra wpisuje inline co klatkę. */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper {
+  background: radial-gradient(circle at 50% 40%, #0c0a10, #030204 75%) !important;
   box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-1), 0 0 calc(8px * var(--vv-k)) var(--vv-glow);
 }
+${N} .bottom-panel-of-bottom-positioner .glass { opacity: .22; filter: grayscale(1); }
+${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
+  background: linear-gradient(rgb(143 69 230 / .55), rgb(28 14 44 / .9) 10px, #0b0712 60%, #060509) !important;
+}
+${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--vv-e-1);
+  box-shadow: 0 0 6px 1px rgb(181 124 255 / calc(.85 * var(--vv-k)));
+  animation: vv-orb-line 3.2s ease-in-out infinite;
+}
+@keyframes vv-orb-line { 50% { opacity: .55; box-shadow: 0 0 10px 2px rgb(181 124 255 / calc(.55 * var(--vv-k))); } }
+${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp { position: relative; z-index: 3; }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
   color: #fff !important;
-  text-shadow: 0 0 4px #000, 0 1px 2px #000 !important;
+  text-shadow: 0 0 4px #000, 0 0 8px #000, 0 1px 2px #000 !important;
 }
+/* pierścień pęknięć wokół kuli: zapętlone wideo (czarne tło znika dzięki mix-blend-mode: screen),
+   leży pod kulą (kula ma z-index 1), środek pęknięć pokrywa się ze środkiem kuli (330, 55 w dolnym panelu) */
+.vv-orb-fx {
+  position: absolute; left: 248px; top: -27px; width: 164px; height: 164px;
+  object-fit: cover; pointer-events: none; z-index: 0;
+  mix-blend-mode: screen; filter: contrast(1.2) brightness(calc(.75 + .25 * var(--vv-k)));
+}
+html:not(.${ON}) .vv-orb-fx { display: none; }
 /* listwa wokół kuli: grafit zamiast brązu */
 ${N} .interface-layer .bottom-panel-graphic { filter: grayscale(1) brightness(.45) contrast(1.1); }
 
@@ -566,7 +592,8 @@ ${N} .widget-button.green.window-is-open { animation: vv-pulse 3.6s ease-in-out 
 ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-shadow .2s ease, background-color .2s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  ${N} .widget-button.green.window-is-open { animation: none !important; }
+  ${N} .widget-button.green.window-is-open,
+  ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: none !important; }
   ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: none !important; }
   #vv-toggle, #vv-toast { transition: none !important; }
 }
@@ -632,6 +659,7 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
   const toggle = () => {
     set(KEY_ON, !enabled());
     apply();
+    ensureOrbFx();
     toast(`Fioletowa Pustka: ${enabled() ? 'włączona' : 'wyłączona'}`);
   };
   const cycleGlow = () => {
@@ -670,6 +698,30 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     document.body.append(b, t);
   };
 
+  /* --- animacja wokół kuli HP (wideo) ---
+     Gra potrafi przebudować dolny panel, więc wideo jest pilnowane przez obserwator z debounce.
+     Przeglądarka pauzuje wideo w ukrytej karcie – po powrocie wznawiamy. Przy „ogranicz ruch” stoi pierwsza klatka. */
+  const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  const ensureOrbFx = () => {
+    const panel = document.querySelector('.bottom-panel-of-bottom-positioner');
+    if (!panel) return;
+    let v = panel.querySelector(':scope > video.vv-orb-fx');
+    if (!v) {
+      v = document.createElement('video');
+      v.className = 'vv-orb-fx';
+      v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
+      v.setAttribute('muted', ''); v.setAttribute('aria-hidden', 'true');
+      v.src = IMG.orbFx;
+      panel.append(v);
+    }
+    const shouldPlay = enabled() && !reduceMotion() && document.visibilityState === 'visible';
+    if (shouldPlay && v.paused) v.play().catch(() => { /* autoplay zablokowany – spróbujemy przy kolejnym sprawdzeniu */ });
+    else if (!shouldPlay && !v.paused) v.pause();
+  };
+  let orbDebounce = 0;
+  const orbObs = new MutationObserver(() => { clearTimeout(orbDebounce); orbDebounce = setTimeout(ensureOrbFx, 300); });
+  document.addEventListener('visibilitychange', ensureOrbFx);
+
   // Strona gry rozpoznana → klasa vv-game (reguły globalne) + przycisk. Obserwator z debounce,
   // odłączany, gdy interfejs zostanie potwierdzony (albo po 60 s – np. strona logowania).
   let debounce = 0;
@@ -678,6 +730,9 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     if (iface !== 'ni') return;
     root.classList.add('vv-game');
     addToggleButton();
+    const layer = document.querySelector('.interface-layer') || document.body;
+    orbObs.observe(layer, { childList: true, subtree: true });
+    ensureOrbFx();
   };
   const check = () => {
     const iface = detectDom();

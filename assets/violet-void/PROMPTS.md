@@ -54,3 +54,13 @@ Prompty dodatkowych kamieni (ta sama obróbka co F):
 - **F6** (seed 82186131): … Rough charred black basalt block with crumbled edges and fine hairline cracks, only a few tiny specks of dim violet light visible deep in the cracks along the right edge …
 
 (Pominięte „…” to wspólny początek i koniec promptu F: „Single square game UI button tile, top-down flat view on pure black background.” oraz „Flat dark center left empty. Extremely dark, low key lighting, gloomy, mostly pure black with dark charcoal texture, no icon, no text, no glow cloud”.)
+
+## Kula HP — animacja wokół kuli (wybrana A3 „Pierścień pęknięć”)
+
+Klatka bazowa: FLUX.1 Krea-dev, 768×768 (seed 1705641850): A perfectly round empty pitch black disc in the exact center, surrounded by a thin ring of jagged glowing violet cracks like fractured black obsidian, small branching fissures leaking dim purple light, ring hugging the disc edge, pure black background, dark, subtle, no text
+
+Wideo: Wan 2.2 first–last frame (`mcp-tools/wan-2-2-first-last-frame`), ta sama klatka jako pierwsza i ostatnia (płynna pętla), 3 s, 8 kroków, seed 1112565403, 480×480 → `orb-cracks.mp4` (103 KB):
+static camera, violet energy flickers and crackles through the cracks around the black disc, pulses of light travel along the fissures, small sparks flicker at the crack tips, the black disc stays still, seamless loop, pure black background
+
+W grze: wideo pod kulą, `mix-blend-mode: screen` (czerń znika), czarne koło z klipu pokrywa się z kulą.
+Odrzucone propozycje tej rundy (A1 mgła, A2 odłamki, A4 iskry, A5 kometa) nie trafiły do repo.
