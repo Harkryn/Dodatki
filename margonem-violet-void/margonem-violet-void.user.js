@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.23.2
+// @version      1.24.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -23,6 +23,7 @@
 // @resource     vvOrbCracks  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-cracks.mp4
 // @resource     vvOrbRing    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-ring.webp
 // @resource     vvShopLintel https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/shop-lintel.webp
+// @resource     vvLoading    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/loading.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // ==/UserScript==
@@ -39,7 +40,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.23.2';
+  const VERSION = '1.24.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -69,7 +70,8 @@
     hud: res('vvHudButtons', 'hud-buttons.webp'),   // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
     orbFx: res('vvOrbCracks', 'orb-cracks.mp4'),    // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
     ring: res('vvOrbRing', 'orb-ring.webp'),        // 256×256, kamienny pierścień wokół kuli (wewn. promień = 0,367 szerokości)
-    lintel: res('vvShopLintel', 'shop-lintel.webp') // 960×65, bazaltowe nadproże sklepu (w miejscu markizy)
+    lintel: res('vvShopLintel', 'shop-lintel.webp'), // 960×65, bazaltowe nadproże sklepu (w miejscu markizy)
+    loading: res('vvLoading', 'loading.webp')        // 1600×900, tło ekranu wczytywania (pęknięty bazaltowy monolit)
   };
 
   // Przydział kafli przyciskom HUD w kolejności, w jakiej stoją na belkach – sąsiednie dostają inne kamienie
@@ -757,6 +759,28 @@ ${N} .shop-wrapper .shop-info-wrapper,
 ${N} .shop-wrapper .shop-info-wrapper * { color: var(--vv-text-dim) !important; text-shadow: 0 1px 2px #000; }
 ${N} .shop-wrapper .total-price { color: var(--vv-text) !important; font-variant: small-caps; letter-spacing: .06em; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-edge) !important; }
+
+/* --- ekran wczytywania ---
+   Tło: pęknięty bazaltowy monolit w pustce (cover), logo gry przebarwione ze złota na ametyst z poświatą,
+   pasek postępu (272×7) jak pasek doświadczenia – fiolet z jasną krawędzią na czarnym korycie w ramie okien. */
+${N} .layer.loader-layer {
+  background: radial-gradient(ellipse 60% 45% at 50% 50%, rgb(0 0 0 / .45), transparent 70%),
+              url("${IMG.loading}") center / cover no-repeat, #000 !important;
+}
+${N} .layer.loader-layer .loader-image {
+  filter: sepia(1) hue-rotate(225deg) saturate(2.6) brightness(.95) drop-shadow(0 0 10px rgb(143 69 230 / .6)) drop-shadow(0 2px 4px #000);
+}
+${N} .layer.loader-layer .progress-bar .inner-wrapper {
+  background: #050407 !important;
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${IMG.frame}") 30 / 6px / 5px stretch;
+  box-shadow: inset 0 1px 3px #000, 0 0 0 5px rgb(6 5 9 / .9), 0 0 calc(14px * var(--vv-k)) 5px var(--vv-glow);
+}
+${N} .layer.loader-layer .progress-bar .inner-wrapper .inner {
+  background: linear-gradient(#d9b8ff 0 1px, #8f45e6 1px, #6d2fb3 50%, #4a1f7a) !important;
+  box-shadow: 1px 0 6px rgb(181 124 255 / calc(.7 * var(--vv-k)));
+}
 
 `;
 
