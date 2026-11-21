@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.25.0
+// @version      1.26.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -40,7 +40,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.25.0';
+  const VERSION = '1.26.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -256,6 +256,22 @@ ${N} .one-item-on-divide-list.active {
   box-shadow: inset 2px 0 0 var(--vv-v-3);
 }
 ${N} .one-item-on-divide-list:not(.active):hover { background: linear-gradient(90deg, rgb(143 69 230 / .1), transparent 80%) !important; }
+/* NI – tabele (c-table: karty zadań w dzienniku i inne okna z tabelami): ciemny nagłówek z fioletową kreską
+   zamiast szarego, grafitowe linie komórek, poziom zadania w jasnym fiolecie, ikony przygaszone do fioletu */
+${N} .c-table th {
+  background: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
+  border-color: var(--vv-edge) !important;
+  box-shadow: inset 0 -1px 0 var(--vv-v-2);
+  color: var(--vv-text) !important;
+  text-shadow: 0 1px 2px #000;
+}
+${N} .c-table td,
+${N} .c-table tr,
+${N} .c-table table { border-color: var(--vv-edge) !important; }
+${N} .c-table td { background-color: rgb(6 5 9 / .55); }
+${N} .c-table .quest-level { color: var(--vv-e-1) !important; }
+${N} .c-table .show-more-icon { filter: grayscale(1) brightness(.85) sepia(.4) hue-rotate(220deg) saturate(1.6); }
+${N} .c-table .show-more-icon:hover { filter: grayscale(1) brightness(1.1) sepia(.5) hue-rotate(220deg) saturate(2); }
 `;
 
   /* =====================================================================
