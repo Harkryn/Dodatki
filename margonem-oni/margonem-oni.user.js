@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.2.0
+// @version      1.3.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -707,6 +707,72 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
 `;
 
   /* =====================================================================
+   * === TOOLTIPY ===
+   * Karta z czarnego lakieru (#0e0a0a / 97%) – tekst washi ~15:1, przygaszony ~5,4:1 (WCAG AA).
+   * Kolor rzadkości (--oni-rar, „r g b”) z klasy ramki ikony w nagłówku (t-…): obwódka, górna linia,
+   * łuna i oprawa ikony. Nazwy i statystyki zachowują kolory gry. Zwykłe przedmioty – stonowana czerwień.
+   * ===================================================================== */
+  const cssTooltips = `
+${N} .tip-wrapper { --oni-rar: 122 18 18; }
+${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --oni-rar: 255 251 0; }
+${N} .tip-wrapper:has(.item-head .highlight.t-her) { --oni-rar: 56 184 235; }
+${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --oni-rar: 255 89 175; }
+${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --oni-rar: 255 132 0; }
+${N} .tip-wrapper:has(.item-head .highlight.t-art) { --oni-rar: 225 64 70; }
+${N} .tip-wrapper {
+  border-style: solid; border-width: 0;
+  border-image: var(--oni-frame-thin) 6 / 4px / 2px stretch !important;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / .9),
+    0 0 14px rgb(var(--oni-rar) / .22),
+    0 12px 28px rgb(0 0 0 / .9) !important;
+}
+${N} .tip-wrapper .content {
+  background:
+    radial-gradient(120% 60px at 50% 0, rgb(var(--oni-rar) / .1), transparent 100%),
+    linear-gradient(rgb(22 16 16 / .97), rgb(14 10 10 / .97) 60px, rgb(7 5 5 / .97)) !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--oni-rar) / .32), inset 0 0 22px rgb(0 0 0 / .7);
+  color: var(--oni-text) !important;
+  text-shadow: 0 1px 2px #000;
+}
+/* górna linia w kolorze rzadkości */
+${N} .tip-wrapper.normal-tip::before {
+  content: "";
+  position: absolute; left: 12%; right: 12%; top: 1px; height: 1px;
+  background: linear-gradient(90deg, rgb(var(--oni-rar) / 0), rgb(var(--oni-rar) / .9) 50%, rgb(var(--oni-rar) / 0));
+  pointer-events: none; z-index: 2;
+}
+/* nagłówek: łuna rzadkości za ikoną, ikona w oprawie, pod spodem pociągnięcie pędzla */
+${N} .tip-wrapper .item-head {
+  border-color: transparent !important;
+  background:
+    var(--oni-brush-dim) center bottom / 94% 3px no-repeat,
+    radial-gradient(70px 44px at 22px 50%, rgb(var(--oni-rar) / .22), transparent 100%) !important;
+  box-shadow: none !important;
+  padding-bottom: 6px !important;
+}
+${N} .tip-wrapper .item-head .item {
+  background: radial-gradient(circle, rgb(var(--oni-rar) / .22), var(--oni-k0) 72%) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgb(var(--oni-rar) / .6), 0 0 0 3px #000, 0 0 10px rgb(var(--oni-rar) / .4) !important;
+}
+${N} .tip-wrapper .item-name { font-weight: bold; text-shadow: 0 0 6px rgb(var(--oni-rar) / .35), 0 1px 2px #000 !important; }
+${N} .tip-wrapper .item-type,
+${N} .tip-wrapper .item-builds { color: var(--oni-dim) !important; letter-spacing: .03em; }
+${N} .tip-wrapper .item-rarity { color: rgb(var(--oni-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+/* sekcje: pędzlowe separatory zamiast cienkich linii gry (gra ustawia kolor linii inline) */
+${N} .tip-wrapper .item-tip-section { border-bottom-color: transparent !important; position: relative; }
+${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
+  content: "";
+  position: absolute; left: 4%; right: 4%; bottom: 0; height: 3px;
+  background: var(--oni-brush-dim) center / 100% 100% no-repeat;
+  opacity: .75;
+  pointer-events: none;
+}
+/* proste tooltipy (np. nad przyciskami) – lakier z czerwoną krawędzią */
+${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 -1px 0 var(--oni-r2); }
+`;
+
+  /* =====================================================================
    * === ANIMACJE (lekkie; wyłączane przy prefers-reduced-motion) ===
    * ===================================================================== */
   const cssAnim = `
@@ -925,7 +991,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssAnim, cssToggle].join('\n'));
+  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'oni-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
