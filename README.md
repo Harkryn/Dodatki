@@ -220,7 +220,7 @@ Funkcje:
 - **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
 - **przełącznik** — mały okrągły przycisk w lewym dolnym rogu (klik: włącz/wyłącz, prawy klik: intensywność), skróty i menu Tampermonkey; stan zapamiętywany.
 
-Interfejsy: **NI** ma pełne wsparcie. **SI** ma na razie tylko podstawowe style (scrollbary, pola, zaznaczenie, główne okna), a jego selektory czekają na sprawdzenie w grze. Interfejs jest rozpoznawany po ciasteczku gry `interface`, potem po elementach strony. Mapa (canvas), sprite'y i logika gry pozostają nietknięte.
+Interfejs: **wyłącznie nowy (NI)**. Na starym interfejsie (SI) skrypt nic nie robi. Interfejs jest rozpoznawany po ciasteczku gry `interface`, potem po elementach strony. Mapa (canvas), sprite'y i logika gry pozostają nietknięte.
 
 **Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 

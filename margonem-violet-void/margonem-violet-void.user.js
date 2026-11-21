@@ -2,8 +2,8 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.6.0
-// @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
+// @version      1.6.1
+// @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -35,7 +35,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.6.0';
+  const VERSION = '1.6.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -45,9 +45,8 @@
   const get = (k, d) => { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch (e) { return d; } };
   const set = (k, v) => { try { if (typeof GM_setValue === 'function') GM_setValue(k, v); } catch (e) { /* brak GM */ } };
 
-  // Prefiksy reguł: NI = nowy interfejs, SI = stary; G = cała strona gry (scrollbary, zaznaczenie)
+  // Prefiksy reguł: N = nowy interfejs (NI); G = cała strona gry NI (scrollbary, zaznaczenie)
   const N = `html.${ON}.vv-ni`;
-  const S = `html.${ON}.vv-si`;
   const G = `html.${ON}.vv-game`;
   // okno „zwykłe” NI (bez przezroczystych i bez okien-dymków)
   const W = `${N} .border-window:not(.transparent):not(.tip-window)`;
@@ -138,7 +137,7 @@ ${N} .scrollbar-wrapper .handle:hover { background: var(--vv-v-2) !important; }
 `;
 
   /* =====================================================================
-   * === OKNA (NI: zwykłe, przezroczyste, dialog NPC, wspólne panele, przyciski; SI: podstawy) ===
+   * === OKNA (NI: zwykłe, przezroczyste, dialog NPC, wspólne panele, przyciski) ===
    * ===================================================================== */
   const cssWindows = `
 /* --- okno zwykłe: czerń w krystalicznej ramie z wulkanicznego szkła, ametystowe kryształy w narożnikach ---
@@ -306,17 +305,6 @@ ${N} .button.purple:not(.green):not(.disable):hover {
 }
 ${N} .button.disable { filter: grayscale(.6) brightness(.7); }
 
-/* --- SI (stary interfejs): podstawowe okna --- */
-${S} #dlgwin, ${S} .dlgwin {   /* TODO: zweryfikuj selektor (dialog NPC SI) */
-  background: var(--vv-bg-1) !important;
-  color: var(--vv-text) !important;
-  border: 1px solid var(--vv-edge) !important;
-  box-shadow: inset 0 1px 0 var(--vv-v-2), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
-}
-${S} #shop, ${S} #bagc, ${S} #panel {   /* TODO: zweryfikuj selektor (sklep / torby / panel SI) */
-  background-color: var(--vv-bg-1) !important;
-  box-shadow: 0 0 0 1px var(--vv-edge);
-}
 `;
 
   /* =====================================================================
@@ -370,16 +358,6 @@ ${N} .new-chat-window .chat-input-wrapper [contenteditable="true"] {   /* TODO: 
   caret-color: var(--vv-e-1);
 }
 
-/* --- SI --- */
-${S} #chat, ${S} #chattxt {   /* TODO: zweryfikuj selektor (czat SI) */
-  background: rgb(6 5 9 / .96) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-edge);
-}
-${S} #inpchat, ${S} #chat input {   /* TODO: zweryfikuj selektor (pole czatu SI) */
-  background: var(--vv-bg-0) !important;
-  color: var(--vv-text) !important;
-  border-color: var(--vv-edge) !important;
-}
 `;
 
   /* =====================================================================
@@ -457,10 +435,6 @@ ${N} .shop-wrapper .shop-background .paper-2 {
 ${N} .shop-wrapper .shop-content .items-grid .label { background: var(--vv-bg-0) !important; color: var(--vv-text) !important; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-edge) !important; }
 
-/* --- SI --- */
-${S} #panel .item, ${S} #bag .item, ${S} #bagc .item {   /* TODO: zweryfikuj selektor (sloty SI) */
-  box-shadow: inset 0 0 0 1px var(--vv-edge);
-}
 `;
 
   /* =====================================================================
@@ -500,13 +474,6 @@ ${N} .tip-wrapper .item-head {
 ${N} .tip-wrapper .item-name { text-shadow: 0 1px 2px #000 !important; }
 ${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-edge) !important; }
 
-/* --- SI --- */
-${S} #tip, ${S} .tip {   /* TODO: zweryfikuj selektor (tooltip SI) */
-  background: rgb(11 10 15 / .97) !important;
-  color: var(--vv-text) !important;
-  border: 1px solid var(--vv-edge) !important;
-  box-shadow: inset 0 1px 0 var(--vv-v-2), 0 6px 18px rgb(0 0 0 / .85) !important;
-}
 `;
 
   /* =====================================================================
@@ -564,14 +531,6 @@ ${N} .battle-controller .button.auto-fight {   /* TODO: zweryfikuj selektor (prz
 /* minimapa: sama mapa bez zmian, tylko ramka */
 ${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge) !important; }
 
-/* --- SI --- */
-${S} #battle {   /* TODO: zweryfikuj selektor (okno walki SI) */
-  box-shadow: 0 0 0 2px var(--vv-edge), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
-}
-${S} #battle #battlelog {   /* TODO: zweryfikuj selektor (dziennik walki SI) */
-  background: rgb(6 5 9 / .95) !important;
-  color: var(--vv-text) !important;
-}
 `;
 
   /* =====================================================================
@@ -663,24 +622,19 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     toast(`Świecenie: ${GLOW_LABEL[next]}`);
   };
 
-  /* --- wykrywanie interfejsu ---
+  /* --- wykrywanie interfejsu (motyw obsługuje wyłącznie NI) ---
      Gra zapisuje wybrany interfejs w ciasteczku `interface` (ni / si) – działa od razu przy starcie.
-     Potem potwierdzamy po DOM: NI ma .game-window-positioner, SI – #centerbox / #base. */
+     Potem potwierdzamy po DOM: NI ma .game-window-positioner / .interface-layer. Na SI klasa vv-ni
+     nie jest ustawiana, więc żadna reguła motywu nie działa. */
   const DETECT_NI = '.game-window-positioner, .interface-layer';
-  const DETECT_SI = '#centerbox, #base';   // TODO: zweryfikuj selektor (znaczniki SI)
-  const setInterface = (iface) => {
-    root.classList.toggle('vv-ni', iface === 'ni');
-    root.classList.toggle('vv-si', iface === 'si');
-  };
+  const setInterface = (iface) => { root.classList.toggle('vv-ni', iface === 'ni'); };
   try {
     const m = /(?:^|;\s*)interface=(\w+)/.exec(document.cookie || '');
     if (m && /^(ni|si)$/i.test(m[1])) setInterface(m[1].toLowerCase());
   } catch (e) { /* brak dostępu do ciasteczek */ }
 
   const detectDom = () => {
-    if (document.querySelector(DETECT_NI)) return 'ni';
-    if (document.querySelector(DETECT_SI)) return 'si';
-    return null;
+    return document.querySelector(DETECT_NI) ? 'ni' : null;
   };
 
   const addToggleButton = () => {
@@ -702,6 +656,7 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
   let debounce = 0;
   const onGameFound = (iface) => {
     setInterface(iface);
+    if (iface !== 'ni') return;
     root.classList.add('vv-game');
     addToggleButton();
   };
