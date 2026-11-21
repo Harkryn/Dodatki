@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.31.1
+// @version      1.32.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -21,7 +21,9 @@
 // @resource     vvTitleGem   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-gem.webp
 // @resource     vvHudButtons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/hud-buttons.webp
 // @resource     vvOrbCracks  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-cracks.mp4
-// @resource     vvOrbRing    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-ring.webp
+// @resource     vvOrbLiquidA https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-liquid-a.mp4
+// @resource     vvOrbLiquidB https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-liquid-b.mp4
+// @resource     vvOrbRing   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-ring.webp
 // @resource     vvShopLintel https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/shop-lintel.webp
 // @resource     vvLoading    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/loading.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
@@ -69,6 +71,8 @@
     gem: res('vvTitleGem', 'title-gem.webp'),       // 20×36
     hud: res('vvHudButtons', 'hud-buttons.webp'),   // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
     orbFx: res('vvOrbCracks', 'orb-cracks.mp4'),    // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
+    liqA: res('vvOrbLiquidA', 'orb-liquid-a.mp4'),  // 480×480, 3 s: mgławica w cieczy kuli HP, klatka A → B (FLUX + Wan 2.2)
+    liqB: res('vvOrbLiquidB', 'orb-liquid-b.mp4'),  // 480×480, 3 s: klatka B → A (odtwarzane na zmianę z A = płynna pętla)
     ring: res('vvOrbRing', 'orb-ring.webp'),        // 256×256, kamienny pierścień wokół kuli (wewn. promień = 0,367 szerokości)
     lintel: res('vvShopLintel', 'shop-lintel.webp'), // 960×65, bazaltowe nadproże sklepu (w miejscu markizy)
     loading: res('vvLoading', 'loading.webp')        // 1600×900, tło ekranu wczytywania (grota z wulkanicznego szkła z ametystami)
@@ -91,9 +95,9 @@
     '<path d="M10 10l4.2 4.2" stroke="#9a7fc4" stroke-width="2.2" stroke-linecap="round"/></svg>');
 
   // Ciecz w kuli HP: kafle bez szwów (zapętlają się przy przesunięciu o własną szerokość).
-  // ORB_WAVE_BACK / ORB_WAVE_FRONT – dwie fale tafli (tylna ciemniejsza, przednia z jasną krawędzią), 10 px wysokości:
+  // ORB_WAVE_BACK / ORB_WAVE_FRONT – dwie fale tafli (tylna ciemniejsza, przednia z jasną krawędzią):
   // grzbiety nad poziomem HP, wypełnienie pod falą zanika ku dołowi (wtapia się w górę „krwi”).
-  // ORB_FLOW – nurty w cieczy: szum fraktalny (stitchTiles = bez szwów), tylko jasne smugi jako fiolet z przezroczystością.
+  // Wnętrze cieczy to wideo (IMG.liqA / IMG.liqB, patrz ensureOrbLiquid).
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
   // Kafel fali 16 px wysokości, linia spoczynkowa w połowie (8 px); grzbiety do 2·amp nad nią.
   const wave = (w, amp, fill, stroke) => svgUrl(
@@ -105,17 +109,6 @@
     '</svg>');
   const ORB_WAVE_BACK = wave(42, 3.2, '#5b26a0', '#8f45e6');
   const ORB_WAVE_FRONT = wave(60, 2.6, '#9a55f0', '#e2ccff');
-  const ORB_FLOW = svgUrl(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="f" x="0" y="0" width="100%" height="100%">' +
-    '<feTurbulence type="fractalNoise" baseFrequency=".028 .05" numOctaves="2" seed="7" stitchTiles="stitch"/>' +
-    '<feColorMatrix values="0 0 0 0 .78  0 0 0 0 .52  0 0 0 0 1  3.6 0 0 0 -1.5"/></filter>' +
-    '<rect width="140" height="140" filter="url(#f)"/></svg>');
-  // Pęcherzyki unoszące się w cieczy: kafel 98×120 (szerokość kuli), zapętla się w pionie.
-  const ORB_BUBBLES = svgUrl(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="98" height="120"><g fill="#c9a3ff" fill-opacity=".18" stroke="#d9b8ff" stroke-opacity=".75" stroke-width=".7">' +
-    [[14, 18, 1.6], [31, 74, 1.1], [47, 40, 2], [58, 104, 1.3], [70, 12, 1], [83, 62, 1.7], [22, 96, 1.2], [90, 30, .9], [39, 6, .9], [64, 84, 1.5]]
-      .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('') +
-    '</g></svg>');
 
   // Popękania nadproża sklepu: poszarpane szczeliny z odgałęzieniami w układzie grafiki nadproża (960×65),
   // z pominięciem ametystu pośrodku (x ≈ 455–525). Ciemny rdzeń szczeliny + fiolet z poświatą + jasna żyłka.
@@ -1146,22 +1139,34 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before {
   50% { transform: rotate(3deg) translateY(0); }
   75% { transform: rotate(0deg) translateY(1px); }
 }
-/* wnętrze cieczy: wyraźne smugi jaśniejszego fioletu przepływające w poprzek i w górę (dwie warstwy w różnej skali
-   i kierunku, więc wzór się nie powtarza na oko) oraz unoszące się pęcherzyki; jaśniejsza poświata tuż pod taflą.
-   Procent HP leży wyżej (z-index 3) z czarnym cieniem, więc zostaje czytelny. */
+/* poświata tuż pod taflą */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::after {
   content: "";
   position: absolute; inset: 1px 0 0;
-  background:
-    ${ORB_BUBBLES} 0 0 / 98px 120px,
-    linear-gradient(rgb(181 124 255 / .35), transparent 14px),
-    ${ORB_FLOW} 0 0 / 140px 140px,
-    ${ORB_FLOW} 0 0 / 210px 210px;
-  opacity: calc(.55 + .2 * var(--vv-k));
-  animation: vv-orb-flow 10s linear infinite;
+  background: linear-gradient(rgb(181 124 255 / .35), transparent 14px);
   pointer-events: none;
 }
-@keyframes vv-orb-flow { to { background-position: 0 -120px, 0 0, 140px -140px, -210px -70px; } }
+/* wnętrze cieczy: mgławica wygenerowana na HF (FLUX + Wan 2.2) – dwa klipy A→B i B→A odtwarzane na zmianę (płynna
+   pętla), czerń klatek zamieniona na przezroczystość filtrem #vv-luma. Warstwa wideo jest większa od kuli i powoli
+   dryfuje (przesunięcie, obrót, „oddech”), więc mgła przepływa przez ciecz jak prąd. Przycięta do wysokości „krwi”
+   (= prawdziwe HP), wyrównana do dna kuli, więc obraz nie skacze przy zmianie HP. */
+.vv-orb-liquid { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+html:not(.${ON}) .vv-orb-liquid { display: none; }
+.vv-orb-liquid .vv-ld {
+  position: absolute; left: 50%; bottom: -40px; width: 150px; height: 150px; margin-left: -75px;
+  animation: vv-orb-drift 14s ease-in-out infinite alternate;
+}
+.vv-orb-liquid video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: brightness(calc(1.45 + .35 * var(--vv-k))) contrast(1.15) saturate(1.2) url(#vv-luma);
+  opacity: 0; transition: opacity .25s;
+}
+.vv-orb-liquid video.vv-on { opacity: 1; }
+@keyframes vv-orb-drift {
+  0% { transform: translate(-14px, 6px) rotate(-10deg) scale(1); }
+  50% { transform: translate(4px, -4px) rotate(4deg) scale(1.08); }
+  100% { transform: translate(16px, 4px) rotate(12deg) scale(.96); }
+}
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp { position: relative; z-index: 3; }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
   color: #fff !important;
@@ -1323,7 +1328,7 @@ ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-s
 @media (prefers-reduced-motion: reduce) {
   ${N} .widget-button.green.window-is-open,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before,
-  ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::after,
+  .vv-orb-liquid .vv-ld,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::before,
   ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner::after { animation: none !important; }
@@ -1460,6 +1465,45 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     const shouldPlay = enabled() && !reduceMotion() && document.visibilityState === 'visible';
     if (shouldPlay && v.paused) v.play().catch(() => { /* autoplay zablokowany – spróbujemy przy kolejnym sprawdzeniu */ });
     else if (!shouldPlay && !v.paused) v.pause();
+    ensureOrbLiquid(shouldPlay);
+  };
+  /* ciecz w kuli: dwa klipy (A→B, B→A) na zmianę – po końcu jednego startuje drugi od zera, więc pętla nie ma szwu.
+     Warstwa leży w .blood (przycięta do wysokości HP); gra nie przebudowuje wnętrza .blood, ale panel tak – stąd
+     sprawdzanie przy każdym ensureOrbFx. */
+  const ensureOrbLiquid = (shouldPlay) => {
+    const blood = document.querySelector('.bottom-panel-of-bottom-positioner .hp-indicator .blood');
+    if (!blood) return;
+    let box = blood.querySelector(':scope > .vv-orb-liquid');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'vv-orb-liquid';
+      box.setAttribute('aria-hidden', 'true');
+      const drift = document.createElement('div');
+      drift.className = 'vv-ld';
+      const clips = [IMG.liqA, IMG.liqB].map((src) => {
+        const c = document.createElement('video');
+        c.muted = true; c.playsInline = true; c.preload = 'auto';
+        c.setAttribute('muted', '');
+        c.src = src;
+        drift.append(c);
+        return c;
+      });
+      clips.forEach((c, i) => c.addEventListener('ended', () => {
+        const next = clips[1 - i];
+        next.currentTime = 0;
+        next.classList.add('vv-on');
+        c.classList.remove('vv-on');
+        if (box.dataset.play === '1') next.play().catch(() => {});
+      }));
+      clips[0].classList.add('vv-on');
+      box.append(drift);
+      blood.prepend(box);
+    }
+    box.dataset.play = shouldPlay ? '1' : '0';
+    const cur = box.querySelector('video.vv-on');
+    if (!cur) return;
+    if (shouldPlay && cur.paused) cur.play().catch(() => {});
+    else if (!shouldPlay && !cur.paused) cur.pause();
   };
   let orbDebounce = 0;
   const orbObs = new MutationObserver(() => { clearTimeout(orbDebounce); orbDebounce = setTimeout(ensureOrbFx, 300); });

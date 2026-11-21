@@ -83,3 +83,21 @@ FLUX.1 Krea-dev, 1536×256, obróbka jak przy kamieniach (czerń → przezroczys
 FLUX.1 Krea-dev, 1536×864 → 1600×900 WebP (jasność 82%, A przycięte z białego passe-partout):
 - **A** (seed 1934192933): Dark fantasy wide landscape, a huge cracked black basalt monolith floating in an endless dark void, faint violet light seeping from deep cracks in the stone, tiny broken stone shards drifting around it, very faint distant stars, mist at the bottom, extremely dark low key cinematic lighting, mostly black with violet accents, empty dark center area, no text, no characters, no planets
 - **B** (seed 1150029738): Dark fantasy wide view of a deep cave with walls of black volcanic glass and obsidian, clusters of sharp amethyst crystals growing from the rock glowing faintly violet in the darkness, faint mist on the floor, extremely dark low key cinematic lighting, mostly black with dim violet accents, empty dark center area, full bleed, no border, no text, no characters
+
+## Kula HP — ciecz we wnętrzu (od 1.32.0 wybrana D „mgławica w cieczy” → orb-liquid-a.mp4 + orb-liquid-b.mp4)
+
+Klatki: FLUX.1 Krea-dev, 768×768. Propozycje (A–D) na jednym prompcie bazowym, odrzucone nie trafiły do repo:
+- A (seed 1062332288): fioletowy atrament kłębiący się w czarnej wodzie,
+- B (seed 972562021): czarny obsydianowy płyn ze świecącymi ametystowymi żyłami,
+- C (seed 561518374): pęcherzyki i promienie światła w ciemnofioletowej cieczy,
+- **D** (seed 374294798): Dark cosmic fluid like a violet nebula dissolved in black liquid, soft luminous purple mist and faint glittering star-like specks suspended in the fluid, gentle flowing layers of light, mostly black with violet accents, extremely dark low key lighting, full frame liquid texture, no vortex, no spiral, no planets, no text
+- **D2** (ten sam seed 374294798, druga klatka pętli): jak D, ale „soft luminous purple mist drifting in long flowing wisps”.
+
+Wideo: Wan 2.2 first–last frame (`mcp-tools/wan-2-2-first-last-frame`), 3 s, 8 kroków, seed 1112565403, 480×480.
+Ta sama klatka na początku i końcu dawała prawie nieruchomy obraz, więc pętla składa się z dwóch klipów odtwarzanych na zmianę:
+`orb-liquid-a.mp4` (D → D2, 75 KB) i `orb-liquid-b.mp4` (D2 → D, 90 KB). Prompt obu:
+static camera, the glowing violet mist slowly flows, stretches and reshapes like ink in dark liquid, wisps unfurl and drift, glittering specks float and twinkle, smooth continuous fluid motion, dark background
+(negative: static, frozen, camera movement, zoom, blurry, text, watermark, overexposed)
+
+W grze: wideo w „krwi” kuli (przycięte do poziomu HP), czerń → przezroczystość filtrem #vv-luma, warstwa większa od kuli
+i powoli dryfuje w CSS (przesunięcie, obrót, „oddech”); falująca tafla na wierzchu rysowana w kodzie (SVG).
