@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.23.0
+// @version      1.23.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.23.0';
+  const VERSION = '1.23.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -1023,6 +1023,12 @@ ${N} .battle-controller .toggle-battle { filter: grayscale(1) brightness(.8) sep
 ${N} .battle-controller .attach-icon:hover,
 ${N} .battle-controller .toggle-battle:hover { filter: grayscale(1) brightness(1.1) sepia(.5) hue-rotate(220deg) saturate(2); }
 ${N} .battle-controller .battle-msg { color: var(--vv-text); text-shadow: 0 1px 2px #000; }
+/* komunikaty informacyjne (np. „Rozpoczęła się walka…”) – zamiast szarego paska delikatny fiolet z kreską */
+${N} .battle-controller .battle-msg.txt {
+  background-color: rgb(143 69 230 / .16) !important;
+  box-shadow: inset 2px 0 0 var(--vv-v-3);
+  color: var(--vv-text) !important;
+}
 ${N} .battle-controller .turn-prediction__item { border-color: var(--vv-edge) !important; }
 
 /* minimapa: sama mapa bez zmian, tylko ramka */
