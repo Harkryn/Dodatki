@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.29.3
+// @version      1.30.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -816,6 +816,31 @@ ${N} .widget-button:not(.disabled):hover {
 }
 ${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-2) !important; }
 ${N} .widget-button.disabled { filter: grayscale(.7) brightness(.6); }
+/* ikony na przyciskach HUD jak runy wyryte w bazalcie: przygaszona lawenda, ciemny wcięty cień pod spodem,
+   ledwie widoczna fioletowa łuna; złote/zielone ikony (np. wydarzenia, gwiazda) też w ametyście. Przy najechaniu
+   i przy otwartym oknie runa jaśnieje, jakby świeciła światłem z pęknięć. Plakietki powiadomień gry bez zmian. */
+${N} .widget-button .icon {
+  filter: grayscale(1) brightness(.78) sepia(.45) hue-rotate(220deg) saturate(1.7)
+          drop-shadow(0 1px 0 #000) drop-shadow(0 0 calc(2px * var(--vv-k)) rgb(143 69 230 / .35)) !important;
+  opacity: .92;
+}
+${N} .widget-button:not(.disabled):hover .icon,
+${N} .widget-button.window-is-open .icon {
+  filter: grayscale(1) brightness(1.05) sepia(.5) hue-rotate(220deg) saturate(2.1)
+          drop-shadow(0 1px 0 #000) drop-shadow(0 0 calc(4px * var(--vv-k)) rgb(181 124 255 / .65)) !important;
+  opacity: 1;
+}
+/* drobne ikony okien (przezroczystość, zwijanie, informacja) w tym samym stylu */
+${N} .border-window .increase-opacity,
+${N} .border-window .collapse,
+${N} .dialogue-window .increase-opacity,
+${N} .info-icon {
+  filter: grayscale(1) brightness(.8) sepia(.4) hue-rotate(220deg) saturate(1.5);
+}
+${N} .border-window .increase-opacity:hover,
+${N} .border-window .collapse:hover,
+${N} .dialogue-window .increase-opacity:hover,
+${N} .info-icon:hover { filter: grayscale(1) brightness(1.1) sepia(.5) hue-rotate(220deg) saturate(2); }
 ${HUD_TILES}
 /* panel statystyk (123×140): rama okien, nagłówek „STATS” na kamiennej tabliczce jak tytuły okien,
    wiersze rozdzielone cienką fioletową linią, ikony gry przygaszone do fioletu; kolory odporności zostają z gry */
