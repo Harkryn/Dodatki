@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.4.0
+// @version      1.5.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.5.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -853,6 +853,96 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
 `;
 
   /* =====================================================================
+   * === PASKI (belki, tabliczka HUD, kula HP, doświadczenie, paski postępu, minimapa) ===
+   * HP jak czerwony lakier z połyskiem, paski jak ostrze (stalowa krawędź + ciemnoczerwona głownia).
+   * ===================================================================== */
+  const cssBars = `
+/* górna i dolna belka: czarny lakier, od strony mapy cienki czerwony sznur */
+${N} .interface-layer > .top.positioner > .bg {
+  background: linear-gradient(transparent calc(100% - 2px), #000 calc(100% - 2px), var(--oni-r1) calc(100% - 1px)), linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
+}
+${N} .interface-layer > .bottom.positioner > .bg {
+  background: linear-gradient(var(--oni-r1) 1px, #000 1px, transparent 2px), linear-gradient(var(--oni-k0), var(--oni-k2)) !important;
+}
+${N} .bottom-panel-graphic { filter: grayscale(1) sepia(.35) brightness(.42) contrast(1.3); }
+
+/* tabliczka z imieniem / lokacją / walutami: lakier w ramie z płytek, pod imieniem pędzlowa kreska */
+${N} .interface-layer .hud-container {
+  background:
+    var(--oni-brush-dim) center 21px / 70% 3px no-repeat,
+    var(--oni-urushi) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .85) !important;
+  color: var(--oni-text) !important;
+}
+${N} .interface-layer .hud-container .heroname { text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .8); }
+${N} .interface-layer .hud-container .location,
+${N} .interface-layer .hud-container .herogold,
+${N} .interface-layer .hud-container .herocredits { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .interface-layer .hud-container .coords,
+${N} .interface-layer .hud-container .world-name { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
+/* „+” (kup złoto / smocze łzy): lakierowany guzik z czerwonym plusem zamiast jaskrawej zieleni */
+${N} .interface-layer .hud-container .btn-min {
+  background: linear-gradient(#211816, #0b0808) !important;
+  border-color: #000 !important;
+  box-shadow: inset 0 0 0 1px rgb(138 106 58 / .45) !important;
+  color: var(--oni-hi) !important;
+  filter: none !important;
+}
+${N} .interface-layer .hud-container .btn-min:hover { box-shadow: inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; color: #fff !important; }
+
+/* kula HP: gęsty czerwony lakier urushi – głęboka czerwień, połysk przy powierzchni, ciemniejsze dno */
+${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
+  background:
+    linear-gradient(rgb(255 210 190 / .55), rgb(255 210 190 / 0) 2px),
+    radial-gradient(ellipse 45% 30% at 34% 22%, rgb(255 190 170 / .28), transparent 70%),
+    linear-gradient(#a31c1c, #7a1212 45%, #4a0909 85%, #2a0505) !important;
+}
+${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper .value {
+  color: var(--oni-text) !important;
+  text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
+}
+
+/* pasek doświadczenia jak ostrze: stalowa krawędź (hamon) u góry, czerwona głownia */
+${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
+  background: linear-gradient(#d8d0c6 0, #8f8478 1px, #9e1b1b 2px, #7a1212 45%, #4a0909 80%, #1a0303) !important;
+}
+${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress.noexp .inner {
+  background: linear-gradient(#d8d0c6 0, #8f8478 1px, #5a524c 2px, #3a3430 60%, #141110) !important;
+}
+${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay,
+${N} .bottom-panel-pointer-bg .pointer-exp-graphic,
+${N} .bottom-panel-pointer-bg .pointer-ttl-graphic { filter: grayscale(1) sepia(.3) brightness(.55) contrast(1.25); }
+${N} .bottom-panel-pointer-bg .pointer-exp,
+${N} .bottom-panel-pointer-bg .pointer-ttl { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+/* numery slotów szybkiego użycia */
+${N} .bottom-panel-of-bottom-positioner .usable-slot::before { color: rgb(230 220 207 / .6) !important; text-shadow: 0 0 3px #000, 0 1px 1px #000; }
+
+/* paski postępu w oknach (np. zadania, rzemiosło) */
+${N} .interface-element-progress-bar-0,
+${N} .interface-element-progress-bar-1 { background: var(--oni-k0) !important; box-shadow: inset 0 0 0 1px var(--oni-edge) !important; }
+${N} .interface-element-progress-bar-0 .inner,
+${N} .interface-element-progress-bar-1 .inner {
+  background: linear-gradient(#cfc6bd 0 1px, #9e1b1b 1px, #7a1212 55%, #3a0808) !important;
+  border-color: var(--oni-r2) !important;
+}
+${N} .interface-element-progress-bar-0 .value,
+${N} .interface-element-progress-bar-1 .value { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+
+/* minimapa: sama mapa bez zmian; wokół cienka lakierowana krawędź i winieta nad mapą (bez przechwytywania kliknięć) */
+${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--oni-edge-hi) !important; }
+${N} .handheld-mini-map { position: relative; }
+${N} .handheld-mini-map::after {
+  content: "";
+  position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px var(--oni-r1), inset 0 0 16px rgb(0 0 0 / .7);
+}
+`;
+
+  /* =====================================================================
    * === ANIMACJE (lekkie; wyłączane przy prefers-reduced-motion) ===
    * ===================================================================== */
   const cssAnim = `
@@ -1071,7 +1161,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssAnim, cssToggle].join('\n'));
+  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'oni-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
