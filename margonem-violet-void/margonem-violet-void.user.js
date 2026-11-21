@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.16.1
+// @version      1.17.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.16.1';
+  const VERSION = '1.17.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -337,43 +337,57 @@ ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
   background: linear-gradient(to right, #000, var(--vv-edge) 40%, var(--vv-v-2) 50%, var(--vv-edge) 60%, #000) !important;
 }
+/* wiadomości: czerń z ledwie widoczną poświatą pustki u góry; kolory kanałów i wiadomości zostają z gry */
 ${N} .new-chat-window .chat-message-wrapper {
-  background: rgb(6 5 9 / .96) !important;
+  background: radial-gradient(ellipse 120% 80px at 50% 0, rgb(109 47 179 / calc(.12 * var(--vv-k))), transparent), rgb(6 5 9 / .96) !important;
   border-top-color: var(--vv-edge) !important;
   border-bottom-color: var(--vv-edge) !important;
   box-shadow: inset 0 0 12px 2px rgb(0 0 0 / .8) !important;
 }
 ${N} .new-chat-window .new-chat-message { text-shadow: 0 1px 1px rgb(0 0 0 / .9); }
-/* zakładki kanałów */
-${N} .new-chat-window .chat-channel-card {
+/* pasek zakładek kanałów: kamienna tabliczka jak nagłówki („STATS”, tytuły okien) */
+${N} .new-chat-window .chat-channel-card-wrapper {
   background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
-  border-color: var(--vv-edge) !important;
-  color: var(--vv-text-dim) !important;
-  box-shadow: none !important;
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 30px / 0 stretch;
+  box-shadow: 0 2px 6px rgb(0 0 0 / .8), inset 0 -1px 0 rgb(143 69 230 / .35);
 }
-${N} .new-chat-window .chat-channel-card:hover { color: var(--vv-text) !important; }
-${N} .new-chat-window .chat-channel-card.active {
-  background: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
-  color: var(--vv-text) !important;
-  box-shadow: inset 0 -2px 0 var(--vv-v-3) !important;
+/* zakładki: same ikony gry przygaszone do fioletu, aktywna jaśniejsza z poświatą i fioletową kreską */
+${N} .new-chat-window .chat-channel-card { background: none !important; border-color: transparent !important; box-shadow: none !important; }
+${N} .new-chat-window .chat-channel-card .chat-channel-card-icon {
+  filter: grayscale(1) brightness(.55) sepia(.45) hue-rotate(220deg) saturate(1.5);
+  transition: filter .2s ease;
 }
-/* nowa wiadomość na nieaktywnym kanale – jedno z niewielu miejsc z akcentem magenty */
-${N} .new-chat-window .chat-channel-card .new-message,
-${N} .new-chat-window .chat-channel-card.new-message {   /* TODO: zweryfikuj selektor (znacznik nieprzeczytanych) */
-  box-shadow: inset 0 -2px 0 var(--vv-accent) !important;
+${N} .new-chat-window .chat-channel-card:hover .chat-channel-card-icon { filter: grayscale(1) brightness(.85) sepia(.5) hue-rotate(220deg) saturate(1.8); }
+${N} .new-chat-window .chat-channel-card.active { box-shadow: inset 0 -2px 0 var(--vv-v-3) !important; }
+${N} .new-chat-window .chat-channel-card.active .chat-channel-card-icon {
+  filter: grayscale(1) brightness(1.05) sepia(.55) hue-rotate(220deg) saturate(2.2) drop-shadow(0 0 4px rgb(181 124 255 / .7));
 }
-/* pole wpisywania */
+${N} .new-chat-window .chat-channel-card.channel-disabled .chat-channel-card-icon { filter: grayscale(1) brightness(.3); }
+/* licznik nieprzeczytanych – jedno z niewielu miejsc z akcentem magenty */
+${N} .new-chat-window .chat-channel-not-read-counter {
+  background: var(--vv-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 1px #000, 0 0 6px rgb(255 79 216 / .6);
+}
+/* pasek pod wiadomościami (kanał, informacje, ustawienia) i pole wpisywania w miniaturze ramy okien */
 ${N} .new-chat-window .chat-input-wrapper {
-  background: linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
-  box-shadow: inset 0 1px 0 var(--vv-edge);
+  background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  box-shadow: inset 0 1px 0 rgb(143 69 230 / .35) !important;
 }
-${N} .new-chat-window .chat-input-wrapper input,
-${N} .new-chat-window .chat-input-wrapper textarea,
-${N} .new-chat-window .chat-input-wrapper [contenteditable="true"] {   /* TODO: zweryfikuj selektor (pole czatu NI) */
-  background: rgb(6 5 9 / .95) !important;
+${N} .new-chat-window .chat-input-wrapper .chat-info-wrapper,
+${N} .new-chat-window .chat-input-wrapper .chat-config-wrapper { filter: grayscale(1) brightness(.75) sepia(.4) hue-rotate(220deg) saturate(1.4); }
+${N} .new-chat-window .magic-input-wrapper { padding: 0 4px 4px; }
+${N} .new-chat-window .magic-input {
+  background: #050407 !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.frame}") 30 / 6px / 0 stretch !important;
   color: var(--vv-text) !important;
   caret-color: var(--vv-e-1);
 }
+${N} .new-chat-window .magic-input-placeholder { color: var(--vv-text-dim) !important; }
 
 `;
 
