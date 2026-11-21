@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.5.0
+// @version      1.5.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -31,7 +31,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -365,15 +365,16 @@ ${N} .interface-element-grid-border-light {
 }
 ${N} .interface-layer .equipment-outline-2,
 ${N} .interface-layer .equipment-outline-3 { background-color: var(--vv-edge) !important; }
-/* sloty: ciemna komórka z grafitową linią (warstwa pod przedmiotami) */
+/* sloty: ciemna komórka z grafitową kratką (warstwa pod przedmiotami; kafel gry ma 33×33 px) */
 ${N} .interface-element-item-slot-grid-stretch,
 ${N} .interface-element-one-item-slot-background-to-repeat {
+  background-color: var(--vv-bg-0) !important;
   background-image:
-    linear-gradient(var(--vv-edge), var(--vv-edge)),
-    radial-gradient(circle at 50% 45%, #121017, var(--vv-bg-0) 75%) !important;
-  background-size: 32px 1px, 32px 32px !important;   /* TODO: zweryfikuj selektor (rozmiar kratki 32 px) */
+    linear-gradient(to right, transparent 32px, var(--vv-edge) 32px),
+    linear-gradient(to bottom, transparent 32px, var(--vv-edge) 32px),
+    radial-gradient(circle at 50% 45%, #15121b, var(--vv-bg-0) 72%) !important;
+  background-size: 33px 33px !important;
   background-repeat: repeat !important;
-  box-shadow: inset 1px 0 0 var(--vv-edge);
 }
 ${N} .interface-element-one-item-slot-2 {
   background: radial-gradient(circle at 50% 45%, #121017, var(--vv-bg-0) 75%) !important;
