@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.21.0
+// @version      1.22.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.21.0';
+  const VERSION = '1.22.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -954,6 +954,28 @@ ${N} .bottom-panel-of-bottom-positioner .pointer-ttl-graphic::before {
   border-image: url("${IMG.frame}") 30 / 6px / 3px stretch;
   box-shadow: 0 2px 6px rgb(0 0 0 / .8);
 }
+/* pasek szybkich slotów (1–8 po bokach kuli): obie czwórki w miniaturze ramy okien, ciemne tło między slotami;
+   każdy slot to inny kafel spękanego bazaltu z atlasu przycisków HUD (ciemny środek – przedmioty czytelne),
+   numery slotów przygaszone do fioletu */
+${N} .bottom-panel-of-bottom-positioner .slots {
+  background: var(--vv-bg-0);
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${IMG.frame}") 30 / 7px / 4px stretch;
+  box-shadow: 0 0 0 4px rgb(6 5 9 / .95), 0 0 0 5px #000, 0 4px 12px 4px rgb(0 0 0 / .7);
+}
+${N} .bottom-panel-of-bottom-positioner .usable-slot {
+  background: url("${IMG.hud}") calc(var(--vv-sx, 0) * 100% / 3) calc(var(--vv-sy, 0) * 100% / 5) / 400% 600% no-repeat, var(--vv-bg-1) !important;
+  border-color: #000 !important;
+  outline: none !important;
+  box-shadow: inset 0 0 6px rgb(0 0 0 / .8) !important;
+}
+${N} .bottom-panel-of-bottom-positioner .usable-slot::before {
+  color: rgb(181 124 255 / .75) !important;
+  text-shadow: 0 0 3px #000, 0 1px 1px #000;
+  font-weight: bold;
+}
+${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `${N} .bottom-panel-of-bottom-positioner .usable-slot-${n} { --vv-sy: ${(n + 2) % 6}; --vv-sx: ${(n + 1) % 4}; }`).join('\n')}
 
 /* okno walki i dziennik (kolory wpisów dziennika zostają z gry) */
 ${N} .battle-controller .border-image,
