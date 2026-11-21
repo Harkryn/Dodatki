@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.13.0
+// @version      1.14.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.13.0';
+  const VERSION = '1.14.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -479,12 +479,35 @@ ${N} .widget-button:not(.disabled):hover {
 ${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-2) !important; }
 ${N} .widget-button.disabled { filter: grayscale(.7) brightness(.6); }
 ${HUD_TILES}
-/* podstawka statystyk postaci */
+/* panel statystyk (123×140): rama okien, nagłówek „STATS” na kamiennej tabliczce jak tytuły okien,
+   wiersze rozdzielone cienką fioletową linią, ikony gry przygaszone do fioletu; kolory odporności zostają z gry */
 ${N} .interface-layer .stats-wrapper {
-  background: rgb(12 10 16 / .95) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-edge) !important;
+  background: var(--vv-void-light), linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.frame}") 30 / 8px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .8) !important;
+  outline: none !important;
 }
-${N} .interface-layer .stats-wrapper * { text-shadow: 0 1px 2px #000; }
+${N} .interface-layer .stats-wrapper .header-title-wrapper .interface-element-active-card-background-stretch {
+  background: none !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 26px / 0 stretch !important;
+  box-shadow: none !important;
+}
+${N} .interface-layer .stats-wrapper .header-title { color: var(--vv-text) !important; letter-spacing: .12em; text-shadow: 0 1px 2px #000 !important; }
+${N} .interface-layer .stats-wrapper .stats-list li { position: relative; }
+${N} .interface-layer .stats-wrapper .stats-list li + li::before {
+  content: ""; position: absolute; left: 2px; right: -26px; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(143 69 230 / .35) 40%, transparent);
+}
+${N} .interface-layer .stats-wrapper .stats-list .stat-icon {
+  filter: grayscale(1) brightness(.85) sepia(.5) hue-rotate(220deg) saturate(1.6) drop-shadow(0 0 1px rgb(143 69 230 / .4));
+}
+${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value,
+${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat { color: var(--vv-text) !important; }
+${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px #000, 0 0 3px #000 !important; }
 
 /* sklep: markiza przyciemniona do grafitowych pasów, papierowe tła na czerń */
 ${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) brightness(.3) contrast(1.15); }
