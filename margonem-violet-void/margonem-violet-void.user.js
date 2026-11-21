@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.14.0
+// @version      1.15.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.14.0';
+  const VERSION = '1.15.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -409,6 +409,52 @@ ${N} .interface-element-one-item-slot-2 {
 }
 ${N} .interface-element-one-black-tile { background: linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important; }
 ${N} .interface-element-one-gray-tile { background: linear-gradient(var(--vv-bg-2), var(--vv-bg-1)) !important; }
+
+/* --- prawa kolumna: ekwipunek, przełącznik toreb, torba ---
+   Ramy z wulkanicznego szkła jak w oknach (wysunięte o 4 px, więc nie zasłaniają slotów).
+   Ikony przedmiotów i ich ramki rzadkości są nietknięte (leżą w osobnych elementach .item). */
+${N} .interface-layer > .right-column.main-column .equipment-wrapper,
+${N} .interface-layer > .right-column.main-column .bags-navigation-bg,
+${N} .interface-layer > .right-column.main-column .inventory-grid-bg {
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.frame}") 30 / 7px / 4px stretch !important;
+  box-shadow: 0 0 0 4px rgb(6 5 9 / .95), 0 0 0 5px #000, 0 4px 12px 4px rgb(0 0 0 / .7) !important;
+  outline: none !important;
+}
+${N} .interface-layer > .right-column.main-column .equipment-wrapper-outline {
+  background: none !important; box-shadow: none !important; border-color: transparent !important;
+}
+/* sloty ekwipunku: osobne, wklęsłe czarne komórki (bez siatki torby) */
+${N} .interface-layer > .right-column.main-column .equipment-wrapper .eq-slot.interface-element-one-item-slot-background-to-repeat {
+  background: radial-gradient(circle at 50% 42%, #17131d, #070609 72%) !important;
+  background-size: auto !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge), inset 0 2px 6px #000, inset 0 -1px 0 rgb(143 69 230 / .18) !important;
+  border-radius: 2px;
+}
+/* torba: komórki 33×33 z ciemną przerwą (maska) i ledwie jaśniejszym środkiem */
+${N} .interface-layer > .right-column.main-column .inventory-grid-bg { background: #000 !important; }
+${N} .interface-layer > .right-column.main-column .inventory-grid-bg .interface-element-item-slot-grid-stretch {
+  background-color: #000 !important;
+  background-image: radial-gradient(circle at 50% 45%, #141119 0 30%, #08070b 70%) !important;
+  background-size: 33px 33px !important;
+  background-repeat: repeat !important;
+  background-position: 0 0 !important;
+  -webkit-mask: linear-gradient(to right, #000 32px, transparent 32px) 0 0 / 33px 33px, linear-gradient(#000 32px, transparent 32px) 0 0 / 33px 33px;
+  -webkit-mask-composite: source-in;
+  mask: linear-gradient(to right, #000 32px, transparent 32px) 0 0 / 33px 33px, linear-gradient(#000 32px, transparent 32px) 0 0 / 33px 33px;
+  mask-composite: intersect;
+  box-shadow: none !important;
+}
+/* zakładki toreb: grafitowe kafle, aktywna torba z fioletową krawędzią */
+${N} .interface-layer > .right-column.main-column .bags-navigation-bg .bag-slot-wrapper {
+  background: radial-gradient(circle at 50% 42%, #1a1622, #070609 75%) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge) !important;
+}
+${N} .interface-layer > .right-column.main-column .bags-navigation .item.bag.active {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-v-3), 0 0 calc(8px * var(--vv-k)) var(--vv-glow-strong) !important;
+  border-radius: 2px;
+}
 
 /* górna i dolna belka interfejsu, tabliczka z imieniem / lokacją / złotem */
 ${N} .interface-layer > .top.positioner > .bg {
