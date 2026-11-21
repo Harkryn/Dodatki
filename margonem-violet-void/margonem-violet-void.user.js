@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.15.1
+// @version      1.15.2
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.15.1';
+  const VERSION = '1.15.2';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -447,8 +447,11 @@ ${N} .interface-layer > .right-column.main-column .inventory-grid-bg .interface-
   box-shadow: none !important;
 }
 /* zakładki toreb: grafitowe kafle, aktywna torba z fioletową krawędzią.
-   Przełącznik toreb nad torbą (z-index), inaczej rama torby zasłaniała dół krawędzi aktywnej torby. */
-${N} .interface-layer > .right-column.main-column .bags-navigation-bg { z-index: 2; }
+   Ramy z cieniem wystają ok. 9 px poza element, a gra kładzie przełącznik toreb i torbę na styk (y 160–200 i 200),
+   więc są rozsunięte: przełącznik o 4 px w dół (z dala od ramy ekwipunku), torba razem z przedmiotami o 22 px w dół
+   (pod torbą kolumna jest pusta). Przełącznik nad torbą (z-index), żeby krawędź aktywnej torby była cała. */
+${N} .interface-layer > .right-column.main-column .bags-navigation-bg { top: -36px !important; z-index: 2; }
+${N} .interface-layer > .right-column.main-column .inventory-grid-bg { top: 22px !important; }
 ${N} .interface-layer > .right-column.main-column .bags-navigation-bg .bag-slot-wrapper {
   background: radial-gradient(circle at 50% 42%, #1a1622, #070609 75%) !important;
   box-shadow: inset 0 0 0 1px var(--vv-edge) !important;
