@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.24.1
+// @version      1.25.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -40,7 +40,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.24.1';
+  const VERSION = '1.25.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -235,6 +235,27 @@ ${G} input::placeholder, ${G} textarea::placeholder { color: var(--vv-text-dim) 
 ${N} .scrollbar-wrapper .track { background: var(--vv-bg-0) !important; box-shadow: inset 0 0 0 1px var(--vv-edge); }
 ${N} .scrollbar-wrapper .handle { background: var(--vv-edge-hi) !important; box-shadow: none !important; }
 ${N} .scrollbar-wrapper .handle:hover { background: var(--vv-v-2) !important; }
+
+/* NI – przełączniki (c-checkbox: kwadrat w ::before etykiety, znaczek w ::after) – w całej grze, m.in. w ustawieniach:
+   czarny kwadrat z grafitową krawędzią, zaznaczony w fiolecie z poświatą */
+${N} .c-checkbox__label::before {
+  background: #050407 !important;
+  border-color: var(--vv-edge-hi) !important;
+  box-shadow: inset 0 1px 3px #000 !important;
+  border-radius: 2px;
+}
+${N} .c-checkbox__label:hover::before { border-color: var(--vv-v-3) !important; }
+${N} .c-checkbox input:checked + .c-checkbox__label::before {
+  background: linear-gradient(#8f45e6, #4a1f7a) !important;
+  border-color: var(--vv-e-1) !important;
+  box-shadow: 0 0 calc(6px * var(--vv-k)) var(--vv-glow-strong) !important;
+}
+/* NI – listy z grupami (np. ustawienia, rzemiosło): wybrana pozycja z fioletową kreską i łuną */
+${N} .one-item-on-divide-list.active {
+  background: linear-gradient(90deg, rgb(143 69 230 / .22), transparent 80%) !important;
+  box-shadow: inset 2px 0 0 var(--vv-v-3);
+}
+${N} .one-item-on-divide-list:not(.active):hover { background: linear-gradient(90deg, rgb(143 69 230 / .1), transparent 80%) !important; }
 `;
 
   /* =====================================================================
@@ -418,6 +439,7 @@ ${N} .interface-element-active-card-background,
 ${N} .interface-element-active-card-background-stretch,
 ${N} .interface-element-active-card-border-image {
   border-image: none !important;
+  border-color: var(--vv-edge) !important;   /* bez tego ramka brała kolor tekstu (białe obramowanie np. nagłówków grup w ustawieniach) */
   background: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
   box-shadow: inset 0 -2px 0 var(--vv-v-3), inset 0 0 0 1px var(--vv-edge);
 }

@@ -223,7 +223,7 @@ Funkcje:
 - **minimapa** — sama mapa bez zmian, grafitowa ramka,
 - **przyciski** — grafitowe płytki, przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,
 - **wspólne panele** `interface-element-*` (nagłówki, karty, linie, dolne paski okien),
-- **scrollbary, zaznaczenie tekstu, focus pól tekstowych** w kolorach motywu,
+- **scrollbary, zaznaczenie tekstu, focus pól tekstowych, przełączniki** (czarne kwadraty, zaznaczone w fiolecie z poświatą) w kolorach motywu; w listach z grupami (ustawienia, rzemiosło) wybrana pozycja z fioletową kreską, nagłówki grup z grafitową ramką,
 - **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
 - **przełącznik** — mały okrągły przycisk w lewym dolnym rogu (klik: włącz/wyłącz, prawy klik: intensywność), skróty i menu Tampermonkey; stan zapamiętywany.
 
