@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.8.1
+// @version      1.9.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -21,6 +21,7 @@
 // @resource     vvTitleGem   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-gem.webp
 // @resource     vvHudButtons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/hud-buttons.webp
 // @resource     vvOrbCracks  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-cracks.mp4
+// @resource     vvOrbRing    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-ring.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // ==/UserScript==
@@ -37,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.8.1';
+  const VERSION = '1.9.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -65,7 +66,8 @@
     plate: res('vvTitlePlate', 'title-plate.webp'), // 360×35, końce 46 px
     gem: res('vvTitleGem', 'title-gem.webp'),       // 20×36
     hud: res('vvHudButtons', 'hud-buttons.webp'),   // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
-    orbFx: res('vvOrbCracks', 'orb-cracks.mp4')     // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
+    orbFx: res('vvOrbCracks', 'orb-cracks.mp4'),    // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
+    ring: res('vvOrbRing', 'orb-ring.webp')         // 256×256, kamienny pierścień wokół kuli (wewn. promień = 0,367 szerokości)
   };
 
   // Przydział kafli przyciskom HUD w kolejności, w jakiej stoją na belkach – sąsiednie dostają inne kamienie
@@ -547,14 +549,27 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
 }
 /* pierścień pęknięć wokół kuli: zapętlone wideo na czarnym tle; filtr SVG #vv-luma zamienia jasność na kanał alfa
    (czerń = przezroczystość). Nie mix-blend-mode: panel tworzy własny kontekst nakładania, więc część wystająca
-   nad panel zostawiała czarny kwadrat na mapie. Wideo leży pod kulą (kula ma z-index 1),
-   środek pęknięć pokrywa się ze środkiem kuli (330, 55 w dolnym panelu). */
+   nad panel zostawiała czarny kwadrat na mapie. Wideo leży pod kulą (kula ma z-index 1), środek pęknięć
+   pokrywa się ze środkiem kuli (330, 55 w dolnym panelu); powiększone tak, by pęknięcia wychodziły spod pierścienia. */
 .vv-orb-fx {
-  position: absolute; left: 248px; top: -27px; width: 164px; height: 164px;
+  position: absolute; left: 233px; top: -42px; width: 194px; height: 194px;
   object-fit: cover; pointer-events: none; z-index: 0;
   filter: contrast(1.2) brightness(calc(.8 + .25 * var(--vv-k))) url(#vv-luma);
 }
 html:not(.${ON}) .vv-orb-fx { display: none; }
+/* kamienny pierścień ze spękanego bazaltu wokół kuli: nachodzi 3 px na brzeg kuli, bardzo wolno krąży
+   (fioletowa szczelina przesuwa się wokół kuli). Pseudo-element szablonu kuli – pozycja liczona od dolnego panelu,
+   z-index 1 i później w DOM niż kula, więc leży nad jej brzegiem; kapsuły EXP/czasu podniesione nad pierścień. */
+${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after {
+  content: "";
+  position: absolute; left: 268px; top: -7px; width: 124px; height: 124px;
+  background: url("${IMG.ring}") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / .85));
+  animation: vv-orb-ring 90s linear infinite;
+  pointer-events: none; z-index: 1;
+}
+@keyframes vv-orb-ring { to { transform: rotate(360deg); } }
+${N} .bottom-panel-of-bottom-positioner .bottom-panel-pointer-bg { z-index: 2; }
 /* listwa wokół kuli: grafit zamiast brązu */
 ${N} .interface-layer .bottom-panel-graphic { filter: grayscale(1) brightness(.45) contrast(1.1); }
 
@@ -595,7 +610,8 @@ ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-s
 
 @media (prefers-reduced-motion: reduce) {
   ${N} .widget-button.green.window-is-open,
-  ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: none !important; }
+  ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before,
+  ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after { animation: none !important; }
   ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: none !important; }
   #vv-toggle, #vv-toast { transition: none !important; }
 }

@@ -64,3 +64,10 @@ static camera, violet energy flickers and crackles through the cracks around the
 
 W grze: wideo pod kulą, filtr SVG zamienia jasność na przezroczystość (czerń znika), czarne koło z klipu pokrywa się z kulą.
 Odrzucone propozycje tej rundy (A1 mgła, A2 odłamki, A4 iskry, A5 kometa) nie trafiły do repo.
+
+## Kula HP — kamienny pierścień (wybrany A, spękany bazalt)
+
+FLUX.1 Krea-dev, 768×768 (seed 977809297) → `orb-ring.webp` (256×256, 12 KB; środek przezroczysty, kamień przyciemniony jak przyciski HUD):
+Top-down flat view of a single circular ring band made of rough charred black basalt stone, like a thick round stone collar, perfectly round empty black hole in the center, the stone ring has shadowed cracks and one thin crack leaking faint dim violet light, pure black background, extremely dark, low key lighting, no text
+
+Odrzucony B (seed 1434086303): rzeźbiony czarny kamień z krystalicznymi ćwiekami.

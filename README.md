@@ -211,7 +211,7 @@ Funkcje:
 - **ekwipunek, postać, torby** — czarna kolumna, ciemne sloty z grafitowymi liniami, obrysy siatek, podstawka statystyk; ikony i ramki rzadkości bez zmian,
 - **HUD** — czarne belki z cienką fioletową linią, tabliczka z imieniem; **przyciski widżetów z zwęglonego bazaltu**, przez którego pęknięcia sączy się przygaszony fiolet — 24 różne kafle (6 kamieni × 4 obroty), sąsiednie przyciski nigdy się nie powtarzają; otwarte okno = fioletowa krawędź (delikatnie pulsuje), kolory alarmów gry jako przygaszony obrys,
 - **sklep** — markiza przyciemniona do grafitowych pasów, czarne tła zamiast papieru,
-- **kula HP** — wnętrze z czarnego obsydianu, poziom HP wyznacza jasna, delikatnie pulsująca fioletowa tafla (prawdziwy poziom z gry, procent zostaje biały i czytelny); wokół kuli **pierścień pęknięć**, przez które przebiega i trzaska fioletowa energia — zapętlona animacja wygenerowana na Hugging Face (FLUX + Wan 2.2), wstrzymywana w ukrytej karcie i przy „ogranicz ruch”,
+- **kula HP** — wnętrze z czarnego obsydianu, poziom HP wyznacza jasna, delikatnie pulsująca fioletowa tafla (prawdziwy poziom z gry, procent zostaje biały i czytelny); kula oprawiona w **pierścień ze spękanego bazaltu**, który bardzo wolno krąży (fioletowa szczelina wędruje wokół kuli), a spod niego wychodzą **pęknięcia**, przez które przebiega i trzaska fioletowa energia — zapętlona animacja wygenerowana na Hugging Face (FLUX + Wan 2.2), wstrzymywana w ukrytej karcie i przy „ogranicz ruch”,
 - **paski** — HP zostaje czerwone (czytelność w walce), druga belka i doświadczenie w przygaszonym fiolecie, grafitowa listwa; paski nad postaciami w walce bez zmian,
 - **walka** — okno i dziennik walki w czerni (kolory wpisów z gry), przycisk „Auto” z fioletową krawędzią,
 - **minimapa** — sama mapa bez zmian, grafitowa ramka,
@@ -237,4 +237,4 @@ Skróty:
 
 Ruchu jest minimum (puls krawędzi otwartych widżetów, przejścia przy najechaniu) i wyłącza się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).
 
-Grafiki (ramka okna, tabliczka tytułu, ametyst, atlas przycisków HUD, animacja wokół kuli HP) leżą w [assets/violet-void/](assets/violet-void/) (4 pliki WebP i 1 wideo MP4, razem ok. 146 KB). Wygenerowano je modelem FLUX.1 Krea na Hugging Face i obrobiono lokalnie; prompty są w [PROMPTS.md](assets/violet-void/PROMPTS.md). Skrypt ładuje je przez `@resource`, więc Tampermonkey pobiera je raz, razem z aktualizacją.
+Grafiki (ramka okna, tabliczka tytułu, ametyst, atlas przycisków HUD, kamienny pierścień i animacja wokół kuli HP) leżą w [assets/violet-void/](assets/violet-void/) (5 plików WebP i 1 wideo MP4, razem ok. 158 KB). Wygenerowano je modelem FLUX.1 Krea na Hugging Face i obrobiono lokalnie; prompty są w [PROMPTS.md](assets/violet-void/PROMPTS.md). Skrypt ładuje je przez `@resource`, więc Tampermonkey pobiera je raz, razem z aktualizacją.
