@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.0.0
+// @version      1.1.0
 // @description  Mroczny, fioletowy motyw interfejsu Margonem w klimacie kosmicznej otchłani: świecące krawędzie, poświata pustki, gwiezdne iskry. Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -31,7 +31,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -303,7 +303,73 @@ ${S} #shop, ${S} #bagc, ${S} #panel {   /* TODO: zweryfikuj selektor (sklep / to
 `;
 
   /* Kolejne sekcje (czat, ekwipunek, tooltipy, walka, animacje) dochodzą w następnych wersjach. */
-  const cssChat = ``;
+  /* =====================================================================
+   * === CZAT ===
+   * Tło pod wiadomościami jest prawie jednolite (#0b0614 ≈ 96%), bez iskier i gradientów na treści –
+   * kanały zachowują kolory gry, a tekst ma kontrast ≥ 4.5:1 (WCAG AA).
+   * ===================================================================== */
+  const cssChat = `
+/* lewa kolumna i okno czatu: pustka z poświatą tylko u góry i na dole (poza tekstem) */
+${N} .interface-layer > .left-column.main-column,
+${N} .new-chat-window {
+  background: radial-gradient(ellipse 140% 18% at 50% 0%, rgb(109 47 179 / calc(.4 * var(--vv-k))), transparent 70%),
+              radial-gradient(ellipse 140% 14% at 50% 100%, rgb(74 31 122 / calc(.45 * var(--vv-k))), transparent 70%),
+              var(--vv-bg-0) !important;
+}
+${N} .interface-layer > .left-column.main-column > .border,
+${N} .interface-layer > .right-column.main-column > .border {
+  background: linear-gradient(to right, #050209, var(--vv-v-1) 45%, var(--vv-e-1) 50%, var(--vv-v-1) 55%, #050209) !important;
+  box-shadow: 0 0 calc(8px * var(--vv-k)) var(--vv-glow);
+}
+${N} .new-chat-window .chat-message-wrapper {
+  background: rgb(11 6 20 / .96) !important;
+  border-top-color: var(--vv-line) !important;
+  border-bottom-color: var(--vv-line) !important;
+  box-shadow: inset 0 0 12px 2px rgb(0 0 0 / .8) !important;
+}
+${N} .new-chat-window .new-chat-message { text-shadow: 0 1px 1px rgb(0 0 0 / .9); }
+/* zakładki kanałów */
+${N} .new-chat-window .chat-channel-card {   /* TODO: zweryfikuj selektor (zakładki kanałów czatu) */
+  background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  border-color: var(--vv-line-soft) !important;
+  color: var(--vv-text-dim) !important;
+  box-shadow: none !important;
+}
+${N} .new-chat-window .chat-channel-card:hover { color: var(--vv-text) !important; }
+${N} .new-chat-window .chat-channel-card.active {
+  background: linear-gradient(var(--vv-v-1), var(--vv-bg-1)) !important;
+  color: var(--vv-text) !important;
+  box-shadow: inset 0 -2px 0 var(--vv-e-1), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
+}
+/* nowa wiadomość na nieaktywnym kanale – jedno z niewielu miejsc z akcentem magenty */
+${N} .new-chat-window .chat-channel-card .new-message,
+${N} .new-chat-window .chat-channel-card.new-message {   /* TODO: zweryfikuj selektor (znacznik nieprzeczytanych) */
+  box-shadow: inset 0 -2px 0 var(--vv-accent) !important;
+}
+/* pole wpisywania */
+${N} .new-chat-window .chat-input-wrapper {
+  background: linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
+  box-shadow: inset 0 1px 0 var(--vv-line);
+}
+${N} .new-chat-window .chat-input-wrapper input,
+${N} .new-chat-window .chat-input-wrapper textarea,
+${N} .new-chat-window .chat-input-wrapper [contenteditable="true"] {   /* TODO: zweryfikuj selektor (pole czatu NI) */
+  background: rgb(11 6 20 / .95) !important;
+  color: var(--vv-text) !important;
+  caret-color: var(--vv-e-1);
+}
+
+/* --- SI --- */
+${S} #chat, ${S} #chattxt {   /* TODO: zweryfikuj selektor (czat SI) */
+  background: rgb(11 6 20 / .96) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+}
+${S} #inpchat, ${S} #chat input {   /* TODO: zweryfikuj selektor (pole czatu SI) */
+  background: var(--vv-bg-0) !important;
+  color: var(--vv-text) !important;
+  border-color: var(--vv-line) !important;
+}
+`;
   const cssInventory = ``;
   const cssTooltips = ``;
   const cssBattle = ``;

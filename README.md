@@ -206,6 +206,7 @@ Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#0b0614` / `#140a24`
 Funkcje:
 - **okna** — fioletowe warstwy z poświatą od góry i od dołu, gwiezdne iskry, świecąca krawędź (rysowana cieniem, układ okien bez zmian), plakietka tytułu z poświatą, okrągły przycisk zamknięcia, zakładki,
 - **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — półprzezroczysta pustka z fioletową obwódką, podświetlenie odpowiedzi,
+- **czat** — prawie jednolita pustka pod wiadomościami (kolory kanałów bez zmian, kontrast AA), świecąca listwa kolumny, zakładki kanałów z aktywną krawędzią energii, magentowy znacznik nowych wiadomości, pole wpisywania z fioletowym focusem,
 - **przyciski** — fioletowe płytki, które przy najechaniu rozświetlają się energią; czerwone, złote i smocze przyciski gry bez zmian,
 - **wspólne panele** `interface-element-*` (nagłówki, karty, linie, dolne paski okien),
 - **scrollbary, zaznaczenie tekstu, focus pól tekstowych** w kolorach motywu,
