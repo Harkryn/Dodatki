@@ -26,3 +26,8 @@ Mroczny motyw z własnych grafik: spękany kamień z runami, maski demonów i ru
 Prawie czarny interfejs z fioletem tylko jako akcentem, ramy z wulkanicznego szkła i animowana kula HP z fioletową cieczą.
 
 [Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-violet-void/margonem-violet-void.user.js)
+
+### Margonem — Oni
+Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier, płytki zbroi samurajskiej i czerwień tylko jako akcent.
+
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-oni/margonem-oni.user.js)
