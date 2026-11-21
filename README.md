@@ -1,249 +1,33 @@
 # Dodatki
 
-Dodatki (userscripty) do Margonem.
+Dodatki (userscripty) do gry Margonem. Do instalacji potrzebne jest rozszerzenie [Tampermonkey](https://www.tampermonkey.net/). Kliknij link przy dodatku, a Tampermonkey zaproponuje instalację.
 
-## Margonem — Legendary Frame Plus
+### Margonem — Legendary Frame Plus
+Ramka i efekty żywiołów wokół ekranu, gdy wypadnie przedmiot legendarny.
 
-Ramki i efekty żywiołów wokół ekranu przy pojawieniu się legendarnego przedmiotu.
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/legendary-frame-plus/legendary-frame-plus.user.js)
 
-Instalacja: zainstaluj Tampermonkey, otwórz [legendary-frame-plus.user.js](legendary-frame-plus/legendary-frame-plus.user.js) i kliknij **Raw** — Tampermonkey zaproponuje instalację. Później Tampermonkey sam pobiera nowe wersje z tego repo.
+### Margonem Forum — Nowy Wygląd
+Nowoczesny wygląd forum Margonem w dwóch trybach: Klasyczny (drewno i pergamin) albo Bloodmoon (czerń i karmazyn).
 
-## Margonem — Forum: Nowy Wygląd
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-forum-modern/margonem-forum-modern.user.js)
 
-Nowoczesny, czytelny wygląd [forum Margonem](https://forum.margonem.pl/) w stylu strony głównej. Dwa tryby: **Klasyczny** (ciemne drewno i pergamin) oraz **Bloodmoon** (czerń i karmazyn). Posty ekipy są wyróżnione kolorem rangi. Zmienia wyłącznie wygląd — wszystkie funkcje forum działają jak dotąd.
+### Margonem — Kocia Noc
+Czarny motyw z kotami i fioletowymi akcentami dla nowego interfejsu (NI), z kocim ekranem wczytywania i kulą HP w kształcie łapki.
 
-Instalacja: zainstaluj Tampermonkey, otwórz [margonem-forum-modern.user.js](margonem-forum-modern/margonem-forum-modern.user.js) i kliknij **Raw** — Tampermonkey zaproponuje instalację. Później Tampermonkey sam pobiera nowe wersje z tego repo.
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-kocia-noc/margonem-kocia-noc.user.js)
 
-Włączanie, wyłączanie i wybór trybu: ikona Tampermonkey na stronie forum → pozycje „Nowy wygląd forum” oraz „Tryb”.
+### Margonem — Dark Gothic
+Mroczny motyw z własnych grafik: spękany kamień z runami, maski demonów i runiczny pierścień kuli HP.
 
-## Margonem — Kocia Noc
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-dark-gothic/dark-gothic.user.js)
 
-Czarny, elegancki motyw z kotami dla **nowego interfejsu (NI)** gry Margonem. Tła są czarne wszędzie, gdzie się da, a fiolet spina całość — obwódki okien, przycisków i slotów, kratki torby, linie belek, poświata przy najechaniu i aktywne zakładki. Okna to jednolite czarne bryły z tytułem leżącym bezpośrednio na oknie.
+### Margonem — Czarna Dziura
+Czerń z lekkim fioletem, kula HP jako czarna dziura i kamień z mieniącymi się pęknięciami w przyciskach HUD.
 
-Kocie detale:
-- **ekran wczytywania gry** — czarne niebo, księżyc i kot na dachu z mrugającymi oczami (kliknięcie lub Esc pomija),
-- **efekt legendy** — gdy w łupie albo w torbie pojawi się nowy przedmiot legendarny, w ciemności otwierają się wielkie kocie oczy w kolorze legendy, mrugają, a wokół rozbiegają się łapki,
-- **kula HP w kształcie odcisku kociej łapy** — wypełniona fioletowym płynem z przesuwającym się połyskiem i losowo unoszącymi się bąbelkami, z pulsującą poświatą; siedzi w księżycowym kręgu, a po bokach drgają kocie wąsy,
-- **górna tabliczka** (imię, lokacja, złoto) z podwójną ramą, fioletową poświatą i ornamentem z medalionem, w którym mruga kot,
-- **torba** z czarnymi kratkami i fioletowymi liniami, **panele interfejsu** (np. Statystyki) w fiolecie,
-- **oczy w ciemności** — co jakiś czas w czarnej kolumnie otwiera się para świecących oczu, mruga i znika,
-- uszy na oknach (lekko się przechylają przy najechaniu), łapki w nagłówkach i tooltipach, ledwo widoczny wzór łapek w tle,
-- czarny kot-maskotka siedzący na dolnej belce i kocia ikonka przełącznika.
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-czarna-dziura/czarna-dziura.user.js)
 
-Wnętrza okien (drewniane paski, pergamin, jasne panele, brązowe ramki) są automatycznie przemalowywane na czerń — skrypt sprawdza wygląd nowych elementów w oknach, więc działa też w oknach, których nie znał wcześniej.
+### Margonem — Fioletowa Pustka (Violet Void)
+Prawie czarny interfejs z fioletem tylko jako akcentem, ramy z wulkanicznego szkła i animowana kula HP z fioletową cieczą.
 
-Tooltipy przedmiotów to czarne karty z kolorem rzadkości na górnej krawędzi i delikatną poświatą w tym kolorze. **Kolory rzadkości, bonusów i kanałów czatu zostają rozpoznawalne.** Wszystkie grafiki motywu są rysowane w kodzie (SVG/CSS), bez zewnętrznych obrazków.
-
-Zmienia wyłącznie wygląd UI — nie dotyka mapy, logiki gry ani komunikacji z serwerem (legendę rozpoznaje wyłącznie po wyglądzie przedmiotów na ekranie). Na starym interfejsie (SI) skrypt nic nie robi.
-
-**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-kocia-noc/margonem-kocia-noc.user.js
-
-Instalacja:
-1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
-2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
-3. Wyłącz w Tampermonkey inne motywy interfejsu (np. nitheme) — podmieniają te same grafiki.
-4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
-
-Skróty:
-- **Alt+T** — włącz/wyłącz motyw (albo kliknij kocią ikonkę w lewym dolnym rogu),
-- **Alt+K** — włącz/wyłącz animacje (kot, oczy w ciemności, płyn, bąbelki i puls kuli HP, wąsy, medalion),
-- **Alt+L** — podgląd efektu legendy.
-
-Interfejs jest rozpoznawany po ciasteczku gry `interface`, więc ekran wczytywania pojawia się od razu, a na starym interfejsie (SI) skrypt nic nie robi. Motyw działa na margonem.pl i margonem.com, wyłącznie na stronach światów gry (nie na forum ani stronie głównej).
-
-Dostosowanie: paleta to zmienne CSS `--mkn-*` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS`, a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (uszy, ekran wczytywania, efekt legendy, oczy, poświata kuli HP, kształt łapki `pawOrb`, zdobienia kuli `orbDecor`, tabliczka `hudDecor`). Pozycję kota zmienisz w regule `right: 230px` w sekcji „KOT-MASKOTKA”.
-
-Coś wygląda po staremu? Uruchom w konsoli gry (F12 → Console) [diagnostyka.js](margonem-kocia-noc/diagnostyka.js), a potem najedź na przedmiot i przytrzymaj kursor — skrypt przechwyci tooltip i skopiuje wynik do schowka. Niczego nie zmienia w grze.
-
-## Margonem — Crimson Knight
-
-Mroczny, gotycko-rycerski motyw dla **nowego interfejsu (NI)** gry Margonem — brudne, mroczne średniowiecze. Przeważa czerń i okopcone grafity, a kolor wariantu jest tylko akcentem, inkrustowanym w żelazo. Wszystko jest kanciaste, bez zaokrągleń, i bogato zdobione jak gotycka budowla. Powierzchnie mają brud, sadzę, szum i rysy (generowane w CSS).
-
-Dwa warianty kolorystyczne:
-- **Szkarłat** (domyślny) — mega mroczny, w duchu mrocznego gotyckiego action-RPG: czarne powierzchnie z subtelnym czerwonym dymem, żarząca się krwista czerwień tylko na liniach i aktywnych elementach, **ciernie** oplatające okna, belki i tabliczkę, **czaszki** nad oknami i w narożnikach, **świece z migoczącym płomieniem** w dolnych rogach mapy, czerwony żar w narożnikach ram, **kula HP z krwią** w kutej oprawie z koroną sterczyn, paski EXP z grotami włóczni, kanciaste przyciski z krwistymi ikonami i tytuły kapitalikami,
-- **Butelkowa Zieleń** — czerń i głęboka, szklista zieleń starego szkła, metal z patyną i śniedzią, chłodny przygaszony blask.
-
-Gotyckie i rycerskie zdobienia:
-- **okna** jak kute żelazo: podwójna rama z inkrustowaną linią w kolorze wariantu, **okute narożniki ze sterczynami i żabkami** oraz czwórliściem,
-- **szczyt z kwiatonem** (ośli grzbiet, sterczyny) nad tytułem okna, tytuły **frakturą**, po bokach **ślepe ostrołuki z trójliściem**, pod tytułem separator z medalionem,
-- **koronka wiszących ostrołuków** pod oknami i pod górną belką, **blanki z otworami strzelniczymi** nad dolną belką, ślepa arkada na belkach,
-- **rozeta** jako ledwo widoczny znak wodny w dużych oknach i **ostrołukowe okno z maswerkiem** w bocznych kolumnach,
-- pod górną tabliczką **rozeta ze skrzyżowanymi mieczami**,
-- **przyciski jak okute tabliczki** z inkrustowaną listwą — przy najechaniu kolor wariantu rozlewa się od krawędzi,
-- **poświata aktywnego okna** (ostatnio klikniętego) delikatnie pulsuje; przy niskim HP (poniżej 30%) pulsuje zawsze na czerwono,
-- **tooltipy** jak ciemny, brudny pergamin w żelaznej ramie z okutymi narożnikami, rzadkość na górnej krawędzi,
-- subtelna **mgła** na dole mapy (w wariancie zielonym zielonkawa).
-
-**Kolory rzadkości przedmiotów są stałe i takie same w obu wariantach.** Pasek HP jest zawsze czerwony, mana zawsze w zimnym, ciemnym błękicie, a doświadczenie w przyciemnionym mosiądzu. Kanały czatu zachowują swoje kolory, tylko lekko przytłumione. Wszystkie grafiki są rysowane w kodzie (SVG/CSS), bez zewnętrznych obrazków. Animacje są spokojne, korzystają tylko z `transform` i `opacity` i wyłączają się same przy systemowym ustawieniu „ogranicz ruch”.
-
-Zmienia wyłącznie wygląd UI — nie dotyka mapy, logiki gry ani komunikacji z serwerem. Na starym interfejsie (SI) skrypt nic nie robi.
-
-**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-crimson-knight/margonem-crimson-knight.user.js
-
-Instalacja:
-1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
-2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
-3. Wyłącz w Tampermonkey inne motywy interfejsu (np. Kocią Noc albo nitheme) — zmieniają te same elementy. Jeśli Kocia Noc jest włączona jednocześnie, motyw raz wyświetli o tym informację.
-4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
-
-Przełączanie (ikonka skrzyżowanych mieczy w lewym dolnym rogu otwiera panel z tymi samymi opcjami):
-- **Alt+T** — włącz/wyłącz motyw (gdy zainstalowana jest też Kocia Noc, która używa Alt+T: **Alt+Shift+T**),
-- **Alt+V** — przełącz wariant Szkarłat ↔ Butelkowa Zieleń (od razu, bez przeładowania, z płynnym przejściem kolorów),
-- **Alt+A** — włącz/wyłącz animacje (pulsowanie poświaty, mgła).
-
-Ustawienia są zapamiętywane i wracają po przeładowaniu. Interfejs jest rozpoznawany tak samo jak w Kociej Nocy (ciasteczko gry `interface`). Motyw działa na margonem.pl i margonem.com, wyłącznie na stronach światów gry.
-
-Dostosowanie: kolory wariantów to zmienne CSS `--ck-*` w blokach `html[data-ck-variant="crimson"]` i `html[data-ck-variant="green"]` w funkcji `buildCss()`, selektory gry są w obiekcie `SELECTORS` (oznaczone `[GRA]` — sprawdzone w grze, `[KN]` — sprawdzone w Kociej Nocy, `[NOWY]` — do weryfikacji), a poszczególne funkcje wyłączysz w obiekcie `FEATURES` (gotyckie ramy, ozdoby belek, znaki wodne, mgła, czerwony puls przy niskim HP).
-
-## Margonem — Dark Gothic
-
-Mroczny, spójny motyw dla **nowego interfejsu (NI)** gry Margonem, zbudowany z **własnych rastrowych grafik**: spękany, okopcony kamień z wytartymi runami, poniszczone maski demonów, runiczny pierścień kuli HP. Prawie wszystko jest czarne, a czerwień to tylko stłumiony akcent. Paleta: `#050405`/`#09080a`/`#110e10`, przygaszona czerwień `#43080c`/`#6e0f14`/`#8f1a1f`, popiół `#8d878c`, kość `#cbc2b6`.
-
-Co jest ostylowane:
-- **tabliczka HUD** (imię, mapa z koordynatami, świat, złoto i smocze łzy — zagęszczona, żeby nie zasłaniała mapy) — imię w przygaszonej czerwieni na spękanym granicie, **poniszczone głowy demonów** po obu stronach, pod napisami ciemna kamienna listwa, w której **runy pulsują na czerwono** jak w pierścieniu kuli HP, a kropla w medalionie przyjmuje kolor trybu PvP mapy,
-- **siatka slotów** (torba, sklep) — linie w bardzo ciemnej czerwieni, po których co kilka sekund przesuwa się delikatny połysk,
-- **statystyki** — na runicznej płycie, z własnymi prostymi ikonkami (atak, szybkość ataku, obrona, odporności),
-- **kula HP** — **runiczny pierścień** ze spękanego żelaza, który powoli się obraca, a żar w rowkach run pulsuje (animacja wyłącza się przy systemowym „ogranicz ruch”); gra dalej pokazuje w środku swój poziom HP i procent,
-- **dolny panel** — poczerniała oprawa, EXP w ciemnym karmazynie, ciemne sloty, a po bokach kuli **głowy kamiennych posągów demonów** patrzące na wprost (w całości w dolnej belce); **gdy w łupie albo w torbie pojawi się nowa legenda, ich oczy płoną na czerwono ogniem przez kilka sekund** (podgląd: **Ctrl+Alt+L**; legenda jest rozpoznawana wyłącznie po wyglądzie przedmiotów, jak w Kociej Nocy),
-- **górna i dolna belka** — czerń z cienką kamienną krawędzią,
-- **przyciski HUD** — **12 kamiennych kafli o różnym stopniu zniszczenia** (każdy pasek zaczyna od innego, więc sąsiednie przyciski się różnią), ikony w szarości, kolor gry (fiolet, niebieski) zostaje jako słaby poblask,
-- **okna z ramką** — cienka (6 px) kamienna ramka 9-slice (`border-image`, skaluje się do każdego rozmiaru) z subtelnymi narożnikami w kształcie sierpowatych rogów z runą, mocno przygaszona ściana z płaskorzeźbą demona w tle, tytuł kapitalikami na czerni,
-- **okna przezroczyste** (śledzone questy, sorter) — czerń z cienką obwódką,
-- **dialog z NPC** — ta sama cienka rama z narożnikami,
-- **sklep** — markiza przyciemniona do brązowej czerni, kamienna krawędź zamiast drewnianej belki,
-- **ekwipunek, torby, statystyki, czat** — ciemna ilustracja w tle kolumn (spękana ściana z płaskorzeźbą demona, łańcuchami, runami i czaszkami, przyciemniona tak, by nie przeszkadzała w czytaniu), aktywne zakładki z cienką czerwoną kreską, kolory kanałów bez zmian,
-- **tooltipy przedmiotów** — cienka kamienna ramka, ciemny nagłówek, kolory rzadkości bez zmian,
-- **przyciski tekstowe** — kamienna oprawa; czerwony, niebieski i fioletowy przycisk gry zachowują znaczenie (stonowane),
-- **paski postępu, scrollbary**,
-- **wszystkie pozostałe okna gry** (dziennik zadań, gildia, społeczność, ustawienia, Premium, mapa świata i inne) — patrz niżej.
-
-**Przemalowanie grafik gry w locie.** Gra rysuje większość interfejsu z kilkudziesięciu plików `/img/gui/*` (sam atlas `buttony.png` jest w ok. 180 regułach CSS). Skrypt pobiera te pliki z serwera gry, przemalowuje je w przeglądarce — drewno, brąz, pergamin i szarości zamienia w okopcony czarny kamień, a kolory znaczeniowe (złoto, zieleń statusów, błękit, czerwone znaczniki, jasne ikony) zostawia — i podmienia je w regułach CSS gry (ok. 320 reguł). Jasne, pergaminowe i szare tła w regułach są przyciemniane, a skaner w oknach rozjaśnia tekst, który był ciemny na pergaminie (neutralny → kość, kolorowy → ten sam odcień, jaśniej). Kopie grafik gry nie trafiają do repo — wszystko dzieje się lokalnie. Kursory, ramki rzadkości przedmiotów, ikony umiejętności i mapy zostają oryginalne. Wyłączenie motywu przywraca oryginalne grafiki i kolory bez przeładowania strony.
-
-Mapa (canvas) i logika gry pozostają nietknięte — skrypt zmienia wyłącznie wygląd (CSS i grafiki interfejsu).
-
-**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-gothic/dark-gothic.user.js
-
-Instalacja:
-1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
-2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
-3. Wyłącz w Tampermonkey inne motywy interfejsu (Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
-4. Odśwież grę.
-
-Aktualizacje: Tampermonkey sam pobiera nowe wersje z tego repo (albo ręcznie: Tampermonkey → Panel → „Sprawdź aktualizacje”).
-
-Wyłączanie: **Ctrl+Alt+G** albo ikona Tampermonkey → „Dark Gothic: włącz / wyłącz” (wybór jest zapamiętywany).
-
-Grafiki leżą w [assets/dark-gothic/](assets/dark-gothic/) (38 plików WebP, razem ok. 333 KB, każdy poniżej 40 KB) i są ładowane przez jsDelivr. Zostały wygenerowane modelem FLUX.1 Krea jako osobne elementy i zaakceptowane pojedynczo; tło wycięte kluczowaniem czerni, środek pierścienia kuli HP wycięty pod kulę gry, żar run wydzielony na osobną warstwę do animacji, kafle ujednolicone pod jasność. Zrzuty przed/po: [margonem-dark-gothic/screenshots/](margonem-dark-gothic/screenshots/).
-
-## Margonem — Mroczna Gwiazda
-
-Motyw w klimacie kosmicznej pustki: głęboka czerń przechodząca w przydymioną śliwkę, łososiowo-koralowe światło jako akcent, srebrny tekst z różowym odcieniem i ledwo widoczny gwiezdny pył na panelach. Inspirowany estetyką „mrocznej gwiazdy”, bez cudzych grafik i logo – grafiki są wygenerowane na Hugging Face (FLUX.1 Krea).
-
-Paleta (zmienne CSS `--mds-*` w `:root` na początku bloku `css`) – czerń przechodząca w przydymioną śliwkę, światło łososiowo-koralowe: tła `#09060a` / `#120b13` / `#1c121e`, śliwka `#7a4878` (akcent), łososiowy koral `#ec8c80` (podświetlenia), ciemna śliwka `#3e2440` (obramowania), tekst `#dccbd6`, oszczędny błękit `#5a7bd8` (mana).
-
-Funkcje:
-- **okna i panele**: czarne tło z gwiezdnym pyłem, cienka śliwkowa krawędź, delikatna poświata, nagłówki z lekkim odstępem liter i śliwkową linią,
-- **minimalistyczne narożniki** okien, dialogu z NPC i tooltipów: krótka linia z małym rombem dokładnie na krawędzi,
-- **kolumna ekwipunku**: pola ekwipunku, torby i statystyki są półprzezroczyste z lekko przezroczystymi ramkami w śliwce,
-- **kula HP jako czarna dziura**: wnętrze kuli jest czarne, płyną w nim dwie warstwy subtelnej mgławicy w śliwce i łososiowym koralu, a co kilka sekund przechodzi przez nie delikatny rozbłysk; poziom HP pokazuje cienka, jasna linia; wokół kuli w 3D krąży łososiowy pierścień cząstek (tylna połowa za kulą, przednia przed nią); przy HP poniżej 30% pierścień przechodzi w głęboką czerwień,
-- **przemalowanie grafik gry w locie**: drewno, brąz i pergamin z plików `/img/gui/*` zamieniają się w śliwkową czerń, złote obszycia w śliwkę przechodzącą w róż; kolory znaczeniowe (złoto, zielone statusy, błękit, czerwone powiadomienia) zostają. Kopie grafik gry nie trafiają do repo,
-- **przyciski**: ciemne, ze śliwkową obwódką i spokojnie pulsującą koralową poświatą po najechaniu; czerwone, zielone i niebieskie przyciski gry zachowują znaczenie,
-- **zakładki, dialog z NPC, sklep, pola tekstowe, scrollbary, zaznaczenie tekstu** w stylu motywu,
-- animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”.
-
-Interfejsy: **NI** – pełne wsparcie. **SI** – podstawowe (okna, przyciski, pola tekstowe); selektory SI nie były jeszcze sprawdzone w grze i są oznaczone w kodzie `TODO: zweryfikuj selektor`. Mapa i sprite'y postaci nie są zmieniane.
-
-**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-dark-star/margonem-dark-star.user.js
-
-Instalacja:
-1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
-2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
-3. Wyłącz w Tampermonkey inne motywy interfejsu (Dark Gothic, Crimson Knight, Kocia Noc, nitheme) — zmieniają te same elementy.
-4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
-
-Wyłączanie: **Ctrl+Alt+D** albo ikona Tampermonkey → „Mroczna Gwiazda: włącz / wyłącz” (wybór jest zapamiętywany).
-
-Grafiki leżą w [assets/dark-star/](assets/dark-star/) (PNG, do ok. 100 KB każdy) i są dołączane przez `@resource`, więc Tampermonkey aktualizuje je razem ze skryptem. Każdy element powstał w dwóch wariantach, z których wybrany jeden; prompty i parametry obróbki są w [PROMPTS.md](assets/dark-star/PROMPTS.md).
-
-## Margonem — Czarna Dziura
-
-Mroczny motyw interfejsu: głęboka czerń z lekkimi fioletowymi akcentami, kula HP jako czarna dziura z animowanym horyzontem zdarzeń, a w wybranych miejscach naturalny kamień z pęknięciami, które mienią się na fioletowo. Tekst, ikony przedmiotów, paski i czat zostają czytelne. Grafiki wygenerowane na Hugging Face (FLUX.1 Krea, seed 666) i obrobione lokalnie.
-
-Co jest ostylowane:
-- **kula HP** — sama kula jest cieniem czarnej dziury; wokół niej różowa korona, pierścień fotonowy i dysk akrecyjny widziany z boku. Bez obrotu: światło płynie wzdłuż dysku, jedna strona jaśnieje (efekt Dopplera), korona migocze. Poziom HP świeci w kuli jako ciemnoczerwona plazma, procent zostaje czytelny,
-- **naturalny kamień** — każdy przycisk HUD (górny i dolny pasek) ma własny kafel szorstkiej skały z innym układem pęknięć (18 wariantów), a statystyki leżą na kamiennej płycie; w szczelinach przesuwa się fioletowy błysk (każdy przycisk w innej fazie),
-- **okna z ramką** — cienka ramka 9-slice, czarne tło z ledwo widocznym pyłem, ciemna tabliczka tytułu (9-slice z outsetem, układ okna bez zmian), obsydianowy dysk zamykania z „X”, zakładki, panele, dolny pasek okna,
-- **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — czerń z cienką fioletową obwódką,
-- **przyciski tekstowe** — czarna, szklista płytka z cienkim brzegiem (także fioletowe przyciski gry, np. „Kup złoto”); czerwone, złote i smocze przyciski gry bez zmian,
-- **górna i dolna belka**, **tabliczka z imieniem (HUD)**, **listwa dolnego panelu** — czarny obsydian,
-- **kolumny czatu i ekwipunku** — przygaszona ilustracja czarnej dziury z mgławicą (pod czatem dodatkowo przyciemniona),
-- **ekwipunek, torba, sklep** — własne sloty, ciemne siatki, markiza sklepu przyciemniona do popielatych pasów,
-- **paski** — HP w ciemnym szkarłacie, EXP w przygaszonym fiolecie (także dolny pasek EXP),
-- **tooltipy przedmiotów** — czarna karta z cienką obwódką, kolory rzadkości bez zmian,
-- **ekran ładowania** — przyciemniona czarna dziura z koroną zaćmienia, logo gry w jej środku,
-- **suwaki** i wspólne elementy `interface-element-*` (nagłówki tabel i sekcji, linie, karty, kafle).
-
-Animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch”. Nie ruszane: ikony gry, podświetlenia przedmiotów do zadań. Dialog z NPC nie był jeszcze sprawdzony w grze. Mapa (canvas) i logika gry pozostają nietknięte.
-
-**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-czarna-dziura/czarna-dziura.user.js
-
-Instalacja:
-1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
-2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
-3. Wyłącz w Tampermonkey inne motywy interfejsu (Dark Gothic, Mroczna Gwiazda, Crimson Knight, Kocia Noc) — zmieniają te same elementy.
-4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
-
-Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
-
-Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (56 plików WebP, razem ok. 140 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
-
-## Margonem — Fioletowa Pustka (Violet Void)
-
-Mroczny motyw interfejsu w klimacie kosmicznej otchłani. Powierzchnie są prawie czarne, krawędzie grafitowe, a fiolet pustki występuje **tylko jako akcent**: cienkie linie, aktywne zakładki, focus pól i poświata przy najechaniu. Bez wirów i bez zalewania okien kolorem. Wszystkie elementy są oryginalne, bez grafik i motywów z innych gier. Najważniejsza jest czytelność: tekst czatu i tooltipów ma kontrast co najmniej WCAG AA, a poświaty nie leżą na treści.
-
-Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#060509` / `#0c0a10` / `#141119` / `#1c1824`, krawędzie `#2a2433` / `#3b3346`, akcenty fioletu `#4a1f7a` / `#6d2fb3` / `#8f45e6`, energia `#b57cff` / `#d9b8ff` (focus, najechanie), oszczędna magenta `#ff4fd8` (nowe wiadomości), tekst `#e6e0ee` i przygaszony `#9a93a8`.
-
-Funkcje:
-- **okna** — czerń w cienkiej ramie z ciemnego wulkanicznego szkła z ametystowymi kryształami w narożnikach (9-slice, układ okien bez zmian), ledwie widoczna poświata, tytuł na kamiennej tabliczce z krystalicznymi ćwiekami i małym ametystem pośrodku, grafitowy przycisk zamknięcia (fiolet przy najechaniu), zakładki,
-- **okna przezroczyste** (minimapa, obserwowane zadania, zegar, ping, sorter) — półprzezroczysta czerń w ramie z wulkanicznego szkła jak okna, tytuł w kolorach motywu,
-- **dialog z NPC** — rama z wulkanicznego szkła jak okna z ametystem pośrodku górnej krawędzi, imię NPC w jasnym fiolecie, cienka fioletowa linia nad odpowiedziami, ikony odpowiedzi przygaszone do fioletu, przy najechaniu fioletowa kreska i łuna; kolory odpowiedzi (np. wyjście) zostają z gry,
-- **czat** — czerń pod wiadomościami z ledwie widoczną poświatą u góry (kolory kanałów i wiadomości bez zmian, kontrast AA), pasek zakładek na kamiennej tabliczce, ikony kanałów przygaszone do fioletu (aktywny kanał jaśniejszy, z poświatą i fioletową kreską), magentowy licznik nieprzeczytanych, pole wpisywania w miniaturze ramy okien, listwy kolumn z cienką fioletową żyłą,
-- **tooltipy przedmiotów** — prawie nieprzezroczysta czarna karta (kontrast tekstu ~16:1) w ramie z wulkanicznego szkła jak okna, formatowana kolorem **ramki, którą przedmiot faktycznie ma na ekranie**: krystaliczny klejnot na górnej krawędzi, cienka obwódka i górna linia, poświata, ikona w oprawie z łuną, ranga jako mała tabliczka z rombem, separatory z kryształem pośrodku, nazwa; stopka (poziom, wartość) na ciemniejszym pasie. Kolor jest odczytywany z grafiki ramki, więc pasuje do każdego zestawu ramek (ustawienia gry, inne dodatki); zwykłe przedmioty dostają stonowany grafit, a gdy grafiki nie da się odczytać – kolor nazwy z gry,
-- **ekwipunek, postać, torby** — czarna kolumna; ekwipunek, przełącznik toreb i torba w ramach z wulkanicznego szkła jak okna; sloty ekwipunku jako osobne wklęsłe komórki, torba z ciemnymi przerwami między polami, aktywna torba z fioletową krawędzią; ikony i ramki rzadkości bez zmian,
-- **panel statystyk** — rama okien, nagłówek „STATS” na kamiennej tabliczce, wiersze rozdzielone cienką fioletową linią, ikony przygaszone do fioletu; kolory odporności zostają z gry,
-- **HUD** — czarne belki z cienką fioletową linią; **górna tabliczka** (imię, lokacja, złoto) w ramie z wulkanicznego szkła jak okna, z cienką linią pod imieniem i ametystem zwisającym pod spodem, przyciski „+” jako grafitowe płytki z fioletowym plusem; **przyciski widżetów z zwęglonego bazaltu**, przez którego pęknięcia sączy się przygaszony fiolet — 24 różne kafle (6 kamieni × 4 obroty), sąsiednie przyciski nigdy się nie powtarzają; otwarte okno = fioletowa krawędź (delikatnie pulsuje), kolory alarmów gry jako przygaszony obrys; **ikony przycisków jak runy wyryte w bazalcie** — przygaszona lawenda z wciętym cieniem, przy najechaniu i otwartym oknie jaśnieją fioletem (złote i zielone ikony też w ametyście, plakietki powiadomień bez zmian); drobne ikony okien (przezroczystość, zwijanie, informacja) w tym samym stylu,
-- **sklep** — w miejscu markizy popękane bazaltowe nadproże z krystalicznymi ćwiekami i ametystem pośrodku, przez pęknięcia prześwituje pulsujący fiolet, siatka towarów oraz pola „kup” i „sprzedaj” w ramach z wulkanicznego szkła z polami jak w torbie, napisy kapitalikami w kolorach motywu, czarne tła zamiast papieru; kolory bilansu z gry; w dolnym pasku okien bez skrzyni złota i napisu „Need more gold?” (przyciski zostają),
-- **kula HP** — wnętrze z czarnego obsydianu, w środku płynie fioletowa ciecz: na poziomie HP niska, spokojna tafla z dwóch drobnych fal płynących w przeciwne strony (jasna krawędź z łuną, pulsuje i lekko kołysze się na boki), a pod nią mgławica rozpuszczona w cieczy — świecąca fioletowa mgła z migoczącymi drobinami, która powoli się przelewa i zmienia kształt (wideo wygenerowane na Hugging Face: FLUX + Wan 2.2, dwa klipy na zmianę = pętla bez szwu, warstwa dodatkowo dryfuje), z poświatą tuż pod taflą (prawdziwy poziom z gry, procent zostaje biały i czytelny; przy „ogranicz ruch” ciecz stoi); kula oprawiona w **pierścień ze spękanego bazaltu**, który bardzo wolno krąży, a przez jego pęknięcia pulsuje fiolet, a spod niego wychodzą **pęknięcia**, przez które przebiega i trzaska fioletowa energia — zapętlona animacja wygenerowana na Hugging Face (FLUX + Wan 2.2), wstrzymywana w ukrytej karcie i przy „ogranicz ruch”,
-- **pasek szybkich slotów** (1–8 po bokach kuli) — obie czwórki w ramie okien, każdy slot to inny kafel spękanego bazaltu jak przyciski HUD (ciemny środek, przedmioty czytelne), numery slotów w przygaszonym fiolecie,
-- **pasek doświadczenia** — kapsuły „% doświadczenia” i „czas” w pierwotnym miejscu, wsunięte pod pierścień kuli (liczby odsunięte tak, by kamień ich nie zasłaniał); ciemny fiolet pustki z jaśniejszą krawędzią i linią energii, po którym wolno przepływa połysk (w obu paskach w stronę kuli), czarne koryto z wewnętrznym cieniem; paski i kapsuły „% doświadczenia” i „czas” w cienkiej ramie z wulkanicznego szkła z ametystami, tej samej co okna — bez metalowych skrzydeł i ozdób gry wokół kuli,
-- **paski** — HP zostaje czerwone (czytelność w walce), druga belka w przygaszonym fiolecie, grafitowa listwa; paski nad postaciami w walce bez zmian,
-- **ikona pingu** — ten sam półokrągły wskaźnik co w grze, w kolorach motywu: odbity w pionie, segmenty zapalają się od góry wraz z lagiem (fiolet, przy dużym lagu magenta),
-- **ekran wczytywania** — grota z czarnego wulkanicznego szkła z ledwie świecącymi ametystami po bokach i pustym, ciemnym środkiem, logo gry przebarwione na ametyst, pasek postępu w fiolecie w ramie okien,
-- **walka** — panel walki w ramie z wulkanicznego szkła jak okna, z ametystem na górnej krawędzi, pasek czasu tury w fiolecie, daty i licznik puli w kolorach motywu, ikony przygaszone do fioletu; plansza walki, wpisy dziennika i kolory stron walki bez zmian,
-- **minimapa** — sama mapa bez zmian, rama przezroczystych okien, cienka grafitowa krawędź i lekka winieta wokół mapy,
-- **przyciski i listy wyboru** — grafitowe płytki w miniaturze ramy okien (wulkaniczne szkło z ametystami w narożnikach), przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,
-- **pola wyszukiwania** — miniatura ramy okien zamiast ramki gry, lupa w przygaszonym fiolecie, przy pisaniu lekka poświata,
-- **wspólne panele** `interface-element-*` na tych samych grafikach co okna: panele, skrzynki i pionowe belki w ramie z wulkanicznego szkła, nagłówki, dolne paski okien, nagłówki kart i zakładki (także zakładki w oknach) na kamiennej tabliczce (aktywna zakładka z fioletową kreską pod spodem); ta sama rama na panelu umiejętności, małych oknach podpowiedzi i dymkach nad postaciami, okno komunikatu bez pergaminu,
-- **scrollbary, zaznaczenie tekstu, focus pól tekstowych, przełączniki** (czarne kwadraty, zaznaczone w fiolecie z poświatą) w kolorach motywu; w listach z grupami (ustawienia, dziennik zadań, rzemiosło) wybrana pozycja z fioletową kreską, nagłówki grup z grafitową ramką; tabele (np. karty zadań) z ciemnym nagłówkiem z fioletową kreską i grafitowymi liniami, poziom zadania w fiolecie,
-- **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
-- **przełącznik** — mały okrągły przycisk w lewym dolnym rogu (klik: włącz/wyłącz, prawy klik: intensywność), skróty i menu Tampermonkey; stan zapamiętywany.
-
-**Pozostałe grafiki gry** (ok. 80 plików `/img/gui/*`, m.in. atlas `buttony.png` z ~180 reguł: ikony, ramki, przyciski, kalendarze, przepustka, powiadomienia) są przemalowywane w locie: drewno, brąz, pergamin i szarości → prawie czerń z nutą fioletu, złote obszycia → przygaszony ametyst, jasne ikony → lekko lawendowe; kolory znaczeniowe (złoto ikon, zielone statusy, błękit, czerwone znaczniki) zostają. Pliki są pobierane z serwera gry i nie trafiają do repo; nietknięte zostają kursory, ramki rzadkości, ikony umiejętności i mapy. Ciemny tekst z dawnego pergaminu jest automatycznie rozjaśniany. Wyłączenie motywu przywraca oryginały bez przeładowania.
-
-Interfejs: **wyłącznie nowy (NI)**. Na starym interfejsie (SI) skrypt nic nie robi. Interfejs jest rozpoznawany po ciasteczku gry `interface`, potem po elementach strony. Mapa (canvas), sprite'y i logika gry pozostają nietknięte.
-
-**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
-
-Instalacja:
-1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
-2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
-3. Wyłącz w Tampermonkey inne motywy interfejsu (Czarna Dziura, Mroczna Gwiazda, Dark Gothic, Crimson Knight, Kocia Noc) — zmieniają te same elementy.
-4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
-
-Skróty:
-- **Ctrl+Alt+V** — włącz/wyłącz motyw,
-- **Ctrl+Alt+I** — intensywność świecenia (niska → średnia → wysoka).
-
-Ruchu jest minimum (puls krawędzi otwartych widżetów, przejścia przy najechaniu) i wyłącza się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).
-
-Grafiki (ramka okna, tabliczka tytułu, ametyst, atlas przycisków HUD, kamienny pierścień i animacja wokół kuli HP, nadproże sklepu, tło ekranu wczytywania) leżą w [assets/violet-void/](assets/violet-void/) (7 plików WebP i 1 wideo MP4, razem ok. 257 KB). Wygenerowano je modelem FLUX.1 Krea na Hugging Face i obrobiono lokalnie; prompty są w [PROMPTS.md](assets/violet-void/PROMPTS.md). Skrypt ładuje je przez `@resource`, więc Tampermonkey pobiera je raz, razem z aktualizacją.
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-violet-void/margonem-violet-void.user.js)
