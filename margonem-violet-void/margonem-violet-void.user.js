@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.2.0
+// @version      1.3.0
 // @description  Mroczny, fioletowy motyw interfejsu Margonem w klimacie kosmicznej otchłani: świecące krawędzie, poświata pustki, gwiezdne iskry. Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -31,7 +31,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -370,7 +370,87 @@ ${S} #inpchat, ${S} #chat input {   /* TODO: zweryfikuj selektor (pole czatu SI)
   border-color: var(--vv-line) !important;
 }
 `;
-  const cssInventory = ``;
+  /* =====================================================================
+   * === EKWIPUNEK (prawa kolumna, postać, torby, sloty, sklep, belki i tabliczka HUD) ===
+   * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
+   * ===================================================================== */
+  const cssInventory = `
+${N} .interface-layer > .right-column.main-column {
+  background: var(--vv-void-light), var(--vv-sparks), var(--vv-bg-0) !important;
+}
+/* obrys siatek ekwipunku i torby */
+${N} .interface-element-grid-border,
+${N} .interface-element-grid-border-light {
+  outline-color: var(--vv-bg-0) !important;
+  box-shadow: 0 0 0 1px var(--vv-v-1), 0 0 0 2px var(--vv-bg-0), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
+}
+${N} .interface-layer .equipment-outline-2,
+${N} .interface-layer .equipment-outline-3 { background-color: var(--vv-v-1) !important; }
+/* sloty: ciemna komórka z fioletową krawędzią (warstwa pod przedmiotami) */
+${N} .interface-element-item-slot-grid-stretch,
+${N} .interface-element-one-item-slot-background-to-repeat {
+  background-image:
+    linear-gradient(rgb(143 69 230 / .35), rgb(143 69 230 / .35)),
+    radial-gradient(circle at 50% 45%, var(--vv-bg-2), var(--vv-bg-0) 75%) !important;
+  background-size: 32px 1px, 32px 32px !important;   /* TODO: zweryfikuj selektor (rozmiar kratki 32 px) */
+  background-repeat: repeat !important;
+  box-shadow: inset 1px 0 0 rgb(143 69 230 / .25);
+}
+${N} .interface-element-one-item-slot-2 {
+  background: radial-gradient(circle at 50% 45%, var(--vv-bg-2), var(--vv-bg-0) 75%) !important;
+  border-color: var(--vv-v-1) !important;
+  outline-color: var(--vv-bg-0) !important;
+}
+${N} .interface-element-one-black-tile { background: linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important; }
+${N} .interface-element-one-gray-tile { background: linear-gradient(var(--vv-bg-2), var(--vv-bg-1)) !important; }
+
+/* górna i dolna belka interfejsu, tabliczka z imieniem / lokacją / złotem */
+${N} .interface-layer > .top.positioner > .bg {
+  background: linear-gradient(transparent calc(100% - 1px), var(--vv-v-3)), linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
+}
+${N} .interface-layer > .bottom.positioner > .bg {
+  background: linear-gradient(var(--vv-v-3), transparent 1px), linear-gradient(var(--vv-bg-0), var(--vv-bg-1)) !important;
+}
+${N} .interface-layer .hud-container {
+  background: var(--vv-void-light), linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  border-image: none !important;
+  box-shadow: inset 0 0 0 1px var(--vv-v-2), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+}
+/* przyciski HUD (widżety) */
+${N} .widget-button.green {
+  background: radial-gradient(circle at 50% 40%, var(--vv-v-1), var(--vv-bg-0) 80%) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-v-2) !important;
+}
+${N} .widget-button.green::before { box-shadow: none !important; }
+${N} .widget-button.green:not(.disabled):hover {
+  box-shadow: inset 0 0 0 1px var(--vv-e-1), 0 0 calc(8px * var(--vv-k)) var(--vv-glow-strong) !important;
+}
+${N} .widget-button.green.window-is-open {
+  background: radial-gradient(circle at 50% 40%, var(--vv-v-2), var(--vv-bg-1) 80%) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-e-2), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
+}
+/* podstawka statystyk postaci */
+${N} .interface-layer .stats-wrapper {
+  background: var(--vv-void-light), rgb(20 10 36 / .94) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-line) !important;
+}
+${N} .interface-layer .stats-wrapper * { text-shadow: 0 1px 2px #000; }
+
+/* sklep: markiza przemalowana na fiolet, papierowe tła na pustkę */
+${N} .shop-wrapper .shop-background .canopy { filter: hue-rotate(200deg) saturate(.7) brightness(.45); }
+${N} .shop-wrapper .shop-background .paper-1,
+${N} .shop-wrapper .shop-background .paper-2 {
+  background: var(--vv-bg-1) !important;
+  box-shadow: inset 0 0 8px #000, inset 0 0 0 1px var(--vv-line-soft) !important;
+}
+${N} .shop-wrapper .shop-content .items-grid .label { background: var(--vv-bg-0) !important; color: var(--vv-text) !important; }
+${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-line) !important; }
+
+/* --- SI --- */
+${S} #panel .item, ${S} #bag .item, ${S} #bagc .item {   /* TODO: zweryfikuj selektor (sloty SI) */
+  box-shadow: inset 0 0 0 1px var(--vv-line-soft);
+}
+`;
   /* =====================================================================
    * === TOOLTIPY ===
    * Karta prawie nieprzezroczysta (#0b0614 / 97%) – tekst #e8ddff ma kontrast ~15:1, przygaszony ~6.6:1.
