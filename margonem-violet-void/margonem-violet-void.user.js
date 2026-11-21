@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.20.2
+// @version      1.20.3
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.20.2';
+  const VERSION = '1.20.3';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -659,11 +659,14 @@ ${N} .shop-wrapper .shop-background::after {
   position: absolute; left: 14px; right: 14px; top: 4px; height: 33px;
   pointer-events: none;
 }
+/* z-index: pierwsze dziecko tła sklepu to pełnowymiarowy, prawie nieprzezroczysty panel – bez tego zakrywał kamień */
 ${N} .shop-wrapper .shop-background::before {
   background: url("${IMG.lintel}") center / contain no-repeat;
   filter: drop-shadow(0 3px 4px rgb(0 0 0 / .85));
+  z-index: 1;
 }
 ${N} .shop-wrapper .shop-background::after {
+  z-index: 2;
   background: ${LINTEL_CRACKS} center / contain no-repeat;
   -webkit-mask: url("${IMG.lintel}") center / contain no-repeat;
   mask: url("${IMG.lintel}") center / contain no-repeat;
