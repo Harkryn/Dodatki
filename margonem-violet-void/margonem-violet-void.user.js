@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.20.0
+// @version      1.20.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.20.0';
+  const VERSION = '1.20.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -82,6 +82,42 @@
     ...[1, 2, 3, 4, 5, 6].map((k) => `html.${ON}.vv-ni .widget-button:nth-child(6n+${k}) { --vv-hy: ${k - 1}; --vv-hx: ${k % 4}; }`),
     ...HUD_ORDER.map((n, i) => `html.${ON}.vv-ni .widget-button[widget-name="${n}"] { --vv-hy: ${i % 6}; --vv-hx: ${Math.floor(i / 6) % 4}; }`)
   ].join('\n');
+
+  // Popękania nadproża sklepu: poszarpane szczeliny z odgałęzieniami w układzie grafiki nadproża (960×65),
+  // z pominięciem ametystu pośrodku (x ≈ 455–525). Ciemny rdzeń szczeliny + fiolet z poświatą + jasna żyłka.
+  // Ziarno stałe, więc pęknięcia wyglądają zawsze tak samo.
+  const LINTEL_CRACKS = (() => {
+    let seed = 7;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const f = (n) => Math.round(n * 10) / 10;
+    const paths = [];
+    [64, 150, 236, 330, 410, 575, 660, 748, 838, 905].forEach((x0, i) => {
+      const down = i % 2 === 0;
+      let x = x0 + (rnd() - 0.5) * 20, y = down ? 0 : 65;
+      let d = `M${f(x)} ${f(y)}`;
+      const steps = 3 + Math.floor(rnd() * 3);
+      for (let s = 0; s < steps; s++) {
+        x += (rnd() - 0.5) * 30;
+        y += (down ? 1 : -1) * (7 + rnd() * 8);
+        y = Math.max(0, Math.min(65, y));
+        d += ` L${f(x)} ${f(y)}`;
+        if (s === 1 && rnd() > 0.35) {   // odgałęzienie
+          const bx = x + (rnd() > 0.5 ? 1 : -1) * (10 + rnd() * 14), by = y + (down ? 1 : -1) * (5 + rnd() * 8);
+          paths.push(`M${f(x)} ${f(y)} L${f(bx)} ${f(Math.max(0, Math.min(65, by)))}`);
+        }
+      }
+      paths.push(d);
+    });
+    const all = paths.map((d) => `<path d='${d}'/>`).join('');
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 65' width='960' height='65'>` +
+      `<defs><filter id='g' x='-20%' y='-50%' width='140%' height='200%'><feGaussianBlur stdDeviation='2.2'/></filter></defs>` +
+      `<g fill='none' stroke-linecap='round' stroke-linejoin='round'>` +
+      `<g stroke='#8f45e6' stroke-width='7' stroke-opacity='.55' filter='url(#g)'>${all}</g>` +
+      `<g stroke='#050208' stroke-width='3.2'>${all}</g>` +
+      `<g stroke='#b57cff' stroke-width='1.4'>${all}</g>` +
+      `<g stroke='#f0e4ff' stroke-width='.5' stroke-opacity='.8'>${all}</g></g></svg>`;
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+  })();
 
   /* =====================================================================
    * === ZMIENNE (paleta i intensywność świecenia) ===
@@ -614,14 +650,27 @@ ${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px
    jak w torbie (ciemne przerwy między komórkami). Ramy wystają ~9 px, więc napisy „Buy”/„Sell” są podniesione
    nad ramy, a opis sklepu opuszczony pod ramę. Kolory bilansu (zielony/czerwony) zostają z gry. */
 ${N} .shop-wrapper .shop-background .canopy { display: none !important; }
-/* w miejscu markizy: bazaltowe nadproże z krystalicznymi ćwiekami i ametystem pośrodku */
+/* w miejscu markizy: bazaltowe nadproże z krystalicznymi ćwiekami i ametystem pośrodku (::before),
+   na nim popękania, przez które prześwituje pulsujący fiolet (::after, SVG przycięte maską do kształtu kamienia;
+   oba obrazy „contain” w tym samym pudełku, więc pęknięcia trafiają dokładnie w kamień) */
+${N} .shop-wrapper .shop-background::before,
 ${N} .shop-wrapper .shop-background::after {
   content: "";
   position: absolute; left: 14px; right: 14px; top: 4px; height: 33px;
-  background: url("${IMG.lintel}") center / contain no-repeat;
-  filter: drop-shadow(0 3px 4px rgb(0 0 0 / .85));
   pointer-events: none;
 }
+${N} .shop-wrapper .shop-background::before {
+  background: url("${IMG.lintel}") center / contain no-repeat;
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / .85));
+}
+${N} .shop-wrapper .shop-background::after {
+  background: ${LINTEL_CRACKS} center / contain no-repeat;
+  -webkit-mask: url("${IMG.lintel}") center / contain no-repeat;
+  mask: url("${IMG.lintel}") center / contain no-repeat;
+  animation: vv-lintel-glow 4.5s ease-in-out infinite;
+}
+@keyframes vv-lintel-glow { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { ${N} .shop-wrapper .shop-background::after { animation: none; opacity: .85; } }
 /* skrzynia złota i napis „Need more gold?” w dolnym pasku okien – ukryte; przyciski „Buy gold” i „Recover items” zostają */
 ${N} .premium-footer__chest,
 ${N} .premium-footer__label { display: none !important; }
