@@ -196,3 +196,34 @@ Instalacja:
 Wyłączanie: **Ctrl+Alt+B** albo ikona Tampermonkey → „Czarna Dziura: włącz / wyłącz” (działa od razu, wybór jest zapamiętywany).
 
 Grafiki leżą w [assets/czarna-dziura/](assets/czarna-dziura/) (56 plików WebP, razem ok. 140 KB) i są ładowane przez jsDelivr spod tagu wersji (`czarna-dziura-X.Y.Z`), więc po aktualizacji nie ma starych grafik z cache. Zrzuty przed/po: [margonem-czarna-dziura/screenshots/](margonem-czarna-dziura/screenshots/).
+
+## Margonem — Fioletowa Pustka (Violet Void)
+
+Mroczny motyw interfejsu w klimacie kosmicznej otchłani, w którym fiolet dominuje w całym UI: warstwy fioletowych teł, światło sączące się z wnętrza pustki (gradienty radialne w oknach), świecące krawędzie paneli i delikatne gwiezdne iskry w tle. Wszystkie elementy są oryginalne, bez grafik i motywów z innych gier. Najważniejsza jest czytelność: tekst czatu i tooltipów ma kontrast co najmniej WCAG AA, a poświaty nie leżą na treści.
+
+Paleta (zmienne CSS `--vv-*` w sekcji „ZMIENNE”): tła `#0b0614` / `#140a24` / `#1c0f33`, fiolety `#4a1f7a` / `#6d2fb3` / `#8f45e6`, energia `#b57cff` / `#d9b8ff`, oszczędny akcent `#ff4fd8`, tekst `#e8ddff` i przygaszony `#9d8cc2`.
+
+Funkcje:
+- **okna** — fioletowe warstwy z poświatą od góry i od dołu, gwiezdne iskry, świecąca krawędź (rysowana cieniem, układ okien bez zmian), plakietka tytułu z poświatą, okrągły przycisk zamknięcia, zakładki,
+- **okna przezroczyste** (minimapa, obserwowane zadania) i **dialog z NPC** — półprzezroczysta pustka z fioletową obwódką, podświetlenie odpowiedzi,
+- **przyciski** — fioletowe płytki, które przy najechaniu rozświetlają się energią; czerwone, złote i smocze przyciski gry bez zmian,
+- **wspólne panele** `interface-element-*` (nagłówki, karty, linie, dolne paski okien),
+- **scrollbary, zaznaczenie tekstu, focus pól tekstowych** w kolorach motywu,
+- **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
+- **przełącznik** — mały okrągły przycisk w lewym dolnym rogu (klik: włącz/wyłącz, prawy klik: intensywność), skróty i menu Tampermonkey; stan zapamiętywany.
+
+Interfejsy: **NI** ma pełne wsparcie. **SI** ma na razie tylko podstawowe style (scrollbary, pola, zaznaczenie, główne okna), a jego selektory czekają na sprawdzenie w grze. Interfejs jest rozpoznawany po ciasteczku gry `interface`, potem po elementach strony. Mapa (canvas), sprite'y i logika gry pozostają nietknięte.
+
+**Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
+
+Instalacja:
+1. Zainstaluj rozszerzenie [Tampermonkey](https://www.tampermonkey.net/).
+2. Otwórz link instalacyjny powyżej i kliknij **Zainstaluj**.
+3. Wyłącz w Tampermonkey inne motywy interfejsu (Czarna Dziura, Mroczna Gwiazda, Dark Gothic, Crimson Knight, Kocia Noc) — zmieniają te same elementy.
+4. Odśwież grę. Nowe wersje Tampermonkey pobiera sam.
+
+Skróty:
+- **Ctrl+Alt+V** — włącz/wyłącz motyw,
+- **Ctrl+Alt+I** — intensywność świecenia (niska → średnia → wysoka).
+
+Animacje są lekkie i wyłączają się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).
