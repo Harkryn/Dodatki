@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.29.1
+// @version      1.29.2
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -84,6 +84,11 @@
     ...[1, 2, 3, 4, 5, 6].map((k) => `html.${ON}.vv-ni .widget-button:nth-child(6n+${k}) { --vv-hy: ${k - 1}; --vv-hx: ${k % 4}; }`),
     ...HUD_ORDER.map((n, i) => `html.${ON}.vv-ni .widget-button[widget-name="${n}"] { --vv-hy: ${i % 6}; --vv-hx: ${Math.floor(i / 6) % 4}; }`)
   ].join('\n');
+
+  // Lupa pól wyszukiwania (zamiast ikony w grafice search.png gry) – przygaszony fiolet
+  const SEARCH_ICON = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.6" fill="none" stroke="#9a7fc4" stroke-width="1.8"/>' +
+    '<path d="M10 10l4.2 4.2" stroke="#9a7fc4" stroke-width="2.2" stroke-linecap="round"/></svg>');
 
   // Popękania nadproża sklepu: poszarpane szczeliny z odgałęzieniami w układzie grafiki nadproża (960×65),
   // z pominięciem ametystu pośrodku (x ≈ 455–525). Ciemny rdzeń szczeliny + fiolet z poświatą + jasna żyłka.
@@ -569,6 +574,25 @@ ${N} .button.purple:not(.green):not(.disable):hover {
   box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-3), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
 }
 ${N} .button.disable { filter: grayscale(.6) brightness(.7); }
+/* przyciski i listy wyboru w miniaturze ramy okien (wulkaniczne szkło, ametysty w narożnikach) – środek ramy pusty,
+   więc grafitowa płytka i fioletowa krawędź przy najechaniu zostają widoczne */
+${N} .button.green:not(.background-gold):not(.background-draconite),
+${N} .button.purple:not(.green) {
+  border-style: solid !important;
+  border-image: url("${IMG.frame}") 30 / 5px / 0 stretch !important;
+}
+
+/* --- pola wyszukiwania: zamiast ramki gry (search.png) miniatura ramy okien i lupa w przygaszonym fiolecie --- */
+${N} .search-component {
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url("${IMG.frame}") 30 / 6px / 0 stretch !important;
+  background: url("${SEARCH_ICON}") 9px 50% / 13px 13px no-repeat, rgb(6 5 9 / .9) !important;
+  background-clip: border-box !important;
+  box-shadow: inset 0 0 8px rgb(0 0 0 / .8);
+}
+${N} .search-component:focus-within { box-shadow: inset 0 0 8px rgb(0 0 0 / .8), 0 0 calc(6px * var(--vv-k)) var(--vv-glow); }
+${N} .scroll-wrapper.left-scroll { border-color: var(--vv-edge) !important; }
 
 `;
 
