@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.22.4
+// @version      1.23.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.22.4';
+  const VERSION = '1.23.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -985,22 +985,45 @@ ${N} .bottom-panel-of-bottom-positioner .usable-slot::before {
 }
 ${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `${N} .bottom-panel-of-bottom-positioner .usable-slot-${n} { --vv-sy: ${(n + 2) % 6}; --vv-sx: ${(n + 1) % 4}; }`).join('\n')}
 
-/* okno walki i dziennik (kolory wpisów dziennika zostają z gry) */
-${N} .battle-controller .border-image,
-${N} .battle-window .border-image {   /* TODO: zweryfikuj selektor (rama okna walki) */
-  background: rgb(6 5 9 / .92) !important;
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge), 0 0 calc(10px * var(--vv-k)) var(--vv-glow) !important;
+/* --- panel walki (.battle-controller, 532×260 na dole ekranu; plansza walki – grafika gry – bez zmian) ---
+   Rama z wulkanicznego szkła jak okna (zamiast window-frame.png gry), ametyst pośrodku górnej krawędzi,
+   tło z ledwie widoczną poświatą. Pasek czasu tury w fiolecie, daty/licznik puli w kolorach motywu,
+   ikony (pomoc, przewidywanie, umiejętności, rozwiń) przygaszone do fioletu.
+   Kolory stron walki (zielony/czerwony w kolejce tur) i wpisy dziennika zostają z gry. */
+${N} .battle-controller .battle-border {
+  border-image: url("${IMG.frame}") 30 / 10px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 0 calc(12px * var(--vv-k)) var(--vv-glow), 0 10px 26px rgb(0 0 0 / .85);
 }
-${N} .battle-controller .battle-console,
-${N} .battle-controller .battle-log {   /* TODO: zweryfikuj selektor (dziennik walki) */
-  background: rgb(6 5 9 / .95) !important;
-  color: var(--vv-text) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-edge);
+${N} .battle-controller .battle-border::after {
+  content: "";
+  position: absolute; left: 50%; top: -12px;
+  width: 11px; height: 20px;
+  transform: translateX(-50%);
+  background: url("${IMG.gem}") center / contain no-repeat;
+  filter: drop-shadow(0 0 calc(4px * var(--vv-k)) var(--vv-glow-strong));
+  pointer-events: none;
 }
-${N} .battle-controller .auto-fight-button.button,
-${N} .battle-controller .button.auto-fight {   /* TODO: zweryfikuj selektor (przycisk „Auto”) */
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-3), 0 0 calc(8px * var(--vv-k)) var(--vv-glow) !important;
+${N} .battle-controller .middle-graphic {
+  background: var(--vv-void-light), linear-gradient(rgb(20 17 25 / .95), rgb(6 5 9 / .95) 70px) !important;
 }
+${N} .battle-controller .c-timer {
+  background: #050407 !important;
+  box-shadow: inset 0 1px 3px #000, 0 0 0 1px var(--vv-edge) !important;
+  border-color: transparent !important;
+}
+${N} .battle-controller .c-timer__progress-bar {
+  background: linear-gradient(#b57cff 0 1px, #6d2fb3 1px, #4a1f7a 60%, #2a1046) !important;
+  box-shadow: 1px 0 4px rgb(181 124 255 / calc(.6 * var(--vv-k)));
+}
+${N} .battle-controller .c-timer__text { color: var(--vv-text) !important; text-shadow: 0 1px 2px #000 !important; }
+${N} .battle-controller .pool-timer-wrapper,
+${N} .battle-controller .battle-watch { color: var(--vv-text-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .battle-controller .attach-icon,
+${N} .battle-controller .toggle-battle { filter: grayscale(1) brightness(.8) sepia(.4) hue-rotate(220deg) saturate(1.5); }
+${N} .battle-controller .attach-icon:hover,
+${N} .battle-controller .toggle-battle:hover { filter: grayscale(1) brightness(1.1) sepia(.5) hue-rotate(220deg) saturate(2); }
+${N} .battle-controller .battle-msg { color: var(--vv-text); text-shadow: 0 1px 2px #000; }
+${N} .battle-controller .turn-prediction__item { border-color: var(--vv-edge) !important; }
 
 /* minimapa: sama mapa bez zmian, tylko ramka */
 ${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--vv-edge) !important; }
