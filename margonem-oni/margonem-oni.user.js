@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.3.0
+// @version      1.4.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -758,7 +758,8 @@ ${N} .tip-wrapper .item-head .item {
 ${N} .tip-wrapper .item-name { font-weight: bold; text-shadow: 0 0 6px rgb(var(--oni-rar) / .35), 0 1px 2px #000 !important; }
 ${N} .tip-wrapper .item-type,
 ${N} .tip-wrapper .item-builds { color: var(--oni-dim) !important; letter-spacing: .03em; }
-${N} .tip-wrapper .item-rarity { color: rgb(var(--oni-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+${N} .tip-wrapper .item-rarity { color: var(--oni-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--oni-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
 /* sekcje: pędzlowe separatory zamiast cienkich linii gry (gra ustawia kolor linii inline) */
 ${N} .tip-wrapper .item-tip-section { border-bottom-color: transparent !important; position: relative; }
 ${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
@@ -770,6 +771,85 @@ ${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
 }
 /* proste tooltipy (np. nad przyciskami) – lakier z czerwoną krawędzią */
 ${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 -1px 0 var(--oni-r2); }
+`;
+
+  /* =====================================================================
+   * === WALKA i DIALOGI Z NPC ===
+   * Plansza walki (grafika gry, sprite'y) bez zmian – przebudowany jest tylko panel walki i dziennik.
+   * Kolory stron walki (zielony/czerwony) i wpisy dziennika zostają z gry.
+   * ===================================================================== */
+  const cssBattle = `
+/* --- panel walki (.battle-controller) --- */
+${N} .battle-controller .battle-border {
+  border-image: var(--oni-frame) 16 / 8px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85);
+}
+${N} .battle-controller .middle-graphic,
+${N} .battle-controller .graphics {
+  background: radial-gradient(ellipse 100% 60px at 50% 0, rgb(122 18 18 / .14), transparent), linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .96) 70px) !important;
+}
+/* pasek czasu tury jak ostrze: stalowa krawędź u góry, ciemnoczerwony lakier */
+${N} .battle-controller .c-timer {
+  background: var(--oni-k0) !important;
+  box-shadow: inset 0 1px 3px #000, 0 0 0 1px var(--oni-edge) !important;
+  border-color: transparent !important;
+}
+${N} .battle-controller .c-timer__progress-bar {
+  background: linear-gradient(#cfc6bd 0 1px, #9e1b1b 1px, #7a1212 55%, #3a0808) !important;
+}
+${N} .battle-controller .c-timer__text { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000 !important; }
+${N} .battle-controller .pool-timer-wrapper,
+${N} .battle-controller .battle-watch { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .battle-controller .attach-icon,
+${N} .battle-controller .toggle-battle { filter: grayscale(1) sepia(.3) brightness(.85); }
+${N} .battle-controller .attach-icon:hover,
+${N} .battle-controller .toggle-battle:hover { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(.95); }
+${N} .battle-controller .battle-msg { color: var(--oni-text); text-shadow: 0 1px 2px #000; }
+/* komunikaty informacyjne – zamiast szarego paska delikatna czerwień z kreską pędzla z lewej */
+${N} .battle-controller .battle-msg.txt {
+  background-color: rgb(122 18 18 / .18) !important;
+  box-shadow: inset 2px 0 0 var(--oni-r3);
+  color: var(--oni-text) !important;
+}
+${N} .battle-controller .turn-prediction__item { border-color: var(--oni-edge) !important; }
+
+/* --- dialog z NPC: papier shoji w lakierowanej ramie (ciemny, czytelny), imię pędzlem,
+   pociągnięcie pędzla między wypowiedzią a odpowiedziami, odpowiedzi żarzą się przy najechaniu --- */
+${N} .dialogue-window .border-image {
+  background:
+    ${WATERMARK} right 14px center / 120px 120px no-repeat,
+    linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .95) 80px) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: var(--oni-frame) 16 / 8px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85) !important;
+}
+${N} .dialogue-window .dialogue-background-color { background: rgb(7 5 5 / .7) !important; }
+${N} .dialogue-window .content { color: var(--oni-text); }
+${N} .dialogue-window .content .npc-dialogue-wrapper .h_content {
+  color: var(--oni-text) !important;
+  font-family: var(--oni-font-title) !important;
+  font-weight: normal !important;
+  letter-spacing: .04em;
+  text-shadow: 0 0 6px rgb(158 27 27 / .5), 0 1px 2px #000 !important;
+}
+${N} .dialogue-window .content .npc-message { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .dialogue-window .content .answers-scroll::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: -6px; height: 4px;
+  background: var(--oni-brush) center / 100% 100% no-repeat;
+  opacity: .8;
+}
+${N} .dialogue-window .content .answers li {
+  border-bottom-color: rgb(42 31 29 / .8) !important;
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+${N} .dialogue-window .content .answers li .icon { filter: grayscale(1) sepia(.35) brightness(.85); }
+${N} .dialogue-window .content .answers li:hover {
+  background: linear-gradient(90deg, rgb(158 27 27 / .25), rgb(122 18 18 / .06) 60%, transparent) !important;
+  box-shadow: inset 2px 0 0 var(--oni-hi) !important;
+}
+${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(1); }
 `;
 
   /* =====================================================================
@@ -991,7 +1071,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssAnim, cssToggle].join('\n'));
+  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'oni-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
