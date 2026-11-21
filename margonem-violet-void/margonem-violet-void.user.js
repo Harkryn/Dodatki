@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.31.0
+// @version      1.31.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -95,20 +95,27 @@
   // grzbiety nad poziomem HP, wypełnienie pod falą zanika ku dołowi (wtapia się w górę „krwi”).
   // ORB_FLOW – nurty w cieczy: szum fraktalny (stitchTiles = bez szwów), tylko jasne smugi jako fiolet z przezroczystością.
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+  // Kafel fali 16 px wysokości, linia spoczynkowa w połowie (8 px); grzbiety do 2·amp nad nią.
   const wave = (w, amp, fill, stroke) => svgUrl(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="10" viewBox="0 0 ${w} 10" preserveAspectRatio="none">` +
-    `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${fill}" stop-opacity=".75"/>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="16" viewBox="0 0 ${w} 16" preserveAspectRatio="none">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${fill}" stop-opacity=".9"/>` +
     `<stop offset="1" stop-color="${fill}" stop-opacity="0"/></linearGradient></defs>` +
-    `<path d="M0 ${5 - amp} Q${w / 4} ${5 + amp} ${w / 2} ${5 - amp} T${w} ${5 - amp} V10 H0Z" fill="url(#g)"/>` +
-    (stroke ? `<path d="M0 ${5 - amp} Q${w / 4} ${5 + amp} ${w / 2} ${5 - amp} T${w} ${5 - amp}" fill="none" stroke="${stroke}" stroke-width="1.3"/>` : '') +
+    `<path d="M0 ${8 - amp} Q${w / 4} ${8 + amp} ${w / 2} ${8 - amp} T${w} ${8 - amp} V16 H0Z" fill="url(#g)"/>` +
+    (stroke ? `<path d="M0 ${8 - amp} Q${w / 4} ${8 + amp} ${w / 2} ${8 - amp} T${w} ${8 - amp}" fill="none" stroke="${stroke}" stroke-width="1.6"/>` : '') +
     '</svg>');
-  const ORB_WAVE_BACK = wave(46, 2.2, '#4a1f7a', '');
-  const ORB_WAVE_FRONT = wave(64, 1.8, '#8f45e6', '#c9a3ff');
+  const ORB_WAVE_BACK = wave(42, 3.2, '#5b26a0', '#8f45e6');
+  const ORB_WAVE_FRONT = wave(60, 2.6, '#9a55f0', '#e2ccff');
   const ORB_FLOW = svgUrl(
     '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="f" x="0" y="0" width="100%" height="100%">' +
     '<feTurbulence type="fractalNoise" baseFrequency=".028 .05" numOctaves="2" seed="7" stitchTiles="stitch"/>' +
-    '<feColorMatrix values="0 0 0 0 .62  0 0 0 0 .36  0 0 0 0 .98  3.2 0 0 0 -1.55"/></filter>' +
+    '<feColorMatrix values="0 0 0 0 .78  0 0 0 0 .52  0 0 0 0 1  3.6 0 0 0 -1.5"/></filter>' +
     '<rect width="140" height="140" filter="url(#f)"/></svg>');
+  // Pęcherzyki unoszące się w cieczy: kafel 98×120 (szerokość kuli), zapętla się w pionie.
+  const ORB_BUBBLES = svgUrl(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="98" height="120"><g fill="#c9a3ff" fill-opacity=".18" stroke="#d9b8ff" stroke-opacity=".75" stroke-width=".7">' +
+    [[14, 18, 1.6], [31, 74, 1.1], [47, 40, 2], [58, 104, 1.3], [70, 12, 1], [83, 62, 1.7], [22, 96, 1.2], [90, 30, .9], [39, 6, .9], [64, 84, 1.5]]
+      .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('') +
+    '</g></svg>');
 
   // Popękania nadproża sklepu: poszarpane szczeliny z odgałęzieniami w układzie grafiki nadproża (960×65),
   // z pominięciem ametystu pośrodku (x ≈ 455–525). Ciemny rdzeń szczeliny + fiolet z poświatą + jasna żyłka.
@@ -1120,29 +1127,41 @@ ${N} .bottom-panel-of-bottom-positioner .glass { opacity: .22; filter: grayscale
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
   background: linear-gradient(rgb(143 69 230 / .55), rgb(28 14 44 / .9) 10px, #0b0712 60%, #060509) !important;
 }
-/* tafla cieczy: dwie fale płynące w przeciwne strony (tylna ciemniejsza i wolniejsza, przednia z jasną krawędzią
-   i łuną), grzbiety wychodzą 5 px nad poziom HP; całość lekko pulsuje jak dawniej linia energii */
+/* tafla cieczy: dwie fale płynące w przeciwne strony (tylna ciemniejsza z fioletową krawędzią, przednia z jasną
+   krawędzią i łuną), grzbiety do ~6 px nad poziomem HP; tafla kołysze się na boki jak ciecz w naczyniu
+   (szersza od kuli, żeby przy przechyle nie odsłaniała rogów) i pulsuje światłem */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before {
   content: "";
-  position: absolute; left: 0; right: 0; top: -5px; height: 10px;
-  background: ${ORB_WAVE_FRONT} 0 0 / 64px 10px repeat-x, ${ORB_WAVE_BACK} 0 -1px / 46px 10px repeat-x;
-  filter: drop-shadow(0 0 calc(3px * var(--vv-k)) rgb(181 124 255 / .75));
-  animation: vv-orb-wave 3.2s linear infinite, vv-orb-line 3.2s ease-in-out infinite;
+  position: absolute; left: -12px; right: -12px; top: -8px; height: 16px;
+  background: ${ORB_WAVE_FRONT} 0 0 / 60px 16px repeat-x, ${ORB_WAVE_BACK} 0 -2px / 42px 16px repeat-x;
+  filter: drop-shadow(0 0 calc(4px * var(--vv-k)) rgb(181 124 255 / .9));
+  animation: vv-orb-wave 2.4s linear infinite, vv-orb-line 3.2s ease-in-out infinite, vv-orb-slosh 5.6s ease-in-out infinite;
   pointer-events: none; z-index: 1;
 }
-@keyframes vv-orb-wave { to { background-position: 64px 0, -46px -1px; } }
-@keyframes vv-orb-line { 50% { opacity: .7; } }
-/* nurty w cieczy: smugi jaśniejszego fioletu przepływające wolno w poprzek i lekko w górę (dwie warstwy w różnej
-   skali i kierunku, więc wzór się nie powtarza na oko); przygaszone, żeby procent HP był czytelny */
+@keyframes vv-orb-wave { to { background-position: 60px 0, -42px -2px; } }
+@keyframes vv-orb-line { 50% { opacity: .75; } }
+@keyframes vv-orb-slosh {
+  0%, 100% { transform: rotate(-3deg) translateY(0); }
+  25% { transform: rotate(0deg) translateY(-1px); }
+  50% { transform: rotate(3deg) translateY(0); }
+  75% { transform: rotate(0deg) translateY(1px); }
+}
+/* wnętrze cieczy: wyraźne smugi jaśniejszego fioletu przepływające w poprzek i w górę (dwie warstwy w różnej skali
+   i kierunku, więc wzór się nie powtarza na oko) oraz unoszące się pęcherzyki; jaśniejsza poświata tuż pod taflą.
+   Procent HP leży wyżej (z-index 3) z czarnym cieniem, więc zostaje czytelny. */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::after {
   content: "";
-  position: absolute; inset: 2px 0 0;
-  background: ${ORB_FLOW} 0 0 / 140px 140px, ${ORB_FLOW} 0 0 / 210px 210px;
-  opacity: calc(.28 + .12 * var(--vv-k));
-  animation: vv-orb-flow 16s linear infinite;
+  position: absolute; inset: 1px 0 0;
+  background:
+    ${ORB_BUBBLES} 0 0 / 98px 120px,
+    linear-gradient(rgb(181 124 255 / .35), transparent 14px),
+    ${ORB_FLOW} 0 0 / 140px 140px,
+    ${ORB_FLOW} 0 0 / 210px 210px;
+  opacity: calc(.55 + .2 * var(--vv-k));
+  animation: vv-orb-flow 10s linear infinite;
   pointer-events: none;
 }
-@keyframes vv-orb-flow { to { background-position: 140px -140px, -210px -70px; } }
+@keyframes vv-orb-flow { to { background-position: 0 -120px, 0 0, 140px -140px, -210px -70px; } }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp { position: relative; z-index: 3; }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
   color: #fff !important;
