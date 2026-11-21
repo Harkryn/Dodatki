@@ -22,11 +22,6 @@ Mroczny motyw z własnych grafik: spękany kamień z runami, maski demonów i ru
 
 [Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-dark-gothic/dark-gothic.user.js)
 
-### Margonem — Czarna Dziura
-Czerń z lekkim fioletem, kula HP jako czarna dziura i kamień z mieniącymi się pęknięciami w przyciskach HUD.
-
-[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-czarna-dziura/czarna-dziura.user.js)
-
 ### Margonem — Fioletowa Pustka (Violet Void)
 Prawie czarny interfejs z fioletem tylko jako akcentem, ramy z wulkanicznego szkła i animowana kula HP z fioletową cieczą.
 
