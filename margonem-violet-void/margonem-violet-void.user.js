@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.10.0
+// @version      1.11.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.10.0';
+  const VERSION = '1.11.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -524,8 +524,13 @@ ${N} .interface-element-progress-bar-1 .value { color: #fff !important; text-sha
    cienką linią energii, po którym wolno przesuwa się połysk (pseudo-element, długość paska ustawia gra). */
 ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress {
   background: #050407 !important;
-  box-shadow: inset 0 1px 3px #000, inset 0 0 0 1px rgb(42 36 51 / .8);
+  overflow: visible !important;
+  /* oprawa: ta sama rama z wulkanicznego szkła co w oknach, w miniaturze (9-slice 30 → 6 px, wysunięta o 5 px) */
+  border-image: url("${IMG.frame}") 30 / 6px / 5px stretch;
+  box-shadow: inset 0 1px 3px #000, 0 0 0 5px rgb(6 5 9 / .9), 0 3px 10px 5px rgb(0 0 0 / .7) !important;
 }
+/* metalowe ramki pasków gry – niepotrzebne pod nową oprawą */
+${N} .interface-layer .exp-bar-wrapper .exp-progress .overlay { background: none !important; }
 ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner {
   position: relative; overflow: hidden;
   background: linear-gradient(#b57cff 0 1px, #6d2fb3 1px, #4a1f7a 45%, #2a1046 80%, #12081f) !important;
@@ -586,8 +591,19 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after {
 }
 @keyframes vv-orb-ring { to { transform: rotate(360deg); } }
 ${N} .bottom-panel-of-bottom-positioner .bottom-panel-pointer-bg { z-index: 2; }
-/* listwa wokół kuli: grafit zamiast brązu */
-${N} .interface-layer .bottom-panel-graphic { filter: grayscale(1) brightness(.45) contrast(1.1); }
+/* metalowe skrzydła i ozdoby gry wokół kuli – usunięte (kulę oprawia bazaltowy pierścień, paski – rama okien) */
+${N} .interface-layer .bottom-panel-graphic { background: none !important; filter: none !important; }
+/* kapsuły „% doświadczenia” i „czas”: niska czarna płytka w tej samej ramie co okna; tekst gry leży nad nią */
+${N} .bottom-panel-of-bottom-positioner .pointer-exp-graphic,
+${N} .bottom-panel-of-bottom-positioner .pointer-ttl-graphic { background: none !important; }
+${N} .bottom-panel-of-bottom-positioner .pointer-exp-graphic::before,
+${N} .bottom-panel-of-bottom-positioner .pointer-ttl-graphic::before {
+  content: "";
+  position: absolute; left: 7px; top: 8px; width: 56px; height: 18px;
+  background: linear-gradient(var(--vv-bg-2), #08070b);
+  border-image: url("${IMG.frame}") 30 / 6px / 3px stretch;
+  box-shadow: 0 2px 6px rgb(0 0 0 / .8);
+}
 
 /* okno walki i dziennik (kolory wpisów dziennika zostają z gry) */
 ${N} .battle-controller .border-image,
