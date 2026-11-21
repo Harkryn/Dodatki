@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.30.0
+// @version      1.31.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -89,6 +89,26 @@
   const SEARCH_ICON = 'data:image/svg+xml,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.6" fill="none" stroke="#9a7fc4" stroke-width="1.8"/>' +
     '<path d="M10 10l4.2 4.2" stroke="#9a7fc4" stroke-width="2.2" stroke-linecap="round"/></svg>');
+
+  // Ciecz w kuli HP: kafle bez szwów (zapętlają się przy przesunięciu o własną szerokość).
+  // ORB_WAVE_BACK / ORB_WAVE_FRONT – dwie fale tafli (tylna ciemniejsza, przednia z jasną krawędzią), 10 px wysokości:
+  // grzbiety nad poziomem HP, wypełnienie pod falą zanika ku dołowi (wtapia się w górę „krwi”).
+  // ORB_FLOW – nurty w cieczy: szum fraktalny (stitchTiles = bez szwów), tylko jasne smugi jako fiolet z przezroczystością.
+  const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+  const wave = (w, amp, fill, stroke) => svgUrl(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="10" viewBox="0 0 ${w} 10" preserveAspectRatio="none">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${fill}" stop-opacity=".75"/>` +
+    `<stop offset="1" stop-color="${fill}" stop-opacity="0"/></linearGradient></defs>` +
+    `<path d="M0 ${5 - amp} Q${w / 4} ${5 + amp} ${w / 2} ${5 - amp} T${w} ${5 - amp} V10 H0Z" fill="url(#g)"/>` +
+    (stroke ? `<path d="M0 ${5 - amp} Q${w / 4} ${5 + amp} ${w / 2} ${5 - amp} T${w} ${5 - amp}" fill="none" stroke="${stroke}" stroke-width="1.3"/>` : '') +
+    '</svg>');
+  const ORB_WAVE_BACK = wave(46, 2.2, '#4a1f7a', '');
+  const ORB_WAVE_FRONT = wave(64, 1.8, '#8f45e6', '#c9a3ff');
+  const ORB_FLOW = svgUrl(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="f" x="0" y="0" width="100%" height="100%">' +
+    '<feTurbulence type="fractalNoise" baseFrequency=".028 .05" numOctaves="2" seed="7" stitchTiles="stitch"/>' +
+    '<feColorMatrix values="0 0 0 0 .62  0 0 0 0 .36  0 0 0 0 .98  3.2 0 0 0 -1.55"/></filter>' +
+    '<rect width="140" height="140" filter="url(#f)"/></svg>');
 
   // Popękania nadproża sklepu: poszarpane szczeliny z odgałęzieniami w układzie grafiki nadproża (960×65),
   // z pominięciem ametystu pośrodku (x ≈ 455–525). Ciemny rdzeń szczeliny + fiolet z poświatą + jasna żyłka.
@@ -1100,14 +1120,29 @@ ${N} .bottom-panel-of-bottom-positioner .glass { opacity: .22; filter: grayscale
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
   background: linear-gradient(rgb(143 69 230 / .55), rgb(28 14 44 / .9) 10px, #0b0712 60%, #060509) !important;
 }
+/* tafla cieczy: dwie fale płynące w przeciwne strony (tylna ciemniejsza i wolniejsza, przednia z jasną krawędzią
+   i łuną), grzbiety wychodzą 5 px nad poziom HP; całość lekko pulsuje jak dawniej linia energii */
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before {
   content: "";
-  position: absolute; left: 0; right: 0; top: 0; height: 2px;
-  background: var(--vv-e-1);
-  box-shadow: 0 0 6px 1px rgb(181 124 255 / calc(.85 * var(--vv-k)));
-  animation: vv-orb-line 3.2s ease-in-out infinite;
+  position: absolute; left: 0; right: 0; top: -5px; height: 10px;
+  background: ${ORB_WAVE_FRONT} 0 0 / 64px 10px repeat-x, ${ORB_WAVE_BACK} 0 -1px / 46px 10px repeat-x;
+  filter: drop-shadow(0 0 calc(3px * var(--vv-k)) rgb(181 124 255 / .75));
+  animation: vv-orb-wave 3.2s linear infinite, vv-orb-line 3.2s ease-in-out infinite;
+  pointer-events: none; z-index: 1;
 }
-@keyframes vv-orb-line { 50% { opacity: .55; box-shadow: 0 0 10px 2px rgb(181 124 255 / calc(.55 * var(--vv-k))); } }
+@keyframes vv-orb-wave { to { background-position: 64px 0, -46px -1px; } }
+@keyframes vv-orb-line { 50% { opacity: .7; } }
+/* nurty w cieczy: smugi jaśniejszego fioletu przepływające wolno w poprzek i lekko w górę (dwie warstwy w różnej
+   skali i kierunku, więc wzór się nie powtarza na oko); przygaszone, żeby procent HP był czytelny */
+${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::after {
+  content: "";
+  position: absolute; inset: 2px 0 0;
+  background: ${ORB_FLOW} 0 0 / 140px 140px, ${ORB_FLOW} 0 0 / 210px 210px;
+  opacity: calc(.28 + .12 * var(--vv-k));
+  animation: vv-orb-flow 16s linear infinite;
+  pointer-events: none;
+}
+@keyframes vv-orb-flow { to { background-position: 140px -140px, -210px -70px; } }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp { position: relative; z-index: 3; }
 ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
   color: #fff !important;
@@ -1269,6 +1304,7 @@ ${N} .button, ${N} .widget-button, ${N} .border-window .card { transition: box-s
 @media (prefers-reduced-motion: reduce) {
   ${N} .widget-button.green.window-is-open,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::before,
+  ${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood::after,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::after,
   ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::before,
   ${N} .interface-layer .exp-bar-wrapper .exp-progress .progress .inner::after { animation: none !important; }
