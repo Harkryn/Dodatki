@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.1.0
+// @version      1.2.0
 // @description  Mroczny, fioletowy motyw interfejsu Margonem w klimacie kosmicznej otchłani: świecące krawędzie, poświata pustki, gwiezdne iskry. Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. NI (pełne wsparcie) i SI (podstawowe).
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -31,7 +31,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -371,7 +371,51 @@ ${S} #inpchat, ${S} #chat input {   /* TODO: zweryfikuj selektor (pole czatu SI)
 }
 `;
   const cssInventory = ``;
-  const cssTooltips = ``;
+  /* =====================================================================
+   * === TOOLTIPY ===
+   * Karta prawie nieprzezroczysta (#0b0614 / 97%) – tekst #e8ddff ma kontrast ~15:1, przygaszony ~6.6:1.
+   * Kolor rzadkości: nazwa przedmiotu + górna krawędź karty + delikatna poświata w tym kolorze.
+   * Kolory rzadkości są dobrane tak, żeby na tle karty miały kontrast ≥ 4.5:1 i były rozpoznawalne jak w grze.
+   * ===================================================================== */
+  const RARITY = {
+    't-norm': '#ece6f5',       // zwykły
+    't-uniupg': '#f2d75a',     // unikatowy
+    't-her': '#4fb4ff',        // heroiczny
+    't-upgraded': '#c58bff',   // ulepszony
+    't-leg': '#ff8c1a',        // legendarny
+    't-art': '#ff5a5a'         // artefakt – TODO: zweryfikuj selektor (wartość data-item-type)
+  };
+  const cssTooltips = `
+${N} .tip-wrapper { --vv-rar: var(--vv-v-3); }
+${Object.entries(RARITY).map(([t, c]) => `${N} .tip-wrapper[data-item-type="${t}"] { --vv-rar: ${c}; }
+${N} .tip-wrapper[data-item-type="${t}"] .item-name { color: ${c} !important; }`).join('\n')}
+${N} .tip-wrapper .content {
+  background: linear-gradient(rgb(28 15 51 / .97), rgb(11 6 20 / .97) 60px) !important;
+  color: var(--vv-text) !important;
+}
+${N} .tip-wrapper {
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 0 2px var(--vv-v-1),
+    inset 0 2px 0 var(--vv-rar),
+    0 0 calc(12px * var(--vv-k)) color-mix(in srgb, var(--vv-rar) 45%, transparent),
+    0 8px 22px rgb(0 0 0 / .85) !important;
+}
+${N} .tip-wrapper:not([data-item-type]) { --vv-rar: var(--vv-v-2); }
+${N} .tip-wrapper .item-head {
+  background: radial-gradient(ellipse 90% 100% at 50% 0%, color-mix(in srgb, var(--vv-rar) 16%, transparent), transparent 75%) !important;
+}
+${N} .tip-wrapper .item-name { text-shadow: 0 1px 2px #000 !important; }
+${N} .tip-wrapper .item-tip-section { border-bottom-color: var(--vv-line-soft) !important; }
+
+/* --- SI --- */
+${S} #tip, ${S} .tip {   /* TODO: zweryfikuj selektor (tooltip SI) */
+  background: rgb(11 6 20 / .97) !important;
+  color: var(--vv-text) !important;
+  border: 1px solid var(--vv-v-2) !important;
+  box-shadow: 0 0 calc(10px * var(--vv-k)) var(--vv-glow), 0 6px 18px rgb(0 0 0 / .85) !important;
+}
+`;
   const cssBattle = ``;
   const cssAnim = ``;
 
