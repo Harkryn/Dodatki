@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.16.0
+// @version      1.16.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.16.0';
+  const VERSION = '1.16.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -962,7 +962,9 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
         const bs = cs.backgroundSize.split(' ');
         let sw = img.naturalWidth, sh = img.naturalHeight;
         if (bs[0] && bs[0].endsWith('px')) { sw = parseFloat(bs[0]); sh = bs[1] && bs[1].endsWith('px') ? parseFloat(bs[1]) : sw * img.naturalHeight / img.naturalWidth; }
-        x.drawImage(img, pos[0] || 0, pos[1] || 0, sw, sh);
+        // tło się powtarza, więc dodatnie przesunięcie (np. „96px 0”) gra zawija – sprowadzamy je do (−rozmiar, 0]
+        const wrap = (p, size) => { if (!size) return p; p %= size; return p > 0 ? p - size : p; };
+        x.drawImage(img, wrap(pos[0] || 0, sw), wrap(pos[1] || 0, sh), sw, sh);
         const d = x.getImageData(0, 0, w, h).data;
         let r = 0, g = 0, b = 0, n = 0;
         for (let i = 0; i < d.length; i += 4) {
