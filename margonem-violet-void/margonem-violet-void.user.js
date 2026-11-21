@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.29.0
+// @version      1.29.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -344,16 +344,21 @@ ${W} .close-button-corner-decor .close-button:hover {
 }
 ${W} .close-button-corner-decor .close-button:hover::after { color: var(--vv-e-2); }
 
-/* zakładki w oknach */
+/* zakładki w oknach – kamienna tabliczka jak tytuł (nieaktywne przygaszone), aktywna z fioletową kreską pod spodem */
 ${N} .border-window .card {
-  background-image: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 22px / 0 stretch !important;
+  background-image: none !important;
+  background-color: transparent !important;
   color: var(--vv-text-dim) !important;
+  opacity: .78;
 }
-${N} .border-window .card:hover { color: var(--vv-text) !important; }
+${N} .border-window .card:hover { color: var(--vv-text) !important; opacity: 1; }
 ${N} .border-window .card.active {
-  background-image: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
   color: var(--vv-text) !important;
-  box-shadow: inset 0 -2px 0 var(--vv-v-3);
+  opacity: 1;
+  box-shadow: 0 2px 0 -1px var(--vv-v-3), 0 3px calc(6px * var(--vv-k)) -2px var(--vv-glow-strong) !important;
 }
 
 /* --- okna przezroczyste (minimapa, obserwowane zadania, zegar, ping, sorter…) – półprzezroczysta czerń w tej samej
