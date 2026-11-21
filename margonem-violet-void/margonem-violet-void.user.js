@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.23.1
+// @version      1.23.2
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.23.1';
+  const VERSION = '1.23.2';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -1005,6 +1005,10 @@ ${N} .battle-controller .battle-border::after {
 }
 ${N} .battle-controller .middle-graphic {
   background: var(--vv-void-light), linear-gradient(rgb(20 17 25 / .95), rgb(6 5 9 / .95) 70px) !important;
+}
+/* tło pod całym panelem – gra zaczyna ciemne wnętrze dopiero od y 30, więc pas z licznikiem tury był przezroczysty */
+${N} .battle-controller .graphics {
+  background: var(--vv-void-light), linear-gradient(rgb(20 17 25 / .97), rgb(6 5 9 / .96) 70px);
 }
 ${N} .battle-controller .c-timer {
   background: #050407 !important;
