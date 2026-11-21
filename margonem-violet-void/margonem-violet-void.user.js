@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.22.3
+// @version      1.22.4
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -39,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.22.3';
+  const VERSION = '1.22.4';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -940,7 +940,8 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper-template::before {
 }
 @keyframes vv-orb-ring { to { transform: rotate(360deg); } }
 @keyframes vv-ring-glow { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
-${N} .bottom-panel-of-bottom-positioner .bottom-panel-pointer-bg { z-index: 2; }
+/* kapsuły % doświadczenia i czasu pod pierścieniem – wsuwają się pod kamień (patrz niżej: napisy odsunięte od pierścienia) */
+${N} .bottom-panel-of-bottom-positioner .bottom-panel-pointer-bg { z-index: 0; }
 /* metalowe skrzydła i ozdoby gry wokół kuli – usunięte (kulę oprawia bazaltowy pierścień, paski – rama okien) */
 ${N} .interface-layer .bottom-panel-graphic { background: none !important; filter: none !important; }
 /* kapsuły „% doświadczenia” i „czas”: niska czarna płytka w tej samej ramie co okna; tekst gry leży nad nią */
@@ -954,19 +955,13 @@ ${N} .bottom-panel-of-bottom-positioner .pointer-ttl-graphic::before {
   border-image: url("${IMG.frame}") 30 / 6px / 3px stretch;
   box-shadow: 0 2px 6px rgb(0 0 0 / .8);
 }
-/* Kapsuły na wewnętrznych końcach pasków doświadczenia, między paskiem a pierścieniem kuli (pierścień jest szerszy
-   niż obudowa gry, więc w oryginalnym miejscu kapsuły na niego wchodziły). Paski są skrócone od strony kuli –
-   szerokość wypełnienia gra ustawia procentowo ([bar-percent] → %), więc postęp zostaje prawdziwy.
-   Lewy pasek x 44–204, kapsuła 213–263; prawa kapsuła 397–461, pasek x 470–617; wszystko na wysokości pasków
-   (y ~21–39), więc nic nie wchodzi na mapę, sloty ani pierścień. */
-${N} .bottom-panel-of-bottom-positioner .exp-progress.left .progress { width: 160px !important; }
-${N} .bottom-panel-of-bottom-positioner .exp-progress.right .progress { left: 91px !important; width: 147px !important; }
-${N} .bottom-panel-of-bottom-positioner .pointer-exp-graphic { translate: -16px -13px; }
-${N} .bottom-panel-of-bottom-positioner .pointer-exp { translate: -20px -13px; }
-${N} .bottom-panel-of-bottom-positioner .pointer-ttl-graphic { translate: 12px -13px; }
-${N} .bottom-panel-of-bottom-positioner .pointer-ttl { translate: 22px -13px; }
-${N} .bottom-panel-of-bottom-positioner .pointer-exp-graphic::before { width: 50px; }
-${N} .bottom-panel-of-bottom-positioner .pointer-ttl-graphic::before { width: 64px; }
+/* Kapsuły w pierwotnym miejscu gry, wsunięte pod bazaltowy pierścień (pierścień leży nad nimi). Żeby kamień nie
+   zasłaniał liczb, napisy są odsunięte od pierścienia (na wysokości tekstu pierścień sięga x 269–391):
+   „% doświadczenia” o 13 px w lewo (tekst ~228–262; płytka poszerzona w lewo do 220–285),
+   „czas” o 8 px w prawo (tekst wyśrodkowany, ~399–431; płytka bez zmian 385–441). */
+${N} .bottom-panel-of-bottom-positioner .pointer-exp-graphic::before { left: -2px; width: 65px; }
+${N} .bottom-panel-of-bottom-positioner .pointer-exp { translate: -13px 0; }
+${N} .bottom-panel-of-bottom-positioner .pointer-ttl { translate: 8px 0; }
 /* pasek szybkich slotów (1–8 po bokach kuli): obie czwórki w miniaturze ramy okien, ciemne tło między slotami;
    każdy slot to inny kafel spękanego bazaltu z atlasu przycisków HUD (ciemny środek – przedmioty czytelne),
    numery slotów przygaszone do fioletu */
