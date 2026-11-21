@@ -222,7 +222,7 @@ Funkcje:
 - **walka** — panel walki w ramie z wulkanicznego szkła jak okna, z ametystem na górnej krawędzi, pasek czasu tury w fiolecie, daty i licznik puli w kolorach motywu, ikony przygaszone do fioletu; plansza walki, wpisy dziennika i kolory stron walki bez zmian,
 - **minimapa** — sama mapa bez zmian, rama przezroczystych okien, cienka grafitowa krawędź i lekka winieta wokół mapy,
 - **przyciski** — grafitowe płytki, przy najechaniu fioletowa krawędź i poświata; czerwone, złote i smocze przyciski gry bez zmian,
-- **wspólne panele** `interface-element-*` (nagłówki, karty, linie, dolne paski okien),
+- **wspólne panele** `interface-element-*` na tych samych grafikach co okna: panele, skrzynki i pionowe belki w ramie z wulkanicznego szkła, nagłówki, dolne paski okien, nagłówki kart i zakładki na kamiennej tabliczce (aktywna zakładka z fioletową kreską pod spodem); ta sama rama na panelu umiejętności, małych oknach podpowiedzi i dymkach nad postaciami, okno komunikatu bez pergaminu,
 - **scrollbary, zaznaczenie tekstu, focus pól tekstowych, przełączniki** (czarne kwadraty, zaznaczone w fiolecie z poświatą) w kolorach motywu; w listach z grupami (ustawienia, dziennik zadań, rzemiosło) wybrana pozycja z fioletową kreską, nagłówki grup z grafitową ramką; tabele (np. karty zadań) z ciemnym nagłówkiem z fioletową kreską i grafitowymi liniami, poziom zadania w fiolecie,
 - **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
 - **przełącznik** — mały okrągły przycisk w lewym dolnym rogu (klik: włącz/wyłącz, prawy klik: intensywność), skróty i menu Tampermonkey; stan zapamiętywany.

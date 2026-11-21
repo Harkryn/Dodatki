@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.28.0
+// @version      1.29.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -418,58 +418,134 @@ ${N} .dialogue-window .content .answers li:hover {
 }
 ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) brightness(1.05) sepia(.5) hue-rotate(220deg) saturate(2); }
 
-/* --- wspólne panele wnętrz okien (interface-element-*) --- */
+/* --- wspólne panele wnętrz okien (interface-element-*) – te same assety co okna:
+   panele i skrzynki → rama z wulkanicznego szkła (frame.webp, cienka), nagłówki, paski i zakładki → kamienna
+   tabliczka (title-plate.webp, 9-slice w poziomie). border-width z gry zostaje (układ bez zmian), obraz rysowany
+   wewnątrz elementu (outset 0); background-clip border-box, żeby tło sięgało pod ramę. --- */
 ${N} .interface-element-middle-1-background,
 ${N} .interface-element-middle-1-background-stretch,
+${N} .interface-element-middle-2-background,
+${N} .interface-element-middle-2-background-stretch,
+${N} .interface-element-middle-3-background,
 ${N} .interface-element-middle-3-background-stretch,
-${N} .interface-element-middle-4-background {
-  border-image: none !important;
-  border-color: var(--vv-bg-0) !important;
+${N} .interface-element-middle-4-background,
+${N} .interface-element-wood-box-background {
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url("${IMG.frame}") 30 / 7px / 0 stretch !important;
   background: rgb(12 10 16 / .94) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-edge), inset 0 0 16px rgb(0 0 0 / .7);
+  background-clip: border-box !important;
+  box-shadow: inset 0 0 16px rgb(0 0 0 / .7);
 }
 ${N} .interface-element-header-1-background,
 ${N} .interface-element-header-1-background-stretch,
 ${N} .interface-element-table-header-1-background,
-${N} .interface-element-header-2-background {
-  border-image: none !important;
-  border-color: transparent !important;
-  background: linear-gradient(90deg, var(--vv-bg-0), var(--vv-bg-3) 50%, var(--vv-bg-0)) !important;
-  box-shadow: inset 0 -1px 0 var(--vv-v-1);
-}
+${N} .interface-element-header-2-background,
+${N} .interface-element-header-2-background-stretch,
 ${N} .interface-element-header-3,
-${N} .interface-element-table-header-3-background {
+${N} .interface-element-table-header-3-background,
+${N} .cards-header-wrapper .header-background-graphic,
+${N} .matchmaking-ranking .ranking-tabs .header-background-graphic,
+${N} .trade-window header .h_background .middle,
+${N} .tabs-nav::before {
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 30px / 0 stretch !important;
+  background: none !important;
+  background-clip: border-box !important;
+  box-shadow: none !important;
+}
+${N} .trade-window header .h_background .left,
+${N} .trade-window header .h_background .right { background: none !important; }
+/* tabele: przy border-collapse ramka obrazkowa się nie rysuje – ciemny pas z kamienną krawędzią jako zapas */
+${N} td.interface-element-table-header-3-background,
+${N} .interface-element-table-3 .table-header-tr td {
   background: linear-gradient(90deg, var(--vv-bg-1), var(--vv-bg-2) 50%, var(--vv-bg-1)) !important;
-  box-shadow: inset 0 -1px 0 var(--vv-edge);
+  box-shadow: inset 0 -1px 0 var(--vv-edge) !important;
 }
 ${N} .interface-element-bottom-bar-background,
 ${N} .interface-element-bottom-bar-background-stretch {
-  border-image: none !important;
+  border-style: solid !important;
   border-color: transparent !important;
-  background: linear-gradient(90deg, transparent, var(--vv-v-1) 50%, transparent) top / 100% 1px no-repeat,
-              linear-gradient(var(--vv-bg-1), var(--vv-bg-0)) !important;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 30px / 0 stretch !important;
+  background: none !important;
 }
 ${N} .interface-element-line-1-background {
   background: linear-gradient(90deg, transparent, var(--vv-edge-hi) 50%, transparent) !important;
 }
+/* pionowa belka (dawniej drewno) → pas wulkanicznego szkła z ramy */
 ${N} .interface-element-vertical-wood {
-  background: linear-gradient(to right, var(--vv-bg-0), var(--vv-edge) 50%, var(--vv-bg-0)) !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url("${IMG.frame}") 30 / 0 3px / 0 stretch !important;
+  background: var(--vv-bg-0) !important;
+  background-clip: border-box !important;
 }
 ${N} .interface-element-background-color-1,
 ${N} .interface-element-background-color-3 { background: var(--vv-bg-1) !important; }
-${N} .interface-element-wood-box-background {
-  background: rgb(12 10 16 / .96) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-edge);
-}
+/* zakładki: kamienna tabliczka; aktywna jaśniejszy tekst i fioletowa kreska pod spodem (cień zewnętrzny – wypełnienie
+   tabliczki zakrywa cienie wewnętrzne) */
 ${N} .interface-element-card-background,
-${N} .interface-element-card-background-stretch { background: linear-gradient(var(--vv-bg-2), var(--vv-bg-0)) !important; }
+${N} .interface-element-card-background-stretch,
 ${N} .interface-element-active-card-background,
 ${N} .interface-element-active-card-background-stretch,
 ${N} .interface-element-active-card-border-image {
-  border-image: none !important;
-  border-color: var(--vv-edge) !important;   /* bez tego ramka brała kolor tekstu (białe obramowanie np. nagłówków grup w ustawieniach) */
-  background: linear-gradient(var(--vv-bg-3), var(--vv-bg-1)) !important;
-  box-shadow: inset 0 -2px 0 var(--vv-v-3), inset 0 0 0 1px var(--vv-edge);
+  border-style: solid !important;
+  border-color: transparent !important;   /* bez tego ramka brała kolor tekstu (białe obramowanie np. nagłówków grup w ustawieniach) */
+  border-image: url("${IMG.plate}") 0 46 fill / 0 22px / 0 stretch !important;
+  background: none !important;
+  background-clip: border-box !important;
+  box-shadow: none !important;
+}
+${N} .interface-element-active-card-background,
+${N} .interface-element-active-card-background-stretch,
+${N} .interface-element-active-card-border-image {
+  box-shadow: 0 2px 0 -1px var(--vv-v-3), 0 3px calc(6px * var(--vv-k)) -2px var(--vv-glow-strong) !important;
+}
+
+/* --- ramy paneli spoza okien (panel umiejętności, inne ramy typu okno) → ta sama rama z wulkanicznego szkła --- */
+${N} .interface-element-border-window-frame,
+${N} .additional-skill-panel .graphics .additional-skill-panel-border {
+  border-style: solid !important;
+  border-image: url("${IMG.frame}") 30 / 12px / 0 stretch !important;
+}
+
+/* --- okno komunikatu (mAlert): pergamin → czerń --- */
+${N} .border-window.mAlert .paper-background,
+${N} .border-window.mAlert-mobile-layer .paper-background {
+  background: rgb(10 8 14 / .96) !important;
+  box-shadow: inset 0 0 0 1px var(--vv-edge), inset 0 0 18px rgb(0 0 0 / .7);
+}
+
+/* --- małe okna podpowiedzi (tip-window) – cienka rama, ciemne tło, tabliczka bez ozdób gry --- */
+${N} .border-window.tip-window {
+  border-style: solid !important;
+  border-image: url("${IMG.frame}") 30 / 8px / 0 stretch !important;
+  background: rgb(10 8 14 / .95) !important;
+  background-clip: border-box !important;
+  box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
+}
+${N} .border-window.tip-window .content { background: transparent !important; color: var(--vv-text); }
+${N} .border-window.tip-window .header-label-positioner .header-label {
+  border-style: solid !important;
+  border-image: url("${IMG.plate}") 0 46 fill / 0 26px / 0 stretch !important;
+  background: none !important;
+}
+${N} .border-window.tip-window .header-label-positioner .header-label .left-decor,
+${N} .border-window.tip-window .header-label-positioner .header-label .right-decor { background: none !important; }
+
+/* --- dymki nad postaciami (bubbledialog): ramki gry ukryte, warstwa tła w ramie z wulkanicznego szkła ---
+   TODO: zweryfikuj selektor (dymek nie był otwarty podczas testu) */
+${N} .bubbledialog .bg-layer .top-frame,
+${N} .bubbledialog .bg-layer .bottom-frame,
+${N} .bubbledialog .bg-layer .left-frame,
+${N} .bubbledialog .bg-layer .right-frame { background: none !important; }
+${N} .bubbledialog .bg-layer {
+  border-style: solid;
+  border-width: 0;
+  border-image: url("${IMG.frame}") 30 / 8px / 0 stretch !important;
+  background: rgb(10 8 14 / .94) !important;
+  box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .7);
 }
 
 /* --- przyciski: grafitowa płytka; fiolet = krawędź przy najechaniu --- */
