@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.8.0
+// @version      1.8.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -37,7 +37,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.8.0';
+  const VERSION = '1.8.1';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -545,12 +545,14 @@ ${N} .bottom-panel-of-bottom-positioner .hp-indicator .hpp .value {
   color: #fff !important;
   text-shadow: 0 0 4px #000, 0 0 8px #000, 0 1px 2px #000 !important;
 }
-/* pierścień pęknięć wokół kuli: zapętlone wideo (czarne tło znika dzięki mix-blend-mode: screen),
-   leży pod kulą (kula ma z-index 1), środek pęknięć pokrywa się ze środkiem kuli (330, 55 w dolnym panelu) */
+/* pierścień pęknięć wokół kuli: zapętlone wideo na czarnym tle; filtr SVG #vv-luma zamienia jasność na kanał alfa
+   (czerń = przezroczystość). Nie mix-blend-mode: panel tworzy własny kontekst nakładania, więc część wystająca
+   nad panel zostawiała czarny kwadrat na mapie. Wideo leży pod kulą (kula ma z-index 1),
+   środek pęknięć pokrywa się ze środkiem kuli (330, 55 w dolnym panelu). */
 .vv-orb-fx {
   position: absolute; left: 248px; top: -27px; width: 164px; height: 164px;
   object-fit: cover; pointer-events: none; z-index: 0;
-  mix-blend-mode: screen; filter: contrast(1.2) brightness(calc(.75 + .25 * var(--vv-k)));
+  filter: contrast(1.2) brightness(calc(.8 + .25 * var(--vv-k))) url(#vv-luma);
 }
 html:not(.${ON}) .vv-orb-fx { display: none; }
 /* listwa wokół kuli: grafit zamiast brązu */
@@ -705,6 +707,15 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
   const ensureOrbFx = () => {
     const panel = document.querySelector('.bottom-panel-of-bottom-positioner');
     if (!panel) return;
+    if (!document.getElementById('vv-svg-defs')) {
+      // filtr: alfa = jasność klatki (z lekkim podbiciem fioletu), kolor bez zmian
+      const d = document.createElement('div');
+      d.id = 'vv-svg-defs';
+      d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+      d.innerHTML = "<svg xmlns='http://www.w3.org/2000/svg' width='0' height='0'><filter id='vv-luma' color-interpolation-filters='sRGB'>" +
+        "<feColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.6 1.6 2 0 -0.1'/></filter></svg>";
+      document.body.append(d);
+    }
     let v = panel.querySelector(':scope > video.vv-orb-fx');
     if (!v) {
       v = document.createElement('video');

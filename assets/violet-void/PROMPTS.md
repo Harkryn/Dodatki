@@ -62,5 +62,5 @@ Klatka bazowa: FLUX.1 Krea-dev, 768×768 (seed 1705641850): A perfectly round em
 Wideo: Wan 2.2 first–last frame (`mcp-tools/wan-2-2-first-last-frame`), ta sama klatka jako pierwsza i ostatnia (płynna pętla), 3 s, 8 kroków, seed 1112565403, 480×480 → `orb-cracks.mp4` (103 KB):
 static camera, violet energy flickers and crackles through the cracks around the black disc, pulses of light travel along the fissures, small sparks flicker at the crack tips, the black disc stays still, seamless loop, pure black background
 
-W grze: wideo pod kulą, `mix-blend-mode: screen` (czerń znika), czarne koło z klipu pokrywa się z kulą.
+W grze: wideo pod kulą, filtr SVG zamienia jasność na przezroczystość (czerń znika), czarne koło z klipu pokrywa się z kulą.
 Odrzucone propozycje tej rundy (A1 mgła, A2 odłamki, A4 iskry, A5 kometa) nie trafiły do repo.
