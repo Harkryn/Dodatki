@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.26.0
+// @version      1.27.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -40,7 +40,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.26.0';
+  const VERSION = '1.27.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -235,6 +235,9 @@ ${G} input::placeholder, ${G} textarea::placeholder { color: var(--vv-text-dim) 
 ${N} .scrollbar-wrapper .track { background: var(--vv-bg-0) !important; box-shadow: inset 0 0 0 1px var(--vv-edge); }
 ${N} .scrollbar-wrapper .handle { background: var(--vv-edge-hi) !important; box-shadow: none !important; }
 ${N} .scrollbar-wrapper .handle:hover { background: var(--vv-v-2) !important; }
+
+/* tekst rozjaśniony przez skaner czytelności (ciemny tekst z dawnego pergaminu; kolor liczy skrypt) */
+${G} .vv-lt { color: var(--vv-c) !important; }
 
 /* NI – przełączniki (c-checkbox: kwadrat w ::before etykiety, znaczek w ::after) – w całej grze, m.in. w ustawieniach:
    czarny kwadrat z grafitową krawędzią, zaznaczony w fiolecie z poświatą */
@@ -1187,6 +1190,7 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     set(KEY_ON, !enabled());
     apply();
     ensureOrbFx();
+    syncGraphics();
     toast(`Fioletowa Pustka: ${enabled() ? 'włączona' : 'wyłączona'}`);
   };
   const cycleGlow = () => {
@@ -1345,6 +1349,202 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     }
   });
 
+  /* --- PRZEMALOWANIE GRAFIK GRY W LOCIE (mechanizm z Dark Gothic / Mrocznej Gwiazdy, paleta Fioletowej Pustki) ---
+     Gra rysuje większość UI z kilkudziesięciu plików /img/gui/* (sam atlas buttony.png jest w ~180 regułach CSS),
+     a reguły motywu obejmują tylko część z nich. Dla pozostałych skrypt:
+       1) pobiera plik z serwera gry (nic nie jest kopiowane do repo),
+       2) przemalowuje go na canvasie: drewno/brąz/pergamin/szarości → prawie czerń z nutą fioletu,
+          złote i brązowe obszycia → przygaszony ametyst, jasne ikony i glify → lekko lawendowe;
+          kolory znaczeniowe (złoto ikon, zieleń statusów, błękit, czerwone znaczniki, fiolet) zostają,
+       3) podmienia adres w regułach CSS gry na wersję przemalowaną (blob:).
+     Jasne, pergaminowe tła w regułach są przyciemniane, a ciemny tekst na nich rozjaśniany.
+     Wyłączenie motywu przywraca oryginalne wartości reguł bez przeładowania. */
+  const GUI_URL = /url\(\s*["']?([^"')]*\/img\/gui\/[^"')]+\.(?:png|gif))(\?[^"')]*)?["']?\s*\)/gi;
+  // nietknięte: kursory, ramki rzadkości (z nich tooltipy czytają kolor), ikony umiejętności/mapy, emotki,
+  // animacje slotów, krew w kuli HP, logo ekranu wczytywania (ma własny filtr), elementy walki
+  const KEEP = /\/img\/gui\/(?:cursor|item_frames|skills|map-icons|emo|buffs-in-fight|item-slot-anim|line-highlight|X-blackoutline|ok-blackoutline|triangle|search|zoom|battle-|outfit|krew|hpStateSprite|loader)/i;
+  const IMG_PROPS = ['background-image', 'border-image-source', 'list-style-image'];
+  const blobCache = new Map();   // ścieżka → Promise<blob URL | null>
+  const touched = new Map();     // reguła CSS → { właściwość: [wartość oryginalna, priorytet] }
+  const recolorPixels = (ctx, w, h) => {
+    const id = ctx.getImageData(0, 0, w, h), a = id.data;
+    for (let i = 0; i < a.length; i += 4) {
+      if (a[i + 3] === 0) continue;
+      const r = a[i] / 255, g = a[i + 1] / 255, b = a[i + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+      let s = 0, hue = 0;
+      if (d > 0) {
+        s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+        if (mx === r) hue = (g - b) / d + (g < b ? 6 : 0); else if (mx === g) hue = (b - r) / d + 2; else hue = (r - g) / d + 4;
+        hue *= 60;
+      }
+      const vivid = s > 0.62 && l > 0.3 && l < 0.72;                   // złoto ikon, klejnoty, ogień
+      const green = hue > 70 && hue < 170 && s > 0.3;                 // statusy, potwierdzenia
+      const blue = hue > 190 && hue < 255 && s > 0.3;                 // mana, informacje
+      const violet = hue >= 255 && hue < 320 && s > 0.3;              // już fioletowe – zostaje
+      const redMark = (hue < 8 || hue > 340) && s > 0.55 && l > 0.25; // powiadomienia, ostrzeżenia
+      if (vivid || green || blue || violet || redMark) continue;
+      const warm = hue >= 8 && hue <= 58;                              // drewno, brąz, pergamin, obszycia
+      if (s < 0.22 && l > 0.42) {                                      // szare/jasne ikony i glify – czytelne, lekko lawendowe
+        a[i] *= 0.92; a[i + 1] *= 0.88; a[i + 2] = Math.min(255, a[i + 2] * 0.98);
+      } else if (warm && s > 0.35 && l > 0.42) {                       // złote/brązowe obszycia → przygaszony ametyst
+        const k = Math.min(1, (l - 0.3) * 1.6);
+        a[i] = 60 + 80 * k; a[i + 1] = 30 + 40 * k; a[i + 2] = 100 + 120 * k;
+      } else if (warm || s < 0.22) {                                   // powierzchnie → prawie czerń z nutą fioletu
+        const L = 0.02 + Math.pow(l, 1.4) * 0.38;
+        a[i] = L * 255; a[i + 1] = L * 0.9 * 255; a[i + 2] = Math.min(255, L * 1.15 * 255);
+      }
+    }
+    ctx.putImageData(id, 0, 0);
+  };
+  const recolored = (path) => {
+    if (!blobCache.has(path)) {
+      blobCache.set(path, (async () => {
+        const res = await fetch(path, { credentials: 'same-origin' });
+        if (!res.ok) return null;
+        const bm = await createImageBitmap(await res.blob());
+        const c = document.createElement('canvas');
+        c.width = bm.width; c.height = bm.height;
+        const x = c.getContext('2d', { willReadFrequently: true });
+        x.drawImage(bm, 0, 0);
+        recolorPixels(x, bm.width, bm.height);
+        const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
+        return blob ? URL.createObjectURL(blob) : null;
+      })().catch(() => null));
+    }
+    return blobCache.get(path);
+  };
+  const remember = (rule, prop) => {
+    let m = touched.get(rule);
+    if (!m) { m = {}; touched.set(rule, m); }
+    if (!(prop in m)) m[prop] = [rule.style.getPropertyValue(prop), rule.style.getPropertyPriority(prop)];
+  };
+  const parseRgb = (v) => { const m = /rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)(?:[ ,/]+([\d.]+))?/.exec(v || ''); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; };
+  const lum = (v) => { const c = parseRgb(v); if (!c || c[3] < 0.5) return -1; return (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255; };
+  const neutral = (v) => { const c = parseRgb(v); if (!c || c[3] < 0.5) return false; return Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]) < 24; };
+  // szare tło → czerń z nutą fioletu (stany wyróżnienia jaśniejsze, żeby nadal odróżniały się od tła)
+  const soot = (v, highlight) => {
+    const c = parseRgb(v); const L = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+    const k = Math.round((highlight ? 0.09 + L * 0.24 : 0.03 + L * 0.14) * 255);
+    return `rgba(${k + 3}, ${k}, ${k + 9}, ${c[3]})`;
+  };
+  const processRule = async (rule) => {
+    const st = rule.style;
+    const hl = /:hover|\.active|\.selected|highlight|\.is-active|\.pressed/.test(rule.selectorText);
+    for (const prop of IMG_PROPS) {
+      const v = st.getPropertyValue(prop);
+      if (!v || v.indexOf('/img/gui/') === -1 || v.indexOf('blob:') !== -1) continue;
+      const jobs = [];
+      v.replace(GUI_URL, (all, url) => { const path = url.replace(/^https?:\/\/[^/]+/, ''); if (!KEEP.test(path)) jobs.push([all, recolored(path)]); return all; });
+      if (!jobs.length) continue;
+      let nv = v;
+      for (const [token, p] of jobs) { const u = await p; if (u) nv = nv.split(token).join(`url("${u}")`); }
+      if (nv !== v && enabled()) { remember(rule, prop); st.setProperty(prop, nv, st.getPropertyPriority(prop)); }
+    }
+    // jasne (pergaminowe) tła → czerń; ciemny tekst w tej samej regule → jasny tekst motywu
+    const bg = st.getPropertyValue('background-color');
+    if (lum(bg) > 0.72) {
+      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(12, 10, 16, .92)', st.getPropertyPriority('background-color'));
+      const col = st.getPropertyValue('color');
+      if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#e6e0ee', st.getPropertyPriority('color')); }
+    } else if (neutral(bg) && lum(bg) > 0.2) {
+      remember(rule, 'background-color'); st.setProperty('background-color', soot(bg, hl), st.getPropertyPriority('background-color'));
+    }
+    // szare gradienty w tłach → przyciemnione; kolorowe (zielone/czerwone przyciski) zostają
+    const bi = st.getPropertyValue('background-image');
+    if (bi && bi.indexOf('gradient') !== -1 && bi.indexOf('blob:') === -1) {
+      const nb = bi.replace(/rgba?\([^)]*\)/g, (c) => (neutral(c) && lum(c) > 0.2 ? soot(c, hl) : c));
+      if (nb !== bi) { remember(rule, 'background-image'); st.setProperty('background-image', nb, st.getPropertyPriority('background-image')); }
+    }
+  };
+  const seenRules = new WeakSet();
+  const walkRules = (rules, out) => {
+    for (const r of rules) {
+      if (r.cssRules && !r.selectorText) { walkRules(r.cssRules, out); continue; }
+      if (!r.style || !r.selectorText || seenRules.has(r) || r.selectorText.indexOf('vv-') !== -1) continue;
+      seenRules.add(r); out.push(r);
+    }
+  };
+  const scanSheets = () => {
+    if (!enabled() || !root.classList.contains('vv-ni')) return;
+    const rules = [];
+    for (const sh of document.styleSheets) {
+      if (sh.ownerNode && sh.ownerNode.id === 'vv-theme-style') continue;
+      let rr; try { rr = sh.cssRules; } catch (e) { continue; }
+      if (rr) walkRules(rr, rules);
+    }
+    rules.forEach((r) => { processRule(r); });
+  };
+  const restoreSheets = () => {
+    for (const [rule, props] of touched) for (const p in props) rule.style.setProperty(p, props[p][0], props[p][1]);
+    touched.clear();
+  };
+  const reapplySheets = () => {
+    for (const sh of document.styleSheets) {
+      let rr; try { rr = sh.cssRules; } catch (e) { continue; }
+      if (rr) (function w(list) { for (const r of list) { if (r.cssRules && !r.selectorText) w(r.cssRules); else seenRules.delete(r); } })(rr);
+    }
+    scanSheets();
+  };
+
+  /* --- czytelność tekstu: ciemny tekst (dawniej na pergaminie) w oknach, tooltipach i dialogach → jaśniejszy odpowiednik
+     (neutralny → jasny tekst motywu, kolorowy → ten sam odcień, jaśniej); elementy dostają klasę vv-lt i zmienną --vv-c */
+  const TEXT_SCOPE = '.border-window, .tip-wrapper, .dialogue-window';
+  const marked = new Set();
+  const lighter = ([r, g, b]) => {
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    if (mx - mn < 28) return '#e6e0ee';
+    const k = 190 / Math.max(mx, 1);
+    return `rgb(${Math.min(255, Math.round(r * k + 30))}, ${Math.min(255, Math.round(g * k + 30))}, ${Math.min(255, Math.round(b * k + 30))})`;
+  };
+  const fixText = (scopeEl) => {
+    if (!enabled()) return;
+    for (const el of scopeEl.querySelectorAll('*')) {
+      if (el.classList.contains('vv-lt') || el.closest('.item, canvas')) continue;
+      let hasText = false;
+      for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) { hasText = true; break; }
+      if (!hasText) continue;
+      const c = parseRgb(getComputedStyle(el).color);
+      if (!c || c[3] < 0.3) continue;
+      if ((0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255 >= 0.36) continue;
+      el.style.setProperty('--vv-c', lighter(c));
+      el.classList.add('vv-lt');
+      marked.add(el);
+    }
+  };
+  const unfixText = () => { for (const el of marked) { el.classList.remove('vv-lt'); el.style.removeProperty('--vv-c'); } marked.clear(); };
+  const pendingFix = new Set();
+  let fixTimer = 0;
+  const queueFix = (node) => {
+    const el = node.nodeType === 1 ? node : node.parentElement;
+    const w = el && el.closest && el.closest(TEXT_SCOPE);
+    if (!w) return;
+    pendingFix.add(w);
+    if (!fixTimer) fixTimer = setTimeout(() => { fixTimer = 0; const list = [...pendingFix]; pendingFix.clear(); list.forEach(fixText); }, 150);
+  };
+  // nowe arkusze gry i nowe elementy okien: ponowny skan (z debounce); okresowo przez pierwsze 2 minuty
+  let sheetTimer = 0;
+  const gfxObs = new MutationObserver((muts) => {
+    if (!enabled()) return;
+    let sheets = false;
+    for (const m of muts) for (const n of m.addedNodes) {
+      if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') sheets = true;
+      else queueFix(n);
+    }
+    if (sheets) { clearTimeout(sheetTimer); sheetTimer = setTimeout(scanSheets, 80); }
+  });
+  const startGraphics = () => {
+    scanSheets();
+    document.querySelectorAll(TEXT_SCOPE).forEach(fixText);
+    gfxObs.observe(document.documentElement, { childList: true, subtree: true });
+    let ticks = 0;
+    const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
+  };
+  const syncGraphics = () => {
+    if (!root.classList.contains('vv-game')) return;
+    if (enabled()) { reapplySheets(); document.querySelectorAll(TEXT_SCOPE).forEach(fixText); } else { restoreSheets(); unfixText(); }
+  };
+
   // Strona gry rozpoznana → klasa vv-game (reguły globalne) + przycisk. Obserwator z debounce,
   // odłączany, gdy interfejs zostanie potwierdzony (albo po 60 s – np. strona logowania).
   let debounce = 0;
@@ -1357,6 +1557,7 @@ html:not(.${ON}) #vv-toggle { filter: grayscale(1); opacity: .35; }
     orbObs.observe(layer, { childList: true, subtree: true });
     ensureOrbFx();
     tipObs.observe(document.body, { childList: true, subtree: true });
+    startGraphics();
   };
   const check = () => {
     const iface = detectDom();

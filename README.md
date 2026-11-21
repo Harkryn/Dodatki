@@ -227,6 +227,8 @@ Funkcje:
 - **intensywność świecenia** — niska / średnia / wysoka, zapamiętywana,
 - **przełącznik** — mały okrągły przycisk w lewym dolnym rogu (klik: włącz/wyłącz, prawy klik: intensywność), skróty i menu Tampermonkey; stan zapamiętywany.
 
+**Pozostałe grafiki gry** (ok. 80 plików `/img/gui/*`, m.in. atlas `buttony.png` z ~180 reguł: ikony, ramki, przyciski, kalendarze, przepustka, powiadomienia) są przemalowywane w locie: drewno, brąz, pergamin i szarości → prawie czerń z nutą fioletu, złote obszycia → przygaszony ametyst, jasne ikony → lekko lawendowe; kolory znaczeniowe (złoto ikon, zielone statusy, błękit, czerwone znaczniki) zostają. Pliki są pobierane z serwera gry i nie trafiają do repo; nietknięte zostają kursory, ramki rzadkości, ikony umiejętności i mapy. Ciemny tekst z dawnego pergaminu jest automatycznie rozjaśniany. Wyłączenie motywu przywraca oryginały bez przeładowania.
+
 Interfejs: **wyłącznie nowy (NI)**. Na starym interfejsie (SI) skrypt nic nie robi. Interfejs jest rozpoznawany po ciasteczku gry `interface`, potem po elementach strony. Mapa (canvas), sprite'y i logika gry pozostają nietknięte.
 
 **Link instalacyjny:** https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
