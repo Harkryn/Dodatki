@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.5.0
+// @version      1.6.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.5.0';
+  const VERSION = '1.6.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -891,6 +891,9 @@ ${N} .interface-layer .hud-container .btn-min {
   color: var(--oni-hi) !important;
   filter: none !important;
 }
+/* ikony walut były częścią grafiki tabliczki gry – podstawiamy czyste ikony gry (jak w Dark Gothic) */
+${N} .interface-layer .hud-container .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat !important; filter: drop-shadow(0 0 2px #000); }
+${N} .interface-layer .hud-container .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat !important; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
 ${N} .interface-layer .hud-container .btn-min:hover { box-shadow: inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; color: #fff !important; }
 
 /* kula HP: gęsty czerwony lakier urushi – głęboka czerwień, połysk przy powierzchni, ciemniejsze dno */
@@ -945,8 +948,56 @@ ${N} .handheld-mini-map::after {
   /* =====================================================================
    * === ANIMACJE (lekkie; wyłączane przy prefers-reduced-motion) ===
    * ===================================================================== */
+  // Popiół i żar: kafel 180×260 z kilkunastoma drobinami (szary popiół, nieliczne czerwone węgielki),
+  // dwie warstwy o różnej skali i prędkości unoszą się powoli w górę. Tylko w bocznych kolumnach –
+  // nigdy nad mapą gry. Pod treścią kolumn (isolation + z-index -1), więc nie zasłania tekstu.
+  const ASH = (() => {
+    let seed = 11;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const dots = [];
+    for (let i = 0; i < 16; i++) {
+      const x = Math.round(rnd() * 180), y = Math.round(rnd() * 260), r = (0.6 + rnd() * 1.1).toFixed(1);
+      const ember = i % 5 === 0;
+      const c = ember ? `rgb(196 42 42 / ${(0.55 + rnd() * 0.35).toFixed(2)})` : `rgb(150 140 130 / ${(0.25 + rnd() * 0.3).toFixed(2)})`;
+      dots.push(`radial-gradient(${r}px ${r}px at ${x}px ${y}px, ${c}, transparent)`);
+    }
+    return dots.join(',\n    ');
+  })();
+  const F = `html.${ON}.${FX}.oni-ni`;
+
   const cssAnim = `
 @keyframes oni-shine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
+@keyframes oni-mist { from { background-position: 0 100%, 0 100%; } to { background-position: 400px 100%, -300px 100%; } }
+@keyframes oni-ember-pulse { 0%, 100% { opacity: .55; } 50% { opacity: .85; } }
+
+/* popiół i żar w bocznych kolumnach */
+${F} .interface-layer > .main-column { isolation: isolate; }
+${F} .interface-layer > .main-column::before {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: ${ASH}, ${ASH};
+  background-size: ${Array(16).fill('180px 260px').join(', ')}, ${Array(16).fill('270px 390px').join(', ')};
+  animation: oni-ash-a 34s linear infinite, oni-ember-pulse 7s ease-in-out infinite;
+}
+@keyframes oni-ash-a {
+  from { background-position: ${Array(16).fill('0 0').join(', ')}, ${Array(16).fill('60px 0').join(', ')}; }
+  to { background-position: ${Array(16).fill('0 -260px').join(', ')}, ${Array(16).fill('60px -780px').join(', ')}; }
+}
+/* nocna mgła u dołu kolumn: dwie szerokie smugi przesuwające się w przeciwne strony */
+${F} .interface-layer > .main-column::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 100%, rgb(143 132 120 / .09), transparent 70%),
+    radial-gradient(ellipse 50% 32% at 70% 100%, rgb(122 18 18 / .07), transparent 70%);
+  background-size: 400px 100%, 300px 100%;
+  background-repeat: repeat-x;
+  animation: oni-mist 60s linear infinite;
+}
 ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button { transition: box-shadow .2s ease, background-color .2s ease, filter .2s ease; }
 @media (prefers-reduced-motion: reduce) {
   ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button { transition: none !important; }
