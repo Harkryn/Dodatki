@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.18.0
+// @version      1.19.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -38,7 +38,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.18.0';
+  const VERSION = '1.19.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -607,14 +607,53 @@ ${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value,
 ${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat { color: var(--vv-text) !important; }
 ${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px #000, 0 0 3px #000 !important; }
 
-/* sklep: markiza przyciemniona do grafitowych pasów, papierowe tła na czerń */
-${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) brightness(.3) contrast(1.15); }
+/* --- sklep ---
+   Markiza przygaszona do grafitu z nutą fioletu i cienką fioletową linią pod spodem. Siatka towarów oraz pola
+   „kup” i „sprzedaj” w ramach z wulkanicznego szkła z polami jak w torbie (ciemne przerwy między komórkami).
+   Ramy wystają ~9 px, więc napisy „Buy”/„Sell” są podniesione nad ramy, a opis sklepu opuszczony pod ramę.
+   Kolory bilansu (zielony/czerwony) zostają z gry. */
+${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) brightness(.33) contrast(1.2) sepia(.35) hue-rotate(220deg) saturate(1.3) !important; }
+${N} .shop-wrapper .shop-background::after {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 37px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(143 69 230 / .55) 25%, rgb(143 69 230 / .55) 75%, transparent);
+  pointer-events: none;
+}
 ${N} .shop-wrapper .shop-background .paper-1,
 ${N} .shop-wrapper .shop-background .paper-2 {
   background: var(--vv-bg-1) !important;
   box-shadow: inset 0 0 8px #000, inset 0 0 0 1px var(--vv-edge) !important;
 }
-${N} .shop-wrapper .shop-content .items-grid .label { background: var(--vv-bg-0) !important; color: var(--vv-text) !important; }
+${N} .shop-wrapper .items-grid {
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: url("${IMG.frame}") 30 / 7px / 4px stretch !important;
+  box-shadow: 0 0 0 4px rgb(6 5 9 / .95), 0 0 0 5px #000, 0 4px 12px 4px rgb(0 0 0 / .7) !important;
+  outline: none !important;
+}
+${N} .shop-wrapper .items-grid > .interface-element-item-slot-grid-stretch {
+  background-color: #000 !important;
+  background-image: radial-gradient(circle at 50% 45%, #141119 0 30%, #08070b 70%) !important;
+  background-size: 33px 33px !important;
+  background-repeat: repeat !important;
+  background-position: 0 0 !important;
+  -webkit-mask: linear-gradient(to right, #000 32px, transparent 32px) 0 0 / 33px 33px, linear-gradient(#000 32px, transparent 32px) 0 0 / 33px 33px;
+  -webkit-mask-composite: source-in;
+  mask: linear-gradient(to right, #000 32px, transparent 32px) 0 0 / 33px 33px, linear-gradient(#000 32px, transparent 32px) 0 0 / 33px 33px;
+  mask-composite: intersect;
+  box-shadow: none !important;
+}
+${N} .shop-wrapper .items-grid .label.interface-element-grid-border {
+  background: none !important; box-shadow: none !important; outline: none !important; border-image: none !important;
+  color: var(--vv-text-dim) !important;
+  font-variant: small-caps; letter-spacing: .1em;
+  text-shadow: 0 1px 2px #000;
+  translate: 0 -8px;
+}
+${N} .shop-wrapper .shop-info-wrapper { translate: 0 7px; }
+${N} .shop-wrapper .shop-info-wrapper,
+${N} .shop-wrapper .shop-info-wrapper * { color: var(--vv-text-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .shop-wrapper .total-price { color: var(--vv-text) !important; font-variant: small-caps; letter-spacing: .06em; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--vv-edge) !important; }
 
 `;
