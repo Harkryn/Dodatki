@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.1.0
+// @version      1.2.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -563,13 +563,158 @@ ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
 `;
 
   /* =====================================================================
+   * === EKWIPUNEK (prawa kolumna, postać, torby, sloty, statystyki, sklep, przyciski HUD) ===
+   * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
+   * ===================================================================== */
+  const cssInventory = `
+${N} .interface-layer > .right-column.main-column { background: var(--oni-k0) !important; }
+${N} .interface-element-grid-border,
+${N} .interface-element-grid-border-light {
+  outline-color: var(--oni-k0) !important;
+  box-shadow: 0 0 0 1px var(--oni-edge), 0 0 0 2px #000 !important;
+}
+${N} .interface-layer .equipment-outline-2,
+${N} .interface-layer .equipment-outline-3 { background-color: var(--oni-edge) !important; }
+
+/* siatka slotów (torba, sklep, skrzynie): wklęsłe komórki z czarnego lakieru, kratka w bardzo ciemnej czerwieni
+   (wzór co 33 px jak siatka gry) */
+${N} .interface-element-item-slot-grid-stretch,
+${N} .interface-element-one-item-slot-background-to-repeat {
+  filter: none !important;
+  background-color: var(--oni-k0) !important;
+  background-image:
+    linear-gradient(90deg, transparent 32px, #2a0a0a 32px),
+    linear-gradient(transparent 32px, #2a0a0a 32px),
+    radial-gradient(circle at 50% 40%, #1a1312, #0a0707 70%) !important;
+  background-size: 33px 33px !important;
+  background-repeat: repeat !important;
+}
+/* połysk lakieru przesuwa się powoli po liniach siatki (jak w Dark Gothic, tu w ciemnej czerwieni) */
+${N} .interface-element-item-slot-grid-stretch::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 42%, rgb(158 27 27 / .55) 50%, transparent 58%) 0 0 / 300% 100% no-repeat;
+  --oni-grid-mask:
+    linear-gradient(90deg, transparent 32px, #000 32px) 0 0 / 33px 33px,
+    linear-gradient(transparent 32px, #000 32px) 0 0 / 33px 33px;
+  -webkit-mask: var(--oni-grid-mask);
+  mask: var(--oni-grid-mask);
+  animation: oni-shine 11s linear infinite;
+}
+${N} .interface-element-one-item-slot-2 {
+  background: radial-gradient(circle at 50% 40%, #1a1312, var(--oni-k0) 75%) !important;
+  border-color: var(--oni-edge) !important;
+  outline-color: #000 !important;
+  box-shadow: inset 0 0 8px #000 !important;
+}
+
+/* ekwipunek, przełącznik toreb, torba: ramy z płytek zbroi (wysunięte o 4 px – sloty nie są zasłonięte) */
+${N} .interface-layer > .right-column.main-column .equipment-wrapper,
+${N} .interface-layer > .right-column.main-column .bags-navigation-bg,
+${N} .interface-layer > .right-column.main-column .inventory-grid-bg {
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: var(--oni-frame-thin) 6 / 4px / 4px stretch !important;
+  box-shadow: 0 0 0 4px rgb(7 5 5 / .95), 0 4px 12px 4px rgb(0 0 0 / .7) !important;
+  outline: none !important;
+}
+${N} .interface-layer > .right-column.main-column .equipment-wrapper-outline {
+  background: none !important; box-shadow: none !important; border-color: transparent !important;
+}
+/* sloty postaci: osobne wnęki z cienką czerwoną krawędzią od dołu (jak sznur pod płytką) */
+${N} .interface-layer > .right-column.main-column .equipment-wrapper .eq-slot.interface-element-one-item-slot-background-to-repeat {
+  background: radial-gradient(circle at 50% 40%, #1c1412, #080505 72%) !important;
+  background-size: auto !important;
+  box-shadow: inset 0 0 0 1px var(--oni-edge), inset 0 2px 6px #000, inset 0 -1px 0 rgb(122 18 18 / .45) !important;
+  border-radius: 2px;
+}
+${N} .interface-layer > .right-column.main-column .bags-navigation-bg .bag-slot-wrapper {
+  background: radial-gradient(circle at 50% 40%, #1c1412, #080505 75%) !important;
+  box-shadow: inset 0 0 0 1px var(--oni-edge) !important;
+}
+${N} .interface-layer > .right-column.main-column .bags-navigation .item.bag.active {
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--oni-r3), 0 0 8px rgb(196 42 42 / .45) !important;
+  border-radius: 2px;
+}
+
+/* panel statystyk: lakier w cienkiej ramie, „STATS” pędzlem, wiersze rozdzielone pociągnięciem pędzla.
+   Kolory odporności (ogień, zimno…) zostają z gry. */
+${N} .interface-layer .stats-wrapper {
+  background: var(--oni-urushi) !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .8) !important;
+  outline: none !important;
+}
+${N} .interface-layer .stats-wrapper .header-title-wrapper .interface-element-active-card-background-stretch {
+  background: var(--oni-brush) center bottom / 70% 3px no-repeat !important;
+  border-image: none !important;
+  box-shadow: none !important;
+}
+${N} .interface-layer .stats-wrapper .header-title {
+  color: var(--oni-text) !important;
+  font-family: var(--oni-font-title) !important;
+  letter-spacing: .08em;
+  text-shadow: 0 1px 2px #000 !important;
+}
+${N} .interface-layer .stats-wrapper .stats-list li { position: relative; }
+${N} .interface-layer .stats-wrapper .stats-list li + li::before {
+  content: ""; position: absolute; left: 2px; right: -26px; top: 0; height: 2px;
+  background: var(--oni-brush-dim) left center / 100% 100% no-repeat;
+  opacity: .6;
+}
+${N} .interface-layer .stats-wrapper .stats-list .stat-icon { filter: grayscale(1) sepia(.3) brightness(.95) drop-shadow(0 1px 1px #000); }
+${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value,
+${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat { color: var(--oni-text) !important; }
+${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px #000, 0 0 3px #000 !important; }
+
+/* --- sklep: markiza jako ciemnoczerwona kurtyna noren, pola kupna/sprzedaży jak torba --- */
+${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) sepia(1) hue-rotate(-38deg) saturate(2.6) brightness(.32) contrast(1.3) !important; }
+${N} .shop-wrapper .shop-background .paper-1,
+${N} .shop-wrapper .shop-background .paper-2 { filter: grayscale(1) brightness(.18) !important; }
+${N} .shop-wrapper .shop-info-wrapper,
+${N} .shop-wrapper .shop-info-wrapper * { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .shop-wrapper .total-price { color: var(--oni-text) !important; letter-spacing: .04em; }
+${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--oni-edge) !important; }
+
+/* --- przyciski HUD (widżety): płytki czarnego lakieru z mosiężnym obrzeżem; ikony gry przygaszone do
+   koloru starego papieru, przy najechaniu żarzą się. Kolory stanów gry zostają jako obrys. --- */
+${N} .widget-button {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0, rgb(255 235 220 / .08), transparent 70%),
+    linear-gradient(#1f1716, #0e0a0a 60%, #070505) !important;
+  border-radius: 3px !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(138 106 58 / .35), inset 0 -2px 0 rgb(92 13 13 / .5) !important;
+}
+${N} .widget-button::before { box-shadow: none !important; }
+${N} .widget-button .icon {
+  filter: grayscale(1) sepia(.35) brightness(.95) drop-shadow(0 1px 0 #000) !important;
+  opacity: .92;
+}
+${N} .widget-button:not(.disabled):hover { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; }
+${N} .widget-button:not(.disabled):hover .icon,
+${N} .widget-button.window-is-open .icon {
+  filter: grayscale(1) sepia(.6) brightness(1.15) drop-shadow(0 1px 0 #000) drop-shadow(0 0 3px rgb(196 42 42 / .6)) !important;
+  opacity: 1;
+}
+${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--oni-r2), inset 0 -2px 0 var(--oni-r3) !important; }
+${N} .widget-button.red { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(196 42 42 / .9) !important; }
+${N} .widget-button.blue { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(80 130 210 / .7) !important; }
+${N} .widget-button.violet, ${N} .widget-button.blink-violet { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(150 90 200 / .7) !important; }
+${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
+`;
+
+  /* =====================================================================
    * === ANIMACJE (lekkie; wyłączane przy prefers-reduced-motion) ===
    * ===================================================================== */
   const cssAnim = `
-${N} .button, ${N} .border-window .card, ${N} .close-button { transition: box-shadow .2s ease, background-color .2s ease, filter .2s ease; }
+@keyframes oni-shine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
+${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button { transition: box-shadow .2s ease, background-color .2s ease, filter .2s ease; }
 @media (prefers-reduced-motion: reduce) {
-  ${N} .button, ${N} .border-window .card, ${N} .close-button { transition: none !important; }
-  ${N} *::before, ${N} *::after { animation-duration: 0s !important; }
+  ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button { transition: none !important; }
+  ${N} *, ${N} *::before, ${N} *::after { animation: none !important; }
   #oni-toggle, #oni-toast { transition: none !important; }
 }
 `;
@@ -780,7 +925,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssAnim, cssToggle].join('\n'));
+  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'oni-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
