@@ -209,7 +209,7 @@ Funkcje:
 - **czat** — jednolita czerń pod wiadomościami (kolory kanałów bez zmian, kontrast AA), listwy kolumn z cienką fioletową żyłą, aktywny kanał z fioletową kreską, magentowy znacznik nowych wiadomości, pole wpisywania z fioletowym focusem,
 - **tooltipy przedmiotów** — prawie nieprzezroczysta czarna karta (kontrast tekstu ~16:1), kolor rzadkości na nazwie, górnej krawędzi i w słabej poświacie; kolory rzadkości czytelne i rozpoznawalne jak w grze,
 - **ekwipunek, postać, torby** — czarna kolumna, ciemne sloty z grafitowymi liniami, obrysy siatek, podstawka statystyk; ikony i ramki rzadkości bez zmian,
-- **HUD** — czarne belki z cienką fioletową linią, tabliczka z imieniem, okrągłe grafitowe przyciski widżetów (otwarte okno = fioletowa krawędź, delikatnie pulsująca),
+- **HUD** — czarne belki z cienką fioletową linią, tabliczka z imieniem; **przyciski widżetów z zwęglonego bazaltu**, przez którego pęknięcia sączy się przygaszony fiolet — 24 różne kafle (6 kamieni × 4 obroty), sąsiednie przyciski nigdy się nie powtarzają; otwarte okno = fioletowa krawędź (delikatnie pulsuje), kolory alarmów gry jako przygaszony obrys,
 - **sklep** — markiza przyciemniona do grafitowych pasów, czarne tła zamiast papieru,
 - **paski i kula HP** — HP zostaje czerwone (czytelność w walce), druga belka i doświadczenie w przygaszonym fiolecie, cienki fioletowy pierścień kuli HP, grafitowa listwa; paski nad postaciami w walce bez zmian,
 - **walka** — okno i dziennik walki w czerni (kolory wpisów z gry), przycisk „Auto” z fioletową krawędzią,
@@ -236,4 +236,4 @@ Skróty:
 
 Ruchu jest minimum (puls krawędzi otwartych widżetów, przejścia przy najechaniu) i wyłącza się przy systemowym „ogranicz ruch” (`prefers-reduced-motion`).
 
-Grafiki (ramka okna, tabliczka tytułu, ametyst) leżą w [assets/violet-void/](assets/violet-void/) (3 pliki WebP, razem ok. 18 KB). Wygenerowano je modelem FLUX.1 Krea na Hugging Face i obrobiono lokalnie; prompty są w [PROMPTS.md](assets/violet-void/PROMPTS.md). Skrypt ładuje je przez `@resource`, więc Tampermonkey pobiera je raz, razem z aktualizacją.
+Grafiki (ramka okna, tabliczka tytułu, ametyst, atlas przycisków HUD) leżą w [assets/violet-void/](assets/violet-void/) (4 pliki WebP, razem ok. 43 KB). Wygenerowano je modelem FLUX.1 Krea na Hugging Face i obrobiono lokalnie; prompty są w [PROMPTS.md](assets/violet-void/PROMPTS.md). Skrypt ładuje je przez `@resource`, więc Tampermonkey pobiera je raz, razem z aktualizacją.

@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.6.1
+// @version      1.7.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -19,6 +19,7 @@
 // @resource     vvFrame      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/frame.webp
 // @resource     vvTitlePlate https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-plate.webp
 // @resource     vvTitleGem   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/title-gem.webp
+// @resource     vvHudButtons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/hud-buttons.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // ==/UserScript==
@@ -35,7 +36,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.6.1';
+  const VERSION = '1.7.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -61,8 +62,20 @@
   const IMG = {
     frame: res('vvFrame', 'frame.webp'),            // 192×192, 9-slice: wycinek 30 px
     plate: res('vvTitlePlate', 'title-plate.webp'), // 360×35, końce 46 px
-    gem: res('vvTitleGem', 'title-gem.webp')        // 20×36
+    gem: res('vvTitleGem', 'title-gem.webp'),       // 20×36
+    hud: res('vvHudButtons', 'hud-buttons.webp')    // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
   };
+
+  // Przydział kafli przyciskom HUD w kolejności, w jakiej stoją na belkach – sąsiednie dostają inne kamienie
+  // (kamień = i % 6), a co szósty przycisk zmienia obrót. Nieznane przyciski: kafle cyklicznie wg pozycji.
+  const HUD_ORDER = ['exit', 'world-icon', 'config', 'rewards-calendar-icon',
+    'inventory-browser-icon', 'matchmaking-icon', 'party', 'globe', 'clans',
+    'chat', 'photo', 'portable-map-icon', 'compass', 'loot-filter-icon', 'timer-icon',
+    'scroll', 'friends', 'skills', 'news-icon', 'star'];
+  const HUD_TILES = [
+    ...[1, 2, 3, 4, 5, 6].map((k) => `html.${ON}.vv-ni .widget-button:nth-child(6n+${k}) { --vv-hy: ${k - 1}; --vv-hx: ${k % 4}; }`),
+    ...HUD_ORDER.map((n, i) => `html.${ON}.vv-ni .widget-button[widget-name="${n}"] { --vv-hy: ${i % 6}; --vv-hx: ${Math.floor(i / 6) % 4}; }`)
+  ].join('\n');
 
   /* =====================================================================
    * === ZMIENNE (paleta i intensywność świecenia) ===
@@ -405,19 +418,25 @@ ${N} .interface-layer .hud-container {
   border-image: none !important;
   box-shadow: inset 0 -1px 0 var(--vv-v-2), inset 0 0 0 1px var(--vv-edge), 0 2px 8px rgb(0 0 0 / .8) !important;
 }
-/* przyciski HUD (widżety) */
-${N} .widget-button.green {
-  background: radial-gradient(circle at 50% 35%, #1d1925, var(--vv-bg-0) 85%) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-edge) !important;
+/* przyciski HUD (widżety): zwęglony bazalt z pęknięciem, przez które sączy się fiolet.
+   Atlas 4×6 kafli (6 kamieni × 4 obroty) – każdy przycisk dostaje inny kafel (--vv-hx = obrót, --vv-hy = kamień). */
+${N} .widget-button {
+  background: url("${IMG.hud}") calc(var(--vv-hx, 0) * 100% / 3) calc(var(--vv-hy, 0) * 100% / 5) / 400% 600% no-repeat, var(--vv-bg-1) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 1px #000 !important;
 }
 ${N} .widget-button.green::before { box-shadow: none !important; }
-${N} .widget-button.green:not(.disabled):hover {
-  box-shadow: inset 0 0 0 1px var(--vv-v-3), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
+/* kolory stanów gry zostają jako przygaszony obrys (czerwony = alarm, niebieski i fioletowy = wyróżnienia) */
+${N} .widget-button.red { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(201 55 79 / .8) !important; }
+${N} .widget-button.blue { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(80 140 230 / .7) !important; }
+${N} .widget-button.violet { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-3) !important; }
+${N} .widget-button:not(.disabled):hover {
+  filter: brightness(1.3);
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-2), 0 0 calc(6px * var(--vv-k)) var(--vv-glow) !important;
 }
-${N} .widget-button.green.window-is-open {
-  background: radial-gradient(circle at 50% 35%, #241d2e, var(--vv-bg-0) 85%) !important;
-  box-shadow: inset 0 0 0 1px var(--vv-v-2) !important;
-}
+${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--vv-v-2) !important; }
+${N} .widget-button.disabled { filter: grayscale(.7) brightness(.6); }
+${HUD_TILES}
 /* podstawka statystyk postaci */
 ${N} .interface-layer .stats-wrapper {
   background: rgb(12 10 16 / .95) !important;
