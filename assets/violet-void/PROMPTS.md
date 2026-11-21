@@ -71,3 +71,9 @@ FLUX.1 Krea-dev, 768×768 (seed 977809297) → `orb-ring.webp` (256×256, 12 KB;
 Top-down flat view of a single circular ring band made of rough charred black basalt stone, like a thick round stone collar, perfectly round empty black hole in the center, the stone ring has shadowed cracks and one thin crack leaking faint dim violet light, pure black background, extremely dark, low key lighting, no text
 
 Odrzucony B (seed 1434086303): rzeźbiony czarny kamień z krystalicznymi ćwiekami.
+
+## Sklep — ozdoba w miejscu markizy (wybrana A → shop-lintel.webp, 960×65)
+
+FLUX.1 Krea-dev, 1536×256, obróbka jak przy kamieniach (czerń → przezroczystość, przyciemnienie szarości):
+- **A** (seed 1491346784): Game UI asset, orthographic flat front view, a wide long thin horizontal carved lintel of rough charred black basalt stone, a row of small dark pyramid crystal studs along it, a single small glowing amethyst crystal set in the exact center, faint violet light in two thin cracks, isolated on pure solid black background #000000, extremely dark, no text
+- **B** (seed 1436142511): Game UI asset, orthographic flat front view, a thin dark iron chain strung horizontally across the full width near the top, small sharp amethyst crystal shards hanging from it at even intervals pointing down, alternating long and short shards, a few shards with faint violet inner glow, isolated on pure solid black background #000000, very dark, no text

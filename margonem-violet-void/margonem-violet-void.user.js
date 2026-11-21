@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.19.1
+// @version      1.20.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -22,6 +22,7 @@
 // @resource     vvHudButtons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/hud-buttons.webp
 // @resource     vvOrbCracks  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-cracks.mp4
 // @resource     vvOrbRing    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/orb-ring.webp
+// @resource     vvShopLintel https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/violet-void/shop-lintel.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-violet-void/margonem-violet-void.user.js
 // ==/UserScript==
@@ -38,7 +39,7 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = '1.19.1';
+  const VERSION = '1.20.0';
   const ON = 'vv-on';            // motyw włączony
   const KEY_ON = 'vv-enabled';
   const KEY_GLOW = 'vv-glow';    // low | mid | high
@@ -67,7 +68,8 @@
     gem: res('vvTitleGem', 'title-gem.webp'),       // 20×36
     hud: res('vvHudButtons', 'hud-buttons.webp'),   // atlas 352×528: 4 obroty × 6 kamieni, kafel 88×88
     orbFx: res('vvOrbCracks', 'orb-cracks.mp4'),    // 480×480, 3 s pętli: pierścień pęknięć wokół kuli HP (FLUX + Wan 2.2)
-    ring: res('vvOrbRing', 'orb-ring.webp')         // 256×256, kamienny pierścień wokół kuli (wewn. promień = 0,367 szerokości)
+    ring: res('vvOrbRing', 'orb-ring.webp'),        // 256×256, kamienny pierścień wokół kuli (wewn. promień = 0,367 szerokości)
+    lintel: res('vvShopLintel', 'shop-lintel.webp') // 960×65, bazaltowe nadproże sklepu (w miejscu markizy)
   };
 
   // Przydział kafli przyciskom HUD w kolejności, w jakiej stoją na belkach – sąsiednie dostają inne kamienie
@@ -612,6 +614,14 @@ ${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px
    jak w torbie (ciemne przerwy między komórkami). Ramy wystają ~9 px, więc napisy „Buy”/„Sell” są podniesione
    nad ramy, a opis sklepu opuszczony pod ramę. Kolory bilansu (zielony/czerwony) zostają z gry. */
 ${N} .shop-wrapper .shop-background .canopy { display: none !important; }
+/* w miejscu markizy: bazaltowe nadproże z krystalicznymi ćwiekami i ametystem pośrodku */
+${N} .shop-wrapper .shop-background::after {
+  content: "";
+  position: absolute; left: 14px; right: 14px; top: 4px; height: 33px;
+  background: url("${IMG.lintel}") center / contain no-repeat;
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / .85));
+  pointer-events: none;
+}
 /* skrzynia złota i napis „Need more gold?” w dolnym pasku okien – ukryte; przyciski „Buy gold” i „Recover items” zostają */
 ${N} .premium-footer__chest,
 ${N} .premium-footer__label { display: none !important; }
