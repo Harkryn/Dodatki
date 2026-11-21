@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.32.1
+// @version      1.33.0
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -990,49 +990,117 @@ ${N} .layer.loader-layer .progress-bar .inner-wrapper .inner {
    * Karta prawie nieprzezroczysta (#0b0a0f / 97%) – tekst #e6e0ee ma kontrast ~16:1, przygaszony ~6.5:1.
    * Kolor rangi (--vv-rar, „r g b”) ustawia skrypt (tintTooltip) dla każdej karty przedmiotu: z grafiki ramki,
    * która FAKTYCZNIE jest pod przedmiotem – więc działa z każdym zestawem ramek (ustawienia gry, inne dodatki).
-   * W tym kolorze: obwódka i górna linia karty, poświata, łuna za ikoną, separator nagłówka i nazwa przedmiotu.
+   * Karta w ramie z wulkanicznego szkła jak okna; w kolorze rangi: klejnot na górnej krawędzi, obwódka i górna linia,
+   * poświata, oprawa i łuna ikony, tabliczka rangi, separatory z kryształem pośrodku i nazwa przedmiotu.
    * Kolor jest wyrównywany do jasności 235, więc nazwa ma na tle karty kontrast ≥ 4.5:1.
    * Zwykłe przedmioty (szara ramka) i karty bez przedmiotu – stonowany grafit / fiolet.
    * ===================================================================== */
   const cssTooltips = `
 ${N} .tip-wrapper { --vv-rar: 109 47 179; }
 ${N} .tip-wrapper.normal-tip { --vv-rar: 92 82 108; }
+/* karta w ramie z wulkanicznego szkła jak okna (9-slice, outset 3 px – układ bez zmian), w środku cienka obwódka
+   w kolorze rangi, winieta i łuna rangi u góry i (słabiej) u dołu */
+${N} .tip-wrapper {
+  border-style: solid; border-width: 0;
+  border-image: url("${IMG.frame}") 30 / 9px / 3px stretch !important;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / .9),
+    0 0 calc(16px * var(--vv-k)) rgb(var(--vv-rar) / .3),
+    0 12px 28px rgb(0 0 0 / .9) !important;
+  transition: box-shadow .2s ease;
+}
 ${N} .tip-wrapper .content {
+  padding: 7px 8px 6px !important;
   background:
-    radial-gradient(120% 55% at 50% 0%, rgb(var(--vv-rar) / .12), transparent 70%),
-    linear-gradient(rgb(20 17 25 / .97), rgb(11 10 15 / .97) 60px) !important;
+    radial-gradient(130% 70px at 50% 0, rgb(var(--vv-rar) / .11), transparent 100%),
+    radial-gradient(90% 60px at 50% 100%, rgb(var(--vv-rar) / .07), transparent 100%),
+    linear-gradient(rgb(18 15 23 / .97), rgb(9 8 12 / .97) 70px) !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--vv-rar) / .38), inset 0 0 24px rgb(0 0 0 / .7);
   color: var(--vv-text) !important;
   text-shadow: 0 1px 2px #000;
 }
-${N} .tip-wrapper {
-  box-shadow:
-    0 0 0 1px rgb(var(--vv-rar) / .7),
-    0 0 0 2px #000,
-    0 0 calc(14px * var(--vv-k)) rgb(var(--vv-rar) / .28),
-    0 10px 24px rgb(0 0 0 / .88) !important;
-  transition: box-shadow .2s ease;
-}
-/* górna linia rangi: jasny środek, zanikające końce, miękka poświata */
+/* górna linia rangi (jasny środek, zanikające końce) i krystaliczny klejnot rangi na środku górnej krawędzi */
 ${N} .tip-wrapper.normal-tip::before {
   content: "";
-  position: absolute; left: 10%; right: 10%; top: -1px; height: 2px;
+  position: absolute; left: 14%; right: 14%; top: 0; height: 1px;
   background: linear-gradient(90deg, rgb(var(--vv-rar) / 0), rgb(var(--vv-rar) / .95) 50%, rgb(var(--vv-rar) / 0));
   box-shadow: 0 0 8px rgb(var(--vv-rar) / .6);
   pointer-events: none; z-index: 2;
 }
-/* nagłówek: łuna rangi za ikoną, separator w kolorze rangi zanikający w prawo */
+${N} .tip-wrapper.normal-tip::after {
+  content: "";
+  position: absolute; left: 50%; top: -6px; width: 9px; height: 9px; margin-left: -5px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #fff 0%, rgb(var(--vv-rar)) 38%, rgb(var(--vv-rar) / .55) 70%, #0b0a0f 100%);
+  box-shadow: 0 0 0 1px #000, 0 0 calc(8px * var(--vv-k)) rgb(var(--vv-rar) / .9);
+  pointer-events: none; z-index: 3;
+}
+/* nagłówek: łuna rangi za ikoną, ikona w oprawie (czarny–ranga–czarny), separator z kryształem pośrodku */
 ${N} .tip-wrapper .item-head {
-  background:
-    linear-gradient(90deg, rgb(var(--vv-rar) / .55), rgb(var(--vv-rar) / .12) 60%, transparent) left bottom / 100% 1px no-repeat,
-    radial-gradient(90px 60px at 20px 50%, rgb(var(--vv-rar) / .22), transparent 100%) !important;
+  border-color: transparent !important;
+  padding-bottom: 7px !important; margin-bottom: 5px !important;
+  background: radial-gradient(70px 46px at 22px 50%, rgb(var(--vv-rar) / .26), transparent 100%) !important;
   box-shadow: none !important;
 }
-${N} .tip-wrapper .item-head .item { box-shadow: 0 0 0 1px #000, 0 0 10px rgb(var(--vv-rar) / .45); border-radius: 2px; }
-${N} .tip-wrapper .item-name { text-shadow: 0 0 8px rgb(var(--vv-rar) / .45), 0 1px 2px #000 !important; }
+${N} .tip-wrapper .item-head .item {
+  background: radial-gradient(circle, rgb(var(--vv-rar) / .28), rgb(6 5 9) 72%) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgb(var(--vv-rar) / .75), 0 0 0 3px #000, 0 0 12px rgb(var(--vv-rar) / .5) !important;
+  border-radius: 1px;
+}
+${N} .tip-wrapper .item-name {
+  font-weight: bold; letter-spacing: .02em;
+  text-shadow: 0 0 8px rgb(var(--vv-rar) / .45), 0 1px 2px #000 !important;
+}
 /* nazwa w kolorze ramki tylko wtedy, gdy kolor odczytano z ramki (inaczej zostaje kolor nazwy z gry) */
 ${N} .tip-wrapper.vv-rar-frame .item-name { color: rgb(var(--vv-rar)) !important; }
-${N} .tip-wrapper .item-type { color: var(--vv-text-dim) !important; }
-${N} .tip-wrapper .item-tip-section { border-color: rgb(var(--vv-rar) / .14) !important; }   /* gra ustawia ten kolor inline */
+${N} .tip-wrapper .item-type,
+${N} .tip-wrapper .item-builds { color: var(--vv-text-dim) !important; font-variant: small-caps; letter-spacing: .04em; }
+/* ranga jako mała tabliczka: kreska i romb w kolorze rangi, kapitaliki z rozstrzeleniem */
+${N} .tip-wrapper .item-rarity {
+  display: inline-block; position: relative;
+  padding: 0 8px 0 14px; margin-bottom: 2px;
+  text-transform: uppercase; letter-spacing: .16em; font-size: 10px !important; font-weight: bold;
+  color: rgb(var(--vv-rar)) !important;
+  background: linear-gradient(90deg, rgb(var(--vv-rar) / .18), transparent);
+  border-left: 1px solid rgb(var(--vv-rar) / .8);
+}
+${N} .tip-wrapper .item-rarity::before {
+  content: "";
+  position: absolute; left: 4px; top: 50%; width: 4px; height: 4px; margin-top: -2px;
+  transform: rotate(45deg);
+  background: rgb(var(--vv-rar)); box-shadow: 0 0 4px rgb(var(--vv-rar));
+}
+/* separatory (pod nagłówkiem i między sekcjami – tam, gdzie gra rysuje linię): linia zanikająca na końcach
+   i ku środkowi, a pośrodku mały kryształ rangi */
+${N} .tip-wrapper .item-tip-section { border-bottom-color: transparent !important; position: relative; }   /* gra ustawia kolor inline */
+${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child) { padding-bottom: 6px !important; margin-bottom: 5px !important; }
+${N} .tip-wrapper .item-head::after,
+${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 6%, rgb(var(--vv-rar) / .32) 35%, transparent 47%, transparent 53%, rgb(var(--vv-rar) / .32) 65%, transparent 94%);
+  pointer-events: none;
+}
+${N} .tip-wrapper .item-head::after {
+  bottom: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--vv-rar) / .6) 30%, transparent 47%, transparent 53%, rgb(var(--vv-rar) / .6) 70%, transparent);
+}
+${N} .tip-wrapper .item-head::before,
+${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::before {
+  content: "";
+  position: absolute; left: 50%; bottom: -1px; width: 5px; height: 5px; margin-left: -3px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #fff, rgb(var(--vv-rar)) 45%, rgb(var(--vv-rar) / .5));
+  box-shadow: 0 0 0 1px #000, 0 0 5px rgb(var(--vv-rar) / .8);
+  pointer-events: none; z-index: 1;
+}
+${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::before { bottom: -2px; width: 4px; height: 4px; margin-left: -2px; opacity: .85; }
+/* stopka (wymagany poziom, wartość) na ciemniejszym pasie przez całą szerokość karty */
+${N} .tip-wrapper .item-tip-section.s-9 {
+  margin: 4px -8px -6px !important; padding: 5px 8px !important;
+  background: linear-gradient(rgb(0 0 0 / .45), rgb(0 0 0 / .25));
+  box-shadow: inset 0 1px 0 rgb(var(--vv-rar) / .22);
+}
 
 `;
 
