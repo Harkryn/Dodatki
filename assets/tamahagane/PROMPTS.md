@@ -69,3 +69,6 @@ Stylized painterly illustration: a pure black empty background with one single h
 
 ## tooltip-rama.webp (Qwen-Image 1:1, BiRefNet, wnętrze uzupełnione z oryginału, 256×255, 9-slice 40 + fill)
 Stylized hand-painted dark fantasy game UI tooltip panel, front view, square, a thin frame of dark forged iron with fine glowing red lava cracks, small sharp iron spike ornaments on the four corners, the inside is a flat very dark charcoal black panel with a faint smoky texture and a subtle dark red glow near the top edge, empty, no text, isolated on plain flat light grey background, painterly game asset, symmetric
+
+## tooltip-tlo.webp (Z-Image Turbo 4:3, przyciemniony lokalnie, 640×480; skrypt przebarwia chmury na kolor rangi)
+Full-frame flat texture, hand-painted stylized: deep warm black lacquer surface (#0b0707) with very faint soft drifting smoke wisps in dark warm grey and a subtle hint of deep crimson, like diluted sumi-e ink wash clouds spread across the whole surface, very low contrast, no blue, no teal, no frame, no border, no objects, no symbols, no letters, fills the whole image edge to edge

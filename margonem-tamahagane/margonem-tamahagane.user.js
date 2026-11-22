@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.8.0
+// @version      2.9.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -29,6 +29,7 @@
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
 // @resource     tmgUnderline https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/podkreslenie.webp
 // @resource     tmgTipFrame  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/tooltip-rama.webp
+// @resource     tmgTipBg     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/tooltip-tlo.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // ==/UserScript==
@@ -48,7 +49,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.8.0';
+  const VERSION = '2.9.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -85,7 +86,8 @@
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
     underline: res('tmgUnderline', 'podkreslenie.webp'), // 400×22, podkreślenie: włoskowate pęknięcie z magmą, wygaszone końce
-    tipFrame: res('tmgTipFrame', 'tooltip-rama.webp')  // 256×255, rama tooltipa z malowanym wnętrzem: kamień, lawa, kolce (9-slice 40, wnętrze od 29 px)
+    tipFrame: res('tmgTipFrame', 'tooltip-rama.webp'), // 256×255, rama tooltipa: kamień, lawa, kolce (9-slice 40, wnętrze od 29 px)
+    tipBg: res('tmgTipBg', 'tooltip-tlo.webp')         // 640×480, tło tooltipa: czarny lakier, smugi dymu i przygaszone chmury (rozciągane, bez powtórzeń)
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -670,19 +672,19 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
    przedmioty – szare, wystygłe pęknięcia; legenda w kolorze ramki legendy z ustawień gry (wersje robi skrypt –
    lavaImage z tintem; zanim powstaną, zostaje czerwona lawa). Tooltipy bez przedmiotu zostają czerwone. */
 ${N} .tip-wrapper { --tmg-rar: 122 18 18; }
-${N} .tip-wrapper:has(.item-head) { --tmg-rar: 120 116 110; border-image-source: var(--tmg-tip-common, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
-${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; border-image-source: var(--tmg-tip-uniupg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-uniupg, url("${IMG.underline}")); }
-${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; border-image-source: var(--tmg-tip-her, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-her, url("${IMG.underline}")); }
-${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; border-image-source: var(--tmg-tip-upgraded, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-upgraded, url("${IMG.underline}")); }
-${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: var(--tmg-rar-leg, 255 132 0); border-image-source: var(--tmg-tip-leg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-leg, url("${IMG.underline}")); }
-${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; border-image-source: var(--tmg-tip-art, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-art, url("${IMG.underline}")); }
-/* malowana rama z wnętrzem (tooltip-rama.webp, 9-slice 40 w skali 0,5 + fill): kamienie i żelazo z lawą,
-   kolce w narożnikach. Rama wysunięta o 14 px (outset), więc wnętrze grafiki zaczyna się tuż przy treści,
+${N} .tip-wrapper:has(.item-head) { --tmg-rar: 120 116 110; border-image-source: var(--tmg-tip-common, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-common, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; border-image-source: var(--tmg-tip-uniupg, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-uniupg, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-uniupg, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; border-image-source: var(--tmg-tip-her, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-her, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-her, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; border-image-source: var(--tmg-tip-upgraded, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-upgraded, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-upgraded, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: var(--tmg-rar-leg, 255 132 0); border-image-source: var(--tmg-tip-leg, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-leg, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-leg, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; border-image-source: var(--tmg-tip-art, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-art, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-art, url("${IMG.underline}")); }
+/* malowana rama (tooltip-rama.webp, 9-slice 40 w skali 0,5, krawędzie rozciągane – nic się nie powtarza):
+   kamienie i żelazo z lawą, kolce w narożnikach. Pod nią malowane tło (tooltip-tlo.webp) na cały tooltip. Rama wysunięta o 14 px (outset), więc wnętrze grafiki zaczyna się tuż przy treści,
    a układ tooltipa się nie zmienia. Cień i łuna rzadkości przez drop-shadow – idą po kształcie ramy. */
 ${N} .tip-wrapper {
   border-style: solid; border-width: 0;
-  border-image: url("${IMG.tipFrame}") 40 fill / 20px / 14px round !important;
-  background: none !important;
+  border-image: url("${IMG.tipFrame}") 40 / 20px / 14px stretch !important;
+  background: url("${IMG.tipBg}") center / cover no-repeat, #0b0707 !important;
   box-shadow: none !important;
   filter: drop-shadow(0 0 7px rgb(var(--tmg-rar) / .28)) drop-shadow(0 10px 14px rgb(0 0 0 / .85));
 }
@@ -1470,7 +1472,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       idx.push(o); wt.push(k);
       ph.push(Math.sin(i * 0.052 + 1.3) + Math.sin(y * 0.071 + i * 0.023) + Math.sin((i - y) * 0.037 + 4.1));
     }
-    if (idx.length < 40) return null;
+    if (idx.length < 40 && !tint) return null;
     if (tint) {
       // kolor rangi z zachowaną jasnością lawy; najgorętsze miejsca bieleją (żar w innym kolorze).
       // Przebarwiany jest cały czerwony żar – także ciemny dym we wnętrzu, nie tylko jasne pęknięcia.
@@ -1517,7 +1519,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   // włączone body.ln-frame-item-active), więc np. czerwona ramka legendy daje czerwoną lawę.
   // Wersje trafiają do zmiennych CSS na <html> (--tmg-tip-<ranga>, --tmg-ul-<ranga>), czytanych w cssTooltips.
   const RARITY = { common: [138, 134, 128], uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
-  const TINTED = { tip: 'tipFrame', ul: 'underline' };
+  const TINTED = { tip: 'tipFrame', ul: 'underline', bg: 'tipBg' };
+  const STILL = new Set(['tipBg']);   // tło: tylko przebarwione, bez mienienia (duży obraz)
   const tintCache = new Map();
   const tintUrl = (key, rgb, animated) => {
     const k = `${key}|${animated ? 1 : 0}|${rgb.join(',')}`;
@@ -1544,7 +1547,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     const cols = rarityColors(), state = `${animated ? 1 : 0}|${cols.leg.join(',')}`;
     if (state === tintState) return;
     const seq = ++tintSeq, vars = [];
-    for (const [rk, col] of Object.entries(cols)) for (const [pre, key] of Object.entries(TINTED)) vars.push([`--tmg-${pre}-${rk}`, await tintUrl(key, col, animated)]);
+    for (const [rk, col] of Object.entries(cols)) for (const [pre, key] of Object.entries(TINTED)) vars.push([`--tmg-${pre}-${rk}`, await tintUrl(key, col, animated && !STILL.has(key))]);
     if (seq !== tintSeq) return;
     for (const [k, u] of vars) if (u) root.style.setProperty(k, `url("${u}")`);
     root.style.setProperty('--tmg-rar-leg', cols.leg.join(' '));
