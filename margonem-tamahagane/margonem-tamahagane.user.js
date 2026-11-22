@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.0.0
+// @version      2.1.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -39,7 +39,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.0.0';
+  const VERSION = '2.1.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -76,61 +76,16 @@
    * GRAFIKI WEKTOROWE (rysowane w kodzie, ostre w każdej skali)
    * ───────────────────────────────────────────────────────────────────────── */
 
-  // Rama okien 9-slice (64×64, wycinek 16 → wyświetlana 8 px): czarny lakier, pas lamelkowych płytek
-  // zbroi (kozane) przewiązanych czerwonym sznurem (odoshi), cienka czerwona linia od środka,
-  // w narożnikach okucia z patynowanego mosiądzu z nitem. Środek pusty (bez „fill”).
-  const FRAME = (() => {
-    const pl = [];
-    for (let x = 16; x < 48; x += 8) {
-      // płytki z połyskiem lakieru u góry
-      for (const [X, Y, Wd, Ht, g] of [[x + .5, 2, 7, 10, 'pv'], [x + .5, 52, 7, 10, 'pv'], [2, x + .5, 10, 7, 'ph'], [52, x + .5, 10, 7, 'ph']]) {
-        pl.push(`<rect x='${X}' y='${Y}' width='${Wd}' height='${Ht}' rx='1.8' fill='url(#${g})' stroke='#000' stroke-width='.7'/>`);
-      }
-      pl.push(`<path d='M${x + 4} 3.2V5M${x + 4} 59V60.8M3.2 ${x + 4}H5M59 ${x + 4}H60.8' stroke='#c9a46a' stroke-opacity='.18' stroke-width='.6'/>`);
-    }
-    // sznur odoshi przez środek płytek i ściegi na krzyż na stykach
-    let lace = `<path d='M16 8.6H48M16 55.4H48M8.6 16V48M55.4 16V48' stroke='#000' stroke-width='2.6'/>` +
-      `<path d='M16 8.6H48M16 55.4H48M8.6 16V48M55.4 16V48' stroke='#5c0d0d' stroke-width='1.5'/>` +
-      `<path d='M16 8.1H48M16 54.9H48M8.1 16V48M54.9 16V48' stroke='#9e1b1b' stroke-opacity='.45' stroke-width='.4'/>`;
-    for (let x = 16; x <= 48; x += 8) {
-      lace += `<path d='M${x - 1.3} 7.2L${x + 1.3} 10M${x + 1.3} 7.2L${x - 1.3} 10M${x - 1.3} 54L${x + 1.3} 56.8M${x + 1.3} 54L${x - 1.3} 56.8` +
-        `M7.2 ${x - 1.3}L10 ${x + 1.3}M7.2 ${x + 1.3}L10 ${x - 1.3}M54 ${x - 1.3}L56.8 ${x + 1.3}M54 ${x + 1.3}L56.8 ${x - 1.3}' stroke='#7a1212' stroke-width='.9'/>`;
-    }
-    // okucie narożnika: litera L z mosiądzu i nit
-    const corner = (tx) => `<g transform='${tx}'><path d='M1 1H15V5.5H5.5V15H1Z' fill='url(#br)' stroke='#000' stroke-width='.8'/>` +
-      `<circle cx='3.6' cy='3.6' r='1.4' fill='#2a1f12'/><circle cx='3.3' cy='3.3' r='.5' fill='#c9a46a' fill-opacity='.7'/></g>`;
-    const s = `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>` +
-      `<defs><linearGradient id='pv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3e2f2b'/><stop offset='.2' stop-color='#241a18'/><stop offset='1' stop-color='#0b0707'/></linearGradient>` +
-      `<linearGradient id='ph' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#3e2f2b'/><stop offset='.2' stop-color='#241a18'/><stop offset='1' stop-color='#0b0707'/></linearGradient>` +
-      `<linearGradient id='br' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#a8854c'/><stop offset='.5' stop-color='#8a6a3a'/><stop offset='1' stop-color='#4a3820'/></linearGradient></defs>` +
-      `<path d='M0 0H64V64H0Z M14 14V50H50V14Z' fill='#070505' fill-rule='evenodd'/>` +
-      pl.join('') + lace +
-      `<rect x='13.5' y='13.5' width='37' height='37' fill='none' stroke='#3a1010'/>` +
-      `<rect x='.5' y='.5' width='63' height='63' fill='none' stroke='#000'/>` +
-      corner('') + corner('translate(64 0) scale(-1 1)') + corner('translate(0 64) scale(1 -1)') + corner('translate(64 64) scale(-1 -1)') +
-      '</svg>';
-    return svgUrl(s);
-  })();
-
-  // Cienka rama paneli wewnątrz okien (32×32, wycinek 6 → 3–4 px): lakier, czerwona żyłka, drobne okucia
+  // Cienka rama paneli, przycisków i tooltipów (32×32, wycinek 6 → 3–4 px): ciemne żelazo, w środku cienka
+  // linia żaru, w narożnikach krótkie żarzące się pęknięcia – w stylu ramek slotów i ramy orba
   const FRAME_THIN = svgUrl(
     `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'>` +
-    `<path d='M0 0H32V32H0Z M5 5V27H27V5Z' fill='#120d0c' fill-rule='evenodd'/>` +
+    `<defs><linearGradient id='i' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#4a4441'/><stop offset='.45' stop-color='#2a2624'/><stop offset='1' stop-color='#151211'/></linearGradient></defs>` +
+    `<path d='M0 0H32V32H0Z M5 5V27H27V5Z' fill='url(#i)' fill-rule='evenodd'/>` +
     `<rect x='.5' y='.5' width='31' height='31' fill='none' stroke='#000'/>` +
-    `<rect x='2.5' y='2.5' width='27' height='27' fill='none' stroke='#3a1010' stroke-opacity='.9'/>` +
-    `<path d='M1 1H6V2.4H2.4V6H1Z M31 1H26V2.4H29.6V6H31Z M1 31H6V29.6H2.4V26H1Z M31 31H26V29.6H29.6V26H31Z' fill='#8a6a3a' fill-opacity='.75'/>` +
-    `</svg>`);
-
-  // Belka tytułu jak górna belka bramy torii (kasagi): czarny lakier z wygiętymi w górę końcami
-  // i czerwoną listwą pod spodem (9-slice w poziomie: końce 40 px, środek się rozciąga)
-  const TORII = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='30' viewBox='0 0 160 30'>` +
-    `<defs><linearGradient id='l' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2a1d1b'/><stop offset='.18' stop-color='#161010'/><stop offset='1' stop-color='#070505'/></linearGradient></defs>` +
-    `<path d='M0 3 Q22 9 40 9 H120 Q138 9 160 3 L158 12 Q138 16 120 16 H40 Q22 16 2 12Z' fill='url(#l)' stroke='#000' stroke-width='.8'/>` +
-    `<path d='M3 5.2 Q22 10 40 10 H120 Q138 10 157 5.2' fill='none' stroke='#c9a46a' stroke-opacity='.25' stroke-width='.6'/>` +
-    `<path d='M10 16 H150 V27 H10Z' fill='#0e0a0a' stroke='#000' stroke-width='.8'/>` +
-    `<path d='M10 16.6 H150' stroke='#7a1212' stroke-width='1.2'/>` +
-    `<path d='M10 26.4 H150' stroke='#5c0d0d' stroke-width='.8'/>` +
+    `<rect x='4.5' y='4.5' width='23' height='23' fill='none' stroke='#ff6a2a' stroke-opacity='.22' stroke-width='2.2'/>` +
+    `<rect x='4.6' y='4.6' width='22.8' height='22.8' fill='none' stroke='#c4401c' stroke-opacity='.9' stroke-width='.8'/>` +
+    `<path d='M1.5 3.5L3 2.6L3.6 1.2M28.4 30.8L29 29.4L30.5 28.5M30.6 3.2L29.2 3.6M1.4 28.8L2.8 28.4' fill='none' stroke='#e0521e' stroke-opacity='.75' stroke-width='.6'/>` +
     `</svg>`);
 
   // Pociągnięcie pędzla sumi-e (separator / podkreślenie): zwężające się końce, poszarpany brzeg
@@ -182,9 +137,9 @@
   --tmg-ember: 0 0 8px rgb(196 42 42 / .45), 0 0 2px rgb(196 42 42 / .6);   /* żarzący się węgiel */
   /* połysk lakieru urushi: miękkie światło z góry, głęboka czerń niżej */
   --tmg-urushi: linear-gradient(170deg, rgb(255 235 220 / .035) 0, rgb(255 235 220 / 0) 38%),
-                linear-gradient(var(--tmg-k2), var(--tmg-k1) 46px, var(--tmg-k0));
-  --tmg-font-title: "Shojumaru", "Yuji Syuku", Georgia, serif;
-  --tmg-frame: ${FRAME};
+                linear-gradient(rgb(14 10 10 / .55), rgb(7 5 5 / .8)),
+                url("${IMG.bar}") 0 0 / auto 90px repeat;
+  --tmg-frame: url("${IMG.slot}");   /* żelazo z żarzącym się wnętrzem (9-slice, wycinek 18) */
   --tmg-frame-thin: ${FRAME_THIN};
   --tmg-brush: ${BRUSH_RED};
   --tmg-brush-dim: ${BRUSH_DIM};
@@ -281,7 +236,7 @@ ${N} .tmg-lt { color: var(--tmg-c) !important; }
 /* --- okno zwykłe: skrzynia z czarnego lakieru w ramie z lamelkowych płytek i czerwonego sznura,
    mosiężne okucia w narożnikach. border-width zostaje 0 – układ okna gry bez zmian (outset 4 px). --- */
 ${W} {
-  border-image: var(--tmg-frame) 16 / 8px / 4px stretch !important;
+  border-image: var(--tmg-frame) 18 / 8px / 4px stretch !important;
   border-radius: 0;
   background:
     var(--tmg-urushi) !important;
@@ -291,20 +246,20 @@ ${W} {
 }
 ${W} > .content { background: transparent !important; color: var(--tmg-text); }
 
-/* tytuł: belka bramy torii z wygiętymi końcami, pędzlowe litery w kolorze washi */
+/* tytuł: płytka z lakieru (ta sama faktura co belki) w żelaznej obwódce, pod spodem linia żaru;
+   oryginalna czcionka gry */
 ${W} .header-label-positioner .header-label {
   background: none !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: ${TORII} 0 40 fill / 0 30px / 4px 24px 0 stretch !important;
+  background: linear-gradient(transparent calc(100% - 2px), rgb(196 64 28 / .75) calc(100% - 2px) calc(100% - 1px), transparent calc(100% - 1px)), url("${IMG.bar}") 0 50% / auto 170% repeat-x !important;
+  border-image: var(--tmg-frame-thin) 6 / 3px / 2px 16px 0 stretch !important;
   box-shadow: none !important;
 }
 ${W} .header-label-positioner .header-label .left-decor,
 ${W} .header-label-positioner .header-label .right-decor { background: none !important; }
 ${W} .header-label-positioner .header-label .text {
   color: var(--tmg-text) !important;
-  font-family: var(--tmg-font-title) !important;
-  font-weight: normal !important;
   letter-spacing: .05em;
   text-shadow: 0 1px 0 #000, 0 0 6px rgb(0 0 0 / .9) !important;
 }
@@ -462,7 +417,7 @@ ${N} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px var(--tmg-edg
 ${N} .interface-element-border-window-frame,
 ${N} .additional-skill-panel .graphics .additional-skill-panel-border {
   border-style: solid !important;
-  border-image: var(--tmg-frame) 16 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 18 / 8px / 0 stretch !important;
 }
 ${N} .interface-element-vertical-wood {
   border-style: solid !important;
@@ -500,7 +455,7 @@ ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
    * ===================================================================== */
   const cssChat = `
 ${N} .interface-layer > .left-column.main-column,
-${N} .new-chat-window { background: var(--tmg-k0) !important; }
+${N} .new-chat-window { background: linear-gradient(rgb(7 5 5 / .7), rgb(7 5 5 / .7)), url("${IMG.bar}") 0 0 / auto 90px repeat, var(--tmg-k0) !important; }
 /* listwy kolumn: pionowa belka czarnego lakieru z czerwonym sznurem pośrodku */
 ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
@@ -578,7 +533,7 @@ ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
    * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
    * ===================================================================== */
   const cssInventory = `
-${N} .interface-layer > .right-column.main-column { background: var(--tmg-k0) !important; }
+${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(7 5 5 / .7), rgb(7 5 5 / .7)), url("${IMG.bar}") 0 0 / auto 90px repeat, var(--tmg-k0) !important; }
 ${N} .interface-element-grid-border,
 ${N} .interface-element-grid-border-light {
   outline-color: var(--tmg-k0) !important;
@@ -666,7 +621,6 @@ ${N} .interface-layer .stats-wrapper .header-title-wrapper .interface-element-ac
 }
 ${N} .interface-layer .stats-wrapper .header-title {
   color: var(--tmg-text) !important;
-  font-family: var(--tmg-font-title) !important;
   letter-spacing: .08em;
   text-shadow: 0 1px 2px #000 !important;
 }
@@ -792,7 +746,7 @@ ${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--
   const cssBattle = `
 /* --- panel walki (.battle-controller) --- */
 ${N} .battle-controller .battle-border {
-  border-image: var(--tmg-frame) 16 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 18 / 8px / 0 stretch !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85);
 }
 ${N} .battle-controller .middle-graphic,
@@ -831,15 +785,13 @@ ${N} .dialogue-window .border-image {
     linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .95) 80px) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--tmg-frame) 16 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 18 / 8px / 0 stretch !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85) !important;
 }
 ${N} .dialogue-window .dialogue-background-color { background: rgb(7 5 5 / .7) !important; }
 ${N} .dialogue-window .content { color: var(--tmg-text); }
 ${N} .dialogue-window .content .npc-dialogue-wrapper .h_content {
   color: var(--tmg-text) !important;
-  font-family: var(--tmg-font-title) !important;
-  font-weight: normal !important;
   letter-spacing: .04em;
   text-shadow: 0 0 6px rgb(158 27 27 / .5), 0 1px 2px #000 !important;
 }
@@ -1013,7 +965,7 @@ ${B}::before {
   z-index: 0;
   pointer-events: none;
   border-style: solid; border-width: 0;
-  border-image: var(--tmg-frame) 16 / 8px / 0 stretch;
+  border-image: var(--tmg-frame) 18 / 8px / 0 stretch;
   background:
     radial-gradient(ellipse 30% 70% at 50% 0, rgb(122 18 18 / .16), transparent 70%),
     var(--tmg-urushi);
@@ -1463,15 +1415,6 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssBottomBar, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'tmg-theme';
 
-  // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
-  const addFont = () => {
-    if (document.getElementById('tmg-font') || !document.head) return;
-    const l = document.createElement('link');
-    l.id = 'tmg-font';
-    l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Shojumaru&family=Yuji+Syuku&display=swap';
-    document.head.append(l);
-  };
 
   const enabled = () => get(KEY_ON, true);
   const effects = () => get(KEY_FX, true);
@@ -1555,7 +1498,6 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     if (started) return;
     started = true;
     root.classList.add('tmg-ni');
-    addFont();
     addToggleButton();
     arrangeHud();
     scanSheets();
