@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.6.0
+// @version      1.7.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -31,7 +31,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.6.0';
+  const VERSION = '1.7.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -861,10 +861,6 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
 ${N} .interface-layer > .top.positioner > .bg {
   background: linear-gradient(transparent calc(100% - 2px), #000 calc(100% - 2px), var(--oni-r1) calc(100% - 1px)), linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
 }
-${N} .interface-layer > .bottom.positioner > .bg {
-  background: linear-gradient(var(--oni-r1) 1px, #000 1px, transparent 2px), linear-gradient(var(--oni-k0), var(--oni-k2)) !important;
-}
-${N} .bottom-panel-graphic { filter: grayscale(1) sepia(.35) brightness(.42) contrast(1.3); }
 
 /* tabliczka z imieniem / lokacją / walutami: lakier w ramie z płytek, pod imieniem pędzlowa kreska */
 ${N} .interface-layer .hud-container {
@@ -896,18 +892,6 @@ ${N} .interface-layer .hud-container .gold-tip { background: url("/img/currency/
 ${N} .interface-layer .hud-container .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat !important; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
 ${N} .interface-layer .hud-container .btn-min:hover { box-shadow: inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; color: #fff !important; }
 
-/* kula HP: gęsty czerwony lakier urushi – głęboka czerwień, połysk przy powierzchni, ciemniejsze dno */
-${N} .bottom-panel-of-bottom-positioner .hp-indicator .blood {
-  background:
-    linear-gradient(rgb(255 210 190 / .55), rgb(255 210 190 / 0) 2px),
-    radial-gradient(ellipse 45% 30% at 34% 22%, rgb(255 190 170 / .28), transparent 70%),
-    linear-gradient(#a31c1c, #7a1212 45%, #4a0909 85%, #2a0505) !important;
-}
-${N} .bottom-panel-of-bottom-positioner .hp-indicator-wrapper .value {
-  color: var(--oni-text) !important;
-  text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
-}
-
 /* pasek doświadczenia jak ostrze: stalowa krawędź (hamon) u góry, czerwona głownia */
 ${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
   background: linear-gradient(#d8d0c6 0, #8f8478 1px, #9e1b1b 2px, #7a1212 45%, #4a0909 80%, #1a0303) !important;
@@ -915,13 +899,7 @@ ${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress
 ${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress.noexp .inner {
   background: linear-gradient(#d8d0c6 0, #8f8478 1px, #5a524c 2px, #3a3430 60%, #141110) !important;
 }
-${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay,
-${N} .bottom-panel-pointer-bg .pointer-exp-graphic,
-${N} .bottom-panel-pointer-bg .pointer-ttl-graphic { filter: grayscale(1) sepia(.3) brightness(.55) contrast(1.25); }
-${N} .bottom-panel-pointer-bg .pointer-exp,
-${N} .bottom-panel-pointer-bg .pointer-ttl { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
-/* numery slotów szybkiego użycia */
-${N} .bottom-panel-of-bottom-positioner .usable-slot::before { color: rgb(230 220 207 / .6) !important; text-shadow: 0 0 3px #000, 0 1px 1px #000; }
+${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay { filter: grayscale(1) sepia(.3) brightness(.55) contrast(1.25); }
 
 /* paski postępu w oknach (np. zadania, rzemiosło) */
 ${N} .interface-element-progress-bar-0,
@@ -948,6 +926,188 @@ ${N} .handheld-mini-map::after {
   /* =====================================================================
    * === ANIMACJE (lekkie; wyłączane przy prefers-reduced-motion) ===
    * ===================================================================== */
+  /* =====================================================================
+   * === DOLNY PASEK (belka, panel ze slotami, orb HP w ramie tsuby, tabliczki ema) ===
+   * Tylko wygląd: wszystkie ozdoby to pseudo-elementy z pointer-events: none, sloty i orb działają jak w grze.
+   * Poziom cieczy w orbie wyznacza gra (wysokość .blood = HP) – motyw tylko ją maluje i animuje.
+   * ===================================================================== */
+  // Pas lamelkowych płytek (kozane) z czerwonym sznurem – kafel 16×12, powtarzany poziomo
+  const KOZANE = svgUrl(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'>` +
+    `<defs><linearGradient id='p' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3a2b28'/><stop offset='.25' stop-color='#211816'/><stop offset='1' stop-color='#0a0707'/></linearGradient></defs>` +
+    `<rect width='16' height='12' fill='#050303'/>` +
+    `<rect x='.6' y='.6' width='14.8' height='10.8' rx='2' fill='url(#p)' stroke='#000' stroke-width='.6'/>` +
+    `<path d='M0 6.5H16' stroke='#000' stroke-width='2'/><path d='M0 6.5H16' stroke='#5c0d0d' stroke-width='1.1'/>` +
+    `<path d='M6.8 5L9.2 8M9.2 5L6.8 8' stroke='#7a1212' stroke-width='.8'/></svg>`);
+  // Rama orba w kształcie tsuby: obręcz z patynowanego mosiądzu, czarny lakier z ażurowymi otworami
+  // (sukashi w kształcie płomieni), czerwona żyłka przy otworze na kulę. Środek przezroczysty.
+  const TSUBA_RING = (() => {
+    const R0 = 50, R1 = 64, C = 66;
+    const holes = [];
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 - Math.PI / 2 + Math.PI / 8;
+      const pt = (r, da) => `${(C + Math.cos(a + da) * r).toFixed(1)} ${(C + Math.sin(a + da) * r).toFixed(1)}`;
+      holes.push(`M${pt(53.5, -.16)} Q${pt(58, -.05)} ${pt(60.5, .02)} Q${pt(57, .1)} ${pt(55, .2)} Q${pt(53, .05)} ${pt(53.5, -.16)}Z`);
+    }
+    const s = `<svg xmlns='http://www.w3.org/2000/svg' width='132' height='132' viewBox='0 0 132 132'>` +
+      `<defs><radialGradient id='l' cx='.42' cy='.35' r='.7'><stop offset='0' stop-color='#2c211e'/><stop offset='.6' stop-color='#120d0c'/><stop offset='1' stop-color='#060404'/></radialGradient>` +
+      `<linearGradient id='b' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#a8854c'/><stop offset='.5' stop-color='#6e5530'/><stop offset='1' stop-color='#3a2c18'/></linearGradient></defs>` +
+      `<path fill-rule='evenodd' fill='url(#l)' d='M${C - R1} ${C}a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0Z M${C - R0} ${C}a${R0} ${R0} 0 1 0 ${R0 * 2} 0a${R0} ${R0} 0 1 0 ${-R0 * 2} 0Z ${holes.join(' ')}'/>` +
+      `<circle cx='${C}' cy='${C}' r='${R1 - .8}' fill='none' stroke='url(#b)' stroke-width='2.2'/>` +
+      `<circle cx='${C}' cy='${C}' r='${R1 + .4}' fill='none' stroke='#000' stroke-width='1'/>` +
+      `<circle cx='${C}' cy='${C}' r='${R0 + .6}' fill='none' stroke='#7a1212' stroke-width='1.4'/>` +
+      `<circle cx='${C}' cy='${C}' r='${R0 - .2}' fill='none' stroke='#000' stroke-width='1'/>` +
+      `<path fill='none' stroke='#5c0d0d' stroke-width='.8' d='${holes.join(' ')}'/>` +
+      `</svg>`;
+    return svgUrl(s);
+  })();
+  // Tabliczka ema (70×35): daszek, czarny lakier, czerwona żyłka, sznurek z dziurką
+  const EMA = svgUrl(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='70' height='35' viewBox='0 0 70 35'>` +
+    `<defs><linearGradient id='e' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2a1f1d'/><stop offset='.35' stop-color='#161010'/><stop offset='1' stop-color='#070505'/></linearGradient></defs>` +
+    `<path d='M3 11L35 2L67 11V33H3Z' fill='url(#e)' stroke='#000' stroke-width='1.2'/>` +
+    `<path d='M6 12.5L35 4.6L64 12.5V30.5H6Z' fill='none' stroke='#5c0d0d' stroke-width='1'/>` +
+    `<path d='M3 11L35 2L67 11' fill='none' stroke='#8a6a3a' stroke-opacity='.55' stroke-width='1'/>` +
+    `<circle cx='35' cy='7.4' r='1.3' fill='#000' stroke='#8a6a3a' stroke-opacity='.6' stroke-width='.5'/>` +
+    `</svg>`);
+  // Pionowe pociągnięcie pędzla (separator)
+  const BRUSH_V = svgUrl(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='60' viewBox='0 0 8 60' preserveAspectRatio='none'>` +
+    `<path d='M4.4 1 C5.6 12 5.2 30 4.8 44 C4.6 52 4.2 56 3.8 59 C3 52 2.6 40 2.9 28 C3.1 16 3.4 8 4.4 1Z' fill='#7a1212' fill-opacity='.85'/>` +
+    `</svg>`);
+  // Środek orba: x = środek panelu − 2 px, y = 55 px od góry szablonu (gra: wrapper 98×98 w (281, 6))
+  const B = `${N} .bottom-panel-of-bottom-positioner`;
+
+  const cssBottomBar = `
+/* --- belka na całą szerokość: czarny lakier, u góry pas płytek kozane z czerwonym sznurem,
+   czerwone linie u góry i u dołu --- */
+${N} .interface-layer > .bottom.positioner > .bg {
+  background:
+    linear-gradient(var(--oni-r2) 0 1px, #000 1px 2px, transparent 2px),
+    ${KOZANE} 0 2px / 16px 12px repeat-x,
+    linear-gradient(transparent calc(100% - 2px), #000 calc(100% - 2px), var(--oni-r1) calc(100% - 1px)),
+    linear-gradient(170deg, rgb(255 235 220 / .03), transparent 40%),
+    linear-gradient(#120d0c 14px, var(--oni-k1) 30px, var(--oni-k0)) !important;
+  box-shadow: 0 -4px 10px rgb(0 0 0 / .6);
+}
+
+/* --- panel ze slotami: grafika gry schowana, zamiast niej lakierowana płyta w ramie z płytek zbroi --- */
+${B} .bottom-panel-graphic { opacity: 0 !important; }
+${B}::before {
+  content: "";
+  position: absolute;
+  left: 30px; right: 30px; top: 30px; bottom: -10px;
+  z-index: 0;
+  pointer-events: none;
+  border-style: solid; border-width: 0;
+  border-image: var(--oni-frame) 16 / 8px / 0 stretch;
+  background:
+    radial-gradient(ellipse 30% 70% at 50% 0, rgb(122 18 18 / .16), transparent 70%),
+    var(--oni-urushi);
+  box-shadow: 0 -2px 12px rgb(0 0 0 / .8);
+}
+
+/* sloty: czarne lakierowane kwadraty z cienką krawędzią; najechanie = żarzący się węgiel */
+${B} .usable-slot {
+  background: radial-gradient(circle at 50% 38%, #1d1513, #090606 70%) !important;
+  border-color: #000 !important;
+  outline: none !important;
+  box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 -1px 0 rgb(122 18 18 / .55), inset 0 0 8px #000, 0 1px 2px #000 !important;
+  transition: box-shadow .18s ease;
+}
+${B} .usable-slot::after { display: none !important; }
+${B} .usable-slot:hover,
+${B} .usable-slot:active,
+${B} .usable-slot.active {   /* .active – TODO: zweryfikuj selektor (stan slotu po użyciu skrótu) */
+  box-shadow: inset 0 0 0 1px var(--oni-r3), inset 0 0 10px rgb(196 42 42 / .35), 0 0 8px rgb(196 42 42 / .5), 0 0 2px rgb(255 120 80 / .6) !important;
+}
+/* numery slotów: washi, pogrubione, z cieniem – czytelne na czerni */
+${B} .usable-slot::before {
+  color: rgb(230 220 207 / .85) !important;
+  font-weight: bold;
+  text-shadow: 0 0 3px #000, 0 1px 1px #000, 0 0 1px #000;
+  z-index: 2;
+}
+/* pędzlowe separatory między slotami 4 | orbem i orbem | 5 */
+${B} .slots.left::after,
+${B} .slots.right::after {
+  content: "";
+  position: absolute; top: -4px; bottom: -4px; width: 6px;
+  background: ${BRUSH_V} center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+${B} .slots.left::after { right: -6px; }
+${B} .slots.right::after { left: -6px; transform: scaleX(-1); }
+
+/* --- orb HP: rama w kształcie tsuby (osobna warstwa, przezroczysty środek) --- */
+${B} .hp-indicator-wrapper-template::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 2px - 66px); top: calc(55px - 66px);
+  width: 132px; height: 132px;
+  z-index: 2;
+  pointer-events: none;
+  background: ${TSUBA_RING} center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 4px #000);
+}
+/* tło kuli (pusta część): głęboka czerń wody z ledwie widoczną czerwienią */
+${B} .hp-indicator-wrapper { background: radial-gradient(circle at 50% 40%, #1a0707, #050202 70%) !important; }
+${B} .hp-indicator-wrapper .glass { opacity: .55; }
+/* ciecz: czerwony tusz rozlewający się w wodzie. Wysokość .blood ustawia gra (HP) – overflow: hidden
+   przycina obłoki tuszu do aktualnego poziomu; obłoki animowane tylko przez transform */
+${B} .hp-indicator .blood {
+  overflow: hidden !important;
+  background:
+    linear-gradient(rgb(255 140 120 / .5), rgb(255 140 120 / 0) 2px),
+    linear-gradient(#8a1414, #5c0d0d 50%, #2a0404) !important;
+}
+${B} .hp-indicator .blood::before,
+${B} .hp-indicator .blood::after {
+  content: "";
+  position: absolute;
+  left: -30%; top: -60%; width: 160%; height: 220%;
+  pointer-events: none;
+}
+${B} .hp-indicator .blood::before {
+  background:
+    radial-gradient(ellipse 22% 14% at 30% 40%, rgb(196 42 42 / .55), transparent 70%),
+    radial-gradient(ellipse 18% 24% at 64% 55%, rgb(158 27 27 / .6), transparent 70%),
+    radial-gradient(ellipse 26% 12% at 50% 72%, rgb(20 2 2 / .7), transparent 70%),
+    radial-gradient(ellipse 14% 20% at 22% 66%, rgb(10 0 0 / .6), transparent 70%),
+    radial-gradient(ellipse 16% 10% at 72% 32%, rgb(230 80 60 / .35), transparent 70%);
+}
+${B} .hp-indicator .blood::after {
+  background:
+    radial-gradient(ellipse 20% 16% at 40% 60%, rgb(196 42 42 / .4), transparent 70%),
+    radial-gradient(ellipse 24% 10% at 70% 45%, rgb(8 0 0 / .55), transparent 70%),
+    radial-gradient(ellipse 12% 18% at 55% 35%, rgb(158 27 27 / .45), transparent 70%);
+  mix-blend-mode: screen;
+  opacity: .8;
+}
+html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: oni-ink-a 22s ease-in-out infinite alternate; }
+html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::after { animation: oni-ink-b 31s ease-in-out infinite alternate; }
+@keyframes oni-ink-a { from { transform: translate(-6%, 2%) rotate(0deg); } to { transform: translate(6%, -3%) rotate(14deg); } }
+@keyframes oni-ink-b { from { transform: translate(5%, -2%) rotate(0deg) scale(1); } to { transform: translate(-7%, 3%) rotate(-18deg) scale(1.1); } }
+${B} .hp-indicator-wrapper .value {
+  color: var(--oni-text) !important;
+  font-weight: bold;
+  text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
+}
+
+/* --- wnęki z wartościami obok orba: tabliczki ema z czytelnym tekstem --- */
+${B} .bottom-panel-pointer-bg .pointer-exp-graphic,
+${B} .bottom-panel-pointer-bg .pointer-ttl-graphic {
+  background: ${EMA} center / 100% 100% no-repeat !important;
+  filter: drop-shadow(0 2px 3px #000) !important;
+}
+${B} .bottom-panel-pointer-bg .pointer-exp,
+${B} .bottom-panel-pointer-bg .pointer-ttl {
+  color: var(--oni-text) !important;
+  font-weight: bold;
+  text-shadow: 0 1px 2px #000, 0 0 3px #000;
+}
+`;
+
   // Popiół i żar: kafel 180×260 z kilkunastoma drobinami (szary popiół, nieliczne czerwone węgielki),
   // dwie warstwy o różnej skali i prędkości unoszą się powoli w górę. Tylko w bocznych kolumnach –
   // nigdy nad mapą gry. Pod treścią kolumn (isolation + z-index -1), więc nie zasłania tekstu.
@@ -1212,7 +1372,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssAnim, cssToggle].join('\n'));
+  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssBottomBar, cssAnim, cssToggle].join('\n'));
   if (style && 'id' in style) style.id = 'oni-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
