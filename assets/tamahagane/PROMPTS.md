@@ -66,3 +66,6 @@ Stylized hand-painted small round dark iron ring with glowing red ember cracks, 
 
 ## podkreslenie.webp (Z-Image Turbo 21:9; alfa z jasności na czerni, wygaszone końce, 400×22)
 Stylized painterly illustration: a pure black empty background with one single hair-thin horizontal crack line in the middle, slightly jagged, glowing faintly with deep red magma, a few tiny hairline branches, the line tapers and fades out at both ends. Minimal, subtle, lots of empty black space, no rocks, no fire.
+
+## tooltip-rama.webp (Qwen-Image 1:1, BiRefNet, wnętrze uzupełnione z oryginału, 256×255, 9-slice 40 + fill)
+Stylized hand-painted dark fantasy game UI tooltip panel, front view, square, a thin frame of dark forged iron with fine glowing red lava cracks, small sharp iron spike ornaments on the four corners, the inside is a flat very dark charcoal black panel with a faint smoky texture and a subtle dark red glow near the top edge, empty, no text, isolated on plain flat light grey background, painterly game asset, symmetric

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.5.0
+// @version      2.6.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -28,6 +28,7 @@
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
 // @resource     tmgUnderline https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/podkreslenie.webp
+// @resource     tmgTipFrame  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/tooltip-rama.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // ==/UserScript==
@@ -47,7 +48,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.5.0';
+  const VERSION = '2.6.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -83,7 +84,8 @@
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
-    underline: res('tmgUnderline', 'podkreslenie.webp') // 400×22, podkreślenie: włoskowate pęknięcie z magmą, wygaszone końce
+    underline: res('tmgUnderline', 'podkreslenie.webp'), // 400×22, podkreślenie: włoskowate pęknięcie z magmą, wygaszone końce
+    tipFrame: res('tmgTipFrame', 'tooltip-rama.webp')  // 256×255, rama tooltipa z malowanym wnętrzem: kamień, lawa, kolce (9-slice 40, wnętrze od 29 px)
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -670,26 +672,26 @@ ${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; }
 ${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; }
 ${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: 255 132 0; }
 ${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; }
+/* malowana rama z wnętrzem (tooltip-rama.webp, 9-slice 40 w skali 0,5 + fill): kamienie i żelazo z lawą,
+   kolce w narożnikach. Rama wysunięta o 14 px (outset), więc wnętrze grafiki zaczyna się tuż przy treści,
+   a układ tooltipa się nie zmienia. Cień i łuna rzadkości przez drop-shadow – idą po kształcie ramy. */
 ${N} .tip-wrapper {
   border-style: solid; border-width: 0;
-  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 2px round !important;
-  box-shadow:
-    0 0 0 1px rgb(0 0 0 / .9),
-    0 0 14px rgb(var(--tmg-rar) / .22),
-    0 12px 28px rgb(0 0 0 / .9) !important;
+  border-image: url("${IMG.tipFrame}") 40 fill / 20px / 14px round !important;
+  background: none !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 7px rgb(var(--tmg-rar) / .28)) drop-shadow(0 10px 14px rgb(0 0 0 / .85));
 }
 ${N} .tip-wrapper .content {
-  background:
-    radial-gradient(120% 60px at 50% 0, rgb(var(--tmg-rar) / .1), transparent 100%),
-    linear-gradient(rgb(22 16 16 / .97), rgb(14 10 10 / .97) 60px, rgb(7 5 5 / .97)) !important;
-  box-shadow: inset 0 0 0 1px rgb(var(--tmg-rar) / .32), inset 0 0 22px rgb(0 0 0 / .7);
+  background: radial-gradient(120% 60px at 50% 0, rgb(var(--tmg-rar) / .12), transparent 100%) !important;
+  box-shadow: none;
   color: var(--tmg-text) !important;
   text-shadow: 0 1px 2px #000;
 }
 /* górna linia w kolorze rzadkości */
 ${N} .tip-wrapper.normal-tip::before {
   content: "";
-  position: absolute; left: 12%; right: 12%; top: 1px; height: 1px;
+  position: absolute; left: 14%; right: 14%; top: -4px; height: 1px;
   background: linear-gradient(90deg, rgb(var(--tmg-rar) / 0), rgb(var(--tmg-rar) / .9) 50%, rgb(var(--tmg-rar) / 0));
   pointer-events: none; z-index: 2;
 }
@@ -721,7 +723,7 @@ ${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
   pointer-events: none;
 }
 /* proste tooltipy (np. nad przyciskami) – lakier z czerwoną krawędzią */
-${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--tmg-edge-hi), inset 0 -1px 0 var(--tmg-r2); }
+${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: none; }
 `;
 
   /* =====================================================================
@@ -1398,7 +1400,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
    * fala blasku przesuwa się po szczelinach, reszta grafiki stoi. Gotowe obrazki podmieniają adresy
    * w arkuszu motywu; przy wyłączonych efektach albo prefers-reduced-motion wraca wersja statyczna.
    * ───────────────────────────────────────────────────────────────────────── */
-  const LAVA_KEYS = ['winFrame', 'winTitle', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
+  const LAVA_KEYS = ['winFrame', 'winTitle', 'tipFrame', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
   const GLOW_FRAMES = 16;      // klatek w pętli
   const GLOW_DELAY = 190;      // ms na klatkę → pętla ~3 s
   const GLOW_AMP = 0.3;        // siła mienienia (0,3 = ±30% jasności w szczelinach)
