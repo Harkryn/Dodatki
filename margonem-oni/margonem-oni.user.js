@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.8.0
+// @version      1.9.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -13,6 +13,7 @@
 // @grant        GM_registerMenuCommand
 // @grant        GM_getResourceURL
 // @resource     oniLiquid https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ciecz-orba.webp
+// @resource     oniMask   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/maska-oni.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // ==/UserScript==
@@ -32,7 +33,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.8.0';
+  const VERSION = '1.9.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -53,7 +54,8 @@
     return RAW + file;
   };
   const IMG = {
-    liquid: res('oniLiquid', 'ciecz-orba.webp')   // 256×256, kafel bez szwów: płynny żar w czarnej wodzie (ciecz orba HP)
+    liquid: res('oniLiquid', 'ciecz-orba.webp'),  // 256×256, kafel bez szwów: płynny żar w czarnej wodzie (ciecz orba HP)
+    mask: res('oniMask', 'maska-oni.webp')        // 179×256, malowana maska Oni z żarzącymi się oczami (końce dolnego paska)
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -1043,6 +1045,20 @@ ${B} .slots.left::after { right: -6px; }
 ${B} .slots.right::after { left: -6px; transform: scaleX(-1); }
 
 /* --- orb HP: rama w kształcie tsuby (osobna warstwa, przezroczysty środek) --- */
+/* maski Oni na obu końcach panelu: przy slocie 1 i slocie 8, wystają ponad belkę.
+   Jedna warstwa (::after panelu) z dwoma tłami – maska jest symetryczna, więc prawa nie wymaga odbicia.
+   Panel gry ma stałe 664 px, sloty zaczynają się 64 px od lewej i kończą 62 px przed prawą krawędzią. */
+${B}::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 2px; height: 68px;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    url("${IMG.mask}") left 13px bottom / auto 68px no-repeat,
+    url("${IMG.mask}") right 11px bottom / auto 68px no-repeat;
+  filter: drop-shadow(0 2px 3px #000) drop-shadow(0 0 4px rgb(0 0 0 / .8));
+}
 ${B} .hp-indicator-wrapper-template::before {
   content: "";
   position: absolute;
