@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.12.0
+// @version      1.12.1
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -37,7 +37,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.12.0';
+  const VERSION = '1.12.1';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -905,13 +905,8 @@ ${N} .interface-layer .hud-container::before {
     url("${IMG.mask}") right center / auto 100% no-repeat;
   filter: drop-shadow(0 2px 3px #000);
 }
-/* imię pędzlem (Shojumaru – pełne polskie znaki); kolor imienia zostaje z gry */
-${N} .interface-layer .hud-container .heroname {
-  font-family: var(--oni-font-title) !important;
-  font-weight: normal !important;
-  letter-spacing: .03em;
-  text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9);
-}
+/* imię: oryginalna czcionka i kolor gry, tylko cień dla czytelności na lakierze */
+${N} .interface-layer .hud-container .heroname { text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9); }
 ${N} .interface-layer .hud-container .location,
 ${N} .interface-layer .hud-container .herogold,
 ${N} .interface-layer .hud-container .herocredits { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
