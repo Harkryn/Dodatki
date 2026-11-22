@@ -63,3 +63,6 @@ Stylized hand-painted small Japanese tsuba sword guard of dark rough iron with g
 
 ## medalion-pvp.webp (Qwen-Image, BiRefNet, 48×61, otwór wycięty)
 Stylized hand-painted small round dark iron ring with glowing red ember cracks, a small pointed iron hook on top, the center is an empty round socket, isolated on plain light grey background, game UI ornament, painterly
+
+## podkreslenie.webp (Z-Image Turbo 21:9; alfa z jasności na czerni, wygaszone końce, 400×22)
+Stylized painterly illustration: a pure black empty background with one single hair-thin horizontal crack line in the middle, slightly jagged, glowing faintly with deep red magma, a few tiny hairline branches, the line tapers and fades out at both ends. Minimal, subtle, lots of empty black space, no rocks, no fire.

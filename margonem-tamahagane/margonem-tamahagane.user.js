@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.3.0
+// @version      2.4.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -27,6 +27,7 @@
 // @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
+// @resource     tmgUnderline https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/podkreslenie.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // ==/UserScript==
@@ -46,7 +47,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.3.0';
+  const VERSION = '2.4.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -81,7 +82,8 @@
     column: res('tmgColumn', 'kolumna-tlo.webp'),      // 384×384, tło kolumn: czarne drewno, czerwony dym u dołu
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
-    medal: res('tmgMedal', 'medalion-pvp.webp')        // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
+    medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
+    underline: res('tmgUnderline', 'podkreslenie.webp') // 400×22, podkreślenie: włoskowate pęknięcie z magmą, wygaszone końce
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -90,14 +92,6 @@
    * GRAFIKI WEKTOROWE (rysowane w kodzie, ostre w każdej skali)
    * ───────────────────────────────────────────────────────────────────────── */
 
-  // Pociągnięcie pędzla sumi-e (separator / podkreślenie): zwężające się końce, poszarpany brzeg
-  const BRUSH = (color, op) => svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='8' viewBox='0 0 200 8' preserveAspectRatio='none'>` +
-    `<path d='M2 4.6 C30 2.4 60 2.2 100 2.6 C140 3 170 2.8 198 4.2 C170 5.6 140 6 100 5.6 C70 5.4 40 6.4 2 4.6Z' fill='${color}' fill-opacity='${op}'/>` +
-    `<path d='M24 4 C60 3.4 90 3.6 120 3.9' stroke='${color}' stroke-opacity='${op * .6}' stroke-width='.5' fill='none'/>` +
-    `</svg>`);
-  const BRUSH_RED = BRUSH('#7a1212', .95);
-  const BRUSH_DIM = BRUSH('#5c0d0d', .7);
 
   // Lupa pól wyszukiwania
   const SEARCH_ICON = svgUrl(
@@ -132,8 +126,8 @@
                 url("${IMG.bar}") 0 0 / auto 90px repeat;
   --tmg-frame: url("${IMG.winFrame}");   /* kamienie z pęknięciami pełnymi lawy, kolce w narożnikach (9-slice, wycinek 32) */
   --tmg-frame-thin: url("${IMG.frameThin}");
-  --tmg-brush: ${BRUSH_RED};
-  --tmg-brush-dim: ${BRUSH_DIM};
+  --tmg-brush: url("${IMG.underline}");      /* podkreślenie: pęknięcie z magmą */
+  --tmg-brush-dim: url("${IMG.underline}");
 }
 `;
 
@@ -286,7 +280,7 @@ ${N} .border-window .collapse:hover,
 ${N} .dialogue-window .increase-opacity:hover,
 ${N} .info-icon:hover { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(.95); }
 
-/* zakładki w oknach: płytki lakieru, aktywna z czerwonym pociągnięciem pędzla pod spodem */
+/* zakładki w oknach: płytki lakieru, aktywna z pęknięciem z magmą pod spodem */
 ${N} .border-window .card,
 ${N} .interface-element-card-background,
 ${N} .interface-element-card-background-stretch {
@@ -303,7 +297,7 @@ ${N} .interface-element-active-card-background-stretch,
 ${N} .interface-element-active-card-border-image {
   border-color: transparent !important;   /* bez tego ramka brała kolor tekstu */
   border-image: none !important;
-  background: var(--tmg-brush) center bottom 1px / 86% 4px no-repeat, linear-gradient(var(--tmg-k3), var(--tmg-k1)) !important;
+  background: var(--tmg-brush) center bottom 1px / 86% 7px no-repeat, linear-gradient(var(--tmg-k3), var(--tmg-k1)) !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge-hi), inset 0 1px 0 rgb(255 235 220 / .06) !important;
   color: var(--tmg-text) !important;
 }
@@ -379,7 +373,7 @@ ${N} .interface-element-green-box-background-stretch {
   background: linear-gradient(90deg, var(--tmg-k0), #1c0b0b 30%, #1c0b0b 70%, var(--tmg-k0)) !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge);
 }
-/* nagłówki sekcji i paski: czarny pas z pędzlowym podkreśleniem */
+/* nagłówki sekcji i paski: czarny pas z podkreśleniem – pęknięciem z magmą */
 ${N} .interface-element-header-1-background,
 ${N} .interface-element-header-1-background-stretch,
 ${N} .interface-element-table-header-1-background,
@@ -394,7 +388,7 @@ ${N} .trade-window header .h_background .middle {
   border-image: none !important;
   border-color: transparent !important;
   background:
-    var(--tmg-brush-dim) center bottom / 92% 3px no-repeat,
+    var(--tmg-brush-dim) center bottom / 92% 6px no-repeat,
     linear-gradient(90deg, transparent, rgb(22 16 16 / .95) 18%, rgb(22 16 16 / .95) 82%, transparent) !important;
   box-shadow: none !important;
 }
@@ -466,9 +460,9 @@ ${N} .new-chat-window .chat-message-wrapper {
 ${N} .new-chat-window .new-chat-message { text-shadow: 0 1px 1px rgb(0 0 0 / .95); }
 ${N} .new-chat-window .new-chat-message .ts-section { color: var(--tmg-dim) !important; }
 ${N} .new-chat-window .new-chat-message .author-section.click-able:hover { text-decoration: underline; text-decoration-color: var(--tmg-r3); }
-/* pasek zakładek kanałów: lakier, pod nim pędzlowa kreska */
+/* pasek zakładek kanałów: lakier, pod nim pęknięcie z magmą */
 ${N} .new-chat-window .chat-channel-card-wrapper {
-  background: var(--tmg-brush-dim) center bottom / 96% 3px no-repeat, linear-gradient(var(--tmg-k2), var(--tmg-k0)) !important;
+  background: var(--tmg-brush-dim) center bottom / 96% 6px no-repeat, linear-gradient(var(--tmg-k2), var(--tmg-k0)) !important;
   border-image: none !important;
   box-shadow: 0 2px 6px rgb(0 0 0 / .8);
 }
@@ -479,7 +473,7 @@ ${N} .new-chat-window .chat-channel-card .chat-channel-card-icon {
 }
 ${N} .new-chat-window .chat-channel-card:hover .chat-channel-card-icon { filter: grayscale(1) sepia(.3) brightness(.95); }
 ${N} .new-chat-window .chat-channel-card.active {
-  background: var(--tmg-brush) center bottom 1px / 80% 3px no-repeat !important;
+  background: var(--tmg-brush) center bottom 1px / 80% 6px no-repeat !important;
 }
 ${N} .new-chat-window .chat-channel-card.active .chat-channel-card-icon {
   filter: grayscale(1) sepia(.35) brightness(1.15) drop-shadow(0 0 3px rgb(196 42 42 / .55));
@@ -596,7 +590,7 @@ ${N} .interface-layer > .right-column.main-column .bags-navigation .item.bag.act
   border-radius: 2px;
 }
 
-/* panel statystyk: lakier w cienkiej ramie, „STATS” pędzlem, wiersze rozdzielone pociągnięciem pędzla.
+/* panel statystyk: lakier w cienkiej ramie, „STATS” pędzlem, wiersze rozdzielone pęknięciem z magmą.
    Kolory odporności (ogień, zimno…) zostają z gry. */
 ${N} .interface-layer .stats-wrapper {
   background: var(--tmg-urushi) !important;
@@ -607,7 +601,7 @@ ${N} .interface-layer .stats-wrapper {
   outline: none !important;
 }
 ${N} .interface-layer .stats-wrapper .header-title-wrapper .interface-element-active-card-background-stretch {
-  background: var(--tmg-brush) center bottom / 70% 3px no-repeat !important;
+  background: var(--tmg-brush) center bottom / 70% 6px no-repeat !important;
   border-image: none !important;
   box-shadow: none !important;
 }
@@ -618,7 +612,7 @@ ${N} .interface-layer .stats-wrapper .header-title {
 }
 ${N} .interface-layer .stats-wrapper .stats-list li { position: relative; }
 ${N} .interface-layer .stats-wrapper .stats-list li + li::before {
-  content: ""; position: absolute; left: 2px; right: -26px; top: 0; height: 2px;
+  content: ""; position: absolute; left: 2px; right: -26px; top: -2px; height: 4px;
   background: var(--tmg-brush-dim) left center / 100% 100% no-repeat;
   opacity: .6;
 }
@@ -699,11 +693,11 @@ ${N} .tip-wrapper.normal-tip::before {
   background: linear-gradient(90deg, rgb(var(--tmg-rar) / 0), rgb(var(--tmg-rar) / .9) 50%, rgb(var(--tmg-rar) / 0));
   pointer-events: none; z-index: 2;
 }
-/* nagłówek: łuna rzadkości za ikoną, ikona w oprawie, pod spodem pociągnięcie pędzla */
+/* nagłówek: łuna rzadkości za ikoną, ikona w oprawie, pod spodem pęknięcie z magmą */
 ${N} .tip-wrapper .item-head {
   border-color: transparent !important;
   background:
-    var(--tmg-brush-dim) center bottom / 94% 3px no-repeat,
+    var(--tmg-brush-dim) center bottom / 94% 6px no-repeat,
     radial-gradient(70px 44px at 22px 50%, rgb(var(--tmg-rar) / .22), transparent 100%) !important;
   box-shadow: none !important;
   padding-bottom: 6px !important;
@@ -717,11 +711,11 @@ ${N} .tip-wrapper .item-type,
 ${N} .tip-wrapper .item-builds { color: var(--tmg-dim) !important; letter-spacing: .03em; }
 ${N} .tip-wrapper .item-rarity { color: var(--tmg-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
 ${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--tmg-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
-/* sekcje: pędzlowe separatory zamiast cienkich linii gry (gra ustawia kolor linii inline) */
+/* sekcje: pęknięcia z magmą zamiast cienkich linii gry (gra ustawia kolor linii inline) */
 ${N} .tip-wrapper .item-tip-section { border-bottom-color: transparent !important; position: relative; }
 ${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
   content: "";
-  position: absolute; left: 4%; right: 4%; bottom: 0; height: 3px;
+  position: absolute; left: 4%; right: 4%; bottom: -1px; height: 5px;
   background: var(--tmg-brush-dim) center / 100% 100% no-repeat;
   opacity: .75;
   pointer-events: none;
@@ -771,7 +765,7 @@ ${N} .battle-controller .battle-msg.txt {
 ${N} .battle-controller .turn-prediction__item { border-color: var(--tmg-edge) !important; }
 
 /* --- dialog z NPC: papier shoji w lakierowanej ramie (ciemny, czytelny), imię pędzlem,
-   pociągnięcie pędzla między wypowiedzią a odpowiedziami, odpowiedzi żarzą się przy najechaniu --- */
+   pęknięcie z magmą między wypowiedzią a odpowiedziami, odpowiedzi żarzą się przy najechaniu --- */
 ${N} .dialogue-window .border-image {
   background:
     linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .95) 80px) !important;
@@ -790,7 +784,7 @@ ${N} .dialogue-window .content .npc-dialogue-wrapper .h_content {
 ${N} .dialogue-window .content .npc-message { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .dialogue-window .content .answers-scroll::before {
   content: "";
-  position: absolute; left: 0; right: 0; top: -6px; height: 4px;
+  position: absolute; left: 0; right: 0; top: -7px; height: 6px;
   background: var(--tmg-brush) center / 100% 100% no-repeat;
   opacity: .8;
 }
@@ -825,7 +819,7 @@ ${N} .interface-layer > .top.positioner > .bg {
    powtarzany (round), żeby kamienie belek nie były rozciągnięte. */
 ${N} .interface-layer .hud-container {
   background:
-    var(--tmg-brush-dim) center 33px / 60% 2px no-repeat,
+    var(--tmg-brush-dim) center 31px / 60% 6px no-repeat,
     radial-gradient(ellipse 45% 70% at 50% 100%, rgb(122 18 18 / .2), transparent 70%),
     url("${IMG.bar}") 0 50% / auto 140% repeat-x,
     var(--tmg-k0) !important;
