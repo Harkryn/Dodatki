@@ -43,3 +43,14 @@ Stylized hand-painted dark fantasy game currency icon, a single smooth crimson r
 Negative: photorealistic, photo, realistic, text, letters, watermark, blurry, low resolution, anything inside the frame, mask, face, helmet, torii
 Stylized hand-painted dark fantasy game UI nameplate frame, a very long and low horizontal frame of dark rough iron with glowing red ember cracks, perfectly flat straight top edge, both the left and the right end widen into a large round iron medallion socket, the bottom edge has a small downward pointed ornament in the center, the long inside of the frame is completely empty plain light grey, front view, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
 Obróbka: szare wnętrze wycięte (zalanie od środka), szpic ze środka dołu usunięty (w tym miejscu wisi medalion PvP), jasny rąbek przy wnętrzu przygaszony.
+
+## Okna, przyciski, kolumny – Qwen-Image (negative: photorealistic, photo, realistic, text, letters, watermark, blurry, low resolution)
+### okno-rama.webp (256×258, 9-slice: wycinek 32)
+Stylized hand-painted dark fantasy game UI window frame, a large square frame with a thin border of dark rough iron stones with glowing red ember cracks, slightly thicker ornamented corners with small iron spikes, the whole inside of the frame is completely empty plain light grey, front view, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
+### okno-tytul.webp (300×130, końce 62 px)
+Stylized hand-painted dark fantasy game UI window title plate, a long narrow horizontal plaque of dark iron with glowing red ember cracks, pointed tapered ends, flat blank face for text, front view, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
+### przycisk.webp (150×78, 9-slice: wycinek 22, fill)
+Stylized hand-painted dark fantasy game UI button, a single wide rectangular button of glossy black lacquer with a forged iron rim and small iron rivets in the corners, a faint red ember glow along the bottom edge, blank flat face for a label, front view, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
+### kolumna-tlo.webp (384×384, zakotwiczona u dołu kolumn)
+Negative: photorealistic, photo, realistic, text, watermark, objects, bright, high contrast, blurry
+Stylized hand-painted dark fantasy game UI background texture, seamless tileable panel of black lacquered wood with subtle vertical grain and faint drifting dark red smoke, very dark overall, low contrast so text stays readable on top, fills the entire image, painterly, not photorealistic

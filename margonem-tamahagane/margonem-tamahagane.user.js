@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.1.0
+// @version      2.2.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -20,6 +20,10 @@
 // @resource     tmgGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ikona-zlota.webp
 // @resource     tmgTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ikona-smoczych-lez.webp
 // @resource     tmgPlate     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki.webp
+// @resource     tmgWinFrame  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/okno-rama.webp
+// @resource     tmgWinTitle  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/okno-tytul.webp
+// @resource     tmgButton    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przycisk.webp
+// @resource     tmgColumn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-tlo.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // ==/UserScript==
@@ -39,7 +43,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.1.0';
+  const VERSION = '2.2.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -67,7 +71,11 @@
     separator: res('tmgSeparator', 'separator.webp'), // 50×120, czerwone pociągnięcie pędzla sumi-e
     gold: res('tmgGold', 'ikona-zlota.webp'),         // 64×51, stos monet koban
     tears: res('tmgTears', 'ikona-smoczych-lez.webp'), // 47×64, czerwony kryształ łzy z ogniem
-    plate: res('tmgPlate', 'rama-tabliczki.webp')      // 600×205, rama górnej tabliczki z gniazdami na maski
+    plate: res('tmgPlate', 'rama-tabliczki.webp'),     // 600×205, rama górnej tabliczki (gniazda z ogniem na końcach)
+    winFrame: res('tmgWinFrame', 'okno-rama.webp'),    // 256×258, rama okien: kamienie z lawą, kolce w narożnikach (9-slice, wycinek 32)
+    winTitle: res('tmgWinTitle', 'okno-tytul.webp'),   // 300×130, tytuł okna: żelazna płytka z lawą, zakrzywione kolce na końcach (końce 62 px)
+    button: res('tmgButton', 'przycisk.webp'),         // 150×78, przycisk: czarny lakier w kutej oprawie z nitami (9-slice, wycinek 22)
+    column: res('tmgColumn', 'kolumna-tlo.webp')       // 384×384, tło kolumn: czarne drewno, czerwony dym u dołu
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -139,7 +147,7 @@
   --tmg-urushi: linear-gradient(170deg, rgb(255 235 220 / .035) 0, rgb(255 235 220 / 0) 38%),
                 linear-gradient(rgb(14 10 10 / .55), rgb(7 5 5 / .8)),
                 url("${IMG.bar}") 0 0 / auto 90px repeat;
-  --tmg-frame: url("${IMG.slot}");   /* żelazo z żarzącym się wnętrzem (9-slice, wycinek 18) */
+  --tmg-frame: url("${IMG.winFrame}");   /* kamienie z pęknięciami pełnymi lawy, kolce w narożnikach (9-slice, wycinek 32) */
   --tmg-frame-thin: ${FRAME_THIN};
   --tmg-brush: ${BRUSH_RED};
   --tmg-brush-dim: ${BRUSH_DIM};
@@ -236,7 +244,7 @@ ${N} .tmg-lt { color: var(--tmg-c) !important; }
 /* --- okno zwykłe: skrzynia z czarnego lakieru w ramie z lamelkowych płytek i czerwonego sznura,
    mosiężne okucia w narożnikach. border-width zostaje 0 – układ okna gry bez zmian (outset 4 px). --- */
 ${W} {
-  border-image: var(--tmg-frame) 18 / 8px / 4px stretch !important;
+  border-image: var(--tmg-frame) 32 / 12px / 6px round !important;
   border-radius: 0;
   background:
     var(--tmg-urushi) !important;
@@ -246,14 +254,14 @@ ${W} {
 }
 ${W} > .content { background: transparent !important; color: var(--tmg-text); }
 
-/* tytuł: płytka z lakieru (ta sama faktura co belki) w żelaznej obwódce, pod spodem linia żaru;
+/* tytuł: malowana żelazna płytka z lawą i zakrzywionymi kolcami na końcach (okno-tytul.webp, 9-slice w poziomie);
    oryginalna czcionka gry */
 ${W} .header-label-positioner .header-label {
   background: none !important;
   border-style: solid !important;
   border-width: 0 !important;
-  background: linear-gradient(transparent calc(100% - 2px), rgb(196 64 28 / .75) calc(100% - 2px) calc(100% - 1px), transparent calc(100% - 1px)), url("${IMG.bar}") 0 50% / auto 170% repeat-x !important;
-  border-image: var(--tmg-frame-thin) 6 / 3px / 2px 16px 0 stretch !important;
+  background: none !important;
+  border-image: url("${IMG.winTitle}") 0 62 fill / 0 18px / 5px 18px stretch !important;
   box-shadow: none !important;
 }
 ${W} .header-label-positioner .header-label .left-decor,
@@ -417,7 +425,7 @@ ${N} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px var(--tmg-edg
 ${N} .interface-element-border-window-frame,
 ${N} .additional-skill-panel .graphics .additional-skill-panel-border {
   border-style: solid !important;
-  border-image: var(--tmg-frame) 18 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 32 / 10px / 0 round !important;
 }
 ${N} .interface-element-vertical-wood {
   border-style: solid !important;
@@ -427,22 +435,23 @@ ${N} .interface-element-vertical-wood {
   background-clip: border-box !important;
 }
 
-/* --- przyciski tekstowe: płytka czarnego lakieru z połyskiem; krawędź żarzy się czerwienią przy najechaniu.
-   Kolory gry z innym znaczeniem (złoto, smocze łzy, czerwony, niebieski) zostają jako przygaszona barwa. --- */
+/* --- przyciski tekstowe: czarny lakier w kutej żelaznej oprawie z nitami, u dołu żar (przycisk.webp, 9-slice).
+   Najechanie – żar mocniej (jaśniej + czerwona poświata). Kolory gry z innym znaczeniem (złoto, smocze łzy,
+   czerwony, niebieski) zostają jako przygaszona barwa. --- */
 ${N} .button.green:not(.background-gold):not(.background-draconite),
 ${N} .button.purple:not(.green) {
   border-style: solid !important;
-  border-image: var(--tmg-frame-thin) 6 / 3px / 0 stretch !important;
-  background: linear-gradient(rgb(255 235 220 / .07), rgb(255 235 220 / 0) 45%), linear-gradient(#211816, #110c0b 55%, #090606) !important;
+  border-image: url("${IMG.button}") 22 fill / 6px / 0 stretch !important;
+  background: none !important;
   box-shadow: 0 1px 3px rgb(0 0 0 / .7) !important;
 }
-${N} .button.purple:not(.green) { box-shadow: inset 0 0 0 1px rgb(110 60 140 / .5), 0 1px 3px rgb(0 0 0 / .7) !important; }
+${N} .button.purple:not(.green) { box-shadow: 0 0 0 1px rgb(110 60 140 / .55), 0 1px 3px rgb(0 0 0 / .7) !important; }
 ${N} .button.green::before, ${N} .button.purple::before { box-shadow: none !important; background: none !important; }
-${N} .button .label { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .button .label { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000, 0 0 3px #000; }
 ${N} .button.green:not(.background-gold):not(.background-draconite):not(.disable):not(.no-hover):hover,
 ${N} .button.purple:not(.green):not(.disable):hover {
-  background: linear-gradient(rgb(255 235 220 / .09), rgb(255 235 220 / 0) 45%), linear-gradient(#2c1210, #170908 55%, #0c0505) !important;
-  box-shadow: inset 0 0 0 1px var(--tmg-r3), var(--tmg-ember) !important;
+  filter: brightness(1.2) saturate(1.15);
+  box-shadow: var(--tmg-ember) !important;
 }
 ${N} .button.red { filter: saturate(.75) brightness(.85); }
 ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
@@ -455,7 +464,7 @@ ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
    * ===================================================================== */
   const cssChat = `
 ${N} .interface-layer > .left-column.main-column,
-${N} .new-chat-window { background: linear-gradient(rgb(7 5 5 / .7), rgb(7 5 5 / .7)), url("${IMG.bar}") 0 0 / auto 90px repeat, var(--tmg-k0) !important; }
+${N} .new-chat-window { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, var(--tmg-k0) !important; }
 /* listwy kolumn: pionowa belka czarnego lakieru z czerwonym sznurem pośrodku */
 ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
@@ -533,7 +542,7 @@ ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
    * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
    * ===================================================================== */
   const cssInventory = `
-${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(7 5 5 / .7), rgb(7 5 5 / .7)), url("${IMG.bar}") 0 0 / auto 90px repeat, var(--tmg-k0) !important; }
+${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, var(--tmg-k0) !important; }
 ${N} .interface-element-grid-border,
 ${N} .interface-element-grid-border-light {
   outline-color: var(--tmg-k0) !important;
@@ -746,7 +755,7 @@ ${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--
   const cssBattle = `
 /* --- panel walki (.battle-controller) --- */
 ${N} .battle-controller .battle-border {
-  border-image: var(--tmg-frame) 18 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 32 / 10px / 0 round !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85);
 }
 ${N} .battle-controller .middle-graphic,
@@ -785,7 +794,7 @@ ${N} .dialogue-window .border-image {
     linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .95) 80px) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--tmg-frame) 18 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 32 / 10px / 0 round !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85) !important;
 }
 ${N} .dialogue-window .dialogue-background-color { background: rgb(7 5 5 / .7) !important; }
@@ -965,7 +974,7 @@ ${B}::before {
   z-index: 0;
   pointer-events: none;
   border-style: solid; border-width: 0;
-  border-image: var(--tmg-frame) 18 / 8px / 0 stretch;
+  border-image: var(--tmg-frame) 32 / 10px / 0 round;
   background:
     radial-gradient(ellipse 30% 70% at 50% 0, rgb(122 18 18 / .16), transparent 70%),
     var(--tmg-urushi);
