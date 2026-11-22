@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.15.0
+// @version      2.15.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.15.0';
+  const VERSION = '2.15.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -89,7 +89,7 @@
     colTile: res('tmgColTile', 'kolumna-kafel.webp'),  // 384×150, kafel drewna powtarzany w pionie nad dołem kolumny (bez szwu)
     hudBtn: res('tmgHudBtn', 'guzik-hud.webp'),        // 512×128, rama guzika HUD w 4 obrotach (rombowy nit: dół, góra, lewo, prawo)
     premIcons: res('tmgPremIcons', 'premium-ikony.webp'), // 288×216, 12 ikon sklepu Premium (siatka 4×3 po 72 px): żelazo i żar
-    awning: res('tmgAwning', 'markiza.webp')          // 542×44, markiza sklepu: kute płyty z lawą i rząd kolców (pas + jego odbicie, powtarzany)
+    awning: res('tmgAwning', 'markiza.webp'),         // 542×44, markiza sklepu: kute płyty z lawą i rząd kolców (pas + jego odbicie, powtarzany)
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
