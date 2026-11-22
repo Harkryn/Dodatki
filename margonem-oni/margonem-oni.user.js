@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.13.0
+// @version      1.14.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -21,6 +21,7 @@
 // @resource     oniMaskSide  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/maska-boczna.webp
 // @resource     oniGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ikona-zlota.webp
 // @resource     oniTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ikona-smoczych-lez.webp
+// @resource     oniPlate     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/rama-tabliczki.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // ==/UserScript==
@@ -40,7 +41,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.13.0';
+  const VERSION = '1.14.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -69,7 +70,8 @@
     separator: res('oniSeparator', 'separator.webp'), // 50×120, czerwone pociągnięcie pędzla sumi-e
     maskSide: res('oniMaskSide', 'maska-boczna.webp'), // 175×256, maska Oni w ujęciu 3/4 patrząca w lewo (boki górnej tabliczki)
     gold: res('oniGold', 'ikona-zlota.webp'),         // 64×51, stos monet koban
-    tears: res('oniTears', 'ikona-smoczych-lez.webp') // 47×64, czerwony kryształ łzy z ogniem
+    tears: res('oniTears', 'ikona-smoczych-lez.webp'), // 47×64, czerwony kryształ łzy z ogniem
+    plate: res('oniPlate', 'rama-tabliczki.webp')      // 600×205, rama górnej tabliczki z gniazdami na maski
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -883,63 +885,94 @@ ${N} .interface-layer > .top.positioner > .bg {
   box-shadow: 0 4px 10px rgb(0 0 0 / .6);
 }
 
-/* tabliczka z imieniem / lokacją / walutami (342×65): lakier w ramie z poszarpanego żelaza z żarem
-   (ta sama grafika co ramki slotów, jako 9-slice), u dołu ledwie widoczna czerwona poświata,
-   pod imieniem pędzlowa kreska. border-width 0 – układ tabliczki gry bez zmian. */
+/* tabliczka z imieniem / lokacją / walutami (gra: 342×65 na górze ekranu).
+   Rama: żelazo z pęknięciami pełnymi żaru, na obu końcach okrągłe gniazda z ogniem, w których siedzą maski
+   (rama-tabliczki.webp, 600×205; wnętrze 141/45 – 458/144 px). 9-slice w skali 0,34: góra 15 px (w obrębie
+   tabliczki), boki 48 px i dół 20 px wysunięte na zewnątrz (outset) – układ gry bez zmian. Środek ramy
+   powtarzany (round), żeby kamienie belek nie były rozciągnięte. */
 ${N} .interface-layer .hud-container {
   background:
-    var(--oni-brush-dim) center 21px / 70% 3px no-repeat,
-    radial-gradient(ellipse 45% 60% at 50% 100%, rgb(122 18 18 / .22), transparent 70%),
+    var(--oni-brush-dim) center 33px / 60% 2px no-repeat,
+    radial-gradient(ellipse 45% 70% at 50% 100%, rgb(122 18 18 / .2), transparent 70%),
     url("${IMG.bar}") 0 50% / auto 140% repeat-x,
     var(--oni-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: url("${IMG.slot}") 18 / 10px / 3px stretch !important;
-  box-shadow: 0 4px 14px rgb(0 0 0 / .85) !important;
+  border-image: url("${IMG.plate}") 45 142 60 141 / 15px 48px 20px 48px / 0 48px 20px 48px round stretch !important;
+  box-shadow: none !important;
   color: var(--oni-text) !important;
   overflow: visible !important;
 }
-/* maski Oni po obu stronach tabliczki, patrzące od środka na zewnątrz (maska-boczna.webp patrzy w lewo –
-   lewa jak w pliku, prawa odbita). Nachodzą ~12 px na krawędzie tabliczki, bez kliknięć. */
+/* maski Oni w gniazdach ramy, patrzące od środka na zewnątrz (maska-boczna.webp patrzy w lewo –
+   lewa jak w pliku, prawa odbita). Środki gniazd: 16 px przed lewą i 17 px za prawą krawędzią tabliczki. */
 ${N} .interface-layer .hud-container::before,
 ${N} .interface-layer .hud-container::after {
   content: "";
   position: absolute;
-  top: 0; width: 46px; height: 66px;
+  top: 8px; width: 42px; height: 62px;
   pointer-events: none;
   z-index: 4;
   background: url("${IMG.maskSide}") center / contain no-repeat;
   filter: drop-shadow(0 2px 3px #000);
 }
-${N} .interface-layer .hud-container::before { left: -34px; }
-${N} .interface-layer .hud-container::after { right: -34px; transform: scaleX(-1); }
-/* imię: oryginalna czcionka i kolor gry, tylko cień dla czytelności na lakierze */
-${N} .interface-layer .hud-container .heroname { text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9); }
-${N} .interface-layer .hud-container .location,
-${N} .interface-layer .hud-container .herogold,
-${N} .interface-layer .hud-container .herocredits { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .interface-layer .hud-container::before { left: -37px; }
+${N} .interface-layer .hud-container::after { right: -38px; transform: scaleX(-1); }
+
+/* ZWARTY UKŁAD (wnętrze ramy: 15–65 px): imię, pod nim mapa + koordynaty + świat w jednym rzędzie,
+   niżej złoto i smocze łzy obok siebie, wszystko wyśrodkowane */
+${N} .interface-layer .hud-container .heroname {
+  transform: translateY(14px);
+  text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9);   /* oryginalna czcionka i kolor gry */
+}
+/* nazwa świata jest przenoszona przez skrypt do .map-data (arrangeHud), więc cały rząd to jeden flex */
+${N} .interface-layer .hud-container .map-data {
+  position: absolute !important;
+  left: 0 !important; right: 0 !important; top: 34px !important;
+  height: auto !important;
+  display: flex !important;
+  justify-content: center;
+  align-items: baseline;
+  gap: 5px;
+  transform: none !important;
+}
+${N} .interface-layer .hud-container .map-data > .location,
+${N} .interface-layer .hud-container .map-data > .coords,
+${N} .interface-layer .hud-container .map-data > .world-name {
+  position: static !important;
+  left: auto !important; top: auto !important;
+  width: auto !important; max-width: none !important;
+  white-space: nowrap;
+}
+${N} .interface-layer .hud-container .location { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .interface-layer .hud-container .coords,
 ${N} .interface-layer .hud-container .world-name { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
-/* „+” (kup złoto / smocze łzy) usunięte; kwoty dosunięte do swoich ikon */
+/* waluty: „+” usunięte, złoto i smocze łzy jako para wyśrodkowana pod mapą */
 ${N} .interface-layer .hud-container .btn-min { display: none !important; }
+${N} .interface-layer .hud-container .gold-tip,
+${N} .interface-layer .hud-container .credits-tip { top: 48px !important; width: 18px !important; height: 18px !important; transform: none !important; }
+${N} .interface-layer .hud-container .gold-tip { left: calc(50% - 76px) !important; background: url("${IMG.gold}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
+${N} .interface-layer .hud-container .credits-tip { left: calc(50% + 16px) !important; background: url("${IMG.tears}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
 ${N} .interface-layer .hud-container .herogold,
-${N} .interface-layer .hud-container .herogold-difference,
-${N} .interface-layer .hud-container .herocredits,
-${N} .interface-layer .hud-container .herocredits-difference { transform: translateX(-20px); }
-/* ikony walut były częścią grafiki tabliczki gry – podstawiamy czyste ikony gry (jak w Dark Gothic) */
-${N} .interface-layer .hud-container .gold-tip { background: url("${IMG.gold}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
-${N} .interface-layer .hud-container .credits-tip { background: url("${IMG.tears}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
+${N} .interface-layer .hud-container .herocredits {
+  top: 49px !important; width: auto !important;
+  text-align: left !important;
+  color: var(--oni-text) !important; text-shadow: 0 1px 2px #000;
+}
+${N} .interface-layer .hud-container .herogold { left: calc(50% - 54px) !important; }
+${N} .interface-layer .hud-container .herocredits { left: calc(50% + 38px) !important; }
+${N} .interface-layer .hud-container .herogold-difference { left: calc(50% - 54px) !important; top: 88px !important; text-align: left !important; }
+${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 38px) !important; top: 88px !important; text-align: left !important; }
 
-/* kulka trybu PvP mapy → medalion zwisający pod środkiem tabliczki: żelazny pierścień z mosiężną obwódką,
+/* kulka trybu PvP mapy → medalion zwisający z dolnej krawędzi ramy: żelazny pierścień z mosiężną obwódką,
    w środku żarzący się kamień w kolorze mapy (gra nadal przełącza klasy green/yellow/orange/red).
    To ten sam element gry (.map_ball) – tylko przeniesiony i przemalowany, więc podpowiedź „PvP…”
    i kliknięcie (lista poszukiwanych) działają jak wcześniej. */
 ${N} .interface-layer .hud-container .map_ball {
   --oni-pvp: 120 120 120;
   left: calc(50% - 10px) !important;
-  top: 54px !important;
+  top: 72px !important;
   width: 20px !important; height: 20px !important;
-  z-index: 3;
+  z-index: 5;
   border-radius: 50%;
   background:
     radial-gradient(circle at 42% 36%, rgb(255 255 255 / .55) 0 1.5px, transparent 2.5px),
@@ -952,8 +985,6 @@ ${N} .interface-layer .hud-container .map_ball.yellow { --oni-pvp: 220 180 50; }
 ${N} .interface-layer .hud-container .map_ball.orange { --oni-pvp: 230 110 30; }
 ${N} .interface-layer .hud-container .map_ball.red { --oni-pvp: 210 30 30; }
 ${N} .interface-layer .hud-container .map_ball:hover { filter: brightness(1.25); }
-/* lokacja i współrzędne przesunięte w miejsce, które zajmowała kulka */
-${N} .interface-layer .hud-container .map-data { transform: translateX(-12px); }
 
 
 /* paski postępu w oknach (np. zadania, rzemiosło) */
@@ -1504,6 +1535,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     set(KEY_ON, !enabled());
     apply();
     syncGraphics();
+    arrangeHud();
     toast(enabled() ? 'Oni: włączony' : 'Oni: wyłączony');
   };
   const toggleFx = () => {
@@ -1527,6 +1559,19 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     document.body.append(b, t);
   };
 
+  // Górna tabliczka: nazwa świata trafia do rzędu z mapą i koordynatami (.map-data – flex w CSS),
+  // żeby stała zaraz za nimi niezależnie od długości nazwy mapy. Wyłączenie motywu odkłada ją na miejsce.
+  const arrangeHud = () => {
+    const h = document.querySelector('.interface-layer .hud-container');
+    if (!h) return;
+    const md = h.querySelector('.map-data'), wn = h.querySelector('.world-name');
+    if (!md || !wn) return;
+    if (enabled()) { if (wn.parentElement !== md) md.appendChild(wn); }
+    else if (wn.parentElement === md) md.after(wn);
+  };
+  let hudTimer = 0;
+  const queueHud = () => { clearTimeout(hudTimer); hudTimer = setTimeout(arrangeHud, 300); };
+
   // obserwator stylów i nowych elementów (debounce) – startuje dopiero po wykryciu NI
   let sheetTimer = 0;
   const gfxObs = new MutationObserver((muts) => {
@@ -1536,6 +1581,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
       if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') sheets = true;
       else queueFix(n);
     }
+    queueHud();
     if (sheets) { clearTimeout(sheetTimer); sheetTimer = setTimeout(scanSheets, 80); }
   });
 
@@ -1549,6 +1595,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     root.classList.add('oni-ni');
     addFont();
     addToggleButton();
+    arrangeHud();
     scanSheets();
     document.querySelectorAll(TEXT_SCOPE).forEach(fixText);
     gfxObs.observe(root, { childList: true, subtree: true });
