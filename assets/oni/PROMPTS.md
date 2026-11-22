@@ -31,3 +31,11 @@ Stylized hand-painted dark fantasy game UI frame for a round health orb, a thick
 Negative prompt: text, letters, characters, seal, stamp, feather, objects, watermark
 A single vertical brush stroke of dark crimson red ink painted from top to bottom, sumi-e calligraphy style, dry brush streaks, tapered ends, a few tiny ink splatter dots, centered on plain white paper with lots of empty space, minimal, nothing else
 Obróbka: przezroczystość liczona z jasności tuszu na białym papierze.
+
+## Górna tabliczka – Qwen-Image (negative jak wyżej; ikony dodatkowo: pixel art, pixelated, 8-bit, kanji, square background)
+### maska-boczna.webp (175×256, patrzy w lewo; prawa strona = odbicie w CSS)
+Stylized hand-painted dark fantasy game art illustration of a Japanese oni demon mask in three-quarter side view facing left, looking to the left, RPG interface ornament, nearly black charcoal mask with a subtle dark red tint, glowing red ember eyes, two short dark horns, snarling fanged mouth, painterly brush strokes, soft red rim light, simple bold shapes readable at small size, not photorealistic, isolated on plain flat light grey background
+### ikona-zlota.webp (64×51)
+Stylized hand-painted dark fantasy game currency icon, a small neat stack of three oval Japanese koban gold coins with simple engraved horizontal lines, warm aged gold with soft painted highlights and dark outline, painterly brush strokes, bold simple silhouette, not photorealistic, isolated on plain flat light grey background
+### ikona-smoczych-lez.webp (47×64)
+Stylized hand-painted dark fantasy game currency icon, a single smooth crimson red teardrop crystal, a dragon's tear, glowing ember light inside, bright painted highlight near the top, dark outline, painterly brush strokes, bold simple silhouette, not photorealistic, isolated on plain flat light grey background

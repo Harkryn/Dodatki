@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.12.1
+// @version      1.13.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -18,6 +18,9 @@
 // @resource     oniSlot   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ramka-slotu.webp
 // @resource     oniRing   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/rama-orba.webp
 // @resource     oniSeparator https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/separator.webp
+// @resource     oniMaskSide  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/maska-boczna.webp
+// @resource     oniGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ikona-zlota.webp
+// @resource     oniTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ikona-smoczych-lez.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // ==/UserScript==
@@ -37,7 +40,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.12.1';
+  const VERSION = '1.13.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -63,7 +66,10 @@
     bar: res('oniBar', 'pasek-tlo.webp'),         // 107×120, kafel bez szwów: malowany czarny lakier belki
     slot: res('oniSlot', 'ramka-slotu.webp'),     // 74×80, ramka slotu: poszarpane żelazo z żarem
     ring: res('oniRing', 'rama-orba.webp'),       // 248×264, rama orba: pierścień z chmurami, pęknięcia z żarem, rogi
-    separator: res('oniSeparator', 'separator.webp') // 50×120, czerwone pociągnięcie pędzla sumi-e
+    separator: res('oniSeparator', 'separator.webp'), // 50×120, czerwone pociągnięcie pędzla sumi-e
+    maskSide: res('oniMaskSide', 'maska-boczna.webp'), // 175×256, maska Oni w ujęciu 3/4 patrząca w lewo (boki górnej tabliczki)
+    gold: res('oniGold', 'ikona-zlota.webp'),         // 64×51, stos monet koban
+    tears: res('oniTears', 'ikona-smoczych-lez.webp') // 47×64, czerwony kryształ łzy z ogniem
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -893,18 +899,20 @@ ${N} .interface-layer .hud-container {
   color: var(--oni-text) !important;
   overflow: visible !important;
 }
-/* maski Oni po obu stronach tabliczki – te same co na końcach dolnego paska (poza tabliczką, bez kliknięć) */
-${N} .interface-layer .hud-container::before {
+/* maski Oni po obu stronach tabliczki, patrzące od środka na zewnątrz (maska-boczna.webp patrzy w lewo –
+   lewa jak w pliku, prawa odbita). Nachodzą ~12 px na krawędzie tabliczki, bez kliknięć. */
+${N} .interface-layer .hud-container::before,
+${N} .interface-layer .hud-container::after {
   content: "";
   position: absolute;
-  left: -50px; right: -50px; top: 0; height: 64px;
+  top: 0; width: 46px; height: 66px;
   pointer-events: none;
-  z-index: 0;
-  background:
-    url("${IMG.mask}") left center / auto 100% no-repeat,
-    url("${IMG.mask}") right center / auto 100% no-repeat;
+  z-index: 4;
+  background: url("${IMG.maskSide}") center / contain no-repeat;
   filter: drop-shadow(0 2px 3px #000);
 }
+${N} .interface-layer .hud-container::before { left: -34px; }
+${N} .interface-layer .hud-container::after { right: -34px; transform: scaleX(-1); }
 /* imię: oryginalna czcionka i kolor gry, tylko cień dla czytelności na lakierze */
 ${N} .interface-layer .hud-container .heroname { text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9); }
 ${N} .interface-layer .hud-container .location,
@@ -919,8 +927,8 @@ ${N} .interface-layer .hud-container .herogold-difference,
 ${N} .interface-layer .hud-container .herocredits,
 ${N} .interface-layer .hud-container .herocredits-difference { transform: translateX(-20px); }
 /* ikony walut były częścią grafiki tabliczki gry – podstawiamy czyste ikony gry (jak w Dark Gothic) */
-${N} .interface-layer .hud-container .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat !important; filter: drop-shadow(0 0 2px #000); }
-${N} .interface-layer .hud-container .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat !important; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
+${N} .interface-layer .hud-container .gold-tip { background: url("${IMG.gold}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
+${N} .interface-layer .hud-container .credits-tip { background: url("${IMG.tears}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
 
 /* kulka trybu PvP mapy → medalion zwisający pod środkiem tabliczki: żelazny pierścień z mosiężną obwódką,
    w środku żarzący się kamień w kolorze mapy (gra nadal przełącza klasy green/yellow/orange/red).
