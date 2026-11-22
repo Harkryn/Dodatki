@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.12.0
+// @version      2.13.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -26,6 +26,7 @@
 // @resource     tmgColumn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-tlo.webp
 // @resource     tmgColTile   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-kafel.webp
 // @resource     tmgHudBtn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/guzik-hud.webp
+// @resource     tmgPremIcons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/premium-ikony.webp
 // @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
@@ -51,7 +52,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.12.0';
+  const VERSION = '2.13.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -86,6 +87,7 @@
     column: res('tmgColumn', 'kolumna-tlo.webp'),      // 384×384, dół kolumn: czarne drewno, czerwony dym (góra miękko wygaszona)
     colTile: res('tmgColTile', 'kolumna-kafel.webp'),  // 384×150, kafel drewna powtarzany w pionie nad dołem kolumny (bez szwu)
     hudBtn: res('tmgHudBtn', 'guzik-hud.webp'),        // 512×128, rama guzika HUD w 4 obrotach (rombowy nit: dół, góra, lewo, prawo)
+    premIcons: res('tmgPremIcons', 'premium-ikony.webp'), // 288×216, 12 ikon sklepu Premium (siatka 4×3 po 72 px): żelazo i żar
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
@@ -650,6 +652,25 @@ ${N} .premium-item {
 }
 ${N} .premium-item:hover { filter: brightness(1.15); box-shadow: inset 0 0 16px rgb(0 0 0 / .85), 0 0 12px rgb(214 170 70 / .45) !important; }
 ${N} .premium-item .premium-text { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+/* ikony kategorii: własne malowane (premium-ikony.webp, 72 px w siatce 4×3, wyświetlane 60 px) zamiast złotych ikon gry */
+${N} .premium-item { background-image: none !important; }
+${N} .premium-item::before {
+  content: ""; position: absolute; left: 50%; top: 4px; width: 60px; height: 60px; margin-left: -30px;
+  background: url("${IMG.premIcons}") 0 0 / 240px 180px no-repeat;
+  pointer-events: none;
+}
+${N} .premium-item.chest::before { background-position: 0px 0px; }
+${N} .premium-item.sales::before { background-position: -60px 0px; }
+${N} .premium-item.stamina::before { background-position: -120px 0px; }
+${N} .premium-item.potions::before { background-position: -180px 0px; }
+${N} .premium-item.upgrades::before { background-position: 0px -60px; }
+${N} .premium-item.gold-shop::before { background-position: -60px -60px; }
+${N} .premium-item.blessing::before { background-position: -120px -60px; }
+${N} .premium-item.teleports::before { background-position: -180px -60px; }
+${N} .premium-item.pets::before { background-position: 0px -120px; }
+${N} .premium-item.outfits::before { background-position: -60px -120px; }
+${N} .premium-item.bags::before { background-position: -120px -120px; }
+${N} .premium-item.boots::before { background-position: -180px -120px; }
 
 /* --- tryb okienkowy (body[data-res]): zamiast windowModeBorder.png gry – malowana rama okien (kamienie z lawą,
    kolce w narożnikach), wysunięta 9 px na zewnątrz; ramka gry ma 7 px, więc układ zostaje. Tło dookoła: czerń
