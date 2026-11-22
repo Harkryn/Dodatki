@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.2.1
+// @version      2.3.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -24,6 +24,9 @@
 // @resource     tmgWinTitle  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/okno-tytul.webp
 // @resource     tmgButton    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przycisk.webp
 // @resource     tmgColumn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-tlo.webp
+// @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
+// @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
+// @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // ==/UserScript==
@@ -43,7 +46,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.2.1';
+  const VERSION = '2.3.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -75,7 +78,10 @@
     winFrame: res('tmgWinFrame', 'okno-rama.webp'),    // 256×258, rama okien: kamienie z lawą, kolce w narożnikach (9-slice, wycinek 32)
     winTitle: res('tmgWinTitle', 'okno-tytul.webp'),   // 300×130, tytuł okna: żelazna płytka z lawą, zakrzywione kolce na końcach (końce 62 px)
     button: res('tmgButton', 'przycisk.webp'),         // 150×78, przycisk: czarny lakier w kutej oprawie z nitami (9-slice, wycinek 22)
-    column: res('tmgColumn', 'kolumna-tlo.webp')       // 384×384, tło kolumn: czarne drewno, czerwony dym u dołu
+    column: res('tmgColumn', 'kolumna-tlo.webp'),      // 384×384, tło kolumn: czarne drewno, czerwony dym u dołu
+    frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
+    toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
+    medal: res('tmgMedal', 'medalion-pvp.webp')        // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -83,18 +89,6 @@
   /* ─────────────────────────────────────────────────────────────────────────
    * GRAFIKI WEKTOROWE (rysowane w kodzie, ostre w każdej skali)
    * ───────────────────────────────────────────────────────────────────────── */
-
-  // Cienka rama paneli, przycisków i tooltipów (32×32, wycinek 6 → 3–4 px): ciemne żelazo, w środku cienka
-  // linia żaru, w narożnikach krótkie żarzące się pęknięcia – w stylu ramek slotów i ramy orba
-  const FRAME_THIN = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'>` +
-    `<defs><linearGradient id='i' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#4a4441'/><stop offset='.45' stop-color='#2a2624'/><stop offset='1' stop-color='#151211'/></linearGradient></defs>` +
-    `<path d='M0 0H32V32H0Z M5 5V27H27V5Z' fill='url(#i)' fill-rule='evenodd'/>` +
-    `<rect x='.5' y='.5' width='31' height='31' fill='none' stroke='#000'/>` +
-    `<rect x='4.5' y='4.5' width='23' height='23' fill='none' stroke='#ff6a2a' stroke-opacity='.22' stroke-width='2.2'/>` +
-    `<rect x='4.6' y='4.6' width='22.8' height='22.8' fill='none' stroke='#c4401c' stroke-opacity='.9' stroke-width='.8'/>` +
-    `<path d='M1.5 3.5L3 2.6L3.6 1.2M28.4 30.8L29 29.4L30.5 28.5M30.6 3.2L29.2 3.6M1.4 28.8L2.8 28.4' fill='none' stroke='#e0521e' stroke-opacity='.75' stroke-width='.6'/>` +
-    `</svg>`);
 
   // Pociągnięcie pędzla sumi-e (separator / podkreślenie): zwężające się końce, poszarpany brzeg
   const BRUSH = (color, op) => svgUrl(
@@ -104,17 +98,6 @@
     `</svg>`);
   const BRUSH_RED = BRUSH('#7a1212', .95);
   const BRUSH_DIM = BRUSH('#5c0d0d', .7);
-
-  // Tsuba (jelec katany) – przycisk przełącznika: krąg z ażurowymi otworami, czerwony rdzeń
-  const TSUBA = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>` +
-    `<defs><radialGradient id='t' cx='.4' cy='.35' r='.8'><stop offset='0' stop-color='#2c211e'/><stop offset='.7' stop-color='#120d0c'/><stop offset='1' stop-color='#060404'/></radialGradient></defs>` +
-    `<circle cx='20' cy='20' r='19' fill='url(#t)' stroke='#8a6a3a' stroke-opacity='.65' stroke-width='1.2'/>` +
-    `<circle cx='20' cy='20' r='15.5' fill='none' stroke='#000' stroke-opacity='.7'/>` +
-    `<path d='M20 6 Q26 12 20 15 Q14 12 20 6Z M20 34 Q26 28 20 25 Q14 28 20 34Z M6 20 Q12 14 15 20 Q12 26 6 20Z M34 20 Q28 14 25 20 Q28 26 34 20Z' fill='#050303' stroke='#5c0d0d' stroke-width='.7'/>` +
-    `<rect x='17.6' y='14.5' width='4.8' height='11' rx='2.2' fill='#9e1b1b' stroke='#000' stroke-width='.8'/>` +
-    `</svg>`);
-
 
   // Lupa pól wyszukiwania
   const SEARCH_ICON = svgUrl(
@@ -148,7 +131,7 @@
                 linear-gradient(rgb(14 10 10 / .55), rgb(7 5 5 / .8)),
                 url("${IMG.bar}") 0 0 / auto 90px repeat;
   --tmg-frame: url("${IMG.winFrame}");   /* kamienie z pęknięciami pełnymi lawy, kolce w narożnikach (9-slice, wycinek 32) */
-  --tmg-frame-thin: ${FRAME_THIN};
+  --tmg-frame-thin: url("${IMG.frameThin}");
   --tmg-brush: ${BRUSH_RED};
   --tmg-brush-dim: ${BRUSH_DIM};
 }
@@ -194,7 +177,7 @@ ${N} input::placeholder, ${N} textarea::placeholder { color: var(--tmg-dim) !imp
 ${N} .search-component {
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   background: ${SEARCH_ICON} 8px 50% / 12px 12px no-repeat, var(--tmg-k0) !important;
   background-clip: border-box !important;
   background-origin: border-box !important;
@@ -330,7 +313,7 @@ ${N} .border-window.transparent .border-image {
   background: rgb(7 5 5 / .78) !important;
   border-style: solid;
   border-width: 0;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
 }
 ${N} .border-window.transparent .header-label .text {
@@ -342,7 +325,7 @@ ${N} .border-window.transparent .header-label .text {
 /* --- małe okna podpowiedzi (tip-window) --- */
 ${N} .border-window.tip-window {
   border-style: solid !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   background: rgb(14 10 10 / .96) !important;
   background-clip: border-box !important;
   box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
@@ -367,7 +350,7 @@ ${N} .bubbledialog .bg-layer .right-frame { background: none !important; }
 ${N} .bubbledialog .bg-layer {
   border-style: solid;
   border-width: 0;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   background: rgb(14 10 10 / .95) !important;
 }
 
@@ -382,7 +365,7 @@ ${N} .interface-element-middle-4-background,
 ${N} .interface-element-wood-box-background {
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   background: rgb(14 10 10 / .94) !important;
   background-clip: border-box !important;
   box-shadow: inset 0 0 16px rgb(0 0 0 / .7);
@@ -430,7 +413,7 @@ ${N} .additional-skill-panel .graphics .additional-skill-panel-border {
 ${N} .interface-element-vertical-wood {
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: var(--tmg-frame-thin) 6 / 0 3px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 0 3px / 0 round !important;
   background: var(--tmg-k0) !important;
   background-clip: border-box !important;
 }
@@ -522,7 +505,7 @@ ${N} .new-chat-window .magic-input {
   background: var(--tmg-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   color: var(--tmg-text) !important;
   caret-color: var(--tmg-hi);
 }
@@ -590,7 +573,7 @@ ${N} .interface-layer > .right-column.main-column .bags-navigation-bg,
 ${N} .interface-layer > .right-column.main-column .inventory-grid-bg {
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 4px stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 4px round !important;
   box-shadow: 0 0 0 4px rgb(7 5 5 / .95), 0 4px 12px 4px rgb(0 0 0 / .7) !important;
   outline: none !important;
 }
@@ -619,7 +602,7 @@ ${N} .interface-layer .stats-wrapper {
   background: var(--tmg-urushi) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .8) !important;
   outline: none !important;
 }
@@ -695,7 +678,7 @@ ${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: 255 132 0; }
 ${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; }
 ${N} .tip-wrapper {
   border-style: solid; border-width: 0;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 2px stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 2px round !important;
   box-shadow:
     0 0 0 1px rgb(0 0 0 / .9),
     0 0 14px rgb(var(--tmg-rar) / .22),
@@ -906,22 +889,25 @@ ${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 
    i kliknięcie (lista poszukiwanych) działają jak wcześniej. */
 ${N} .interface-layer .hud-container .map_ball {
   --tmg-pvp: 120 120 120;
-  left: calc(50% - 10px) !important;
-  top: 72px !important;
-  width: 20px !important; height: 20px !important;
+  left: calc(50% - 13px) !important;
+  top: 64px !important;
+  width: 26px !important; height: 33px !important;
   z-index: 5;
-  border-radius: 50%;
+  border-radius: 0;
+  /* medalion 48×61 w skali 26/48: otwór w (12.7px, 19.5px), promień ≈ 7.4px */
   background:
-    radial-gradient(circle at 42% 36%, rgb(255 255 255 / .55) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle, rgb(var(--tmg-pvp)) 0 30%, rgb(var(--tmg-pvp) / .55) 45%, #0b0707 52% 64%, #8a6a3a 66% 72%, #120c0b 74% 92%, #000 94%) !important;
-  box-shadow: 0 2px 4px #000, 0 0 8px rgb(var(--tmg-pvp) / .55);
+    url("${IMG.medal}") 0 0 / 100% 100% no-repeat,
+    radial-gradient(circle at 11.6px 18.2px, rgb(255 255 255 / .6) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 12.7px 19.5px, rgb(var(--tmg-pvp)) 0 3.8px, rgb(var(--tmg-pvp) / .6) 5.6px, #0b0707 7.6px, transparent 8px) !important;
+  box-shadow: none;
+  filter: drop-shadow(0 2px 2px #000) drop-shadow(0 0 4px rgb(var(--tmg-pvp) / .5));
   cursor: pointer;
 }
 ${N} .interface-layer .hud-container .map_ball.green { --tmg-pvp: 60 170 80; }
 ${N} .interface-layer .hud-container .map_ball.yellow { --tmg-pvp: 220 180 50; }
 ${N} .interface-layer .hud-container .map_ball.orange { --tmg-pvp: 230 110 30; }
 ${N} .interface-layer .hud-container .map_ball.red { --tmg-pvp: 210 30 30; }
-${N} .interface-layer .hud-container .map_ball:hover { filter: brightness(1.25); }
+${N} .interface-layer .hud-container .map_ball:hover { filter: brightness(1.25) drop-shadow(0 2px 2px #000) drop-shadow(0 0 6px rgb(var(--tmg-pvp) / .7)); }
 
 
 /* paski postępu w oknach (np. zadania, rzemiosło) */
@@ -1107,7 +1093,7 @@ ${B} .exp-bar-wrapper .exp-progress .overlay {
   filter: none !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
   box-shadow: 0 1px 4px rgb(0 0 0 / .8);
   pointer-events: none;
 }
@@ -1221,14 +1207,14 @@ ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button
   const cssToggle = `
 #tmg-toggle {
   position: fixed; left: 8px; bottom: 8px; z-index: 2147483000;
-  width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%;
-  background: ${TSUBA} center / 100% 100% no-repeat;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%;
+  background: url("${IMG.toggle}") center / 100% 100% no-repeat;
   cursor: pointer;
   opacity: .55;
-  box-shadow: 0 0 0 1px #000, 0 2px 4px rgb(0 0 0 / .7);
+  box-shadow: 0 2px 4px rgb(0 0 0 / .7);
   transition: opacity .2s, box-shadow .2s, transform .3s;
 }
-#tmg-toggle:hover, #tmg-toggle:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 1px #000, 0 0 10px rgb(196 42 42 / .55); transform: rotate(30deg); }
+#tmg-toggle:hover, #tmg-toggle:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 10px rgb(196 42 42 / .55); transform: rotate(30deg); }
 html:not(.${ON}) #tmg-toggle { filter: grayscale(1); opacity: .35; }
 html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
 #tmg-toast {

@@ -54,3 +54,12 @@ Stylized hand-painted dark fantasy game UI button, a single wide rectangular but
 ### kolumna-tlo.webp (384×384, zakotwiczona u dołu kolumn)
 Negative: photorealistic, photo, realistic, text, watermark, objects, bright, high contrast, blurry
 Stylized hand-painted dark fantasy game UI background texture, seamless tileable panel of black lacquered wood with subtle vertical grain and faint drifting dark red smoke, very dark overall, low contrast so text stays readable on top, fills the entire image, painterly, not photorealistic
+
+## ramka-cienka.webp (Qwen-Image, BiRefNet, 128×131, 9-slice 9 10 10 9)
+Stylized hand-painted dark fantasy game UI panel border, a simple square frame made of a very thin strip of dark forged iron with a faint glowing red ember line along the inner edge and tiny cracks at the corners, empty center, isolated on plain light grey background, game asset, painterly
+
+## przelacznik.webp (Qwen-Image, BiRefNet, 64×64)
+Stylized hand-painted small Japanese tsuba sword guard of dark rough iron with glowing red ember cracks, openwork flame cut-outs, a glowing ember slot in the center, top view, isolated on plain light grey background, game icon, painterly
+
+## medalion-pvp.webp (Qwen-Image, BiRefNet, 48×61, otwór wycięty)
+Stylized hand-painted small round dark iron ring with glowing red ember cracks, a small pointed iron hook on top, the center is an empty round socket, isolated on plain light grey background, game UI ornament, painterly
