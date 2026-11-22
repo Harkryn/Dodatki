@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.9.1
+// @version      2.9.2
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -50,7 +50,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.9.1';
+  const VERSION = '2.9.2';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1032,12 +1032,15 @@ ${B} .slots.right::after { left: -12px; transform: scaleX(-1); }
 
 /* --- orb HP: rama w kształcie tsuby (osobna warstwa, przezroczysty środek) --- */
 /* rama orba: żelazny pierścień z chmurami, pęknięcia z żarem, rogi u góry (rama-orba.webp, 248×264,
-   otwór: środek 127/134 px, promień 72 px). Skala 0,694 → otwór r 50 px dokładnie na kulę (r 49);
-   środek kuli w szablonie: x = 50% − 2 px, y = 55 px. */
+   otwór: środek 127/134 px, promień 72 px). Skala 0,694 → otwór r 50 px dokładnie na kulę (r 49).
+   Gra stawia kulę 2 px w lewo od środka szablonu, a widoczny pierścień nie jest symetryczny względem otworu
+   (lewa krawędź 2 px, prawa 170 px z 172) – kula i rama przesunięte do x = 50% + 3 px, żeby szczeliny
+   między ramą a slotami 4 i 5 były równe (po 21 px). y = 55 px. */
+${B} .hp-indicator-wrapper-template .hp-indicator-wrapper { translate: 5px 0; }
 ${B} .hp-indicator-wrapper-template::before {
   content: "";
   position: absolute;
-  left: calc(50% - 2px - 88px); top: calc(55px - 93px);
+  left: calc(50% + 3px - 88px); top: calc(55px - 93px);
   width: 172px; height: 183px;
   z-index: 2;
   pointer-events: none;
