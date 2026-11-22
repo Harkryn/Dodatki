@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.6.0
+// @version      2.7.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -48,7 +48,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.6.0';
+  const VERSION = '2.7.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -666,12 +666,14 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
    * łuna i oprawa ikony. Nazwy i statystyki zachowują kolory gry. Zwykłe przedmioty – stonowana czerwień.
    * ===================================================================== */
   const cssTooltips = `
+/* ranga przedmiotu: kolor tekstu i łuny, a lawa w ramie i pęknięcia w środku przebarwione na ten kolor
+   (wersje robi skrypt – lavaImage z tintem; zanim powstaną, zostaje czerwona lawa) */
 ${N} .tip-wrapper { --tmg-rar: 122 18 18; }
-${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; }
-${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; }
-${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; }
-${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: 255 132 0; }
-${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; }
+${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; border-image-source: var(--tmg-tip-uniupg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-uniupg, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; border-image-source: var(--tmg-tip-her, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-her, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; border-image-source: var(--tmg-tip-upgraded, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-upgraded, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: 255 132 0; border-image-source: var(--tmg-tip-leg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-leg, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; border-image-source: var(--tmg-tip-art, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-art, url("${IMG.underline}")); }
 /* malowana rama z wnętrzem (tooltip-rama.webp, 9-slice 40 w skali 0,5 + fill): kamienie i żelazo z lawą,
    kolce w narożnikach. Rama wysunięta o 14 px (outset), więc wnętrze grafiki zaczyna się tuż przy treści,
    a układ tooltipa się nie zmienia. Cień i łuna rzadkości przez drop-shadow – idą po kształcie ramy. */
@@ -1447,7 +1449,9 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     return new Blob(parts, { type: 'image/png' });
   }
 
-  async function shimmer(url) {
+  // Grafika z lawą: opcjonalnie przebarwiona (tint = [r, g, b] – kolor rangi przedmiotu; kamień zostaje)
+  // i opcjonalnie animowana (fala blasku po szczelinach). Zwraca blob URL albo null (brak lawy).
+  async function lavaImage(url, tint, animated) {
     const bm = await createImageBitmap(await (await fetch(url)).blob());
     const w = bm.width, h = bm.height;
     const c = document.createElement('canvas'); c.width = w; c.height = h;
@@ -1465,23 +1469,55 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       ph.push(Math.sin(i * 0.052 + 1.3) + Math.sin(y * 0.071 + i * 0.023) + Math.sin((i - y) * 0.037 + 4.1));
     }
     if (idx.length < 40) return null;
+    if (tint) {
+      // kolor rangi z zachowaną jasnością lawy; najgorętsze miejsca bieleją (żar w innym kolorze)
+      for (let j = 0; j < idx.length; j++) {
+        const o = idx[j], k = wt[j], v = Math.max(px[o], px[o + 1], px[o + 2]) / 255, hot = Math.max(0, (v - 0.75) / 0.25) * 0.45;
+        for (let ch = 0; ch < 3; ch++) {
+          const t = Math.min(255, tint[ch] * Math.min(1, v * 1.25));
+          px[o + ch] = px[o + ch] * (1 - k) + (t + (255 - t) * hot) * k;
+        }
+      }
+    }
+    const encode = async () => { const blob = await new Promise((ok) => c.toBlob(ok, 'image/png')); return blob ? new Uint8Array(await blob.arrayBuffer()) : null; };
+    if (!animated) {
+      x.putImageData(base, 0, 0);
+      const png = await encode();
+      return png ? URL.createObjectURL(new Blob([png], { type: 'image/png' })) : null;
+    }
     const frames = [];
     for (let f = 0; f < GLOW_FRAMES; f++) {
       const t = (f / GLOW_FRAMES) * Math.PI * 2, out = new ImageData(new Uint8ClampedArray(px), w, h), d = out.data;
       for (let j = 0; j < idx.length; j++) {
         const o = idx[j], sw = Math.sin(t + ph[j] * 1.6) * wt[j] * GLOW_AMP;
-        d[o] = px[o] * (1 + sw);                 // jaśniej w szczycie fali…
-        d[o + 1] = px[o + 1] * (1 + sw * 1.6);   // …i cieplej (więcej żółci)
-        d[o + 2] = px[o + 2] * (1 + sw * 0.6);
+        // czerwona lawa w szczycie fali cieplej (więcej żółci); przebarwiona – równo we wszystkich kanałach
+        d[o] = px[o] * (1 + sw);
+        d[o + 1] = px[o + 1] * (1 + sw * (tint ? 1 : 1.6));
+        d[o + 2] = px[o + 2] * (1 + sw * (tint ? 1 : 0.6));
       }
       x.putImageData(out, 0, 0);
-      const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
-      if (!blob) return null;
-      frames.push(readChunks(new Uint8Array(await blob.arrayBuffer())));
+      const png = await encode();
+      if (!png) return null;
+      frames.push(readChunks(png));
       await new Promise((ok) => setTimeout(ok, 0));   // nie blokuj gry
     }
     return URL.createObjectURL(buildApng(frames, w, h));
   }
+  const shimmer = (url) => lavaImage(url, null, true);
+
+  // Tooltipy: lawa w ramie i pęknięcia-podkreślenia w kolorze rangi przedmiotu (zwykłe zostają czerwone).
+  // Wersje trafiają do zmiennych CSS na <html> (--tmg-tip-<ranga>, --tmg-ul-<ranga>), czytanych w cssTooltips.
+  const RARITY = { uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
+  const TINTED = { tip: 'tipFrame', ul: 'underline' };
+  let tintStatic = null, tintAnim = null;
+  const buildTints = (animated) => (async () => {
+    const m = {};
+    for (const [rk, col] of Object.entries(RARITY)) for (const [pre, key] of Object.entries(TINTED)) {
+      try { const u = await lavaImage(IMG[key], col, animated); if (u) m[`--tmg-${pre}-${rk}`] = u; } catch (e) { /* zostaje czerwona */ }
+    }
+    return m;
+  })();
+  const setTints = (m) => { for (const [k, v] of Object.entries(m)) root.style.setProperty(k, `url("${v}")`); };
 
   let glowMap = null, glowOn = false;
   const reducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
@@ -1520,14 +1556,19 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     const want = () => enabled() && effects() && !(reducedMotion && reducedMotion.matches);
     if (want()) {
       const m = await buildGlow();
-      if (!want() || glowOn || !m.size) return;
+      const tints = await (tintAnim || (tintAnim = buildTints(true)));
+      if (!want()) return;
+      setTints(tints);
+      if (glowOn || !m.size) return;
       let t = baseCss;
       for (const [from, to] of m) t = t.split(from).join(to);
       style.textContent = t;
       glowOn = true;
-    } else if (glowOn) {
-      style.textContent = baseCss;
-      glowOn = false;
+    } else {
+      const tints = await (tintStatic || (tintStatic = buildTints(false)));
+      if (want()) return;
+      setTints(tints);
+      if (glowOn) { style.textContent = baseCss; glowOn = false; }
     }
   };
 
