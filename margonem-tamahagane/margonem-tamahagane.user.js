@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.9.0
+// @version      2.9.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -24,6 +24,7 @@
 // @resource     tmgWinTitle  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/okno-tytul.webp
 // @resource     tmgButton    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przycisk.webp
 // @resource     tmgColumn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-tlo.webp
+// @resource     tmgColTile   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-kafel.webp
 // @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
@@ -49,7 +50,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.9.0';
+  const VERSION = '2.9.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -81,7 +82,8 @@
     winFrame: res('tmgWinFrame', 'okno-rama.webp'),    // 256×258, rama okien: kamienie z lawą, kolce w narożnikach (9-slice, wycinek 32)
     winTitle: res('tmgWinTitle', 'okno-tytul.webp'),   // 300×130, tytuł okna: żelazna płytka z lawą, zakrzywione kolce na końcach (końce 62 px)
     button: res('tmgButton', 'przycisk.webp'),         // 150×78, przycisk: czarny lakier w kutej oprawie z nitami (9-slice, wycinek 22)
-    column: res('tmgColumn', 'kolumna-tlo.webp'),      // 384×384, tło kolumn: czarne drewno, czerwony dym u dołu
+    column: res('tmgColumn', 'kolumna-tlo.webp'),      // 384×384, dół kolumn: czarne drewno, czerwony dym (góra miękko wygaszona)
+    colTile: res('tmgColTile', 'kolumna-kafel.webp'),  // 384×150, kafel drewna powtarzany w pionie nad dołem kolumny (bez szwu)
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
@@ -445,7 +447,7 @@ ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
    * ===================================================================== */
   const cssChat = `
 ${N} .interface-layer > .left-column.main-column,
-${N} .new-chat-window { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, var(--tmg-k0) !important; }
+${N} .new-chat-window { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, url("${IMG.colTile}") center top / 100% auto repeat-y, var(--tmg-k0) !important; }
 /* listwy kolumn: pionowa belka czarnego lakieru z czerwonym sznurem pośrodku */
 ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
@@ -523,7 +525,7 @@ ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
    * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
    * ===================================================================== */
   const cssInventory = `
-${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, var(--tmg-k0) !important; }
+${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, url("${IMG.colTile}") center top / 100% auto repeat-y, var(--tmg-k0) !important; }
 ${N} .interface-element-grid-border,
 ${N} .interface-element-grid-border-light {
   outline-color: var(--tmg-k0) !important;

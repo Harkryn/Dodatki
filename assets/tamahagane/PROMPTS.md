@@ -72,3 +72,6 @@ Stylized hand-painted dark fantasy game UI tooltip panel, front view, square, a 
 
 ## tooltip-tlo.webp (Z-Image Turbo 4:3, przyciemniony lokalnie, 640×480; skrypt przebarwia chmury na kolor rangi)
 Full-frame flat texture, hand-painted stylized: deep warm black lacquer surface (#0b0707) with very faint soft drifting smoke wisps in dark warm grey and a subtle hint of deep crimson, like diluted sumi-e ink wash clouds spread across the whole surface, very low contrast, no blue, no teal, no frame, no border, no objects, no symbols, no letters, fills the whole image edge to edge
+
+## kolumna-kafel.webp (pochodna kolumna-tlo.webp, bez nowego promptu)
+Górne 150 px kolumna-tlo (samo drewno) z przenikaniem 46 px, żeby kafel łączył się bez szwu w pionie. kolumna-tlo.webp dostał wygaszoną alfą górę (90 px), więc przechodzi w kafel – tło kolumn sięga pełnej wysokości ekranu.
