@@ -1,4 +1,4 @@
-# Oni – prompty grafik
+# Tamahagane – prompty grafik
 
 Generowane w Hugging Face (Z-Image Turbo), dalej obrobione lokalnie (Pillow).
 

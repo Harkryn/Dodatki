@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Margonem – Oni
+// @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.14.1
-// @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
+// @version      2.0.0
+// @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -12,23 +12,21 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_getResourceURL
-// @resource     oniLiquid https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ciecz-orba.webp
-// @resource     oniMask   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/maska-oni.webp
-// @resource     oniBar    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/pasek-tlo.webp
-// @resource     oniSlot   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ramka-slotu.webp
-// @resource     oniRing   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/rama-orba.webp
-// @resource     oniSeparator https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/separator.webp
-// @resource     oniMaskSide  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/maska-boczna.webp
-// @resource     oniGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ikona-zlota.webp
-// @resource     oniTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ikona-smoczych-lez.webp
-// @resource     oniPlate     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/rama-tabliczki.webp
-// @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
-// @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
+// @resource     tmgLiquid https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ciecz-orba.webp
+// @resource     tmgBar    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/pasek-tlo.webp
+// @resource     tmgSlot   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-slotu.webp
+// @resource     tmgRing   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-orba.webp
+// @resource     tmgSeparator https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/separator.webp
+// @resource     tmgGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ikona-zlota.webp
+// @resource     tmgTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ikona-smoczych-lez.webp
+// @resource     tmgPlate     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki.webp
+// @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
+// @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-tamahagane/margonem-tamahagane.user.js
 // ==/UserScript==
 
 /*
- * Budowa (jak w Dark Gothic): wszystkie reguły są pod html.oni-on.oni-ni, więc wyłączenie motywu
- * to zdjęcie jednej klasy. Klasa oni-ni pojawia się dopiero po wykryciu nowego interfejsu –
+ * Budowa (jak w Dark Gothic): wszystkie reguły są pod html.tmg-on.tmg-ni, więc wyłączenie motywu
+ * to zdjęcie jednej klasy. Klasa tmg-ni pojawia się dopiero po wykryciu nowego interfejsu –
  * w starym interfejsie (SI) skrypt kończy się od razu i niczego nie dodaje.
  * Sekcje: ZMIENNE · BAZOWE · OKNA · CZAT · EKWIPUNEK · TOOLTIPY · WALKA · PASKI · ANIMACJE · PRZEŁĄCZNIK
  */
@@ -41,37 +39,35 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.14.1';
-  const ON = 'oni-on';          // motyw włączony
-  const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
-  const KEY_ON = 'oni-enabled';
-  const KEY_FX = 'oni-effects';
+  const VERSION = '2.0.0';
+  const ON = 'tmg-on';          // motyw włączony
+  const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
+  const KEY_ON = 'tmg-enabled';
+  const KEY_FX = 'tmg-effects';
   const root = document.documentElement;
 
   const get = (k, d) => { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch (e) { return d; } };
   const set = (k, v) => { try { if (typeof GM_setValue === 'function') GM_setValue(k, v); } catch (e) { /* brak GM */ } };
 
   // N – reguły nowego interfejsu; W – zwykłe okno NI (bez przezroczystych i dymków)
-  const N = `html.${ON}.oni-ni`;
+  const N = `html.${ON}.tmg-ni`;
   const W = `${N} .border-window:not(.transparent):not(.tip-window)`;
 
   // Grafiki: @resource (Tampermonkey trzyma je lokalnie), bez GM_getResourceURL – raw link do repo.
-  const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/';
+  const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/';
   const res = (name, file) => {
     try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return u; } } catch (e) { /* brak zasobu */ }
     return RAW + file;
   };
   const IMG = {
-    liquid: res('oniLiquid', 'ciecz-orba.webp'),  // 256×256, kafel bez szwów: płynny żar w czarnej wodzie (ciecz orba HP)
-    mask: res('oniMask', 'maska-oni.webp'),       // 179×256, malowana maska Oni z żarzącymi się oczami (końce dolnego paska)
-    bar: res('oniBar', 'pasek-tlo.webp'),         // 107×120, kafel bez szwów: malowany czarny lakier belki
-    slot: res('oniSlot', 'ramka-slotu.webp'),     // 74×80, ramka slotu: poszarpane żelazo z żarem
-    ring: res('oniRing', 'rama-orba.webp'),       // 248×264, rama orba: pierścień z chmurami, pęknięcia z żarem, rogi
-    separator: res('oniSeparator', 'separator.webp'), // 50×120, czerwone pociągnięcie pędzla sumi-e
-    maskSide: res('oniMaskSide', 'maska-boczna.webp'), // 175×256, maska Oni w ujęciu 3/4 patrząca w lewo (boki górnej tabliczki)
-    gold: res('oniGold', 'ikona-zlota.webp'),         // 64×51, stos monet koban
-    tears: res('oniTears', 'ikona-smoczych-lez.webp'), // 47×64, czerwony kryształ łzy z ogniem
-    plate: res('oniPlate', 'rama-tabliczki.webp')      // 600×205, rama górnej tabliczki z gniazdami na maski
+    liquid: res('tmgLiquid', 'ciecz-orba.webp'),  // 256×256, kafel bez szwów: płynny żar w czarnej wodzie (ciecz orba HP)
+    bar: res('tmgBar', 'pasek-tlo.webp'),         // 107×120, kafel bez szwów: malowany czarny lakier belki
+    slot: res('tmgSlot', 'ramka-slotu.webp'),     // 74×80, ramka slotu: poszarpane żelazo z żarem
+    ring: res('tmgRing', 'rama-orba.webp'),       // 248×264, rama orba: pierścień z chmurami, pęknięcia z żarem, rogi
+    separator: res('tmgSeparator', 'separator.webp'), // 50×120, czerwone pociągnięcie pędzla sumi-e
+    gold: res('tmgGold', 'ikona-zlota.webp'),         // 64×51, stos monet koban
+    tears: res('tmgTears', 'ikona-smoczych-lez.webp'), // 47×64, czerwony kryształ łzy z ogniem
+    plate: res('tmgPlate', 'rama-tabliczki.webp')      // 600×205, rama górnej tabliczki z gniazdami na maski
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -156,11 +152,6 @@
     `<rect x='17.6' y='14.5' width='4.8' height='11' rx='2.2' fill='#9e1b1b' stroke='#000' stroke-width='.8'/>` +
     `</svg>`);
 
-  // Znak wodny w tle okien: 鬼 (oni) w kręgu, prawie niewidoczny (krycie 6%) – tylko dekoracja
-  const WATERMARK = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160' opacity='.06'>` +
-    `<circle cx='80' cy='80' r='70' fill='none' stroke='#9e1b1b' stroke-width='3' stroke-dasharray='300 40 60 40'/>` +
-    `<text x='80' y='108' text-anchor='middle' font-size='84' font-family='serif' fill='#9e1b1b'>鬼</text></svg>`);
 
   // Lupa pól wyszukiwania
   const SEARCH_ICON = svgUrl(
@@ -175,28 +166,28 @@
    * ===================================================================== */
   const cssVars = `
 :root {
-  --oni-k0: #070505;
-  --oni-k1: #0e0a0a;
-  --oni-k2: #161010;
-  --oni-k3: #1f1716;            /* podniesiona płytka, aktywna zakładka */
-  --oni-edge: #2a1f1d;          /* krawędź lakieru */
-  --oni-edge-hi: #3a2b28;
-  --oni-r1: #5c0d0d;
-  --oni-r2: #7a1212;
-  --oni-r3: #9e1b1b;
-  --oni-hi: #c42a2a;            /* tylko najważniejsze */
-  --oni-gold: #8a6a3a;          /* okucia, bardzo rzadko */
-  --oni-text: #e6dccf;          /* papier washi */
-  --oni-dim: #8f8478;
-  --oni-ember: 0 0 8px rgb(196 42 42 / .45), 0 0 2px rgb(196 42 42 / .6);   /* żarzący się węgiel */
+  --tmg-k0: #070505;
+  --tmg-k1: #0e0a0a;
+  --tmg-k2: #161010;
+  --tmg-k3: #1f1716;            /* podniesiona płytka, aktywna zakładka */
+  --tmg-edge: #2a1f1d;          /* krawędź lakieru */
+  --tmg-edge-hi: #3a2b28;
+  --tmg-r1: #5c0d0d;
+  --tmg-r2: #7a1212;
+  --tmg-r3: #9e1b1b;
+  --tmg-hi: #c42a2a;            /* tylko najważniejsze */
+  --tmg-gold: #8a6a3a;          /* okucia, bardzo rzadko */
+  --tmg-text: #e6dccf;          /* papier washi */
+  --tmg-dim: #8f8478;
+  --tmg-ember: 0 0 8px rgb(196 42 42 / .45), 0 0 2px rgb(196 42 42 / .6);   /* żarzący się węgiel */
   /* połysk lakieru urushi: miękkie światło z góry, głęboka czerń niżej */
-  --oni-urushi: linear-gradient(170deg, rgb(255 235 220 / .035) 0, rgb(255 235 220 / 0) 38%),
-                linear-gradient(var(--oni-k2), var(--oni-k1) 46px, var(--oni-k0));
-  --oni-font-title: "Shojumaru", "Yuji Syuku", Georgia, serif;
-  --oni-frame: ${FRAME};
-  --oni-frame-thin: ${FRAME_THIN};
-  --oni-brush: ${BRUSH_RED};
-  --oni-brush-dim: ${BRUSH_DIM};
+  --tmg-urushi: linear-gradient(170deg, rgb(255 235 220 / .035) 0, rgb(255 235 220 / 0) 38%),
+                linear-gradient(var(--tmg-k2), var(--tmg-k1) 46px, var(--tmg-k0));
+  --tmg-font-title: "Shojumaru", "Yuji Syuku", Georgia, serif;
+  --tmg-frame: ${FRAME};
+  --tmg-frame-thin: ${FRAME_THIN};
+  --tmg-brush: ${BRUSH_RED};
+  --tmg-brush-dim: ${BRUSH_DIM};
 }
 `;
 
@@ -204,44 +195,44 @@
    * === BAZOWE (cała strona gry NI: zaznaczenie, scrollbary, pola, przełączniki) ===
    * ===================================================================== */
   const cssBase = `
-${N} ::selection { background: var(--oni-r2); color: #fff; }
-${N} * { scrollbar-color: var(--oni-edge-hi) var(--oni-k0); }
+${N} ::selection { background: var(--tmg-r2); color: #fff; }
+${N} * { scrollbar-color: var(--tmg-edge-hi) var(--tmg-k0); }
 ${N} ::-webkit-scrollbar { width: 8px; height: 8px; }
-${N} ::-webkit-scrollbar-track { background: var(--oni-k0); }
-${N} ::-webkit-scrollbar-thumb { background: linear-gradient(90deg, var(--oni-edge), var(--oni-edge-hi), var(--oni-edge)); border: 1px solid #000; border-radius: 4px; }
-${N} ::-webkit-scrollbar-thumb:hover { background: var(--oni-r2); }
-${N} ::-webkit-scrollbar-corner { background: var(--oni-k0); }
+${N} ::-webkit-scrollbar-track { background: var(--tmg-k0); }
+${N} ::-webkit-scrollbar-thumb { background: linear-gradient(90deg, var(--tmg-edge), var(--tmg-edge-hi), var(--tmg-edge)); border: 1px solid #000; border-radius: 4px; }
+${N} ::-webkit-scrollbar-thumb:hover { background: var(--tmg-r2); }
+${N} ::-webkit-scrollbar-corner { background: var(--tmg-k0); }
 
 /* suwaki gry (własne, nie natywne): rowek z czarnego lakieru, uchwyt jak płytka zbroi */
-${N} .scrollbar-wrapper .track { background: var(--oni-k0) !important; box-shadow: inset 0 0 0 1px var(--oni-edge); }
+${N} .scrollbar-wrapper .track { background: var(--tmg-k0) !important; box-shadow: inset 0 0 0 1px var(--tmg-edge); }
 ${N} .scrollbar-wrapper .handle {
-  background: linear-gradient(90deg, #0b0808, var(--oni-edge-hi) 50%, #0b0808) !important;
+  background: linear-gradient(90deg, #0b0808, var(--tmg-edge-hi) 50%, #0b0808) !important;
   box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgb(255 235 220 / .06) !important;
   border-radius: 2px;
 }
-${N} .scrollbar-wrapper .handle:hover { background: linear-gradient(90deg, #1a0606, var(--oni-r2) 50%, #1a0606) !important; }
+${N} .scrollbar-wrapper .handle:hover { background: linear-gradient(90deg, #1a0606, var(--tmg-r2) 50%, #1a0606) !important; }
 
 /* pola tekstowe: czarna wnęka, karetka i obrys przy fokusie w czerwieni */
 ${N} input[type="text"], ${N} input[type="number"], ${N} input[type="search"], ${N} input[type="password"],
 ${N} input:not([type]), ${N} textarea, ${N} select {
-  background-color: var(--oni-k0) !important;
-  color: var(--oni-text) !important;
-  border-color: var(--oni-edge-hi) !important;
-  caret-color: var(--oni-hi);
+  background-color: var(--tmg-k0) !important;
+  color: var(--tmg-text) !important;
+  border-color: var(--tmg-edge-hi) !important;
+  caret-color: var(--tmg-hi);
 }
 ${N} input:focus, ${N} textarea:focus, ${N} select:focus, ${N} [contenteditable="true"]:focus {
   outline: none !important;
-  border-color: var(--oni-r3) !important;
-  box-shadow: 0 0 0 1px var(--oni-r2), 0 0 6px rgb(158 27 27 / .35) !important;
+  border-color: var(--tmg-r3) !important;
+  box-shadow: 0 0 0 1px var(--tmg-r2), 0 0 6px rgb(158 27 27 / .35) !important;
 }
-${N} input::placeholder, ${N} textarea::placeholder { color: var(--oni-dim) !important; opacity: 1; }
+${N} input::placeholder, ${N} textarea::placeholder { color: var(--tmg-dim) !important; opacity: 1; }
 
 /* pola wyszukiwania */
 ${N} .search-component {
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
-  background: ${SEARCH_ICON} 8px 50% / 12px 12px no-repeat, var(--oni-k0) !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  background: ${SEARCH_ICON} 8px 50% / 12px 12px no-repeat, var(--tmg-k0) !important;
   background-clip: border-box !important;
   background-origin: border-box !important;
   box-shadow: inset 0 0 8px rgb(0 0 0 / .8);
@@ -249,38 +240,38 @@ ${N} .search-component {
 
 /* przełączniki (c-checkbox) */
 ${N} .c-checkbox__label::before {
-  background: var(--oni-k0) !important;
-  border-color: var(--oni-edge-hi) !important;
+  background: var(--tmg-k0) !important;
+  border-color: var(--tmg-edge-hi) !important;
   box-shadow: inset 0 1px 3px #000 !important;
   border-radius: 2px;
 }
-${N} .c-checkbox__label:hover::before { border-color: var(--oni-r3) !important; }
+${N} .c-checkbox__label:hover::before { border-color: var(--tmg-r3) !important; }
 ${N} .c-checkbox input:checked + .c-checkbox__label::before {
-  background: linear-gradient(var(--oni-r3), var(--oni-r1)) !important;
-  border-color: var(--oni-hi) !important;
-  box-shadow: var(--oni-ember) !important;
+  background: linear-gradient(var(--tmg-r3), var(--tmg-r1)) !important;
+  border-color: var(--tmg-hi) !important;
+  box-shadow: var(--tmg-ember) !important;
 }
 
 /* listy z grupami (ustawienia, rzemiosło): wybrana pozycja z czerwoną kreską */
 ${N} .one-item-on-divide-list.active {
   background: linear-gradient(90deg, rgb(122 18 18 / .3), transparent 80%) !important;
-  box-shadow: inset 2px 0 0 var(--oni-r3);
+  box-shadow: inset 2px 0 0 var(--tmg-r3);
 }
 ${N} .one-item-on-divide-list:not(.active):hover { background: linear-gradient(90deg, rgb(122 18 18 / .14), transparent 80%) !important; }
 
 /* tabele (c-table) */
 ${N} .c-table th {
-  background: linear-gradient(var(--oni-k3), var(--oni-k1)) !important;
-  border-color: var(--oni-edge) !important;
-  box-shadow: inset 0 -1px 0 var(--oni-r2);
-  color: var(--oni-text) !important;
+  background: linear-gradient(var(--tmg-k3), var(--tmg-k1)) !important;
+  border-color: var(--tmg-edge) !important;
+  box-shadow: inset 0 -1px 0 var(--tmg-r2);
+  color: var(--tmg-text) !important;
   text-shadow: 0 1px 2px #000;
 }
-${N} .c-table td, ${N} .c-table tr, ${N} .c-table table { border-color: var(--oni-edge) !important; }
+${N} .c-table td, ${N} .c-table tr, ${N} .c-table table { border-color: var(--tmg-edge) !important; }
 ${N} .c-table td { background-color: rgb(7 5 5 / .55); }
 
 /* tekst rozjaśniony przez skaner czytelności (ciemny tekst z dawnego pergaminu) */
-${N} .oni-lt { color: var(--oni-c) !important; }
+${N} .tmg-lt { color: var(--tmg-c) !important; }
 `;
 
   /* =====================================================================
@@ -290,16 +281,15 @@ ${N} .oni-lt { color: var(--oni-c) !important; }
 /* --- okno zwykłe: skrzynia z czarnego lakieru w ramie z lamelkowych płytek i czerwonego sznura,
    mosiężne okucia w narożnikach. border-width zostaje 0 – układ okna gry bez zmian (outset 4 px). --- */
 ${W} {
-  border-image: var(--oni-frame) 16 / 8px / 4px stretch !important;
+  border-image: var(--tmg-frame) 16 / 8px / 4px stretch !important;
   border-radius: 0;
   background:
-    ${WATERMARK} right 10px bottom 8px / 92px 92px no-repeat,
-    var(--oni-urushi) !important;
+    var(--tmg-urushi) !important;
   background-clip: border-box !important;
   box-shadow: 0 0 0 4px rgb(0 0 0 / .55), 0 12px 30px rgb(0 0 0 / .85) !important;
-  color: var(--oni-text);
+  color: var(--tmg-text);
 }
-${W} > .content { background: transparent !important; color: var(--oni-text); }
+${W} > .content { background: transparent !important; color: var(--tmg-text); }
 
 /* tytuł: belka bramy torii z wygiętymi końcami, pędzlowe litery w kolorze washi */
 ${W} .header-label-positioner .header-label {
@@ -312,8 +302,8 @@ ${W} .header-label-positioner .header-label {
 ${W} .header-label-positioner .header-label .left-decor,
 ${W} .header-label-positioner .header-label .right-decor { background: none !important; }
 ${W} .header-label-positioner .header-label .text {
-  color: var(--oni-text) !important;
-  font-family: var(--oni-font-title) !important;
+  color: var(--tmg-text) !important;
+  font-family: var(--tmg-font-title) !important;
   font-weight: normal !important;
   letter-spacing: .05em;
   text-shadow: 0 1px 0 #000, 0 0 6px rgb(0 0 0 / .9) !important;
@@ -322,7 +312,7 @@ ${W} .header-label-positioner .header-label .text {
 /* zamknięcie: mała tsuba z „×”, przy najechaniu żarzy się czerwienią */
 ${W} .close-button-corner-decor { background: none !important; }
 ${W} .close-button-corner-decor .close-button {
-  background: radial-gradient(circle, var(--oni-k2) 52%, var(--oni-gold) 54% 60%, #000 62% 66%, transparent 68%) !important;
+  background: radial-gradient(circle, var(--tmg-k2) 52%, var(--tmg-gold) 54% 60%, #000 62% 66%, transparent 68%) !important;
   border-radius: 50%;
   filter: saturate(.8) brightness(.85);
 }
@@ -330,15 +320,15 @@ ${W} .close-button-corner-decor .close-button::after {
   content: "×";
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  color: var(--oni-dim); font: bold 14px/1 sans-serif;
+  color: var(--tmg-dim); font: bold 14px/1 sans-serif;
   pointer-events: none;
 }
 ${W} .close-button-corner-decor .close-button:hover {
   filter: none;
-  background: radial-gradient(circle, var(--oni-k2) 52%, var(--oni-r3) 54% 60%, #000 62% 66%, transparent 68%) !important;
-  box-shadow: var(--oni-ember);
+  background: radial-gradient(circle, var(--tmg-k2) 52%, var(--tmg-r3) 54% 60%, #000 62% 66%, transparent 68%) !important;
+  box-shadow: var(--tmg-ember);
 }
-${W} .close-button-corner-decor .close-button:hover::after { color: var(--oni-text); }
+${W} .close-button-corner-decor .close-button:hover::after { color: var(--tmg-text); }
 
 /* drobne ikony okien (przezroczystość, zwijanie, informacja): przygaszone, przy najechaniu ciepły żar */
 ${N} .border-window .increase-opacity,
@@ -356,20 +346,20 @@ ${N} .interface-element-card-background,
 ${N} .interface-element-card-background-stretch {
   border-color: transparent !important;
   border-image: none !important;
-  background: linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge), inset 0 1px 0 rgb(255 235 220 / .04) !important;
-  color: var(--oni-dim) !important;
+  background: linear-gradient(var(--tmg-k2), var(--tmg-k0)) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-edge), inset 0 1px 0 rgb(255 235 220 / .04) !important;
+  color: var(--tmg-dim) !important;
 }
-${N} .border-window .card:hover { color: var(--oni-text) !important; }
+${N} .border-window .card:hover { color: var(--tmg-text) !important; }
 ${N} .border-window .card.active,
 ${N} .interface-element-active-card-background,
 ${N} .interface-element-active-card-background-stretch,
 ${N} .interface-element-active-card-border-image {
   border-color: transparent !important;   /* bez tego ramka brała kolor tekstu */
   border-image: none !important;
-  background: var(--oni-brush) center bottom 1px / 86% 4px no-repeat, linear-gradient(var(--oni-k3), var(--oni-k1)) !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 1px 0 rgb(255 235 220 / .06) !important;
-  color: var(--oni-text) !important;
+  background: var(--tmg-brush) center bottom 1px / 86% 4px no-repeat, linear-gradient(var(--tmg-k3), var(--tmg-k1)) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-edge-hi), inset 0 1px 0 rgb(255 235 220 / .06) !important;
+  color: var(--tmg-text) !important;
 }
 
 /* --- okna przezroczyste (minimapa, obserwowane zadania, zegar…): półprzezroczysty lakier w cienkiej ramie --- */
@@ -377,11 +367,11 @@ ${N} .border-window.transparent .border-image {
   background: rgb(7 5 5 / .78) !important;
   border-style: solid;
   border-width: 0;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
   box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
 }
 ${N} .border-window.transparent .header-label .text {
-  color: var(--oni-text) !important;
+  color: var(--tmg-text) !important;
   text-shadow: 0 1px 2px #000 !important;
   letter-spacing: .04em;
 }
@@ -389,12 +379,12 @@ ${N} .border-window.transparent .header-label .text {
 /* --- małe okna podpowiedzi (tip-window) --- */
 ${N} .border-window.tip-window {
   border-style: solid !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
   background: rgb(14 10 10 / .96) !important;
   background-clip: border-box !important;
   box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
 }
-${N} .border-window.tip-window .content { background: transparent !important; color: var(--oni-text); }
+${N} .border-window.tip-window .content { background: transparent !important; color: var(--tmg-text); }
 ${N} .border-window.tip-window .header-label-positioner .header-label { background: none !important; }
 ${N} .border-window.tip-window .header-label-positioner .header-label .left-decor,
 ${N} .border-window.tip-window .header-label-positioner .header-label .right-decor { background: none !important; }
@@ -403,7 +393,7 @@ ${N} .border-window.tip-window .header-label-positioner .header-label .right-dec
 ${N} .border-window.mAlert .paper-background,
 ${N} .border-window.mAlert-mobile-layer .paper-background {
   background: rgb(14 10 10 / .97) !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge), inset 0 0 18px rgb(0 0 0 / .7);
+  box-shadow: inset 0 0 0 1px var(--tmg-edge), inset 0 0 18px rgb(0 0 0 / .7);
 }
 
 /* --- dymki nad postaciami (bubbledialog) – TODO: zweryfikuj selektor --- */
@@ -414,7 +404,7 @@ ${N} .bubbledialog .bg-layer .right-frame { background: none !important; }
 ${N} .bubbledialog .bg-layer {
   border-style: solid;
   border-width: 0;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
   background: rgb(14 10 10 / .95) !important;
 }
 
@@ -429,19 +419,19 @@ ${N} .interface-element-middle-4-background,
 ${N} .interface-element-wood-box-background {
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
   background: rgb(14 10 10 / .94) !important;
   background-clip: border-box !important;
   box-shadow: inset 0 0 16px rgb(0 0 0 / .7);
-  color: var(--oni-text);
+  color: var(--tmg-text);
 }
 ${N} .interface-element-background-color-1,
 ${N} .interface-element-background-color-2,
-${N} .interface-element-background-color-3 { background: var(--oni-k1) !important; color: var(--oni-text); }
+${N} .interface-element-background-color-3 { background: var(--tmg-k1) !important; color: var(--tmg-text); }
 ${N} .interface-element-green-box-background,
 ${N} .interface-element-green-box-background-stretch {
-  background: linear-gradient(90deg, var(--oni-k0), #1c0b0b 30%, #1c0b0b 70%, var(--oni-k0)) !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge);
+  background: linear-gradient(90deg, var(--tmg-k0), #1c0b0b 30%, #1c0b0b 70%, var(--tmg-k0)) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-edge);
 }
 /* nagłówki sekcji i paski: czarny pas z pędzlowym podkreśleniem */
 ${N} .interface-element-header-1-background,
@@ -458,27 +448,27 @@ ${N} .trade-window header .h_background .middle {
   border-image: none !important;
   border-color: transparent !important;
   background:
-    var(--oni-brush-dim) center bottom / 92% 3px no-repeat,
+    var(--tmg-brush-dim) center bottom / 92% 3px no-repeat,
     linear-gradient(90deg, transparent, rgb(22 16 16 / .95) 18%, rgb(22 16 16 / .95) 82%, transparent) !important;
   box-shadow: none !important;
 }
 ${N} .trade-window header .h_background .left,
 ${N} .trade-window header .h_background .right { background: none !important; }
-${N} .interface-element-header-1 { color: var(--oni-text); }
-${N} .interface-element-line-1-background { background: var(--oni-brush-dim) center / 100% 100% no-repeat !important; }
-${N} .interface-element-one-black-tile { background: linear-gradient(var(--oni-k1), var(--oni-k0)) !important; }
-${N} .interface-element-one-gray-tile { background: linear-gradient(var(--oni-k2), var(--oni-k1)) !important; }
-${N} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px var(--oni-edge), inset 0 0 14px #000 !important; }
+${N} .interface-element-header-1 { color: var(--tmg-text); }
+${N} .interface-element-line-1-background { background: var(--tmg-brush-dim) center / 100% 100% no-repeat !important; }
+${N} .interface-element-one-black-tile { background: linear-gradient(var(--tmg-k1), var(--tmg-k0)) !important; }
+${N} .interface-element-one-gray-tile { background: linear-gradient(var(--tmg-k2), var(--tmg-k1)) !important; }
+${N} .interface-element-box-shadow-2 { box-shadow: inset 0 0 0 1px var(--tmg-edge), inset 0 0 14px #000 !important; }
 ${N} .interface-element-border-window-frame,
 ${N} .additional-skill-panel .graphics .additional-skill-panel-border {
   border-style: solid !important;
-  border-image: var(--oni-frame) 16 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 16 / 8px / 0 stretch !important;
 }
 ${N} .interface-element-vertical-wood {
   border-style: solid !important;
   border-color: transparent !important;
-  border-image: var(--oni-frame-thin) 6 / 0 3px / 0 stretch !important;
-  background: var(--oni-k0) !important;
+  border-image: var(--tmg-frame-thin) 6 / 0 3px / 0 stretch !important;
+  background: var(--tmg-k0) !important;
   background-clip: border-box !important;
 }
 
@@ -487,17 +477,17 @@ ${N} .interface-element-vertical-wood {
 ${N} .button.green:not(.background-gold):not(.background-draconite),
 ${N} .button.purple:not(.green) {
   border-style: solid !important;
-  border-image: var(--oni-frame-thin) 6 / 3px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 3px / 0 stretch !important;
   background: linear-gradient(rgb(255 235 220 / .07), rgb(255 235 220 / 0) 45%), linear-gradient(#211816, #110c0b 55%, #090606) !important;
   box-shadow: 0 1px 3px rgb(0 0 0 / .7) !important;
 }
 ${N} .button.purple:not(.green) { box-shadow: inset 0 0 0 1px rgb(110 60 140 / .5), 0 1px 3px rgb(0 0 0 / .7) !important; }
 ${N} .button.green::before, ${N} .button.purple::before { box-shadow: none !important; background: none !important; }
-${N} .button .label { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .button .label { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .button.green:not(.background-gold):not(.background-draconite):not(.disable):not(.no-hover):hover,
 ${N} .button.purple:not(.green):not(.disable):hover {
   background: linear-gradient(rgb(255 235 220 / .09), rgb(255 235 220 / 0) 45%), linear-gradient(#2c1210, #170908 55%, #0c0505) !important;
-  box-shadow: inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-r3), var(--tmg-ember) !important;
 }
 ${N} .button.red { filter: saturate(.75) brightness(.85); }
 ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
@@ -510,28 +500,28 @@ ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
    * ===================================================================== */
   const cssChat = `
 ${N} .interface-layer > .left-column.main-column,
-${N} .new-chat-window { background: var(--oni-k0) !important; }
+${N} .new-chat-window { background: var(--tmg-k0) !important; }
 /* listwy kolumn: pionowa belka czarnego lakieru z czerwonym sznurem pośrodku */
 ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
   background:
-    linear-gradient(90deg, transparent 45%, var(--oni-r1) 45% 55%, transparent 55%),
-    linear-gradient(90deg, #000, var(--oni-edge-hi) 30%, var(--oni-k2) 50%, var(--oni-edge-hi) 70%, #000) !important;
+    linear-gradient(90deg, transparent 45%, var(--tmg-r1) 45% 55%, transparent 55%),
+    linear-gradient(90deg, #000, var(--tmg-edge-hi) 30%, var(--tmg-k2) 50%, var(--tmg-edge-hi) 70%, #000) !important;
   border-image: none !important;
 }
 /* wiadomości */
 ${N} .new-chat-window .chat-message-wrapper {
   background: radial-gradient(ellipse 120% 70px at 50% 0, rgb(122 18 18 / .1), transparent), rgb(7 5 5 / .93) !important;
-  border-top-color: var(--oni-edge) !important;
-  border-bottom-color: var(--oni-edge) !important;
+  border-top-color: var(--tmg-edge) !important;
+  border-bottom-color: var(--tmg-edge) !important;
   box-shadow: inset 0 0 14px 2px rgb(0 0 0 / .85) !important;
 }
 ${N} .new-chat-window .new-chat-message { text-shadow: 0 1px 1px rgb(0 0 0 / .95); }
-${N} .new-chat-window .new-chat-message .ts-section { color: var(--oni-dim) !important; }
-${N} .new-chat-window .new-chat-message .author-section.click-able:hover { text-decoration: underline; text-decoration-color: var(--oni-r3); }
+${N} .new-chat-window .new-chat-message .ts-section { color: var(--tmg-dim) !important; }
+${N} .new-chat-window .new-chat-message .author-section.click-able:hover { text-decoration: underline; text-decoration-color: var(--tmg-r3); }
 /* pasek zakładek kanałów: lakier, pod nim pędzlowa kreska */
 ${N} .new-chat-window .chat-channel-card-wrapper {
-  background: var(--oni-brush-dim) center bottom / 96% 3px no-repeat, linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
+  background: var(--tmg-brush-dim) center bottom / 96% 3px no-repeat, linear-gradient(var(--tmg-k2), var(--tmg-k0)) !important;
   border-image: none !important;
   box-shadow: 0 2px 6px rgb(0 0 0 / .8);
 }
@@ -542,7 +532,7 @@ ${N} .new-chat-window .chat-channel-card .chat-channel-card-icon {
 }
 ${N} .new-chat-window .chat-channel-card:hover .chat-channel-card-icon { filter: grayscale(1) sepia(.3) brightness(.95); }
 ${N} .new-chat-window .chat-channel-card.active {
-  background: var(--oni-brush) center bottom 1px / 80% 3px no-repeat !important;
+  background: var(--tmg-brush) center bottom 1px / 80% 3px no-repeat !important;
 }
 ${N} .new-chat-window .chat-channel-card.active .chat-channel-card-icon {
   filter: grayscale(1) sepia(.35) brightness(1.15) drop-shadow(0 0 3px rgb(196 42 42 / .55));
@@ -550,14 +540,14 @@ ${N} .new-chat-window .chat-channel-card.active .chat-channel-card-icon {
 ${N} .new-chat-window .chat-channel-card.channel-disabled .chat-channel-card-icon { filter: grayscale(1) brightness(.28); }
 /* licznik nieprzeczytanych – jedno z niewielu miejsc z jasną czerwienią (#fff na #c42a2a ≈ 5:1) */
 ${N} .new-chat-window .chat-channel-not-read-counter {
-  background: var(--oni-hi) !important;
+  background: var(--tmg-hi) !important;
   color: #fff !important;
   box-shadow: 0 0 0 1px #000, 0 0 6px rgb(196 42 42 / .6);
 }
 /* pasek pod wiadomościami i pole wpisywania */
 ${N} .new-chat-window .chat-input-wrapper {
-  background: linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
-  box-shadow: inset 0 1px 0 var(--oni-r1) !important;
+  background: linear-gradient(var(--tmg-k2), var(--tmg-k0)) !important;
+  box-shadow: inset 0 1px 0 var(--tmg-r1) !important;
 }
 ${N} .new-chat-window .chat-input-wrapper .chat-info-wrapper,
 ${N} .new-chat-window .chat-input-wrapper .chat-config-wrapper { filter: grayscale(1) sepia(.3) brightness(.8); }
@@ -565,20 +555,20 @@ ${N} .new-chat-window .chat-input-wrapper .chat-info-wrapper:hover,
 ${N} .new-chat-window .chat-input-wrapper .chat-config-wrapper:hover { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(.95); }
 ${N} .new-chat-window .magic-input-wrapper { padding: 0 4px 4px; }
 ${N} .new-chat-window .magic-input {
-  background: var(--oni-k0) !important;
+  background: var(--tmg-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
-  color: var(--oni-text) !important;
-  caret-color: var(--oni-hi);
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
+  color: var(--tmg-text) !important;
+  caret-color: var(--tmg-hi);
 }
-${N} .new-chat-window .magic-input-placeholder { color: var(--oni-dim) !important; }
+${N} .new-chat-window .magic-input-placeholder { color: var(--tmg-dim) !important; }
 /* menu kanału (lista wyboru nad polem) i powiadomienia czatu */
 ${N} .new-chat-window .control-wrapper .card-list,
 ${N} .new-chat-window .menu-card {
   background: rgb(14 10 10 / .97) !important;
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--oni-edge) !important;
-  color: var(--oni-text) !important;
+  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--tmg-edge) !important;
+  color: var(--tmg-text) !important;
 }
 ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
 `;
@@ -588,21 +578,21 @@ ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
    * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
    * ===================================================================== */
   const cssInventory = `
-${N} .interface-layer > .right-column.main-column { background: var(--oni-k0) !important; }
+${N} .interface-layer > .right-column.main-column { background: var(--tmg-k0) !important; }
 ${N} .interface-element-grid-border,
 ${N} .interface-element-grid-border-light {
-  outline-color: var(--oni-k0) !important;
-  box-shadow: 0 0 0 1px var(--oni-edge), 0 0 0 2px #000 !important;
+  outline-color: var(--tmg-k0) !important;
+  box-shadow: 0 0 0 1px var(--tmg-edge), 0 0 0 2px #000 !important;
 }
 ${N} .interface-layer .equipment-outline-2,
-${N} .interface-layer .equipment-outline-3 { background-color: var(--oni-edge) !important; }
+${N} .interface-layer .equipment-outline-3 { background-color: var(--tmg-edge) !important; }
 
 /* siatka slotów (torba, sklep, skrzynie): wklęsłe komórki z czarnego lakieru, kratka w bardzo ciemnej czerwieni
    (wzór co 33 px jak siatka gry) */
 ${N} .interface-element-item-slot-grid-stretch,
 ${N} .interface-element-one-item-slot-background-to-repeat {
   filter: none !important;
-  background-color: var(--oni-k0) !important;
+  background-color: var(--tmg-k0) !important;
   background-image:
     linear-gradient(90deg, transparent 32px, #2a0a0a 32px),
     linear-gradient(transparent 32px, #2a0a0a 32px),
@@ -616,16 +606,16 @@ ${N} .interface-element-item-slot-grid-stretch::after {
   position: absolute; inset: 0;
   pointer-events: none;
   background: linear-gradient(115deg, transparent 42%, rgb(158 27 27 / .55) 50%, transparent 58%) 0 0 / 300% 100% no-repeat;
-  --oni-grid-mask:
+  --tmg-grid-mask:
     linear-gradient(90deg, transparent 32px, #000 32px) 0 0 / 33px 33px,
     linear-gradient(transparent 32px, #000 32px) 0 0 / 33px 33px;
-  -webkit-mask: var(--oni-grid-mask);
-  mask: var(--oni-grid-mask);
-  animation: oni-shine 11s linear infinite;
+  -webkit-mask: var(--tmg-grid-mask);
+  mask: var(--tmg-grid-mask);
+  animation: tmg-shine 11s linear infinite;
 }
 ${N} .interface-element-one-item-slot-2 {
-  background: radial-gradient(circle at 50% 40%, #1a1312, var(--oni-k0) 75%) !important;
-  border-color: var(--oni-edge) !important;
+  background: radial-gradient(circle at 50% 40%, #1a1312, var(--tmg-k0) 75%) !important;
+  border-color: var(--tmg-edge) !important;
   outline-color: #000 !important;
   box-shadow: inset 0 0 8px #000 !important;
 }
@@ -636,7 +626,7 @@ ${N} .interface-layer > .right-column.main-column .bags-navigation-bg,
 ${N} .interface-layer > .right-column.main-column .inventory-grid-bg {
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 4px stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 4px stretch !important;
   box-shadow: 0 0 0 4px rgb(7 5 5 / .95), 0 4px 12px 4px rgb(0 0 0 / .7) !important;
   outline: none !important;
 }
@@ -647,48 +637,48 @@ ${N} .interface-layer > .right-column.main-column .equipment-wrapper-outline {
 ${N} .interface-layer > .right-column.main-column .equipment-wrapper .eq-slot.interface-element-one-item-slot-background-to-repeat {
   background: radial-gradient(circle at 50% 40%, #1c1412, #080505 72%) !important;
   background-size: auto !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge), inset 0 2px 6px #000, inset 0 -1px 0 rgb(122 18 18 / .45) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-edge), inset 0 2px 6px #000, inset 0 -1px 0 rgb(122 18 18 / .45) !important;
   border-radius: 2px;
 }
 ${N} .interface-layer > .right-column.main-column .bags-navigation-bg .bag-slot-wrapper {
   background: radial-gradient(circle at 50% 40%, #1c1412, #080505 75%) !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-edge) !important;
 }
 ${N} .interface-layer > .right-column.main-column .bags-navigation .item.bag.active {
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--oni-r3), 0 0 8px rgb(196 42 42 / .45) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--tmg-r3), 0 0 8px rgb(196 42 42 / .45) !important;
   border-radius: 2px;
 }
 
 /* panel statystyk: lakier w cienkiej ramie, „STATS” pędzlem, wiersze rozdzielone pociągnięciem pędzla.
    Kolory odporności (ogień, zimno…) zostają z gry. */
 ${N} .interface-layer .stats-wrapper {
-  background: var(--oni-urushi) !important;
+  background: var(--tmg-urushi) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
   box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .8) !important;
   outline: none !important;
 }
 ${N} .interface-layer .stats-wrapper .header-title-wrapper .interface-element-active-card-background-stretch {
-  background: var(--oni-brush) center bottom / 70% 3px no-repeat !important;
+  background: var(--tmg-brush) center bottom / 70% 3px no-repeat !important;
   border-image: none !important;
   box-shadow: none !important;
 }
 ${N} .interface-layer .stats-wrapper .header-title {
-  color: var(--oni-text) !important;
-  font-family: var(--oni-font-title) !important;
+  color: var(--tmg-text) !important;
+  font-family: var(--tmg-font-title) !important;
   letter-spacing: .08em;
   text-shadow: 0 1px 2px #000 !important;
 }
 ${N} .interface-layer .stats-wrapper .stats-list li { position: relative; }
 ${N} .interface-layer .stats-wrapper .stats-list li + li::before {
   content: ""; position: absolute; left: 2px; right: -26px; top: 0; height: 2px;
-  background: var(--oni-brush-dim) left center / 100% 100% no-repeat;
+  background: var(--tmg-brush-dim) left center / 100% 100% no-repeat;
   opacity: .6;
 }
 ${N} .interface-layer .stats-wrapper .stats-list .stat-icon { filter: grayscale(1) sepia(.3) brightness(.95) drop-shadow(0 1px 1px #000); }
 ${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value,
-${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat { color: var(--oni-text) !important; }
+${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat { color: var(--tmg-text) !important; }
 ${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px #000, 0 0 3px #000 !important; }
 
 /* --- sklep: markiza jako ciemnoczerwona kurtyna noren, pola kupna/sprzedaży jak torba --- */
@@ -696,9 +686,9 @@ ${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) sepia(1) hue-
 ${N} .shop-wrapper .shop-background .paper-1,
 ${N} .shop-wrapper .shop-background .paper-2 { filter: grayscale(1) brightness(.18) !important; }
 ${N} .shop-wrapper .shop-info-wrapper,
-${N} .shop-wrapper .shop-info-wrapper * { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
-${N} .shop-wrapper .total-price { color: var(--oni-text) !important; letter-spacing: .04em; }
-${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--oni-edge) !important; }
+${N} .shop-wrapper .shop-info-wrapper * { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .shop-wrapper .total-price { color: var(--tmg-text) !important; letter-spacing: .04em; }
+${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--tmg-edge) !important; }
 
 /* --- przyciski HUD (widżety): płytki czarnego lakieru z mosiężnym obrzeżem; ikony gry przygaszone do
    koloru starego papieru, przy najechaniu żarzą się. Kolory stanów gry zostają jako obrys. --- */
@@ -714,13 +704,13 @@ ${N} .widget-button .icon {
   filter: grayscale(1) sepia(.35) brightness(.95) drop-shadow(0 1px 0 #000) !important;
   opacity: .92;
 }
-${N} .widget-button:not(.disabled):hover { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; }
+${N} .widget-button:not(.disabled):hover { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--tmg-r3), var(--tmg-ember) !important; }
 ${N} .widget-button:not(.disabled):hover .icon,
 ${N} .widget-button.window-is-open .icon {
   filter: grayscale(1) sepia(.6) brightness(1.15) drop-shadow(0 1px 0 #000) drop-shadow(0 0 3px rgb(196 42 42 / .6)) !important;
   opacity: 1;
 }
-${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--oni-r2), inset 0 -2px 0 var(--oni-r3) !important; }
+${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--tmg-r2), inset 0 -2px 0 var(--tmg-r3) !important; }
 ${N} .widget-button.red { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(196 42 42 / .9) !important; }
 ${N} .widget-button.blue { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(80 130 210 / .7) !important; }
 ${N} .widget-button.violet, ${N} .widget-button.blink-violet { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(150 90 200 / .7) !important; }
@@ -730,68 +720,68 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
   /* =====================================================================
    * === TOOLTIPY ===
    * Karta z czarnego lakieru (#0e0a0a / 97%) – tekst washi ~15:1, przygaszony ~5,4:1 (WCAG AA).
-   * Kolor rzadkości (--oni-rar, „r g b”) z klasy ramki ikony w nagłówku (t-…): obwódka, górna linia,
+   * Kolor rzadkości (--tmg-rar, „r g b”) z klasy ramki ikony w nagłówku (t-…): obwódka, górna linia,
    * łuna i oprawa ikony. Nazwy i statystyki zachowują kolory gry. Zwykłe przedmioty – stonowana czerwień.
    * ===================================================================== */
   const cssTooltips = `
-${N} .tip-wrapper { --oni-rar: 122 18 18; }
-${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --oni-rar: 255 251 0; }
-${N} .tip-wrapper:has(.item-head .highlight.t-her) { --oni-rar: 56 184 235; }
-${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --oni-rar: 255 89 175; }
-${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --oni-rar: 255 132 0; }
-${N} .tip-wrapper:has(.item-head .highlight.t-art) { --oni-rar: 225 64 70; }
+${N} .tip-wrapper { --tmg-rar: 122 18 18; }
+${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; }
+${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; }
+${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; }
+${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: 255 132 0; }
+${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; }
 ${N} .tip-wrapper {
   border-style: solid; border-width: 0;
-  border-image: var(--oni-frame-thin) 6 / 4px / 2px stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 2px stretch !important;
   box-shadow:
     0 0 0 1px rgb(0 0 0 / .9),
-    0 0 14px rgb(var(--oni-rar) / .22),
+    0 0 14px rgb(var(--tmg-rar) / .22),
     0 12px 28px rgb(0 0 0 / .9) !important;
 }
 ${N} .tip-wrapper .content {
   background:
-    radial-gradient(120% 60px at 50% 0, rgb(var(--oni-rar) / .1), transparent 100%),
+    radial-gradient(120% 60px at 50% 0, rgb(var(--tmg-rar) / .1), transparent 100%),
     linear-gradient(rgb(22 16 16 / .97), rgb(14 10 10 / .97) 60px, rgb(7 5 5 / .97)) !important;
-  box-shadow: inset 0 0 0 1px rgb(var(--oni-rar) / .32), inset 0 0 22px rgb(0 0 0 / .7);
-  color: var(--oni-text) !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--tmg-rar) / .32), inset 0 0 22px rgb(0 0 0 / .7);
+  color: var(--tmg-text) !important;
   text-shadow: 0 1px 2px #000;
 }
 /* górna linia w kolorze rzadkości */
 ${N} .tip-wrapper.normal-tip::before {
   content: "";
   position: absolute; left: 12%; right: 12%; top: 1px; height: 1px;
-  background: linear-gradient(90deg, rgb(var(--oni-rar) / 0), rgb(var(--oni-rar) / .9) 50%, rgb(var(--oni-rar) / 0));
+  background: linear-gradient(90deg, rgb(var(--tmg-rar) / 0), rgb(var(--tmg-rar) / .9) 50%, rgb(var(--tmg-rar) / 0));
   pointer-events: none; z-index: 2;
 }
 /* nagłówek: łuna rzadkości za ikoną, ikona w oprawie, pod spodem pociągnięcie pędzla */
 ${N} .tip-wrapper .item-head {
   border-color: transparent !important;
   background:
-    var(--oni-brush-dim) center bottom / 94% 3px no-repeat,
-    radial-gradient(70px 44px at 22px 50%, rgb(var(--oni-rar) / .22), transparent 100%) !important;
+    var(--tmg-brush-dim) center bottom / 94% 3px no-repeat,
+    radial-gradient(70px 44px at 22px 50%, rgb(var(--tmg-rar) / .22), transparent 100%) !important;
   box-shadow: none !important;
   padding-bottom: 6px !important;
 }
 ${N} .tip-wrapper .item-head .item {
-  background: radial-gradient(circle, rgb(var(--oni-rar) / .22), var(--oni-k0) 72%) !important;
-  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgb(var(--oni-rar) / .6), 0 0 0 3px #000, 0 0 10px rgb(var(--oni-rar) / .4) !important;
+  background: radial-gradient(circle, rgb(var(--tmg-rar) / .22), var(--tmg-k0) 72%) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 0 2px rgb(var(--tmg-rar) / .6), 0 0 0 3px #000, 0 0 10px rgb(var(--tmg-rar) / .4) !important;
 }
-${N} .tip-wrapper .item-name { font-weight: bold; text-shadow: 0 0 6px rgb(var(--oni-rar) / .35), 0 1px 2px #000 !important; }
+${N} .tip-wrapper .item-name { font-weight: bold; text-shadow: 0 0 6px rgb(var(--tmg-rar) / .35), 0 1px 2px #000 !important; }
 ${N} .tip-wrapper .item-type,
-${N} .tip-wrapper .item-builds { color: var(--oni-dim) !important; letter-spacing: .03em; }
-${N} .tip-wrapper .item-rarity { color: var(--oni-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
-${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--oni-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+${N} .tip-wrapper .item-builds { color: var(--tmg-dim) !important; letter-spacing: .03em; }
+${N} .tip-wrapper .item-rarity { color: var(--tmg-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--tmg-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
 /* sekcje: pędzlowe separatory zamiast cienkich linii gry (gra ustawia kolor linii inline) */
 ${N} .tip-wrapper .item-tip-section { border-bottom-color: transparent !important; position: relative; }
 ${N} .tip-wrapper .item-tip-section:not(.no-border):not(:last-child)::after {
   content: "";
   position: absolute; left: 4%; right: 4%; bottom: 0; height: 3px;
-  background: var(--oni-brush-dim) center / 100% 100% no-repeat;
+  background: var(--tmg-brush-dim) center / 100% 100% no-repeat;
   opacity: .75;
   pointer-events: none;
 }
 /* proste tooltipy (np. nad przyciskami) – lakier z czerwoną krawędzią */
-${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 -1px 0 var(--oni-r2); }
+${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--tmg-edge-hi), inset 0 -1px 0 var(--tmg-r2); }
 `;
 
   /* =====================================================================
@@ -802,7 +792,7 @@ ${N} .tip-wrapper:not(.normal-tip) .content { box-shadow: inset 0 0 0 1px var(--
   const cssBattle = `
 /* --- panel walki (.battle-controller) --- */
 ${N} .battle-controller .battle-border {
-  border-image: var(--oni-frame) 16 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 16 / 8px / 0 stretch !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85);
 }
 ${N} .battle-controller .middle-graphic,
@@ -811,54 +801,53 @@ ${N} .battle-controller .graphics {
 }
 /* pasek czasu tury jak ostrze: stalowa krawędź u góry, ciemnoczerwony lakier */
 ${N} .battle-controller .c-timer {
-  background: var(--oni-k0) !important;
-  box-shadow: inset 0 1px 3px #000, 0 0 0 1px var(--oni-edge) !important;
+  background: var(--tmg-k0) !important;
+  box-shadow: inset 0 1px 3px #000, 0 0 0 1px var(--tmg-edge) !important;
   border-color: transparent !important;
 }
 ${N} .battle-controller .c-timer__progress-bar {
   background: linear-gradient(#cfc6bd 0 1px, #9e1b1b 1px, #7a1212 55%, #3a0808) !important;
 }
-${N} .battle-controller .c-timer__text { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000 !important; }
+${N} .battle-controller .c-timer__text { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000 !important; }
 ${N} .battle-controller .pool-timer-wrapper,
-${N} .battle-controller .battle-watch { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .battle-controller .battle-watch { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
 ${N} .battle-controller .attach-icon,
 ${N} .battle-controller .toggle-battle { filter: grayscale(1) sepia(.3) brightness(.85); }
 ${N} .battle-controller .attach-icon:hover,
 ${N} .battle-controller .toggle-battle:hover { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(.95); }
-${N} .battle-controller .battle-msg { color: var(--oni-text); text-shadow: 0 1px 2px #000; }
+${N} .battle-controller .battle-msg { color: var(--tmg-text); text-shadow: 0 1px 2px #000; }
 /* komunikaty informacyjne – zamiast szarego paska delikatna czerwień z kreską pędzla z lewej */
 ${N} .battle-controller .battle-msg.txt {
   background-color: rgb(122 18 18 / .18) !important;
-  box-shadow: inset 2px 0 0 var(--oni-r3);
-  color: var(--oni-text) !important;
+  box-shadow: inset 2px 0 0 var(--tmg-r3);
+  color: var(--tmg-text) !important;
 }
-${N} .battle-controller .turn-prediction__item { border-color: var(--oni-edge) !important; }
+${N} .battle-controller .turn-prediction__item { border-color: var(--tmg-edge) !important; }
 
 /* --- dialog z NPC: papier shoji w lakierowanej ramie (ciemny, czytelny), imię pędzlem,
    pociągnięcie pędzla między wypowiedzią a odpowiedziami, odpowiedzi żarzą się przy najechaniu --- */
 ${N} .dialogue-window .border-image {
   background:
-    ${WATERMARK} right 14px center / 120px 120px no-repeat,
     linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .95) 80px) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--oni-frame) 16 / 8px / 0 stretch !important;
+  border-image: var(--tmg-frame) 16 / 8px / 0 stretch !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85) !important;
 }
 ${N} .dialogue-window .dialogue-background-color { background: rgb(7 5 5 / .7) !important; }
-${N} .dialogue-window .content { color: var(--oni-text); }
+${N} .dialogue-window .content { color: var(--tmg-text); }
 ${N} .dialogue-window .content .npc-dialogue-wrapper .h_content {
-  color: var(--oni-text) !important;
-  font-family: var(--oni-font-title) !important;
+  color: var(--tmg-text) !important;
+  font-family: var(--tmg-font-title) !important;
   font-weight: normal !important;
   letter-spacing: .04em;
   text-shadow: 0 0 6px rgb(158 27 27 / .5), 0 1px 2px #000 !important;
 }
-${N} .dialogue-window .content .npc-message { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .dialogue-window .content .npc-message { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .dialogue-window .content .answers-scroll::before {
   content: "";
   position: absolute; left: 0; right: 0; top: -6px; height: 4px;
-  background: var(--oni-brush) center / 100% 100% no-repeat;
+  background: var(--tmg-brush) center / 100% 100% no-repeat;
   opacity: .8;
 }
 ${N} .dialogue-window .content .answers li {
@@ -868,7 +857,7 @@ ${N} .dialogue-window .content .answers li {
 ${N} .dialogue-window .content .answers li .icon { filter: grayscale(1) sepia(.35) brightness(.85); }
 ${N} .dialogue-window .content .answers li:hover {
   background: linear-gradient(90deg, rgb(158 27 27 / .25), rgb(122 18 18 / .06) 60%, transparent) !important;
-  box-shadow: inset 2px 0 0 var(--oni-hi) !important;
+  box-shadow: inset 2px 0 0 var(--tmg-hi) !important;
 }
 ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) sepia(1) hue-rotate(-30deg) saturate(3) brightness(1); }
 `;
@@ -881,7 +870,7 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
 /* --- GÓRA w tym samym stylu co dolny pasek ---
    belka: ten sam malowany lakier co dół (kafel bez szwów) */
 ${N} .interface-layer > .top.positioner > .bg {
-  background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--oni-k0) !important;
+  background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--tmg-k0) !important;
   box-shadow: 0 4px 10px rgb(0 0 0 / .6);
 }
 
@@ -892,31 +881,17 @@ ${N} .interface-layer > .top.positioner > .bg {
    powtarzany (round), żeby kamienie belek nie były rozciągnięte. */
 ${N} .interface-layer .hud-container {
   background:
-    var(--oni-brush-dim) center 33px / 60% 2px no-repeat,
+    var(--tmg-brush-dim) center 33px / 60% 2px no-repeat,
     radial-gradient(ellipse 45% 70% at 50% 100%, rgb(122 18 18 / .2), transparent 70%),
     url("${IMG.bar}") 0 50% / auto 140% repeat-x,
-    var(--oni-k0) !important;
+    var(--tmg-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
   border-image: url("${IMG.plate}") 45 142 60 141 / 15px 48px 20px 48px / 0 48px 20px 48px round stretch !important;
   box-shadow: none !important;
-  color: var(--oni-text) !important;
+  color: var(--tmg-text) !important;
   overflow: visible !important;
 }
-/* maski Oni w gniazdach ramy, patrzące od środka na zewnątrz (maska-boczna.webp patrzy w lewo –
-   lewa jak w pliku, prawa odbita). Środki gniazd: 16 px przed lewą i 17 px za prawą krawędzią tabliczki. */
-${N} .interface-layer .hud-container::before,
-${N} .interface-layer .hud-container::after {
-  content: "";
-  position: absolute;
-  top: 8px; width: 42px; height: 62px;
-  pointer-events: none;
-  z-index: 4;
-  background: url("${IMG.maskSide}") center / contain no-repeat;
-  filter: drop-shadow(0 2px 3px #000);
-}
-${N} .interface-layer .hud-container::before { left: -37px; }
-${N} .interface-layer .hud-container::after { right: -38px; transform: scaleX(-1); }
 
 /* ZWARTY UKŁAD (wnętrze ramy: 15–65 px): imię, pod nim mapa + koordynaty + świat w jednym rzędzie,
    niżej złoto i smocze łzy obok siebie, wszystko wyśrodkowane */
@@ -944,9 +919,9 @@ ${N} .interface-layer .hud-container .map-data > .world-name {
   width: auto !important; max-width: none !important;
   white-space: nowrap;
 }
-${N} .interface-layer .hud-container .location { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .interface-layer .hud-container .location { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .interface-layer .hud-container .coords,
-${N} .interface-layer .hud-container .world-name { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
+${N} .interface-layer .hud-container .world-name { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
 /* waluty: „+” usunięte, złoto i smocze łzy jako para wyśrodkowana pod mapą */
 ${N} .interface-layer .hud-container .btn-min { display: none !important; }
 ${N} .interface-layer .hud-container .gold-tip,
@@ -957,7 +932,7 @@ ${N} .interface-layer .hud-container .herogold,
 ${N} .interface-layer .hud-container .herocredits {
   top: 49px !important; width: auto !important;
   text-align: left !important;
-  color: var(--oni-text) !important; text-shadow: 0 1px 2px #000;
+  color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000;
 }
 ${N} .interface-layer .hud-container .herogold { left: calc(50% - 54px) !important; }
 ${N} .interface-layer .hud-container .herocredits { left: calc(50% + 38px) !important; }
@@ -969,7 +944,7 @@ ${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 
    To ten sam element gry (.map_ball) – tylko przeniesiony i przemalowany, więc podpowiedź „PvP…”
    i kliknięcie (lista poszukiwanych) działają jak wcześniej. */
 ${N} .interface-layer .hud-container .map_ball {
-  --oni-pvp: 120 120 120;
+  --tmg-pvp: 120 120 120;
   left: calc(50% - 10px) !important;
   top: 72px !important;
   width: 20px !important; height: 20px !important;
@@ -977,36 +952,36 @@ ${N} .interface-layer .hud-container .map_ball {
   border-radius: 50%;
   background:
     radial-gradient(circle at 42% 36%, rgb(255 255 255 / .55) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle, rgb(var(--oni-pvp)) 0 30%, rgb(var(--oni-pvp) / .55) 45%, #0b0707 52% 64%, #8a6a3a 66% 72%, #120c0b 74% 92%, #000 94%) !important;
-  box-shadow: 0 2px 4px #000, 0 0 8px rgb(var(--oni-pvp) / .55);
+    radial-gradient(circle, rgb(var(--tmg-pvp)) 0 30%, rgb(var(--tmg-pvp) / .55) 45%, #0b0707 52% 64%, #8a6a3a 66% 72%, #120c0b 74% 92%, #000 94%) !important;
+  box-shadow: 0 2px 4px #000, 0 0 8px rgb(var(--tmg-pvp) / .55);
   cursor: pointer;
 }
-${N} .interface-layer .hud-container .map_ball.green { --oni-pvp: 60 170 80; }
-${N} .interface-layer .hud-container .map_ball.yellow { --oni-pvp: 220 180 50; }
-${N} .interface-layer .hud-container .map_ball.orange { --oni-pvp: 230 110 30; }
-${N} .interface-layer .hud-container .map_ball.red { --oni-pvp: 210 30 30; }
+${N} .interface-layer .hud-container .map_ball.green { --tmg-pvp: 60 170 80; }
+${N} .interface-layer .hud-container .map_ball.yellow { --tmg-pvp: 220 180 50; }
+${N} .interface-layer .hud-container .map_ball.orange { --tmg-pvp: 230 110 30; }
+${N} .interface-layer .hud-container .map_ball.red { --tmg-pvp: 210 30 30; }
 ${N} .interface-layer .hud-container .map_ball:hover { filter: brightness(1.25); }
 
 
 /* paski postępu w oknach (np. zadania, rzemiosło) */
 ${N} .interface-element-progress-bar-0,
-${N} .interface-element-progress-bar-1 { background: var(--oni-k0) !important; box-shadow: inset 0 0 0 1px var(--oni-edge) !important; }
+${N} .interface-element-progress-bar-1 { background: var(--tmg-k0) !important; box-shadow: inset 0 0 0 1px var(--tmg-edge) !important; }
 ${N} .interface-element-progress-bar-0 .inner,
 ${N} .interface-element-progress-bar-1 .inner {
   background: linear-gradient(#cfc6bd 0 1px, #9e1b1b 1px, #7a1212 55%, #3a0808) !important;
-  border-color: var(--oni-r2) !important;
+  border-color: var(--tmg-r2) !important;
 }
 ${N} .interface-element-progress-bar-0 .value,
-${N} .interface-element-progress-bar-1 .value { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
+${N} .interface-element-progress-bar-1 .value { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
 
 /* minimapa: sama mapa bez zmian; wokół cienka lakierowana krawędź i winieta nad mapą (bez przechwytywania kliknięć) */
-${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--oni-edge-hi) !important; }
+${N} .mini-map { box-shadow: 0 0 0 1px #000, 0 0 0 2px var(--tmg-edge-hi) !important; }
 ${N} .handheld-mini-map { position: relative; }
 ${N} .handheld-mini-map::after {
   content: "";
   position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1;
   pointer-events: none;
-  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px var(--oni-r1), inset 0 0 16px rgb(0 0 0 / .7);
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px var(--tmg-r1), inset 0 0 16px rgb(0 0 0 / .7);
 }
 `;
 
@@ -1025,7 +1000,7 @@ ${N} .handheld-mini-map::after {
 /* --- belka na całą szerokość: czarny lakier, u góry pas płytek kozane z czerwonym sznurem,
    czerwone linie u góry i u dołu --- */
 ${N} .interface-layer > .bottom.positioner > .bg {
-  background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--oni-k0) !important;   /* malowany lakier, kafel bez szwów */
+  background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--tmg-k0) !important;   /* malowany lakier, kafel bez szwów */
   box-shadow: 0 -4px 10px rgb(0 0 0 / .6);
 }
 
@@ -1038,10 +1013,10 @@ ${B}::before {
   z-index: 0;
   pointer-events: none;
   border-style: solid; border-width: 0;
-  border-image: var(--oni-frame) 16 / 8px / 0 stretch;
+  border-image: var(--tmg-frame) 16 / 8px / 0 stretch;
   background:
     radial-gradient(ellipse 30% 70% at 50% 0, rgb(122 18 18 / .16), transparent 70%),
-    var(--oni-urushi);
+    var(--tmg-urushi);
   box-shadow: 0 -2px 12px rgb(0 0 0 / .8);
 }
 
@@ -1050,7 +1025,7 @@ ${B} .usable-slot {
   background: radial-gradient(circle at 50% 38%, #1d1513, #090606 70%) !important;
   border-color: #000 !important;
   outline: none !important;
-  box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 -1px 0 rgb(122 18 18 / .55), inset 0 0 8px #000, 0 1px 2px #000 !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-edge-hi), inset 0 -1px 0 rgb(122 18 18 / .55), inset 0 0 8px #000, 0 1px 2px #000 !important;
   transition: box-shadow .18s ease;
 }
 /* ramka slotu: poszarpane żelazo z żarzącym się wnętrzem (ramka-slotu.webp).
@@ -1065,26 +1040,26 @@ ${B} .usable-slot::after {
   z-index: 1;
   pointer-events: none;
   background: url("${IMG.slot}") center / 100% 100% no-repeat !important;
-  transform: var(--oni-st, none);
-  filter: brightness(var(--oni-sb, 1)) drop-shadow(0 1px 2px #000);
+  transform: var(--tmg-st, none);
+  filter: brightness(var(--tmg-sb, 1)) drop-shadow(0 1px 2px #000);
   animation: none;
 }
-${B} .usable-slot-1 { --oni-st: none;                       --oni-sb: 1;    --oni-sd: 4.2s; --oni-so: 0s; }
-${B} .usable-slot-2 { --oni-st: rotate(180deg);             --oni-sb: .9;   --oni-sd: 5.1s; --oni-so: -1.3s; }
-${B} .usable-slot-3 { --oni-st: scaleX(-1);                 --oni-sb: 1.08; --oni-sd: 4.6s; --oni-so: -2.7s; }
-${B} .usable-slot-4 { --oni-st: rotate(-90deg);             --oni-sb: .95;  --oni-sd: 5.6s; --oni-so: -.8s; }
-${B} .usable-slot-5 { --oni-st: rotate(90deg);              --oni-sb: .95;  --oni-sd: 4.9s; --oni-so: -3.1s; }
-${B} .usable-slot-6 { --oni-st: scaleY(-1);                 --oni-sb: 1.05; --oni-sd: 5.3s; --oni-so: -1.9s; }
-${B} .usable-slot-7 { --oni-st: rotate(90deg) scaleX(-1);   --oni-sb: .92;  --oni-sd: 4.4s; --oni-so: -3.6s; }
-${B} .usable-slot-8 { --oni-st: rotate(-90deg) scaleX(-1);  --oni-sb: 1.02; --oni-sd: 5.8s; --oni-so: -2.2s; }
-html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .usable-slot::after {
-  animation: oni-coal var(--oni-sd, 5s) ease-in-out var(--oni-so, 0s) infinite alternate;
+${B} .usable-slot-1 { --tmg-st: none;                       --tmg-sb: 1;    --tmg-sd: 4.2s; --tmg-so: 0s; }
+${B} .usable-slot-2 { --tmg-st: rotate(180deg);             --tmg-sb: .9;   --tmg-sd: 5.1s; --tmg-so: -1.3s; }
+${B} .usable-slot-3 { --tmg-st: scaleX(-1);                 --tmg-sb: 1.08; --tmg-sd: 4.6s; --tmg-so: -2.7s; }
+${B} .usable-slot-4 { --tmg-st: rotate(-90deg);             --tmg-sb: .95;  --tmg-sd: 5.6s; --tmg-so: -.8s; }
+${B} .usable-slot-5 { --tmg-st: rotate(90deg);              --tmg-sb: .95;  --tmg-sd: 4.9s; --tmg-so: -3.1s; }
+${B} .usable-slot-6 { --tmg-st: scaleY(-1);                 --tmg-sb: 1.05; --tmg-sd: 5.3s; --tmg-so: -1.9s; }
+${B} .usable-slot-7 { --tmg-st: rotate(90deg) scaleX(-1);   --tmg-sb: .92;  --tmg-sd: 4.4s; --tmg-so: -3.6s; }
+${B} .usable-slot-8 { --tmg-st: rotate(-90deg) scaleX(-1);  --tmg-sb: 1.02; --tmg-sd: 5.8s; --tmg-so: -2.2s; }
+html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .usable-slot::after {
+  animation: tmg-coal var(--tmg-sd, 5s) ease-in-out var(--tmg-so, 0s) infinite alternate;
 }
-@keyframes oni-coal { from { opacity: .78; } to { opacity: 1; } }
+@keyframes tmg-coal { from { opacity: .78; } to { opacity: 1; } }
 ${B} .usable-slot:hover,
 ${B} .usable-slot:active,
 ${B} .usable-slot.active {   /* .active – TODO: zweryfikuj selektor (stan slotu po użyciu skrótu) */
-  box-shadow: inset 0 0 0 1px var(--oni-r3), inset 0 0 10px rgb(196 42 42 / .35), 0 0 8px rgb(196 42 42 / .5), 0 0 2px rgb(255 120 80 / .6) !important;
+  box-shadow: inset 0 0 0 1px var(--tmg-r3), inset 0 0 10px rgb(196 42 42 / .35), 0 0 8px rgb(196 42 42 / .5), 0 0 2px rgb(255 120 80 / .6) !important;
 }
 /* numery slotów: washi, pogrubione, z cieniem – czytelne na czerni */
 ${B} .usable-slot::before {
@@ -1105,20 +1080,6 @@ ${B} .slots.left::after { right: -12px; }
 ${B} .slots.right::after { left: -12px; transform: scaleX(-1); }
 
 /* --- orb HP: rama w kształcie tsuby (osobna warstwa, przezroczysty środek) --- */
-/* maski Oni na obu końcach panelu: przy slocie 1 i slocie 8, wystają ponad belkę.
-   Jedna warstwa (::after panelu) z dwoma tłami – maska jest symetryczna, więc prawa nie wymaga odbicia.
-   Panel gry ma stałe 664 px, sloty zaczynają się 64 px od lewej i kończą 62 px przed prawą krawędzią. */
-${B}::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: 2px; height: 68px;
-  z-index: 3;
-  pointer-events: none;
-  background:
-    url("${IMG.mask}") left 13px bottom / auto 68px no-repeat,
-    url("${IMG.mask}") right 11px bottom / auto 68px no-repeat;
-  filter: drop-shadow(0 2px 3px #000) drop-shadow(0 0 4px rgb(0 0 0 / .8));
-}
 /* rama orba: żelazny pierścień z chmurami, pęknięcia z żarem, rogi u góry (rama-orba.webp, 248×264,
    otwór: środek 127/134 px, promień 72 px). Skala 0,694 → otwór r 50 px dokładnie na kulę (r 49);
    środek kuli w szablonie: x = 50% − 2 px, y = 55 px. */
@@ -1166,10 +1127,10 @@ ${B} .hp-indicator .blood::after {
     linear-gradient(rgb(0 0 0 / .35), transparent 6px),
     radial-gradient(ellipse 70% 120% at 50% 100%, transparent 55%, rgb(0 0 0 / .55) 100%);
 }
-html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: oni-liquid 38s linear infinite; }
-@keyframes oni-liquid { from { transform: translate(0, 0); } to { transform: translate(110px, -110px); } }
+html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: tmg-liquid 38s linear infinite; }
+@keyframes tmg-liquid { from { transform: translate(0, 0); } to { transform: translate(110px, -110px); } }
 ${B} .hp-indicator-wrapper .value {
-  color: var(--oni-text) !important;
+  color: var(--tmg-text) !important;
   font-weight: bold;
   text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
 }
@@ -1185,7 +1146,7 @@ ${B} .exp-bar-wrapper .exp-progress .overlay {
   filter: none !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  border-image: var(--tmg-frame-thin) 6 / 4px / 0 stretch !important;
   box-shadow: 0 1px 4px rgb(0 0 0 / .8);
   pointer-events: none;
 }
@@ -1226,7 +1187,7 @@ ${B} .bottom-panel-pointer-bg .pointer-ttl { transform: translate(109px, -16px);
 ${B} .bottom-panel-pointer-bg .pointer-exp,
 ${B} .bottom-panel-pointer-bg .pointer-ttl {
   z-index: 3;
-  color: var(--oni-text) !important;
+  color: var(--tmg-text) !important;
   font-weight: bold;
   font-size: 10px !important;
   line-height: 12px !important;
@@ -1250,12 +1211,12 @@ ${B} .bottom-panel-pointer-bg .pointer-ttl {
     }
     return dots.join(',\n    ');
   })();
-  const F = `html.${ON}.${FX}.oni-ni`;
+  const F = `html.${ON}.${FX}.tmg-ni`;
 
   const cssAnim = `
-@keyframes oni-shine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
-@keyframes oni-mist { from { background-position: 0 100%, 0 100%; } to { background-position: 400px 100%, -300px 100%; } }
-@keyframes oni-ember-pulse { 0%, 100% { opacity: .55; } 50% { opacity: .85; } }
+@keyframes tmg-shine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
+@keyframes tmg-mist { from { background-position: 0 100%, 0 100%; } to { background-position: 400px 100%, -300px 100%; } }
+@keyframes tmg-ember-pulse { 0%, 100% { opacity: .55; } 50% { opacity: .85; } }
 
 /* popiół i żar w bocznych kolumnach */
 ${F} .interface-layer > .main-column { isolation: isolate; }
@@ -1266,9 +1227,9 @@ ${F} .interface-layer > .main-column::before {
   pointer-events: none;
   background-image: ${ASH}, ${ASH};
   background-size: ${Array(16).fill('180px 260px').join(', ')}, ${Array(16).fill('270px 390px').join(', ')};
-  animation: oni-ash-a 34s linear infinite, oni-ember-pulse 7s ease-in-out infinite;
+  animation: tmg-ash-a 34s linear infinite, tmg-ember-pulse 7s ease-in-out infinite;
 }
-@keyframes oni-ash-a {
+@keyframes tmg-ash-a {
   from { background-position: ${Array(16).fill('0 0').join(', ')}, ${Array(16).fill('60px 0').join(', ')}; }
   to { background-position: ${Array(16).fill('0 -260px').join(', ')}, ${Array(16).fill('60px -780px').join(', ')}; }
 }
@@ -1283,13 +1244,13 @@ ${F} .interface-layer > .main-column::after {
     radial-gradient(ellipse 50% 32% at 70% 100%, rgb(122 18 18 / .07), transparent 70%);
   background-size: 400px 100%, 300px 100%;
   background-repeat: repeat-x;
-  animation: oni-mist 60s linear infinite;
+  animation: tmg-mist 60s linear infinite;
 }
 ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button { transition: box-shadow .2s ease, background-color .2s ease, filter .2s ease; }
 @media (prefers-reduced-motion: reduce) {
   ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button { transition: none !important; }
   ${N} *, ${N} *::before, ${N} *::after { animation: none !important; }
-  #oni-toggle, #oni-toast { transition: none !important; }
+  #tmg-toggle, #tmg-toast { transition: none !important; }
 }
 `;
 
@@ -1297,7 +1258,7 @@ ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button
    * === PRZEŁĄCZNIK (tsuba w lewym dolnym rogu, skróty, menu Tampermonkey) ===
    * ===================================================================== */
   const cssToggle = `
-#oni-toggle {
+#tmg-toggle {
   position: fixed; left: 8px; bottom: 8px; z-index: 2147483000;
   width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%;
   background: ${TSUBA} center / 100% 100% no-repeat;
@@ -1306,10 +1267,10 @@ ${N} .button, ${N} .border-window .card, ${N} .close-button, ${N} .widget-button
   box-shadow: 0 0 0 1px #000, 0 2px 4px rgb(0 0 0 / .7);
   transition: opacity .2s, box-shadow .2s, transform .3s;
 }
-#oni-toggle:hover, #oni-toggle:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 1px #000, 0 0 10px rgb(196 42 42 / .55); transform: rotate(30deg); }
-html:not(.${ON}) #oni-toggle { filter: grayscale(1); opacity: .35; }
-html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
-#oni-toast {
+#tmg-toggle:hover, #tmg-toggle:focus-visible { opacity: 1; outline: none; box-shadow: 0 0 0 1px #000, 0 0 10px rgb(196 42 42 / .55); transform: rotate(30deg); }
+html:not(.${ON}) #tmg-toggle { filter: grayscale(1); opacity: .35; }
+html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
+#tmg-toast {
   position: fixed; left: 40px; bottom: 10px; z-index: 2147483000;
   padding: 4px 10px;
   background: rgb(14 10 10 / .95); color: #e6dccf;
@@ -1318,7 +1279,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
   box-shadow: 0 2px 8px rgb(0 0 0 / .8);
   opacity: 0; pointer-events: none; transition: opacity .25s;
 }
-#oni-toast.show { opacity: 1; }
+#tmg-toast.show { opacity: 1; }
 `;
 
   /* ─────────────────────────────────────────────────────────────────────────
@@ -1426,12 +1387,12 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
   function walk(rules, out) {
     for (const r of rules) {
       if (r.cssRules && !r.selectorText) { walk(r.cssRules, out); continue; }
-      if (!r.style || !r.selectorText || seen.has(r) || r.selectorText.indexOf('oni-') !== -1) continue;
+      if (!r.style || !r.selectorText || seen.has(r) || r.selectorText.indexOf('tmg-') !== -1) continue;
       seen.add(r); out.push(r);
     }
   }
   function scanSheets() {
-    if (!root.classList.contains(ON) || !root.classList.contains('oni-ni')) return;
+    if (!root.classList.contains(ON) || !root.classList.contains('tmg-ni')) return;
     const rules = [];
     for (const sh of document.styleSheets) { let rr; try { rr = sh.cssRules; } catch (e) { continue; } if (rr) walk(rr, rules); }
     rules.forEach((r) => { processRule(r); });
@@ -1451,7 +1412,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
 
   /* ─────────────────────────────────────────────────────────────────────────
    * CZYTELNOŚĆ TEKSTU W OKNACH: ciemny tekst z dawnego pergaminu → jasny odpowiednik
-   * (neutralny → washi, kolorowy → ten sam odcień, rozjaśniony). Klasa .oni-lt + zmienna --oni-c.
+   * (neutralny → washi, kolorowy → ten sam odcień, rozjaśniony). Klasa .tmg-lt + zmienna --tmg-c.
    * ───────────────────────────────────────────────────────────────────────── */
   const TEXT_SCOPE = '.border-window, .tip-wrapper, .dialogue-window, .battle-controller';
   const marked = new Set();
@@ -1464,20 +1425,20 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
   function fixText(scope) {
     if (!root.classList.contains(ON)) return;
     for (const el of scope.querySelectorAll('*')) {
-      if (el.classList.contains('oni-lt') || el.closest('.item, canvas')) continue;
+      if (el.classList.contains('tmg-lt') || el.closest('.item, canvas')) continue;
       let hasText = false;
       for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue.trim()) { hasText = true; break; }
       if (!hasText) continue;
       const c = parseRgb(getComputedStyle(el).color);
       if (!c || c[3] < 0.3) continue;
       if ((0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255 >= 0.36) continue;
-      el.style.setProperty('--oni-c', lighter(c));
-      el.classList.add('oni-lt');
+      el.style.setProperty('--tmg-c', lighter(c));
+      el.classList.add('tmg-lt');
       marked.add(el);
     }
   }
   function unfixText() {
-    for (const el of marked) { el.classList.remove('oni-lt'); el.style.removeProperty('--oni-c'); }
+    for (const el of marked) { el.classList.remove('tmg-lt'); el.style.removeProperty('--tmg-c'); }
     marked.clear();
   }
   const pending = new Set();
@@ -1500,13 +1461,13 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     return s;
   };
   const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssBottomBar, cssAnim, cssToggle].join('\n'));
-  if (style && 'id' in style) style.id = 'oni-theme';
+  if (style && 'id' in style) style.id = 'tmg-theme';
 
   // czcionka pędzlowa nagłówków (Shojumaru – pełne polskie znaki; zapas: Yuji Syuku)
   const addFont = () => {
-    if (document.getElementById('oni-font') || !document.head) return;
+    if (document.getElementById('tmg-font') || !document.head) return;
     const l = document.createElement('link');
-    l.id = 'oni-font';
+    l.id = 'tmg-font';
     l.rel = 'stylesheet';
     l.href = 'https://fonts.googleapis.com/css2?family=Shojumaru&family=Yuji+Syuku&display=swap';
     document.head.append(l);
@@ -1521,7 +1482,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
 
   let toastTimer = 0;
   const toast = (msg) => {
-    const t = document.getElementById('oni-toast');
+    const t = document.getElementById('tmg-toast');
     if (!t) return;
     t.textContent = msg;
     t.classList.add('show');
@@ -1529,7 +1490,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
   };
   const syncGraphics = () => {
-    if (!root.classList.contains('oni-ni')) return;
+    if (!root.classList.contains('tmg-ni')) return;
     if (enabled()) { reapplySheets(); document.querySelectorAll(TEXT_SCOPE).forEach(fixText); } else { restoreSheets(); unfixText(); }
   };
   const toggle = () => {
@@ -1537,7 +1498,7 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     apply();
     syncGraphics();
     arrangeHud();
-    toast(enabled() ? 'Oni: włączony' : 'Oni: wyłączony');
+    toast(enabled() ? 'Tamahagane: włączony' : 'Tamahagane: wyłączony');
   };
   const toggleFx = () => {
     set(KEY_FX, !effects());
@@ -1546,16 +1507,16 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
   };
 
   const addToggleButton = () => {
-    if (document.getElementById('oni-toggle') || !document.body) return;
+    if (document.getElementById('tmg-toggle') || !document.body) return;
     const b = document.createElement('button');
-    b.id = 'oni-toggle';
+    b.id = 'tmg-toggle';
     b.type = 'button';
-    b.title = 'Oni – klik: włącz/wyłącz motyw (Ctrl+Alt+O)\nPrawy klik: efekty popiołu i mgły (Ctrl+Alt+P)';
-    b.setAttribute('aria-label', 'Przełącz motyw Oni');
+    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty popiołu i mgły (Ctrl+Alt+P)';
+    b.setAttribute('aria-label', 'Przełącz motyw Tamahagane');
     b.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
     b.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); toggleFx(); });
     const t = document.createElement('div');
-    t.id = 'oni-toast';
+    t.id = 'tmg-toast';
     t.setAttribute('role', 'status');
     document.body.append(b, t);
   };
@@ -1586,14 +1547,14 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
     if (sheets) { clearTimeout(sheetTimer); sheetTimer = setTimeout(scanSheets, 80); }
   });
 
-  // Wykrywanie NI po DOM (.game-window-positioner / .interface-layer). Bez tego klasa oni-ni nie powstaje
+  // Wykrywanie NI po DOM (.game-window-positioner / .interface-layer). Bez tego klasa tmg-ni nie powstaje
   // i żadna reguła motywu nie działa (strona logowania, forum, SI).
   const DETECT_NI = '.game-window-positioner, .interface-layer';
   let started = false;
   const onGameFound = () => {
     if (started) return;
     started = true;
-    root.classList.add('oni-ni');
+    root.classList.add('tmg-ni');
     addFont();
     addToggleButton();
     arrangeHud();
@@ -1612,14 +1573,14 @@ html.${ON}:not(.${FX}) #oni-toggle { filter: saturate(.4); }
 
   apply();
   if (typeof GM_registerMenuCommand === 'function') {
-    GM_registerMenuCommand('Oni: włącz / wyłącz (Ctrl+Alt+O)', toggle);
-    GM_registerMenuCommand('Oni: efekty popiołu i mgły (Ctrl+Alt+P)', toggleFx);
+    GM_registerMenuCommand('Tamahagane: włącz / wyłącz (Ctrl+Alt+H)', toggle);
+    GM_registerMenuCommand('Tamahagane: efekty popiołu i mgły (Ctrl+Alt+P)', toggleFx);
   }
   window.addEventListener('keydown', (e) => {
     if (!e.ctrlKey || !e.altKey || e.shiftKey || e.metaKey) return;
-    if (e.code === 'KeyO') { e.preventDefault(); toggle(); }
+    if (e.code === 'KeyH') { e.preventDefault(); toggle(); }
     else if (e.code === 'KeyP') { e.preventDefault(); toggleFx(); }
   }, true);
 
-  console.info(`[Oni] v${VERSION} ${enabled() ? 'włączony' : 'wyłączony'}`);
+  console.info(`[Tamahagane] v${VERSION} ${enabled() ? 'włączony' : 'wyłączony'}`);
 })();
