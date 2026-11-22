@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.0
+// @version      1.8.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -12,6 +12,7 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_getResourceURL
+// @resource     oniLiquid https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ciecz-orba.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // ==/UserScript==
@@ -31,7 +32,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.7.0';
+  const VERSION = '1.8.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -47,10 +48,12 @@
 
   // Grafiki: @resource (Tampermonkey trzyma je lokalnie), bez GM_getResourceURL – raw link do repo.
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/';
-  // eslint-disable-next-line no-unused-vars
   const res = (name, file) => {
     try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return u; } } catch (e) { /* brak zasobu */ }
     return RAW + file;
+  };
+  const IMG = {
+    liquid: res('oniLiquid', 'ciecz-orba.webp')   // 256×256, kafel bez szwów: płynny żar w czarnej wodzie (ciecz orba HP)
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -1053,41 +1056,39 @@ ${B} .hp-indicator-wrapper-template::before {
 /* tło kuli (pusta część): głęboka czerń wody z ledwie widoczną czerwienią */
 ${B} .hp-indicator-wrapper { background: radial-gradient(circle at 50% 40%, #1a0707, #050202 70%) !important; }
 ${B} .hp-indicator-wrapper .glass { opacity: .55; }
-/* ciecz: czerwony tusz rozlewający się w wodzie. Wysokość .blood ustawia gra (HP) – overflow: hidden
-   przycina obłoki tuszu do aktualnego poziomu; obłoki animowane tylko przez transform */
+/* ciecz: płynny żar wirujący w czarnej wodzie (ciecz-orba.webp – kafel bez szwów).
+   Wysokość .blood ustawia gra (HP), overflow: hidden przycina ciecz do aktualnego poziomu.
+   Tekstury są zakotwiczone u dołu kuli, więc przy zmianie HP ciecz nie „skacze”.
+   Warstwy: .blood – nieruchoma tekstura (kafel 150 px) na ciemnym dnie,
+            ::before – ta sama tekstura (kafel 110 px) płynąca po skosie w górę (tylko transform, pętla o 1 kafel),
+            ::after – powierzchnia (jasny menisk) i cień przy brzegach kuli (nieruchome). */
 ${B} .hp-indicator .blood {
   overflow: hidden !important;
   background:
-    linear-gradient(rgb(255 140 120 / .5), rgb(255 140 120 / 0) 2px),
-    linear-gradient(#8a1414, #5c0d0d 50%, #2a0404) !important;
+    url("${IMG.liquid}") left bottom / 150px 150px repeat,
+    linear-gradient(#5c0d0d, #2a0404) !important;
 }
 ${B} .hp-indicator .blood::before,
 ${B} .hp-indicator .blood::after {
   content: "";
   position: absolute;
-  left: -30%; top: -60%; width: 160%; height: 220%;
   pointer-events: none;
 }
 ${B} .hp-indicator .blood::before {
-  background:
-    radial-gradient(ellipse 22% 14% at 30% 40%, rgb(196 42 42 / .55), transparent 70%),
-    radial-gradient(ellipse 18% 24% at 64% 55%, rgb(158 27 27 / .6), transparent 70%),
-    radial-gradient(ellipse 26% 12% at 50% 72%, rgb(20 2 2 / .7), transparent 70%),
-    radial-gradient(ellipse 14% 20% at 22% 66%, rgb(10 0 0 / .6), transparent 70%),
-    radial-gradient(ellipse 16% 10% at 72% 32%, rgb(230 80 60 / .35), transparent 70%);
+  left: -110px; bottom: -110px; width: 330px; height: 330px;
+  background: url("${IMG.liquid}") 0 0 / 110px 110px repeat;
+  mix-blend-mode: screen;
+  opacity: .7;
 }
 ${B} .hp-indicator .blood::after {
+  inset: 0;
   background:
-    radial-gradient(ellipse 20% 16% at 40% 60%, rgb(196 42 42 / .4), transparent 70%),
-    radial-gradient(ellipse 24% 10% at 70% 45%, rgb(8 0 0 / .55), transparent 70%),
-    radial-gradient(ellipse 12% 18% at 55% 35%, rgb(158 27 27 / .45), transparent 70%);
-  mix-blend-mode: screen;
-  opacity: .8;
+    linear-gradient(rgb(255 140 120 / .55), rgb(255 140 120 / 0) 2px),
+    linear-gradient(rgb(0 0 0 / .35), transparent 6px),
+    radial-gradient(ellipse 70% 120% at 50% 100%, transparent 55%, rgb(0 0 0 / .55) 100%);
 }
-html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: oni-ink-a 22s ease-in-out infinite alternate; }
-html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::after { animation: oni-ink-b 31s ease-in-out infinite alternate; }
-@keyframes oni-ink-a { from { transform: translate(-6%, 2%) rotate(0deg); } to { transform: translate(6%, -3%) rotate(14deg); } }
-@keyframes oni-ink-b { from { transform: translate(5%, -2%) rotate(0deg) scale(1); } to { transform: translate(-7%, 3%) rotate(-18deg) scale(1.1); } }
+html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: oni-liquid 38s linear infinite; }
+@keyframes oni-liquid { from { transform: translate(0, 0); } to { transform: translate(110px, -110px); } }
 ${B} .hp-indicator-wrapper .value {
   color: var(--oni-text) !important;
   font-weight: bold;
