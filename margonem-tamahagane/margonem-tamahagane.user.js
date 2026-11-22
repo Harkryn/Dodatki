@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.10.0
+// @version      2.11.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -25,6 +25,7 @@
 // @resource     tmgButton    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przycisk.webp
 // @resource     tmgColumn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-tlo.webp
 // @resource     tmgColTile   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-kafel.webp
+// @resource     tmgHudBtn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/guzik-hud.webp
 // @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
@@ -50,7 +51,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.10.0';
+  const VERSION = '2.11.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -84,6 +85,7 @@
     button: res('tmgButton', 'przycisk.webp'),         // 150×78, przycisk: czarny lakier w kutej oprawie z nitami (9-slice, wycinek 22)
     column: res('tmgColumn', 'kolumna-tlo.webp'),      // 384×384, dół kolumn: czarne drewno, czerwony dym (góra miękko wygaszona)
     colTile: res('tmgColTile', 'kolumna-kafel.webp'),  // 384×150, kafel drewna powtarzany w pionie nad dołem kolumny (bez szwu)
+    hudBtn: res('tmgHudBtn', 'guzik-hud.webp'),        // 512×128, rama guzika HUD w 4 obrotach (rombowy nit: dół, góra, lewo, prawo)
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
@@ -647,30 +649,32 @@ ${N} body[data-res] .window-mode-background-layer {
   background: radial-gradient(ellipse 65% 65% at 50% 50%, rgb(122 18 18 / .14), transparent 72%), #050303 !important;
 }
 
-/* --- przyciski HUD (widżety): płytki czarnego lakieru z mosiężnym obrzeżem; ikony gry przygaszone do
-   koloru starego papieru, przy najechaniu żarzą się. Kolory stanów gry zostają jako obrys. --- */
+/* --- przyciski HUD (widżety): malowana rama – kute żelazo z żarem w środku i rombowym nitem (guzik-hud.webp,
+   arkusz 4 obrotów). Kolejne guziki mają nit z innej strony, więc rząd nie jest monotonny. Ikony gry
+   przygaszone do koloru starego papieru, przy najechaniu żarzą się. Kolory stanów gry – jako łuna we wnętrzu. --- */
 ${N} .widget-button {
-  background:
-    radial-gradient(ellipse 90% 60% at 50% 0, rgb(255 235 220 / .08), transparent 70%),
-    linear-gradient(#1f1716, #0e0a0a 60%, #070505) !important;
-  border-radius: 3px !important;
-  box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(138 106 58 / .35), inset 0 -2px 0 rgb(92 13 13 / .5) !important;
+  background: url("${IMG.hudBtn}") 0 0 / 400% 100% no-repeat, #050303 !important;
+  border-radius: 2px !important;
+  box-shadow: 0 1px 3px rgb(0 0 0 / .8) !important;
 }
+${N} .widget-button:nth-child(4n+2) { background-position: 33.333% 0 !important; }
+${N} .widget-button:nth-child(4n+3) { background-position: 66.667% 0 !important; }
+${N} .widget-button:nth-child(4n+4) { background-position: 100% 0 !important; }
 ${N} .widget-button::before { box-shadow: none !important; }
 ${N} .widget-button .icon {
   filter: grayscale(1) sepia(.35) brightness(.95) drop-shadow(0 1px 0 #000) !important;
   opacity: .92;
 }
-${N} .widget-button:not(.disabled):hover { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--tmg-r3), var(--tmg-ember) !important; }
+${N} .widget-button:not(.disabled):hover { filter: brightness(1.18); box-shadow: 0 1px 3px rgb(0 0 0 / .8), var(--tmg-ember) !important; }
 ${N} .widget-button:not(.disabled):hover .icon,
 ${N} .widget-button.window-is-open .icon {
   filter: grayscale(1) sepia(.6) brightness(1.15) drop-shadow(0 1px 0 #000) drop-shadow(0 0 3px rgb(196 42 42 / .6)) !important;
   opacity: 1;
 }
-${N} .widget-button.green.window-is-open { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--tmg-r2), inset 0 -2px 0 var(--tmg-r3) !important; }
-${N} .widget-button.red { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(196 42 42 / .9) !important; }
-${N} .widget-button.blue { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(80 130 210 / .7) !important; }
-${N} .widget-button.violet, ${N} .widget-button.blink-violet { box-shadow: 0 0 0 1px #000, inset 0 0 0 1px rgb(150 90 200 / .7) !important; }
+${N} .widget-button.green.window-is-open { box-shadow: 0 1px 3px rgb(0 0 0 / .8), inset 0 0 10px 4px rgb(196 42 42 / .35) !important; }
+${N} .widget-button.red { box-shadow: 0 1px 3px rgb(0 0 0 / .8), inset 0 0 10px 4px rgb(196 42 42 / .5) !important; }
+${N} .widget-button.blue { box-shadow: 0 1px 3px rgb(0 0 0 / .8), inset 0 0 10px 4px rgb(80 130 210 / .45) !important; }
+${N} .widget-button.violet, ${N} .widget-button.blink-violet { box-shadow: 0 1px 3px rgb(0 0 0 / .8), inset 0 0 10px 4px rgb(150 90 200 / .45) !important; }
 ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
 `;
 
@@ -1422,7 +1426,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
    * fala blasku przesuwa się po szczelinach, reszta grafiki stoi. Gotowe obrazki podmieniają adresy
    * w arkuszu motywu; przy wyłączonych efektach albo prefers-reduced-motion wraca wersja statyczna.
    * ───────────────────────────────────────────────────────────────────────── */
-  const LAVA_KEYS = ['winFrame', 'winTitle', 'tipFrame', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
+  const LAVA_KEYS = ['winFrame', 'winTitle', 'tipFrame', 'hudBtn', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
   const GLOW_FRAMES = 16;      // klatek w pętli
   const GLOW_DELAY = 190;      // ms na klatkę → pętla ~3 s
   const GLOW_AMP = 0.3;        // siła mienienia (0,3 = ±30% jasności w szczelinach)

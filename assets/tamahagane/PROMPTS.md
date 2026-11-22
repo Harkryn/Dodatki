@@ -75,3 +75,7 @@ Full-frame flat texture, hand-painted stylized: deep warm black lacquer surface 
 
 ## kolumna-kafel.webp (pochodna kolumna-tlo.webp, bez nowego promptu)
 Górne 150 px kolumna-tlo (samo drewno) z przenikaniem 46 px, żeby kafel łączył się bez szwu w pionie. kolumna-tlo.webp dostał wygaszoną alfą górę (90 px), więc przechodzi w kafel – tło kolumn sięga pełnej wysokości ekranu.
+
+## guzik-hud.webp (kafel B2 z arkusza Qwen-Image, BiRefNet; arkusz 4 obrotów 512×128)
+Game UI asset sheet, 2 by 2 grid of four square button plates on plain flat light grey background, evenly spaced, same size, all glossy black lacquer square plates with a thin dark forged iron rim and a faint red ember line inside, each with a different small iron corner fitting: first with small square corner caps, second with round rivets, third with small angular kanagu brackets on two opposite corners, fourth with tiny flame-shaped iron corners; compact, fittings stay within the plate outline, each with an empty flat black square center, front view, stylized hand-painted painterly dark fantasy
+(wybrany kafel 2 – żelazna obręcz z rombowym nitem; obrócony 4 razy, nit: dół, góra, lewo, prawo)
