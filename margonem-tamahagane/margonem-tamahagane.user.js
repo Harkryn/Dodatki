@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.2.0
+// @version      2.2.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -43,7 +43,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.2.0';
+  const VERSION = '2.2.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -836,7 +836,7 @@ ${N} .interface-layer > .top.positioner > .bg {
 }
 
 /* tabliczka z imieniem / lokacją / walutami (gra: 342×65 na górze ekranu).
-   Rama: żelazo z pęknięciami pełnymi żaru, na obu końcach okrągłe gniazda z ogniem, w których siedzą maski
+   Rama: żelazo z pęknięciami pełnymi żaru, na obu końcach okrągłe gniazda z ogniem
    (rama-tabliczki.webp, 600×205; wnętrze 141/45 – 458/144 px). 9-slice w skali 0,34: góra 15 px (w obrębie
    tabliczki), boki 48 px i dół 20 px wysunięte na zewnątrz (outset) – układ gry bez zmian. Środek ramy
    powtarzany (round), żeby kamienie belek nie były rozciągnięte. */
@@ -958,8 +958,8 @@ ${N} .handheld-mini-map::after {
   const B = `${N} .bottom-panel-of-bottom-positioner`;
 
   const cssBottomBar = `
-/* --- belka na całą szerokość: czarny lakier, u góry pas płytek kozane z czerwonym sznurem,
-   czerwone linie u góry i u dołu --- */
+/* --- belka na całą szerokość: malowany czarny lakier (pasek-tlo.webp, kafel bez szwów)
+   z przygaszonymi czerwonymi liniami u góry i u dołu --- */
 ${N} .interface-layer > .bottom.positioner > .bg {
   background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--tmg-k0) !important;   /* malowany lakier, kafel bez szwów */
   box-shadow: 0 -4px 10px rgb(0 0 0 / .6);
