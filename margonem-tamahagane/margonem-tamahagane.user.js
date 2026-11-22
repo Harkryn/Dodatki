@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.15.1
+// @version      2.15.2
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.15.1';
+  const VERSION = '2.15.2';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1478,8 +1478,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
    * w arkuszu motywu; przy wyłączonych efektach albo prefers-reduced-motion wraca wersja statyczna.
    * ───────────────────────────────────────────────────────────────────────── */
   const LAVA_KEYS = ['winFrame', 'winTitle', 'tipFrame', 'hudBtn', 'awning', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
-  const GLOW_FRAMES = 16;      // klatek w pętli
-  const GLOW_DELAY = 190;      // ms na klatkę → pętla ~3 s
+  const GLOW_FRAMES = 12;      // klatek w pętli
+  const GLOW_DELAY = 250;      // ms na klatkę → pętla 3 s
   const GLOW_AMP = 0.3;        // siła mienienia (0,3 = ±30% jasności w szczelinach)
 
   const CRC_T = (() => {
@@ -1579,11 +1579,40 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       const png = await encode();
       if (!png) return null;
       frames.push(readChunks(png));
-      await new Promise((ok) => setTimeout(ok, 0));   // nie blokuj gry
+      await new Promise((ok) => setTimeout(ok, 12));  // przerwa między klatkami – gra ma czas na swoje klatki
     }
     return URL.createObjectURL(buildApng(frames, w, h));
   }
-  const shimmer = (url) => lavaImage(url, null, true);
+  // Pamięć podręczna gotowych obrazków (Cache API, klucz = wersja motywu + grafika + kolor + animacja):
+  // liczone tylko przy pierwszym wczytaniu danej wersji, potem odczyt w kilka ms. Stare wersje są czyszczone.
+  const LAVA_CACHE = 'tmg-lava';
+  const lavaCacheOpen = (() => {
+    let p = null;
+    return () => p || (p = (async () => {
+      if (typeof caches === 'undefined') return null;
+      const c = await caches.open(LAVA_CACHE);
+      for (const req of await c.keys()) if (!req.url.includes(`/v${VERSION}/`)) c.delete(req);
+      return c;
+    })().catch(() => null));
+  })();
+  async function cachedLava(name, tint, animated) {
+    const id = `https://tmg.cache/v${VERSION}/${name}/${tint ? tint.join('-') : 'base'}/${animated ? 'a' : 's'}`;
+    const c = await lavaCacheOpen();
+    if (c) {
+      const hit = await c.match(id).catch(() => null);
+      if (hit) return hit.headers.get('x-tmg-none') ? null : URL.createObjectURL(await hit.blob());
+    }
+    const url = await lavaImage(IMG[name], tint, animated);
+    if (c) {
+      try {
+        const res = url ? new Response(await (await fetch(url)).blob(), { headers: { 'content-type': 'image/png' } })
+                        : new Response('', { headers: { 'x-tmg-none': '1' } });
+        await c.put(id, res);
+      } catch (e) { /* brak miejsca – trudno, następnym razem policzy się znowu */ }
+    }
+    return url;
+  }
+  const shimmer = (name) => cachedLava(name, null, true);
 
   // Tooltipy: lawa w ramie i pęknięcia-podkreślenia w kolorze rangi przedmiotu; zwykłe przedmioty – szare,
   // wystygłe pęknięcia. Legenda bierze kolor z ustawienia gry „ramka legendy” (--ln-frame_item_color, gdy
@@ -1591,11 +1620,11 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   // Wersje trafiają do zmiennych CSS na <html> (--tmg-tip-<ranga>, --tmg-ul-<ranga>), czytanych w cssTooltips.
   const RARITY = { premium: [214, 170, 70], common: [138, 134, 128], uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
   const TINTED = { tip: 'tipFrame', ul: 'underline', bg: 'tipBg' };
-  const STILL = new Set(['tipBg']);   // tło: tylko przebarwione, bez mienienia (duży obraz)
+  const STILL = new Set(['tipBg', 'underline']);   // tło i podkreślenia: tylko przebarwione, bez mienienia (mieni się rama)
   const tintCache = new Map();
   const tintUrl = (key, rgb, animated) => {
     const k = `${key}|${animated ? 1 : 0}|${rgb.join(',')}`;
-    if (!tintCache.has(k)) tintCache.set(k, lavaImage(IMG[key], rgb, animated).catch(() => null));
+    if (!tintCache.has(k)) tintCache.set(k, cachedLava(key, rgb, animated).catch(() => null));
     return tintCache.get(k);
   };
   const colorCtx = document.createElement('canvas').getContext('2d');
@@ -1620,8 +1649,9 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     const seq = ++tintSeq, vars = [];
     for (const [rk, col] of Object.entries(cols)) for (const [pre, key] of Object.entries(TINTED)) vars.push([`--tmg-${pre}-${rk}`, await tintUrl(key, col, animated && !STILL.has(key))]);
     if (seq !== tintSeq) return;
-    for (const [k, u] of vars) if (u) root.style.setProperty(k, `url("${u}")`);
-    root.style.setProperty('--tmg-rar-leg', cols.leg.join(' '));
+    let tv = document.getElementById('tmg-tints');
+    if (!tv) { tv = document.createElement('style'); tv.id = 'tmg-tints'; (document.head || root).appendChild(tv); }
+    tv.textContent = `:root { ${vars.filter(([, u]) => u).map(([k, u]) => `${k}: url("${u}");`).join(' ')} --tmg-rar-leg: ${cols.leg.join(' ')}; }`;
     tintState = state;
   };
 
@@ -1630,7 +1660,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const buildGlow = () => glowMap || (glowMap = (async () => {
     const m = new Map();
     for (const k of LAVA_KEYS) {
-      try { const u = await shimmer(IMG[k]); if (u) m.set(IMG[k], u); } catch (e) { /* zostaje statyczna */ }
+      try { const u = await shimmer(k); if (u) m.set(IMG[k], u); } catch (e) { /* zostaje statyczna */ }
     }
     return m;
   })());
@@ -1760,7 +1790,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     scanSheets();
     document.querySelectorAll(TEXT_SCOPE).forEach(fixText);
     gfxObs.observe(root, { childList: true, subtree: true });
-    setTimeout(syncGlow, 1500);
+    const idle = window.requestIdleCallback ? (fn) => requestIdleCallback(fn, { timeout: 8000 }) : (fn) => setTimeout(fn, 1500);
+    setTimeout(() => idle(syncGlow), 3000);
     if (reducedMotion && reducedMotion.addEventListener) reducedMotion.addEventListener('change', syncGlow);
     let ticks = 0;
     const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
