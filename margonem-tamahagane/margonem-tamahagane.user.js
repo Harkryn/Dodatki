@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.4.1
+// @version      2.5.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -47,7 +47,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.4.1';
+  const VERSION = '2.5.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1392,6 +1392,106 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   }
 
   /* ─────────────────────────────────────────────────────────────────────────
+   * MIENIENIE LAWY – szczeliny z lawą w malowanych grafikach lekko pulsują światłem.
+   * Grafika jest obrazkiem, więc CSS nie rozjaśni samych pęknięć. Skrypt wyznacza piksele lawy
+   * (czerwień/pomarańcz wyraźnie silniejsza od zieleni i błękitu) i składa z nich animowany PNG (APNG):
+   * fala blasku przesuwa się po szczelinach, reszta grafiki stoi. Gotowe obrazki podmieniają adresy
+   * w arkuszu motywu; przy wyłączonych efektach albo prefers-reduced-motion wraca wersja statyczna.
+   * ───────────────────────────────────────────────────────────────────────── */
+  const LAVA_KEYS = ['winFrame', 'winTitle', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
+  const GLOW_FRAMES = 16;      // klatek w pętli
+  const GLOW_DELAY = 190;      // ms na klatkę → pętla ~3 s
+  const GLOW_AMP = 0.3;        // siła mienienia (0,3 = ±30% jasności w szczelinach)
+
+  const CRC_T = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    return t;
+  })();
+  const crc32 = (u8) => { let c = 0xffffffff; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const pngChunk = (type, data) => {
+    const out = new Uint8Array(12 + data.length), dv = new DataView(out.buffer);
+    dv.setUint32(0, data.length);
+    for (let i = 0; i < 4; i++) out[4 + i] = type.charCodeAt(i);
+    out.set(data, 8);
+    dv.setUint32(8 + data.length, crc32(out.subarray(4, 8 + data.length)));
+    return out;
+  };
+  const readChunks = (u8) => {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), list = [];
+    for (let o = 8; o < u8.length;) {
+      const len = dv.getUint32(o), type = String.fromCharCode(u8[o + 4], u8[o + 5], u8[o + 6], u8[o + 7]);
+      list.push({ type, data: u8.subarray(o + 8, o + 8 + len) });
+      o += 12 + len;
+    }
+    return list;
+  };
+  const u32 = (...v) => { const b = new Uint8Array(v.length * 4), d = new DataView(b.buffer); v.forEach((x, i) => d.setUint32(i * 4, x)); return b; };
+  const joinU8 = (parts) => { const out = new Uint8Array(parts.reduce((a, p) => a + p.length, 0)); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out; };
+
+  function buildApng(frames, w, h) {
+    const parts = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])];
+    let seq = 0;
+    frames.forEach((ch, i) => {
+      if (i === 0) parts.push(pngChunk('IHDR', ch.find((c) => c.type === 'IHDR').data), pngChunk('acTL', u32(frames.length, 0)));
+      const fc = new Uint8Array(26), d = new DataView(fc.buffer);
+      d.setUint32(0, seq++); d.setUint32(4, w); d.setUint32(8, h); d.setUint32(12, 0); d.setUint32(16, 0);
+      d.setUint16(20, GLOW_DELAY); d.setUint16(22, 1000); fc[24] = 0; fc[25] = 0;
+      parts.push(pngChunk('fcTL', fc));
+      const idat = joinU8(ch.filter((c) => c.type === 'IDAT').map((c) => c.data));
+      parts.push(i === 0 ? pngChunk('IDAT', idat) : pngChunk('fdAT', joinU8([u32(seq++), idat])));
+    });
+    parts.push(pngChunk('IEND', new Uint8Array(0)));
+    return new Blob(parts, { type: 'image/png' });
+  }
+
+  async function shimmer(url) {
+    const bm = await createImageBitmap(await (await fetch(url)).blob());
+    const w = bm.width, h = bm.height;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.drawImage(bm, 0, 0);
+    const base = x.getImageData(0, 0, w, h), px = base.data;
+    // piksele lawy: indeks, waga (0–1) i faza fali (gładki szum z sinusów, plamy ~60–120 px)
+    const idx = [], wt = [], ph = [];
+    for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) {
+      const o = (y * w + i) * 4, r = px[o], g = px[o + 1], b = px[o + 2];
+      if (!px[o + 3] || r < 90) continue;
+      const k = Math.min(1, Math.max(0, (r - Math.max(g, b) * 1.35 - 30) / 60)) * Math.min(1, (r - 90) / 80);
+      if (k <= 0.02) continue;
+      idx.push(o); wt.push(k);
+      ph.push(Math.sin(i * 0.052 + 1.3) + Math.sin(y * 0.071 + i * 0.023) + Math.sin((i - y) * 0.037 + 4.1));
+    }
+    if (idx.length < 40) return null;
+    const frames = [];
+    for (let f = 0; f < GLOW_FRAMES; f++) {
+      const t = (f / GLOW_FRAMES) * Math.PI * 2, out = new ImageData(new Uint8ClampedArray(px), w, h), d = out.data;
+      for (let j = 0; j < idx.length; j++) {
+        const o = idx[j], sw = Math.sin(t + ph[j] * 1.6) * wt[j] * GLOW_AMP;
+        d[o] = px[o] * (1 + sw);                 // jaśniej w szczycie fali…
+        d[o + 1] = px[o + 1] * (1 + sw * 1.6);   // …i cieplej (więcej żółci)
+        d[o + 2] = px[o + 2] * (1 + sw * 0.6);
+      }
+      x.putImageData(out, 0, 0);
+      const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
+      if (!blob) return null;
+      frames.push(readChunks(new Uint8Array(await blob.arrayBuffer())));
+      await new Promise((ok) => setTimeout(ok, 0));   // nie blokuj gry
+    }
+    return URL.createObjectURL(buildApng(frames, w, h));
+  }
+
+  let glowMap = null, glowOn = false;
+  const reducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const buildGlow = () => glowMap || (glowMap = (async () => {
+    const m = new Map();
+    for (const k of LAVA_KEYS) {
+      try { const u = await shimmer(IMG[k]); if (u) m.set(IMG[k], u); } catch (e) { /* zostaje statyczna */ }
+    }
+    return m;
+  })());
+
+  /* ─────────────────────────────────────────────────────────────────────────
    * STAN, PRZEŁĄCZNIK, WYKRYWANIE NI
    * ───────────────────────────────────────────────────────────────────────── */
   const addStyle = (text) => {
@@ -1401,7 +1501,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     (document.head || root).appendChild(s);
     return s;
   };
-  const style = addStyle([cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssBottomBar, cssAnim, cssToggle].join('\n'));
+  const baseCss = [cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssBottomBar, cssAnim, cssToggle].join('\n');
+  const style = addStyle(baseCss);
   if (style && 'id' in style) style.id = 'tmg-theme';
 
 
@@ -1410,6 +1511,22 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const apply = () => {
     root.classList.toggle(ON, enabled());
     root.classList.toggle(FX, enabled() && effects());
+  };
+  // mienienie lawy: animowane wersje grafik tylko przy włączonym motywie i efektach, bez reduced-motion
+  const syncGlow = async () => {
+    if (!style || !root.classList.contains('tmg-ni')) return;
+    const want = () => enabled() && effects() && !(reducedMotion && reducedMotion.matches);
+    if (want()) {
+      const m = await buildGlow();
+      if (!want() || glowOn || !m.size) return;
+      let t = baseCss;
+      for (const [from, to] of m) t = t.split(from).join(to);
+      style.textContent = t;
+      glowOn = true;
+    } else if (glowOn) {
+      style.textContent = baseCss;
+      glowOn = false;
+    }
   };
 
   let toastTimer = 0;
@@ -1430,12 +1547,14 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     apply();
     syncGraphics();
     arrangeHud();
+    syncGlow();
     toast(enabled() ? 'Tamahagane: włączony' : 'Tamahagane: wyłączony');
   };
   const toggleFx = () => {
     set(KEY_FX, !effects());
     apply();
-    toast(effects() ? 'Efekty (popiół, mgła): włączone' : 'Efekty (popiół, mgła): wyłączone');
+    syncGlow();
+    toast(effects() ? 'Efekty (żar, popiół, mgła): włączone' : 'Efekty (żar, popiół, mgła): wyłączone');
   };
 
   const addToggleButton = () => {
@@ -1443,7 +1562,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     const b = document.createElement('button');
     b.id = 'tmg-toggle';
     b.type = 'button';
-    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty popiołu i mgły (Ctrl+Alt+P)';
+    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty żaru, popiołu i mgły (Ctrl+Alt+P)';
     b.setAttribute('aria-label', 'Przełącz motyw Tamahagane');
     b.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
     b.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); toggleFx(); });
@@ -1492,6 +1611,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     scanSheets();
     document.querySelectorAll(TEXT_SCOPE).forEach(fixText);
     gfxObs.observe(root, { childList: true, subtree: true });
+    setTimeout(syncGlow, 1500);
+    if (reducedMotion && reducedMotion.addEventListener) reducedMotion.addEventListener('change', syncGlow);
     let ticks = 0;
     const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
   };
@@ -1505,7 +1626,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   apply();
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand('Tamahagane: włącz / wyłącz (Ctrl+Alt+H)', toggle);
-    GM_registerMenuCommand('Tamahagane: efekty popiołu i mgły (Ctrl+Alt+P)', toggleFx);
+    GM_registerMenuCommand('Tamahagane: efekty żaru, popiołu i mgły (Ctrl+Alt+P)', toggleFx);
   }
   window.addEventListener('keydown', (e) => {
     if (!e.ctrlKey || !e.altKey || e.shiftKey || e.metaKey) return;
