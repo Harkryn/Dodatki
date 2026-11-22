@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.9.2
+// @version      2.10.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -50,7 +50,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.9.2';
+  const VERSION = '2.10.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -635,6 +635,17 @@ ${N} .shop-wrapper .shop-info-wrapper,
 ${N} .shop-wrapper .shop-info-wrapper * { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
 ${N} .shop-wrapper .total-price { color: var(--tmg-text) !important; letter-spacing: .04em; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--tmg-edge) !important; }
+
+/* --- tryb okienkowy (body[data-res]): zamiast windowModeBorder.png gry – malowana rama okien (kamienie z lawą,
+   kolce w narożnikach), wysunięta 9 px na zewnątrz; ramka gry ma 7 px, więc układ zostaje. Tło dookoła: czerń
+   z przygaszoną czerwoną łuną zza gry. --- */
+${N} body[data-res] .game-window-positioner > .interface-layer {
+  border-color: transparent !important;
+  border-image: url("${IMG.winFrame}") 32 / 16px / 9px round !important;
+}
+${N} body[data-res] .window-mode-background-layer {
+  background: radial-gradient(ellipse 65% 65% at 50% 50%, rgb(122 18 18 / .14), transparent 72%), #050303 !important;
+}
 
 /* --- przyciski HUD (widżety): płytki czarnego lakieru z mosiężnym obrzeżem; ikony gry przygaszone do
    koloru starego papieru, przy najechaniu żarzą się. Kolory stanów gry zostają jako obrys. --- */
