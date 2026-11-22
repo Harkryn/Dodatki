@@ -27,9 +27,6 @@ Obróbka: jasny cień w środku usunięty. W grze każdy slot ma inne ułożenie
 ### rama-orba.webp (248×264, otwór r 72 px w (127, 134))
 Stylized hand-painted dark fantasy game UI frame for a round health orb, a thick ring of dark iron carved with swirling clouds, glowing red ember cracks running through the metal, two small demon horns on top of the ring, the large circular center is completely empty plain light grey, front view, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
 
-### tabliczka.webp (140×79)
-Stylized hand-painted dark fantasy game UI label plaque, a small wide horizontal rounded rectangle like a hanko seal stamp face, very dark oxblood red lacquer center with a thick black lacquer frame and tiny dull brass studs in the corners, blank empty face, front view, twice as wide as tall, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
-
 ### separator.webp (50×120)
 Negative prompt: text, letters, characters, seal, stamp, feather, objects, watermark
 A single vertical brush stroke of dark crimson red ink painted from top to bottom, sumi-e calligraphy style, dry brush streaks, tapered ends, a few tiny ink splatter dots, centered on plain white paper with lots of empty space, minimal, nothing else

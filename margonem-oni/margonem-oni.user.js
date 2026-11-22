@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.10.0
+// @version      1.11.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -17,7 +17,6 @@
 // @resource     oniBar    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/pasek-tlo.webp
 // @resource     oniSlot   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ramka-slotu.webp
 // @resource     oniRing   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/rama-orba.webp
-// @resource     oniPlaque https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/tabliczka.webp
 // @resource     oniSeparator https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/separator.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
@@ -38,7 +37,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.10.0';
+  const VERSION = '1.11.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -64,7 +63,6 @@
     bar: res('oniBar', 'pasek-tlo.webp'),         // 107×120, kafel bez szwów: malowany czarny lakier belki
     slot: res('oniSlot', 'ramka-slotu.webp'),     // 74×80, ramka slotu: poszarpane żelazo z żarem
     ring: res('oniRing', 'rama-orba.webp'),       // 248×264, rama orba: pierścień z chmurami, pęknięcia z żarem, rogi
-    plaque: res('oniPlaque', 'tabliczka.webp'),   // 140×79, tabliczka na wartości obok orba
     separator: res('oniSeparator', 'separator.webp') // 50×120, czerwone pociągnięcie pędzla sumi-e
   };
 
@@ -907,14 +905,6 @@ ${N} .interface-layer .hud-container .gold-tip { background: url("/img/currency/
 ${N} .interface-layer .hud-container .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat !important; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
 ${N} .interface-layer .hud-container .btn-min:hover { box-shadow: inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; color: #fff !important; }
 
-/* pasek doświadczenia jak ostrze: stalowa krawędź (hamon) u góry, czerwona głownia */
-${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress .inner {
-  background: linear-gradient(#d8d0c6 0, #8f8478 1px, #9e1b1b 2px, #7a1212 45%, #4a0909 80%, #1a0303) !important;
-}
-${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .progress.noexp .inner {
-  background: linear-gradient(#d8d0c6 0, #8f8478 1px, #5a524c 2px, #3a3430 60%, #141110) !important;
-}
-${N} .bottom-panel-of-bottom-positioner .exp-bar-wrapper .exp-progress .overlay { filter: grayscale(1) sepia(.3) brightness(.55) contrast(1.25); }
 
 /* paski postępu w oknach (np. zadania, rzemiosło) */
 ${N} .interface-element-progress-bar-0,
@@ -1102,24 +1092,64 @@ ${B} .hp-indicator-wrapper .value {
   text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
 }
 
-/* --- wnęki z wartościami obok orba: kamienne tabliczki z ciemnoczerwonym lakierem (tabliczka.webp).
-   Rama orba sięga ok. 85 px od środka kuli, więc tabliczki (i ich teksty) są odsunięte o 50 px na boki
-   i 20 px w górę – nad rząd slotów, wystają nad belkę jak orb i maski. Tylko transform – gra liczy
-   układ po staremu, podpowiedzi działają. */
-${B} .bottom-panel-pointer-bg .pointer-exp-graphic,
-${B} .bottom-panel-pointer-bg .pointer-ttl-graphic {
-  background: url("${IMG.plaque}") center / 100% 100% no-repeat !important;
-  filter: drop-shadow(0 2px 3px #000) !important;
+/* --- ping (lagmeter) usunięty: psuł symetrię paska --- */
+${B} .lagmeter { display: none !important; }
+
+/* --- pasek doświadczenia: dwie połówki gry (lewa 0–50 %, prawa 50–100 %, każda 235×11 px) wchodzą pod ramę orba.
+   Rowek z czarnego lakieru w cienkiej ramie z płytek (jak panel), wypełnienie z tej samej cieczy-żaru co orb HP,
+   z jasną linią powierzchni u góry i rozżarzonym czołem po prawej. Grafika ramki gry (.overlay) schowana. --- */
+${B} .exp-bar-wrapper .exp-progress .overlay {
+  background: none !important;
+  filter: none !important;
+  border-style: solid !important;
+  border-width: 0 !important;
+  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
+  box-shadow: 0 1px 4px rgb(0 0 0 / .8);
+  pointer-events: none;
 }
+${B} .exp-bar-wrapper .exp-progress .progress {
+  background: linear-gradient(#030202, #0e0a0a 60%, #070505) !important;
+  box-shadow: inset 0 1px 2px #000, inset 0 0 0 1px rgb(92 13 13 / .45);
+  overflow: hidden;
+}
+${B} .exp-bar-wrapper .exp-progress .progress .inner {
+  position: relative;
+  background:
+    linear-gradient(rgb(255 150 130 / .6), rgb(255 150 130 / 0) 2px),
+    linear-gradient(transparent 55%, rgb(0 0 0 / .45)),
+    url("${IMG.liquid}") 0 50% / 64px 64px repeat,
+    #5c0d0d !important;
+  border-color: transparent !important;
+}
+/* rozżarzone czoło paska (gdzie kończy się doświadczenie) */
+${B} .exp-bar-wrapper .exp-progress .progress .inner::after {
+  content: "";
+  position: absolute; right: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(90deg, transparent, rgb(255 120 90 / .85));
+  box-shadow: 0 0 5px rgb(196 42 42 / .9);
+  pointer-events: none;
+}
+${B} .exp-bar-wrapper .exp-progress .progress.noexp .inner {
+  background: linear-gradient(rgb(230 220 207 / .35), transparent 2px), linear-gradient(#3a3430, #141110) !important;
+}
+${B} .exp-bar-wrapper .exp-progress .progress.noexp .inner::after { display: none; }
+
+/* --- procent doświadczenia i stamina: sam tekst na pasku expa (bez tabliczek).
+   Procent na środku widocznej części lewej połówki (352–553 px, dalej rama orba), stamina na środku
+   prawej (723–925 px). Przesunięcie tylko przez transform – podpowiedzi gry działają. --- */
 ${B} .bottom-panel-pointer-bg .pointer-exp-graphic,
-${B} .bottom-panel-pointer-bg .pointer-exp { transform: translate(-50px, -20px); }
-${B} .bottom-panel-pointer-bg .pointer-ttl-graphic,
-${B} .bottom-panel-pointer-bg .pointer-ttl { transform: translate(50px, -20px); }
+${B} .bottom-panel-pointer-bg .pointer-ttl-graphic { visibility: hidden !important; }
+${B} .bottom-panel-pointer-bg .pointer-exp { transform: translate(-114px, -13px); }
+${B} .bottom-panel-pointer-bg .pointer-ttl { transform: translate(109px, -13px); }
 ${B} .bottom-panel-pointer-bg .pointer-exp,
 ${B} .bottom-panel-pointer-bg .pointer-ttl {
+  z-index: 3;
   color: var(--oni-text) !important;
   font-weight: bold;
-  text-shadow: 0 1px 2px #000, 0 0 3px #000, 0 0 1px #000;
+  font-size: 10px !important;
+  line-height: 12px !important;
+  text-align: center;
+  text-shadow: 0 0 2px #000, 0 0 3px #000, 0 1px 1px #000, 0 0 1px #000;
 }
 `;
 
