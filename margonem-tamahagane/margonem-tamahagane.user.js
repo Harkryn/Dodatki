@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.7.0
+// @version      2.7.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -48,7 +48,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.7.0';
+  const VERSION = '2.7.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1470,9 +1470,14 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     }
     if (idx.length < 40) return null;
     if (tint) {
-      // kolor rangi z zachowaną jasnością lawy; najgorętsze miejsca bieleją (żar w innym kolorze)
-      for (let j = 0; j < idx.length; j++) {
-        const o = idx[j], k = wt[j], v = Math.max(px[o], px[o + 1], px[o + 2]) / 255, hot = Math.max(0, (v - 0.75) / 0.25) * 0.45;
+      // kolor rangi z zachowaną jasnością lawy; najgorętsze miejsca bieleją (żar w innym kolorze).
+      // Przebarwiany jest cały czerwony żar – także ciemny dym we wnętrzu, nie tylko jasne pęknięcia.
+      for (let o = 0; o < px.length; o += 4) {
+        const r = px[o], g = px[o + 1], b = px[o + 2];
+        if (!px[o + 3]) continue;
+        const k = Math.min(1, Math.max(0, (r - Math.max(g, b) * 1.2 - 8) / 40));
+        if (k <= 0) continue;
+        const v = Math.max(r, g, b) / 255, hot = Math.max(0, (v - 0.75) / 0.25) * 0.45;
         for (let ch = 0; ch < 3; ch++) {
           const t = Math.min(255, tint[ch] * Math.min(1, v * 1.25));
           px[o + ch] = px[o + ch] * (1 - k) + (t + (255 - t) * hot) * k;
