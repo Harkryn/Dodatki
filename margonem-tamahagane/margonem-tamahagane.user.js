@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.4.0
+// @version      2.4.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -47,7 +47,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.4.0';
+  const VERSION = '2.4.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -814,8 +814,8 @@ ${N} .interface-layer > .top.positioner > .bg {
 
 /* tabliczka z imieniem / lokacją / walutami (gra: 342×65 na górze ekranu).
    Rama: żelazo z pęknięciami pełnymi żaru, na obu końcach okrągłe gniazda z ogniem
-   (rama-tabliczki.webp, 600×205; wnętrze 141/45 – 458/144 px). 9-slice w skali 0,34: góra 15 px (w obrębie
-   tabliczki), boki 48 px i dół 20 px wysunięte na zewnątrz (outset) – układ gry bez zmian. Środek ramy
+   (rama-tabliczki.webp, 600×205; wnętrze 141/45 – 458/144 px). 9-slice w jednej skali 0,44 (wysokość 65 + 26 px = 205 × 0,44, więc gniazda na końcach nie są ściśnięte): góra 20 px (w obrębie
+   tabliczki), boki 62 px i dół 26 px wysunięte na zewnątrz (outset) – układ gry bez zmian. Środek ramy
    powtarzany (round), żeby kamienie belek nie były rozciągnięte. */
 ${N} .interface-layer .hud-container {
   background:
@@ -825,7 +825,7 @@ ${N} .interface-layer .hud-container {
     var(--tmg-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: url("${IMG.plate}") 45 142 60 141 / 15px 48px 20px 48px / 0 48px 20px 48px round stretch !important;
+  border-image: url("${IMG.plate}") 45 142 60 141 / 20px 62px 26px 62px / 0 62px 26px 62px round stretch !important;
   box-shadow: none !important;
   color: var(--tmg-text) !important;
   overflow: visible !important;
