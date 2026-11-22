@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.9.0
+// @version      1.10.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -14,6 +14,11 @@
 // @grant        GM_getResourceURL
 // @resource     oniLiquid https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ciecz-orba.webp
 // @resource     oniMask   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/maska-oni.webp
+// @resource     oniBar    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/pasek-tlo.webp
+// @resource     oniSlot   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/ramka-slotu.webp
+// @resource     oniRing   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/rama-orba.webp
+// @resource     oniPlaque https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/tabliczka.webp
+// @resource     oniSeparator https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/oni/separator.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-oni/margonem-oni.user.js
 // ==/UserScript==
@@ -33,7 +38,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.9.0';
+  const VERSION = '1.10.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -55,7 +60,12 @@
   };
   const IMG = {
     liquid: res('oniLiquid', 'ciecz-orba.webp'),  // 256×256, kafel bez szwów: płynny żar w czarnej wodzie (ciecz orba HP)
-    mask: res('oniMask', 'maska-oni.webp')        // 179×256, malowana maska Oni z żarzącymi się oczami (końce dolnego paska)
+    mask: res('oniMask', 'maska-oni.webp'),       // 179×256, malowana maska Oni z żarzącymi się oczami (końce dolnego paska)
+    bar: res('oniBar', 'pasek-tlo.webp'),         // 107×120, kafel bez szwów: malowany czarny lakier belki
+    slot: res('oniSlot', 'ramka-slotu.webp'),     // 74×80, ramka slotu: poszarpane żelazo z żarem
+    ring: res('oniRing', 'rama-orba.webp'),       // 248×264, rama orba: pierścień z chmurami, pęknięcia z żarem, rogi
+    plaque: res('oniPlaque', 'tabliczka.webp'),   // 140×79, tabliczka na wartości obok orba
+    separator: res('oniSeparator', 'separator.webp') // 50×120, czerwone pociągnięcie pędzla sumi-e
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -936,50 +946,6 @@ ${N} .handheld-mini-map::after {
    * Tylko wygląd: wszystkie ozdoby to pseudo-elementy z pointer-events: none, sloty i orb działają jak w grze.
    * Poziom cieczy w orbie wyznacza gra (wysokość .blood = HP) – motyw tylko ją maluje i animuje.
    * ===================================================================== */
-  // Pas lamelkowych płytek (kozane) z czerwonym sznurem – kafel 16×12, powtarzany poziomo
-  const KOZANE = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'>` +
-    `<defs><linearGradient id='p' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3a2b28'/><stop offset='.25' stop-color='#211816'/><stop offset='1' stop-color='#0a0707'/></linearGradient></defs>` +
-    `<rect width='16' height='12' fill='#050303'/>` +
-    `<rect x='.6' y='.6' width='14.8' height='10.8' rx='2' fill='url(#p)' stroke='#000' stroke-width='.6'/>` +
-    `<path d='M0 6.5H16' stroke='#000' stroke-width='2'/><path d='M0 6.5H16' stroke='#5c0d0d' stroke-width='1.1'/>` +
-    `<path d='M6.8 5L9.2 8M9.2 5L6.8 8' stroke='#7a1212' stroke-width='.8'/></svg>`);
-  // Rama orba w kształcie tsuby: obręcz z patynowanego mosiądzu, czarny lakier z ażurowymi otworami
-  // (sukashi w kształcie płomieni), czerwona żyłka przy otworze na kulę. Środek przezroczysty.
-  const TSUBA_RING = (() => {
-    const R0 = 50, R1 = 64, C = 66;
-    const holes = [];
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 - Math.PI / 2 + Math.PI / 8;
-      const pt = (r, da) => `${(C + Math.cos(a + da) * r).toFixed(1)} ${(C + Math.sin(a + da) * r).toFixed(1)}`;
-      holes.push(`M${pt(53.5, -.16)} Q${pt(58, -.05)} ${pt(60.5, .02)} Q${pt(57, .1)} ${pt(55, .2)} Q${pt(53, .05)} ${pt(53.5, -.16)}Z`);
-    }
-    const s = `<svg xmlns='http://www.w3.org/2000/svg' width='132' height='132' viewBox='0 0 132 132'>` +
-      `<defs><radialGradient id='l' cx='.42' cy='.35' r='.7'><stop offset='0' stop-color='#2c211e'/><stop offset='.6' stop-color='#120d0c'/><stop offset='1' stop-color='#060404'/></radialGradient>` +
-      `<linearGradient id='b' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#a8854c'/><stop offset='.5' stop-color='#6e5530'/><stop offset='1' stop-color='#3a2c18'/></linearGradient></defs>` +
-      `<path fill-rule='evenodd' fill='url(#l)' d='M${C - R1} ${C}a${R1} ${R1} 0 1 0 ${R1 * 2} 0a${R1} ${R1} 0 1 0 ${-R1 * 2} 0Z M${C - R0} ${C}a${R0} ${R0} 0 1 0 ${R0 * 2} 0a${R0} ${R0} 0 1 0 ${-R0 * 2} 0Z ${holes.join(' ')}'/>` +
-      `<circle cx='${C}' cy='${C}' r='${R1 - .8}' fill='none' stroke='url(#b)' stroke-width='2.2'/>` +
-      `<circle cx='${C}' cy='${C}' r='${R1 + .4}' fill='none' stroke='#000' stroke-width='1'/>` +
-      `<circle cx='${C}' cy='${C}' r='${R0 + .6}' fill='none' stroke='#7a1212' stroke-width='1.4'/>` +
-      `<circle cx='${C}' cy='${C}' r='${R0 - .2}' fill='none' stroke='#000' stroke-width='1'/>` +
-      `<path fill='none' stroke='#5c0d0d' stroke-width='.8' d='${holes.join(' ')}'/>` +
-      `</svg>`;
-    return svgUrl(s);
-  })();
-  // Tabliczka ema (70×35): daszek, czarny lakier, czerwona żyłka, sznurek z dziurką
-  const EMA = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='70' height='35' viewBox='0 0 70 35'>` +
-    `<defs><linearGradient id='e' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2a1f1d'/><stop offset='.35' stop-color='#161010'/><stop offset='1' stop-color='#070505'/></linearGradient></defs>` +
-    `<path d='M3 11L35 2L67 11V33H3Z' fill='url(#e)' stroke='#000' stroke-width='1.2'/>` +
-    `<path d='M6 12.5L35 4.6L64 12.5V30.5H6Z' fill='none' stroke='#5c0d0d' stroke-width='1'/>` +
-    `<path d='M3 11L35 2L67 11' fill='none' stroke='#8a6a3a' stroke-opacity='.55' stroke-width='1'/>` +
-    `<circle cx='35' cy='7.4' r='1.3' fill='#000' stroke='#8a6a3a' stroke-opacity='.6' stroke-width='.5'/>` +
-    `</svg>`);
-  // Pionowe pociągnięcie pędzla (separator)
-  const BRUSH_V = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='60' viewBox='0 0 8 60' preserveAspectRatio='none'>` +
-    `<path d='M4.4 1 C5.6 12 5.2 30 4.8 44 C4.6 52 4.2 56 3.8 59 C3 52 2.6 40 2.9 28 C3.1 16 3.4 8 4.4 1Z' fill='#7a1212' fill-opacity='.85'/>` +
-    `</svg>`);
   // Środek orba: x = środek panelu − 2 px, y = 55 px od góry szablonu (gra: wrapper 98×98 w (281, 6))
   const B = `${N} .bottom-panel-of-bottom-positioner`;
 
@@ -987,12 +953,7 @@ ${N} .handheld-mini-map::after {
 /* --- belka na całą szerokość: czarny lakier, u góry pas płytek kozane z czerwonym sznurem,
    czerwone linie u góry i u dołu --- */
 ${N} .interface-layer > .bottom.positioner > .bg {
-  background:
-    linear-gradient(var(--oni-r2) 0 1px, #000 1px 2px, transparent 2px),
-    ${KOZANE} 0 2px / 16px 12px repeat-x,
-    linear-gradient(transparent calc(100% - 2px), #000 calc(100% - 2px), var(--oni-r1) calc(100% - 1px)),
-    linear-gradient(170deg, rgb(255 235 220 / .03), transparent 40%),
-    linear-gradient(#120d0c 14px, var(--oni-k1) 30px, var(--oni-k0)) !important;
+  background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--oni-k0) !important;   /* malowany lakier, kafel bez szwów */
   box-shadow: 0 -4px 10px rgb(0 0 0 / .6);
 }
 
@@ -1020,7 +981,34 @@ ${B} .usable-slot {
   box-shadow: inset 0 0 0 1px var(--oni-edge-hi), inset 0 -1px 0 rgb(122 18 18 / .55), inset 0 0 8px #000, 0 1px 2px #000 !important;
   transition: box-shadow .18s ease;
 }
-${B} .usable-slot::after { display: none !important; }
+/* ramka slotu: poszarpane żelazo z żarzącym się wnętrzem (ramka-slotu.webp).
+   Żeby 8 jednakowych ramek nie było monotonne: każdy slot dostaje inne ułożenie tej samej grafiki
+   (8 kombinacji obrotu i odbicia – płomienie raz u dołu, raz z boku, raz u góry), lekko inną jasność
+   i własny rytm „oddechu” żaru (różny czas i przesunięcie animacji, tylko opacity). */
+${B} .usable-slot::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: -4px;
+  z-index: 1;
+  pointer-events: none;
+  background: url("${IMG.slot}") center / 100% 100% no-repeat !important;
+  transform: var(--oni-st, none);
+  filter: brightness(var(--oni-sb, 1)) drop-shadow(0 1px 2px #000);
+  animation: none;
+}
+${B} .usable-slot-1 { --oni-st: none;                       --oni-sb: 1;    --oni-sd: 4.2s; --oni-so: 0s; }
+${B} .usable-slot-2 { --oni-st: rotate(180deg);             --oni-sb: .9;   --oni-sd: 5.1s; --oni-so: -1.3s; }
+${B} .usable-slot-3 { --oni-st: scaleX(-1);                 --oni-sb: 1.08; --oni-sd: 4.6s; --oni-so: -2.7s; }
+${B} .usable-slot-4 { --oni-st: rotate(-90deg);             --oni-sb: .95;  --oni-sd: 5.6s; --oni-so: -.8s; }
+${B} .usable-slot-5 { --oni-st: rotate(90deg);              --oni-sb: .95;  --oni-sd: 4.9s; --oni-so: -3.1s; }
+${B} .usable-slot-6 { --oni-st: scaleY(-1);                 --oni-sb: 1.05; --oni-sd: 5.3s; --oni-so: -1.9s; }
+${B} .usable-slot-7 { --oni-st: rotate(90deg) scaleX(-1);   --oni-sb: .92;  --oni-sd: 4.4s; --oni-so: -3.6s; }
+${B} .usable-slot-8 { --oni-st: rotate(-90deg) scaleX(-1);  --oni-sb: 1.02; --oni-sd: 5.8s; --oni-so: -2.2s; }
+html.${ON}.${FX}.oni-ni .bottom-panel-of-bottom-positioner .usable-slot::after {
+  animation: oni-coal var(--oni-sd, 5s) ease-in-out var(--oni-so, 0s) infinite alternate;
+}
+@keyframes oni-coal { from { opacity: .78; } to { opacity: 1; } }
 ${B} .usable-slot:hover,
 ${B} .usable-slot:active,
 ${B} .usable-slot.active {   /* .active – TODO: zweryfikuj selektor (stan slotu po użyciu skrótu) */
@@ -1037,12 +1025,12 @@ ${B} .usable-slot::before {
 ${B} .slots.left::after,
 ${B} .slots.right::after {
   content: "";
-  position: absolute; top: -4px; bottom: -4px; width: 6px;
-  background: ${BRUSH_V} center / 100% 100% no-repeat;
+  position: absolute; top: -4px; bottom: -4px; width: 14px;
+  background: url("${IMG.separator}") center / 100% 100% no-repeat;
   pointer-events: none;
 }
-${B} .slots.left::after { right: -6px; }
-${B} .slots.right::after { left: -6px; transform: scaleX(-1); }
+${B} .slots.left::after { right: -12px; }
+${B} .slots.right::after { left: -12px; transform: scaleX(-1); }
 
 /* --- orb HP: rama w kształcie tsuby (osobna warstwa, przezroczysty środek) --- */
 /* maski Oni na obu końcach panelu: przy slocie 1 i slocie 8, wystają ponad belkę.
@@ -1059,15 +1047,18 @@ ${B}::after {
     url("${IMG.mask}") right 11px bottom / auto 68px no-repeat;
   filter: drop-shadow(0 2px 3px #000) drop-shadow(0 0 4px rgb(0 0 0 / .8));
 }
+/* rama orba: żelazny pierścień z chmurami, pęknięcia z żarem, rogi u góry (rama-orba.webp, 248×264,
+   otwór: środek 127/134 px, promień 72 px). Skala 0,694 → otwór r 50 px dokładnie na kulę (r 49);
+   środek kuli w szablonie: x = 50% − 2 px, y = 55 px. */
 ${B} .hp-indicator-wrapper-template::before {
   content: "";
   position: absolute;
-  left: calc(50% - 2px - 66px); top: calc(55px - 66px);
-  width: 132px; height: 132px;
+  left: calc(50% - 2px - 88px); top: calc(55px - 93px);
+  width: 172px; height: 183px;
   z-index: 2;
   pointer-events: none;
-  background: ${TSUBA_RING} center / 100% 100% no-repeat;
-  filter: drop-shadow(0 2px 4px #000);
+  background: url("${IMG.ring}") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 5px #000);
 }
 /* tło kuli (pusta część): głęboka czerń wody z ledwie widoczną czerwienią */
 ${B} .hp-indicator-wrapper { background: radial-gradient(circle at 50% 40%, #1a0707, #050202 70%) !important; }
@@ -1111,17 +1102,24 @@ ${B} .hp-indicator-wrapper .value {
   text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
 }
 
-/* --- wnęki z wartościami obok orba: tabliczki ema z czytelnym tekstem --- */
+/* --- wnęki z wartościami obok orba: kamienne tabliczki z ciemnoczerwonym lakierem (tabliczka.webp).
+   Rama orba sięga ok. 85 px od środka kuli, więc tabliczki (i ich teksty) są odsunięte o 50 px na boki
+   i 20 px w górę – nad rząd slotów, wystają nad belkę jak orb i maski. Tylko transform – gra liczy
+   układ po staremu, podpowiedzi działają. */
 ${B} .bottom-panel-pointer-bg .pointer-exp-graphic,
 ${B} .bottom-panel-pointer-bg .pointer-ttl-graphic {
-  background: ${EMA} center / 100% 100% no-repeat !important;
+  background: url("${IMG.plaque}") center / 100% 100% no-repeat !important;
   filter: drop-shadow(0 2px 3px #000) !important;
 }
+${B} .bottom-panel-pointer-bg .pointer-exp-graphic,
+${B} .bottom-panel-pointer-bg .pointer-exp { transform: translate(-50px, -20px); }
+${B} .bottom-panel-pointer-bg .pointer-ttl-graphic,
+${B} .bottom-panel-pointer-bg .pointer-ttl { transform: translate(50px, -20px); }
 ${B} .bottom-panel-pointer-bg .pointer-exp,
 ${B} .bottom-panel-pointer-bg .pointer-ttl {
   color: var(--oni-text) !important;
   font-weight: bold;
-  text-shadow: 0 1px 2px #000, 0 0 3px #000;
+  text-shadow: 0 1px 2px #000, 0 0 3px #000, 0 0 1px #000;
 }
 `;
 
