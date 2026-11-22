@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Oni
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.11.1
+// @version      1.12.0
 // @description  Motyw nowego interfejsu (NI) w klimacie feudalnej Japonii: czarny lakier urushi, lamelkowe płytki zbroi, czerwone sznurowanie, maski Oni i nocna mgła. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -37,7 +37,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.11.1';
+  const VERSION = '1.12.0';
   const ON = 'oni-on';          // motyw włączony
   const FX = 'oni-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'oni-enabled';
@@ -870,40 +870,87 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
    * HP jak czerwony lakier z połyskiem, paski jak ostrze (stalowa krawędź + ciemnoczerwona głownia).
    * ===================================================================== */
   const cssBars = `
-/* górna i dolna belka: czarny lakier, od strony mapy cienki czerwony sznur */
+/* --- GÓRA w tym samym stylu co dolny pasek ---
+   belka: ten sam malowany lakier co dół (kafel bez szwów) */
 ${N} .interface-layer > .top.positioner > .bg {
-  background: linear-gradient(transparent calc(100% - 2px), #000 calc(100% - 2px), var(--oni-r1) calc(100% - 1px)), linear-gradient(var(--oni-k2), var(--oni-k0)) !important;
+  background: url("${IMG.bar}") 0 0 / auto 100% repeat-x, var(--oni-k0) !important;
+  box-shadow: 0 4px 10px rgb(0 0 0 / .6);
 }
 
-/* tabliczka z imieniem / lokacją / walutami: lakier w ramie z płytek, pod imieniem pędzlowa kreska */
+/* tabliczka z imieniem / lokacją / walutami (342×65): lakier w ramie z poszarpanego żelaza z żarem
+   (ta sama grafika co ramki slotów, jako 9-slice), u dołu ledwie widoczna czerwona poświata,
+   pod imieniem pędzlowa kreska. border-width 0 – układ tabliczki gry bez zmian. */
 ${N} .interface-layer .hud-container {
   background:
     var(--oni-brush-dim) center 21px / 70% 3px no-repeat,
-    var(--oni-urushi) !important;
+    radial-gradient(ellipse 45% 60% at 50% 100%, rgb(122 18 18 / .22), transparent 70%),
+    url("${IMG.bar}") 0 50% / auto 140% repeat-x,
+    var(--oni-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: var(--oni-frame-thin) 6 / 4px / 0 stretch !important;
-  box-shadow: 0 0 0 1px #000, 0 4px 12px rgb(0 0 0 / .85) !important;
+  border-image: url("${IMG.slot}") 18 / 10px / 3px stretch !important;
+  box-shadow: 0 4px 14px rgb(0 0 0 / .85) !important;
   color: var(--oni-text) !important;
+  overflow: visible !important;
 }
-${N} .interface-layer .hud-container .heroname { text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .8); }
+/* maski Oni po obu stronach tabliczki – te same co na końcach dolnego paska (poza tabliczką, bez kliknięć) */
+${N} .interface-layer .hud-container::before {
+  content: "";
+  position: absolute;
+  left: -50px; right: -50px; top: 0; height: 64px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    url("${IMG.mask}") left center / auto 100% no-repeat,
+    url("${IMG.mask}") right center / auto 100% no-repeat;
+  filter: drop-shadow(0 2px 3px #000);
+}
+/* imię pędzlem (Shojumaru – pełne polskie znaki); kolor imienia zostaje z gry */
+${N} .interface-layer .hud-container .heroname {
+  font-family: var(--oni-font-title) !important;
+  font-weight: normal !important;
+  letter-spacing: .03em;
+  text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9);
+}
 ${N} .interface-layer .hud-container .location,
 ${N} .interface-layer .hud-container .herogold,
 ${N} .interface-layer .hud-container .herocredits { color: var(--oni-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .interface-layer .hud-container .coords,
 ${N} .interface-layer .hud-container .world-name { color: var(--oni-dim) !important; text-shadow: 0 1px 2px #000; }
-/* „+” (kup złoto / smocze łzy): lakierowany guzik z czerwonym plusem zamiast jaskrawej zieleni */
-${N} .interface-layer .hud-container .btn-min {
-  background: linear-gradient(#211816, #0b0808) !important;
-  border-color: #000 !important;
-  box-shadow: inset 0 0 0 1px rgb(138 106 58 / .45) !important;
-  color: var(--oni-hi) !important;
-  filter: none !important;
-}
+/* „+” (kup złoto / smocze łzy) usunięte; kwoty dosunięte do swoich ikon */
+${N} .interface-layer .hud-container .btn-min { display: none !important; }
+${N} .interface-layer .hud-container .herogold,
+${N} .interface-layer .hud-container .herogold-difference,
+${N} .interface-layer .hud-container .herocredits,
+${N} .interface-layer .hud-container .herocredits-difference { transform: translateX(-20px); }
 /* ikony walut były częścią grafiki tabliczki gry – podstawiamy czyste ikony gry (jak w Dark Gothic) */
 ${N} .interface-layer .hud-container .gold-tip { background: url("/img/currency/goldIcon16.gif") center / 16px 16px no-repeat !important; filter: drop-shadow(0 0 2px #000); }
 ${N} .interface-layer .hud-container .credits-tip { background: url("/img/draconite_small.gif") -6px -4px no-repeat !important; transform: scale(.85); filter: drop-shadow(0 0 2px #000); }
-${N} .interface-layer .hud-container .btn-min:hover { box-shadow: inset 0 0 0 1px var(--oni-r3), var(--oni-ember) !important; color: #fff !important; }
+
+/* kulka trybu PvP mapy → medalion zwisający pod środkiem tabliczki: żelazny pierścień z mosiężną obwódką,
+   w środku żarzący się kamień w kolorze mapy (gra nadal przełącza klasy green/yellow/orange/red).
+   To ten sam element gry (.map_ball) – tylko przeniesiony i przemalowany, więc podpowiedź „PvP…”
+   i kliknięcie (lista poszukiwanych) działają jak wcześniej. */
+${N} .interface-layer .hud-container .map_ball {
+  --oni-pvp: 120 120 120;
+  left: calc(50% - 10px) !important;
+  top: 54px !important;
+  width: 20px !important; height: 20px !important;
+  z-index: 3;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 36%, rgb(255 255 255 / .55) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle, rgb(var(--oni-pvp)) 0 30%, rgb(var(--oni-pvp) / .55) 45%, #0b0707 52% 64%, #8a6a3a 66% 72%, #120c0b 74% 92%, #000 94%) !important;
+  box-shadow: 0 2px 4px #000, 0 0 8px rgb(var(--oni-pvp) / .55);
+  cursor: pointer;
+}
+${N} .interface-layer .hud-container .map_ball.green { --oni-pvp: 60 170 80; }
+${N} .interface-layer .hud-container .map_ball.yellow { --oni-pvp: 220 180 50; }
+${N} .interface-layer .hud-container .map_ball.orange { --oni-pvp: 230 110 30; }
+${N} .interface-layer .hud-container .map_ball.red { --oni-pvp: 210 30 30; }
+${N} .interface-layer .hud-container .map_ball:hover { filter: brightness(1.25); }
+/* lokacja i współrzędne przesunięte w miejsce, które zajmowała kulka */
+${N} .interface-layer .hud-container .map-data { transform: translateX(-12px); }
 
 
 /* paski postępu w oknach (np. zadania, rzemiosło) */
