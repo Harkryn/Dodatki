@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.13.0
+// @version      2.14.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -27,6 +27,7 @@
 // @resource     tmgColTile   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-kafel.webp
 // @resource     tmgHudBtn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/guzik-hud.webp
 // @resource     tmgPremIcons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/premium-ikony.webp
+// @resource     tmgSlotGrid  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/siatka-slotow.webp
 // @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
@@ -52,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.13.0';
+  const VERSION = '2.14.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -88,6 +89,7 @@
     colTile: res('tmgColTile', 'kolumna-kafel.webp'),  // 384×150, kafel drewna powtarzany w pionie nad dołem kolumny (bez szwu)
     hudBtn: res('tmgHudBtn', 'guzik-hud.webp'),        // 512×128, rama guzika HUD w 4 obrotach (rombowy nit: dół, góra, lewo, prawo)
     premIcons: res('tmgPremIcons', 'premium-ikony.webp'), // 288×216, 12 ikon sklepu Premium (siatka 4×3 po 72 px): żelazo i żar
+    slotGrid: res('tmgSlotGrid', 'siatka-slotow.webp')    // 256×256, siatka 4×4 ramek slotów (obroty, odbicia, różna jasność) – wyświetlana 132 px = 4 komórki po 33 px
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
@@ -538,9 +540,13 @@ ${N} .interface-element-grid-border-light {
 ${N} .interface-layer .equipment-outline-2,
 ${N} .interface-layer .equipment-outline-3 { background-color: var(--tmg-edge) !important; }
 
-/* siatka slotów (torba, sklep, skrzynie): wklęsłe komórki z czarnego lakieru, kratka w bardzo ciemnej czerwieni
-   (wzór co 33 px jak siatka gry) */
-${N} .interface-element-item-slot-grid-stretch,
+/* siatka slotów (torba, sklep, skrzynie): każda komórka w malowanej ramce slotu (żelazo z żarem); kafel 4×4
+   z obróconych/odbitych ramek o różnej jasności, więc wzór wraca dopiero co 4 komórki (skok 33 px jak w grze) */
+${N} .interface-element-item-slot-grid-stretch {
+  filter: none !important;
+  background: url("${IMG.slotGrid}") 0 0 / 132px 132px repeat, var(--tmg-k0) !important;
+}
+/* pojedyncze sloty: wklęsłe komórki z czarnego lakieru */
 ${N} .interface-element-one-item-slot-background-to-repeat {
   filter: none !important;
   background-color: var(--tmg-k0) !important;
@@ -639,6 +645,20 @@ ${N} .shop-wrapper .shop-info-wrapper,
 ${N} .shop-wrapper .shop-info-wrapper * { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
 ${N} .shop-wrapper .total-price { color: var(--tmg-text) !important; letter-spacing: .04em; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--tmg-edge) !important; }
+
+/* --- sklep: etykiety „Kup/Sprzedaj” jako mała płytka lakieru z pęknięciem z magmą pod spodem; złota skrzynia gry
+   w stopce (premium-footer) zastąpiona malowaną skrzynią z żarem (ikona z premium-ikony.webp) --- */
+${N} .shop-wrapper .label.interface-element-grid-border {
+  background: var(--tmg-brush) center bottom / 100% 4px no-repeat, linear-gradient(var(--tmg-k2), var(--tmg-k0)) !important;
+  border-color: transparent !important; box-shadow: 0 0 0 1px #000 !important;
+  color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000;
+}
+${N} .premium-footer__chest { background-image: none !important; position: relative; }
+${N} .premium-footer__chest::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px;
+  background: url("${IMG.premIcons}") 0 0 / 240px 180px no-repeat;
+  pointer-events: none;
+}
 
 /* --- okno Premium: kafelki kategorii zamiast zielonych pól ze złotą obwódką – malowana rama tooltipa
    (kamień, lawa przebarwiona na złoto: --tmg-tip-premium), ciemne wnętrze; złote ikony gry zostają. --- */
