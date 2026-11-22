@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.7.1
+// @version      2.8.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -48,7 +48,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.7.1';
+  const VERSION = '2.8.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -666,13 +666,15 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
    * łuna i oprawa ikony. Nazwy i statystyki zachowują kolory gry. Zwykłe przedmioty – stonowana czerwień.
    * ===================================================================== */
   const cssTooltips = `
-/* ranga przedmiotu: kolor tekstu i łuny, a lawa w ramie i pęknięcia w środku przebarwione na ten kolor
-   (wersje robi skrypt – lavaImage z tintem; zanim powstaną, zostaje czerwona lawa) */
+/* ranga przedmiotu: kolor łuny, a lawa w ramie i pęknięcia w środku przebarwione na ten kolor; zwykłe
+   przedmioty – szare, wystygłe pęknięcia; legenda w kolorze ramki legendy z ustawień gry (wersje robi skrypt –
+   lavaImage z tintem; zanim powstaną, zostaje czerwona lawa). Tooltipy bez przedmiotu zostają czerwone. */
 ${N} .tip-wrapper { --tmg-rar: 122 18 18; }
+${N} .tip-wrapper:has(.item-head) { --tmg-rar: 120 116 110; border-image-source: var(--tmg-tip-common, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; border-image-source: var(--tmg-tip-uniupg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-uniupg, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; border-image-source: var(--tmg-tip-her, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-her, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head .highlight.t-upgraded) { --tmg-rar: 255 89 175; border-image-source: var(--tmg-tip-upgraded, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-upgraded, url("${IMG.underline}")); }
-${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: 255 132 0; border-image-source: var(--tmg-tip-leg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-leg, url("${IMG.underline}")); }
+${N} .tip-wrapper:has(.item-head .highlight.t-leg) { --tmg-rar: var(--tmg-rar-leg, 255 132 0); border-image-source: var(--tmg-tip-leg, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-leg, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; border-image-source: var(--tmg-tip-art, url("${IMG.tipFrame}")) !important; --tmg-brush-dim: var(--tmg-ul-art, url("${IMG.underline}")); }
 /* malowana rama z wnętrzem (tooltip-rama.webp, 9-slice 40 w skali 0,5 + fill): kamienie i żelazo z lawą,
    kolce w narożnikach. Rama wysunięta o 14 px (outset), więc wnętrze grafiki zaczyna się tuż przy treści,
@@ -1510,19 +1512,44 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   }
   const shimmer = (url) => lavaImage(url, null, true);
 
-  // Tooltipy: lawa w ramie i pęknięcia-podkreślenia w kolorze rangi przedmiotu (zwykłe zostają czerwone).
+  // Tooltipy: lawa w ramie i pęknięcia-podkreślenia w kolorze rangi przedmiotu; zwykłe przedmioty – szare,
+  // wystygłe pęknięcia. Legenda bierze kolor z ustawienia gry „ramka legendy” (--ln-frame_item_color, gdy
+  // włączone body.ln-frame-item-active), więc np. czerwona ramka legendy daje czerwoną lawę.
   // Wersje trafiają do zmiennych CSS na <html> (--tmg-tip-<ranga>, --tmg-ul-<ranga>), czytanych w cssTooltips.
-  const RARITY = { uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
+  const RARITY = { common: [138, 134, 128], uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
   const TINTED = { tip: 'tipFrame', ul: 'underline' };
-  let tintStatic = null, tintAnim = null;
-  const buildTints = (animated) => (async () => {
-    const m = {};
-    for (const [rk, col] of Object.entries(RARITY)) for (const [pre, key] of Object.entries(TINTED)) {
-      try { const u = await lavaImage(IMG[key], col, animated); if (u) m[`--tmg-${pre}-${rk}`] = u; } catch (e) { /* zostaje czerwona */ }
+  const tintCache = new Map();
+  const tintUrl = (key, rgb, animated) => {
+    const k = `${key}|${animated ? 1 : 0}|${rgb.join(',')}`;
+    if (!tintCache.has(k)) tintCache.set(k, lavaImage(IMG[key], rgb, animated).catch(() => null));
+    return tintCache.get(k);
+  };
+  const colorCtx = document.createElement('canvas').getContext('2d');
+  const parseColor = (v) => {
+    if (!v) return null;
+    colorCtx.fillStyle = '#000'; colorCtx.fillStyle = v.trim();
+    const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(colorCtx.fillStyle);
+    return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : null;
+  };
+  const rarityColors = () => {
+    const c = { ...RARITY };
+    if (document.body && document.body.classList.contains('ln-frame-item-active')) {
+      const ln = parseColor(getComputedStyle(document.body).getPropertyValue('--ln-frame_item_color'));
+      if (ln) c.leg = ln;
     }
-    return m;
-  })();
-  const setTints = (m) => { for (const [k, v] of Object.entries(m)) root.style.setProperty(k, `url("${v}")`); };
+    return c;
+  };
+  let tintSeq = 0, tintState = '';
+  const applyTints = async (animated) => {
+    const cols = rarityColors(), state = `${animated ? 1 : 0}|${cols.leg.join(',')}`;
+    if (state === tintState) return;
+    const seq = ++tintSeq, vars = [];
+    for (const [rk, col] of Object.entries(cols)) for (const [pre, key] of Object.entries(TINTED)) vars.push([`--tmg-${pre}-${rk}`, await tintUrl(key, col, animated)]);
+    if (seq !== tintSeq) return;
+    for (const [k, u] of vars) if (u) root.style.setProperty(k, `url("${u}")`);
+    root.style.setProperty('--tmg-rar-leg', cols.leg.join(' '));
+    tintState = state;
+  };
 
   let glowMap = null, glowOn = false;
   const reducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
@@ -1556,24 +1583,21 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     root.classList.toggle(FX, enabled() && effects());
   };
   // mienienie lawy: animowane wersje grafik tylko przy włączonym motywie i efektach, bez reduced-motion
+  const glowWanted = () => enabled() && effects() && !(reducedMotion && reducedMotion.matches);
   const syncGlow = async () => {
     if (!style || !root.classList.contains('tmg-ni')) return;
-    const want = () => enabled() && effects() && !(reducedMotion && reducedMotion.matches);
-    if (want()) {
+    if (glowWanted()) {
       const m = await buildGlow();
-      const tints = await (tintAnim || (tintAnim = buildTints(true)));
-      if (!want()) return;
-      setTints(tints);
-      if (glowOn || !m.size) return;
+      if (!glowWanted()) return;
+      await applyTints(true);
+      if (glowOn || !m.size || !glowWanted()) return;
       let t = baseCss;
       for (const [from, to] of m) t = t.split(from).join(to);
       style.textContent = t;
       glowOn = true;
     } else {
-      const tints = await (tintStatic || (tintStatic = buildTints(false)));
-      if (want()) return;
-      setTints(tints);
-      if (glowOn) { style.textContent = baseCss; glowOn = false; }
+      await applyTints(false);
+      if (glowOn && !glowWanted()) { style.textContent = baseCss; glowOn = false; }
     }
   };
 
@@ -1635,6 +1659,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
 
   // obserwator stylów i nowych elementów (debounce) – startuje dopiero po wykryciu NI
   let sheetTimer = 0;
+  let tintTimer = 0;
+  const queueTints = () => { clearTimeout(tintTimer); tintTimer = setTimeout(() => { if (root.classList.contains('tmg-ni')) applyTints(glowOn); }, 400); };
   const gfxObs = new MutationObserver((muts) => {
     if (!enabled()) return;
     let sheets = false;
@@ -1643,6 +1669,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       else queueFix(n);
     }
     queueHud();
+    queueTints();
     if (sheets) { clearTimeout(sheetTimer); sheetTimer = setTimeout(scanSheets, 80); }
   });
 
