@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.14.0
+// @version      2.15.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -27,7 +27,7 @@
 // @resource     tmgColTile   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/kolumna-kafel.webp
 // @resource     tmgHudBtn    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/guzik-hud.webp
 // @resource     tmgPremIcons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/premium-ikony.webp
-// @resource     tmgSlotGrid  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/siatka-slotow.webp
+// @resource     tmgAwning    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/markiza.webp
 // @resource     tmgFrameThin https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ramka-cienka.webp
 // @resource     tmgToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przelacznik.webp
 // @resource     tmgMedal     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/medalion-pvp.webp
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.14.0';
+  const VERSION = '2.15.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -89,7 +89,7 @@
     colTile: res('tmgColTile', 'kolumna-kafel.webp'),  // 384×150, kafel drewna powtarzany w pionie nad dołem kolumny (bez szwu)
     hudBtn: res('tmgHudBtn', 'guzik-hud.webp'),        // 512×128, rama guzika HUD w 4 obrotach (rombowy nit: dół, góra, lewo, prawo)
     premIcons: res('tmgPremIcons', 'premium-ikony.webp'), // 288×216, 12 ikon sklepu Premium (siatka 4×3 po 72 px): żelazo i żar
-    slotGrid: res('tmgSlotGrid', 'siatka-slotow.webp')    // 256×256, siatka 4×4 ramek slotów (obroty, odbicia, różna jasność) – wyświetlana 132 px = 4 komórki po 33 px
+    awning: res('tmgAwning', 'markiza.webp')          // 542×44, markiza sklepu: kute płyty z lawą i rząd kolców (pas + jego odbicie, powtarzany)
     frameThin: res('tmgFrameThin', 'ramka-cienka.webp'), // 128×131, cienka rama: kute żelazo z linią żaru (9-slice, wycinek 9 10 10 9)
     toggle: res('tmgToggle', 'przelacznik.webp'),      // 64×64, tsuba z żelaza z płomiennymi wycięciami (przełącznik motywu)
     medal: res('tmgMedal', 'medalion-pvp.webp'),       // 48×61, medalion PvP: żelazny pierścień z lawą i haczykiem; otwór (23.5, 36) r 13.75
@@ -540,13 +540,9 @@ ${N} .interface-element-grid-border-light {
 ${N} .interface-layer .equipment-outline-2,
 ${N} .interface-layer .equipment-outline-3 { background-color: var(--tmg-edge) !important; }
 
-/* siatka slotów (torba, sklep, skrzynie): każda komórka w malowanej ramce slotu (żelazo z żarem); kafel 4×4
-   z obróconych/odbitych ramek o różnej jasności, więc wzór wraca dopiero co 4 komórki (skok 33 px jak w grze) */
-${N} .interface-element-item-slot-grid-stretch {
-  filter: none !important;
-  background: url("${IMG.slotGrid}") 0 0 / 132px 132px repeat, var(--tmg-k0) !important;
-}
-/* pojedyncze sloty: wklęsłe komórki z czarnego lakieru */
+/* siatka slotów (torba, sklep, skrzynie): wklęsłe komórki z czarnego lakieru, kratka w bardzo ciemnej czerwieni
+   (wzór co 33 px jak siatka gry) */
+${N} .interface-element-item-slot-grid-stretch,
 ${N} .interface-element-one-item-slot-background-to-repeat {
   filter: none !important;
   background-color: var(--tmg-k0) !important;
@@ -638,7 +634,8 @@ ${N} .interface-layer .stats-wrapper .stats-list li:not(.resists) .value .stat {
 ${N} .interface-layer .stats-wrapper .stats-list .value { text-shadow: 0 1px 2px #000, 0 0 3px #000 !important; }
 
 /* --- sklep: markiza jako ciemnoczerwona kurtyna noren, pola kupna/sprzedaży jak torba --- */
-${N} .shop-wrapper .shop-background .canopy { filter: grayscale(1) sepia(1) hue-rotate(-38deg) saturate(2.6) brightness(.32) contrast(1.3) !important; }
+/* markiza sklepu: malowane kute płyty z lawą i rząd kolców (markiza.webp, lawa się mieni) zamiast pasiastego daszka gry */
+${N} .shop-wrapper .shop-background .canopy { filter: drop-shadow(0 3px 3px rgb(0 0 0 / .8)) !important; background: url("${IMG.awning}") 0 0 / auto 100% repeat-x !important; }
 ${N} .shop-wrapper .shop-background .paper-1,
 ${N} .shop-wrapper .shop-background .paper-2 { filter: grayscale(1) brightness(.18) !important; }
 ${N} .shop-wrapper .shop-info-wrapper,
@@ -1480,7 +1477,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
    * fala blasku przesuwa się po szczelinach, reszta grafiki stoi. Gotowe obrazki podmieniają adresy
    * w arkuszu motywu; przy wyłączonych efektach albo prefers-reduced-motion wraca wersja statyczna.
    * ───────────────────────────────────────────────────────────────────────── */
-  const LAVA_KEYS = ['winFrame', 'winTitle', 'tipFrame', 'hudBtn', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
+  const LAVA_KEYS = ['winFrame', 'winTitle', 'tipFrame', 'hudBtn', 'awning', 'plate', 'ring', 'slot', 'frameThin', 'button', 'underline', 'medal', 'toggle'];
   const GLOW_FRAMES = 16;      // klatek w pętli
   const GLOW_DELAY = 190;      // ms na klatkę → pętla ~3 s
   const GLOW_AMP = 0.3;        // siła mienienia (0,3 = ±30% jasności w szczelinach)
