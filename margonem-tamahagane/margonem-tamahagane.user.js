@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.11.0
+// @version      2.12.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -51,7 +51,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.11.0';
+  const VERSION = '2.12.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -637,6 +637,19 @@ ${N} .shop-wrapper .shop-info-wrapper,
 ${N} .shop-wrapper .shop-info-wrapper * { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
 ${N} .shop-wrapper .total-price { color: var(--tmg-text) !important; letter-spacing: .04em; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--tmg-edge) !important; }
+
+/* --- okno Premium: kafelki kategorii zamiast zielonych pól ze złotą obwódką – malowana rama tooltipa
+   (kamień, lawa przebarwiona na złoto: --tmg-tip-premium), ciemne wnętrze; złote ikony gry zostają. --- */
+${N} .premium-item {
+  background-color: #0b0707 !important;
+  border-color: transparent !important;
+  border-style: solid !important;
+  border-image: var(--tmg-tip-premium, url("${IMG.tipFrame}")) 40 / 14px / 3px stretch !important;
+  box-shadow: inset 0 0 16px rgb(0 0 0 / .85), 0 2px 5px rgb(0 0 0 / .75) !important;
+  transition: filter .2s ease, box-shadow .2s ease;
+}
+${N} .premium-item:hover { filter: brightness(1.15); box-shadow: inset 0 0 16px rgb(0 0 0 / .85), 0 0 12px rgb(214 170 70 / .45) !important; }
+${N} .premium-item .premium-text { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
 
 /* --- tryb okienkowy (body[data-res]): zamiast windowModeBorder.png gry – malowana rama okien (kamienie z lawą,
    kolce w narożnikach), wysunięta 9 px na zewnątrz; ramka gry ma 7 px, więc układ zostaje. Tło dookoła: czerń
@@ -1538,7 +1551,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   // wystygłe pęknięcia. Legenda bierze kolor z ustawienia gry „ramka legendy” (--ln-frame_item_color, gdy
   // włączone body.ln-frame-item-active), więc np. czerwona ramka legendy daje czerwoną lawę.
   // Wersje trafiają do zmiennych CSS na <html> (--tmg-tip-<ranga>, --tmg-ul-<ranga>), czytanych w cssTooltips.
-  const RARITY = { common: [138, 134, 128], uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
+  const RARITY = { premium: [214, 170, 70], common: [138, 134, 128], uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
   const TINTED = { tip: 'tipFrame', ul: 'underline', bg: 'tipBg' };
   const STILL = new Set(['tipBg']);   // tło: tylko przebarwione, bez mienienia (duży obraz)
   const tintCache = new Map();
