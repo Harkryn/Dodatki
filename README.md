@@ -31,3 +31,8 @@ Prawie czarny interfejs z fioletem tylko jako akcentem, ramy z wulkanicznego szk
 Motyw nowego interfejsu (NI) z hartowanej stali: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar w kuli HP.
 
 [Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-tamahagane/margonem-tamahagane.user.js)
+
+### Margonem — Nocny Kot
+Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami i fioletem tylko jako akcentem.
+
+[Zainstaluj](https://github.com/Harkryn/Dodatki/raw/main/margonem-nocny-kot/margonem-nocny-kot.user.js)
