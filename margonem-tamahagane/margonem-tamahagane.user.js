@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.1
+// @version      2.17.2
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.1';
+  const VERSION = '2.17.2';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -706,14 +706,10 @@ ${N} .premium-item.bags::before { background-position: -120px -120px; }
 ${N} .premium-item.boots::before { background-position: -180px -120px; }
 
 /* --- tryb okienkowy (body[data-res]): zamiast windowModeBorder.png gry – malowana rama okien (kamienie z lawą,
-   kolce w narożnikach), wysunięta 9 px na zewnątrz; ramka gry ma 7 px, więc układ zostaje. Tło dookoła: czerń
-   z przygaszoną czerwoną łuną zza gry. --- */
+   kolce w narożnikach), wysunięta 9 px na zewnątrz; ramka gry ma 7 px, więc układ zostaje. Tło dookoła gry: oryginalne, czarne (bez zmian motywu). --- */
 ${N} body[data-res] .game-window-positioner > .interface-layer {
   border-color: transparent !important;
   border-image: url("${IMG.winFrame}") 32 / 16px / 9px round !important;
-}
-${N} body[data-res] .window-mode-background-layer {
-  background: radial-gradient(ellipse 65% 65% at 50% 50%, rgb(122 18 18 / .14), transparent 72%), #040202 !important;
 }
 
 /* --- przyciski HUD (widżety): malowana rama – kute żelazo z żarem w środku i rombowym nitem (guzik-hud.webp,
