@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.15.4
+// @version      2.15.5
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.15.4';
+  const VERSION = '2.15.5';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -69,8 +69,23 @@
 
   // Grafiki: @resource (Tampermonkey trzyma je lokalnie), bez GM_getResourceURL – raw link do repo.
   const RAW = 'https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/';
+  // Tampermonkey zwraca grafiki jako adresy data: (cały plik w base64). Wklejone do CSS w wielu regułach robiły z arkusza
+  // ~1,5 MB tekstu, który przeglądarka parsowała przy każdej zmianie – stąd lagi przy wczytywaniu. Każdą grafikę
+  // zamieniamy raz na krótki adres blob: (synchronicznie, przed zbudowaniem CSS).
+  const toBlobUrl = (u) => {
+    if (!u || u.slice(0, 5) !== 'data:') return u;
+    try {
+      const i = u.indexOf(','), meta = u.slice(5, i), body = u.slice(i + 1);
+      const bin = /;base64/i.test(meta) ? atob(body) : decodeURIComponent(body);
+      const arr = new Uint8Array(bin.length);
+      for (let k = 0; k < bin.length; k++) arr[k] = bin.charCodeAt(k);
+      let type = meta.split(';')[0];
+      if (!/^image\//.test(type)) type = 'image/webp';
+      return URL.createObjectURL(new Blob([arr], { type }));
+    } catch (e) { return u; }
+  };
   const res = (name, file) => {
-    try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return u; } } catch (e) { /* brak zasobu */ }
+    try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return toBlobUrl(u); } } catch (e) { /* brak zasobu */ }
     return RAW + file;
   };
   const IMG = {
@@ -1678,17 +1693,49 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     }
     return c;
   };
-  let tintSeq = 0, tintState = '';
+  // Liczone leniwie: tylko dla rang, których tooltipy właśnie są na ekranie (i dla okna Premium, gdy otwarte).
+  // Gotowe wersje trafiają do pamięci podręcznej, więc każda ranga liczy się raz na wersję motywu.
+  const RANKS = ['uniupg', 'her', 'upgraded', 'leg', 'art'];
+  const rarityOf = (tip) => {
+    const h = tip.querySelector('.item-head .highlight');
+    if (h) for (const rk of RANKS) if (h.classList.contains('t-' + rk)) return rk;
+    return 'common';
+  };
+  const neededRanks = () => {
+    const need = new Set();
+    for (const t of document.querySelectorAll('.tip-wrapper')) if (t.querySelector('.item-head')) need.add(rarityOf(t));
+    if (document.querySelector('.premium-item')) need.add('premium');
+    return need;
+  };
+  const tintDone = new Map(), tintVars = {};
+  let tintBusy = false, tintAgain = false, legSet = '';
   const applyTints = async (animated) => {
-    const cols = rarityColors(), state = `${animated ? 1 : 0}|${cols.leg.join(',')}`;
-    if (state === tintState) return;
-    const seq = ++tintSeq, vars = [];
-    for (const [rk, col] of Object.entries(cols)) for (const [pre, key] of Object.entries(TINTED)) vars.push([`--tmg-${pre}-${rk}`, await tintUrl(key, col, animated && !STILL.has(key))]);
-    if (seq !== tintSeq) return;
-    let tv = document.getElementById('tmg-tints');
-    if (!tv) { tv = document.createElement('style'); tv.id = 'tmg-tints'; (document.head || root).appendChild(tv); }
-    tv.textContent = `:root { ${vars.filter(([, u]) => u).map(([k, u]) => `${k}: url("${u}");`).join(' ')} --tmg-rar-leg: ${cols.leg.join(' ')}; }`;
-    tintState = state;
+    if (tintBusy) { tintAgain = true; return; }
+    const need = neededRanks();
+    if (!need.size && legSet) return;
+    tintBusy = true;
+    try {
+      const cols = rarityColors();
+      let changed = legSet !== cols.leg.join(' ');
+      legSet = cols.leg.join(' ');
+      for (const rk of need) {
+        const state = `${animated ? 1 : 0}|${cols[rk].join(',')}`;
+        if (tintDone.get(rk) === state) continue;
+        tintDone.set(rk, state);
+        for (const [pre, key] of Object.entries(TINTED)) {
+          const u = await tintUrl(key, cols[rk], animated && !STILL.has(key));
+          if (u) { tintVars[`--tmg-${pre}-${rk}`] = u; changed = true; }
+        }
+      }
+      if (changed) {
+        let tv = document.getElementById('tmg-tints');
+        if (!tv) { tv = document.createElement('style'); tv.id = 'tmg-tints'; (document.head || root).appendChild(tv); }
+        tv.textContent = `:root { ${Object.entries(tintVars).map(([k, u]) => `${k}: url("${u}");`).join(' ')} --tmg-rar-leg: ${legSet}; }`;
+      }
+    } finally {
+      tintBusy = false;
+      if (tintAgain) { tintAgain = false; setTimeout(() => applyTints(glowOn), 50); }
+    }
   };
 
   let glowMap = null, glowOn = false;
