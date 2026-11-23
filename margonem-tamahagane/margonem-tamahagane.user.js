@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.18.0
+// @version      2.19.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.18.0';
+  const VERSION = '2.19.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1064,6 +1064,8 @@ ${N} .handheld-mini-map::after {
    * ===================================================================== */
   // Środek orba: x = środek panelu − 2 px, y = 55 px od góry szablonu (gra: wrapper 98×98 w (281, 6))
   const B = `${N} .bottom-panel-of-bottom-positioner`;
+  const WAVE_MASK = svgUrl("<svg xmlns='http://www.w3.org/2000/svg' width='49' height='7'><path d='M0 3.5Q12.25 .5 24.5 3.5T49 3.5V7H0Z'/></svg>");
+  const WAVE_LINE = svgUrl("<svg xmlns='http://www.w3.org/2000/svg' width='49' height='7'><path d='M0 3.5Q12.25 .5 24.5 3.5T49 3.5' fill='none' stroke='rgb(255,150,120)' stroke-opacity='.75' stroke-width='1.6'/></svg>");
 
   const cssBottomBar = `
 /* --- belka na całą szerokość: malowany czarny lakier (pasek-tlo.webp, kafel bez szwów)
@@ -1150,11 +1152,11 @@ ${B} .slots.right::after { left: -12px; transform: scaleX(-1); }
 
 /* --- orb HP: rama w kształcie tsuby (osobna warstwa, przezroczysty środek) --- */
 /* rama orba: żelazny pierścień z chmurami, pęknięcia z żarem, rogi u góry (rama-orba.webp, 248×264,
-   otwór: środek 127/134 px, promień 72 px). Skala 0,694 → otwór r 50 px dokładnie na kulę (r 49).
+   otwór: środek 127/134 px, promień 72 px). Skala 0,694 → otwór r 50 px (nieprzezroczysty brzeg r 51–55 px), kula powiększona do r 55.
    Gra stawia kulę 2 px w lewo od środka szablonu, a widoczny pierścień nie jest symetryczny względem otworu
    (lewa krawędź 2 px, prawa 170 px z 172) – kula i rama przesunięte do x = 50% + 3 px, żeby szczeliny
    między ramą a slotami 4 i 5 były równe (po 21 px). y = 55 px. */
-${B} .hp-indicator-wrapper-template .hp-indicator-wrapper { translate: 5px 0; }
+${B} .hp-indicator-wrapper-template .hp-indicator-wrapper { translate: 5px 0; scale: 1.12; }   /* otwór ramy ma nierówny brzeg (r 51–55 px) – kula r 55 chowa się pod nim, bez czarnej szczeliny */
 ${B} .hp-indicator-wrapper-template::before {
   content: "";
   position: absolute;
@@ -1192,15 +1194,25 @@ ${B} .hp-indicator .blood::before {
   mix-blend-mode: screen;
   opacity: .7;
 }
+/* powierzchnia: delikatna fala (maska SVG, okres 49 px = pół kuli, amplituda 1,5 px) z jasnym meniskiem wzdłuż fali;
+   przy efektach fala płynie w lewo (tylko pozycja maski i tła, 5 s na okres) */
+${B} .hp-indicator .blood {
+  -webkit-mask: ${WAVE_MASK} 0 0 / 49px 7px repeat-x, linear-gradient(#000, #000) 0 6px / 100% 100% no-repeat;
+          mask: ${WAVE_MASK} 0 0 / 49px 7px repeat-x, linear-gradient(#000, #000) 0 6px / 100% 100% no-repeat;
+}
 ${B} .hp-indicator .blood::after {
   inset: 0;
   background:
-    linear-gradient(rgb(255 140 120 / .55), rgb(255 140 120 / 0) 2px),
-    linear-gradient(rgb(0 0 0 / .35), transparent 6px),
+    ${WAVE_LINE} 0 0 / 49px 7px repeat-x,
+    linear-gradient(rgb(0 0 0 / .35), transparent 8px),
     radial-gradient(ellipse 70% 120% at 50% 100%, transparent 55%, rgb(0 0 0 / .55) 100%);
 }
+html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood { animation: tmg-wave 5s linear infinite; }
 html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: tmg-liquid 38s linear infinite; }
+html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::after { animation: tmg-wave-line 5s linear infinite; }
 @keyframes tmg-liquid { from { transform: translate(0, 0); } to { transform: translate(110px, -110px); } }
+@keyframes tmg-wave { to { -webkit-mask-position: -49px 0, 0 6px; mask-position: -49px 0, 0 6px; } }
+@keyframes tmg-wave-line { to { background-position: -49px 0, 0 0, 0 0; } }
 ${B} .hp-indicator-wrapper .value {
   color: var(--tmg-text) !important;
   font-weight: bold;
