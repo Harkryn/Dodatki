@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.2
+// @version      2.17.3
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.2';
+  const VERSION = '2.17.3';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -908,33 +908,35 @@ ${N} .interface-layer > .top.positioner > .bg {
 
 /* tabliczka z imieniem / lokacją / walutami (gra: 342×65 na górze ekranu).
    Rama: żelazo z pęknięciami pełnymi żaru, na obu końcach okrągłe gniazda z ogniem
-   (rama-tabliczki.webp, 600×205; wnętrze 141/45 – 458/144 px). 9-slice w jednej skali 0,44 (wysokość 65 + 26 px = 205 × 0,44, więc gniazda na końcach nie są ściśnięte): góra 20 px (w obrębie
-   tabliczki), boki 62 px i dół 26 px wysunięte na zewnątrz (outset) – układ gry bez zmian. Środek ramy
+   (rama-tabliczki.webp, 600×205; wnętrze 141/45 – 458/144 px). Tabliczka wydłużona do 80 px (długie nicki z poziomami
+   mieszczą się nad mapą i walutami), rama w jednej skali 0,532 (80 + 29 px = 205 × 0,532, gniazda nie są ściśnięte):
+   góra 24 px, boki 76 px i dół 32 px; boki i dół wysunięte na zewnątrz (outset 76/29 px). Środek ramy
    powtarzany (round), żeby kamienie belek nie były rozciągnięte. */
 ${N} .interface-layer .hud-container {
   background:
-    var(--tmg-brush-dim) center 31px / 60% 6px no-repeat,
+    var(--tmg-brush-dim) center 42px / 60% 6px no-repeat,
     radial-gradient(ellipse 45% 70% at 50% 100%, rgb(122 18 18 / .2), transparent 70%),
     url("${IMG.bar}") 0 50% / auto 140% repeat-x,
     var(--tmg-k0) !important;
   border-style: solid !important;
   border-width: 0 !important;
-  border-image: url("${IMG.plate}") 45 142 60 141 / 20px 62px 26px 62px / 0 62px 26px 62px round stretch !important;
+  height: 80px !important;
+  border-image: url("${IMG.plate}") 45 142 60 141 / 24px 76px 32px 76px / 0 76px 29px 76px round stretch !important;
   box-shadow: none !important;
   color: var(--tmg-text) !important;
   overflow: visible !important;
 }
 
-/* ZWARTY UKŁAD (wnętrze ramy: 15–65 px): imię, pod nim mapa + koordynaty + świat w jednym rzędzie,
+/* ZWARTY UKŁAD (wnętrze ramy: 24–77 px): imię, pod nim mapa + koordynaty + świat w jednym rzędzie,
    niżej złoto i smocze łzy obok siebie, wszystko wyśrodkowane */
 ${N} .interface-layer .hud-container .heroname {
-  transform: translateY(14px);
+  transform: translateY(24px);
   text-shadow: 0 1px 2px #000, 0 0 6px rgb(0 0 0 / .9);   /* oryginalna czcionka i kolor gry */
 }
 /* nazwa świata jest przenoszona przez skrypt do .map-data (arrangeHud), więc cały rząd to jeden flex */
 ${N} .interface-layer .hud-container .map-data {
   position: absolute !important;
-  left: 0 !important; right: 0 !important; top: 34px !important;
+  left: 0 !important; right: 0 !important; top: 45px !important;
   margin: 0 !important;
   height: auto !important;
   display: flex !important;
@@ -957,19 +959,19 @@ ${N} .interface-layer .hud-container .world-name { color: var(--tmg-dim) !import
 /* waluty: „+” usunięte, złoto i smocze łzy jako para wyśrodkowana pod mapą */
 ${N} .interface-layer .hud-container .btn-min { display: none !important; }
 ${N} .interface-layer .hud-container .gold-tip,
-${N} .interface-layer .hud-container .credits-tip { top: 48px !important; width: 18px !important; height: 18px !important; transform: none !important; }
+${N} .interface-layer .hud-container .credits-tip { top: 59px !important; width: 18px !important; height: 18px !important; transform: none !important; }
 ${N} .interface-layer .hud-container .gold-tip { left: calc(50% - 76px) !important; background: url("${IMG.gold}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
 ${N} .interface-layer .hud-container .credits-tip { left: calc(50% + 16px) !important; background: url("${IMG.tears}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
 ${N} .interface-layer .hud-container .herogold,
 ${N} .interface-layer .hud-container .herocredits {
-  top: 49px !important; width: auto !important;
+  top: 60px !important; width: auto !important;
   text-align: left !important;
   color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000;
 }
 ${N} .interface-layer .hud-container .herogold { left: calc(50% - 54px) !important; }
 ${N} .interface-layer .hud-container .herocredits { left: calc(50% + 38px) !important; }
-${N} .interface-layer .hud-container .herogold-difference { left: calc(50% - 54px) !important; top: 88px !important; text-align: left !important; }
-${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 38px) !important; top: 88px !important; text-align: left !important; }
+${N} .interface-layer .hud-container .herogold-difference { left: calc(50% - 54px) !important; top: 112px !important; text-align: left !important; }
+${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 38px) !important; top: 112px !important; text-align: left !important; }
 
 /* kulka trybu PvP mapy → medalion zwisający z dolnej krawędzi ramy: żelazny pierścień z mosiężną obwódką,
    w środku żarzący się kamień w kolorze mapy (gra nadal przełącza klasy green/yellow/orange/red).
@@ -978,7 +980,7 @@ ${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 
 ${N} .interface-layer .hud-container .map_ball {
   --tmg-pvp: 120 120 120;
   left: calc(50% - 13px) !important;
-  top: 64px !important;
+  top: 82px !important;
   width: 26px !important; height: 33px !important;
   z-index: 5;
   border-radius: 0;
