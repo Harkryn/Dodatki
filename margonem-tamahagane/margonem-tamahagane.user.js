@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.20.0
+// @version      2.20.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.20.0';
+  const VERSION = '2.20.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -988,22 +988,22 @@ ${N} .interface-layer .hud-container .map-data > .world-name {
 ${N} .interface-layer .hud-container .location { color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000; }
 ${N} .interface-layer .hud-container .coords,
 ${N} .interface-layer .hud-container .world-name { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
-/* waluty: „+” usunięte, złoto i smocze łzy jako para wyśrodkowana pod mapą */
+/* waluty: „+” usunięte, złoto i smocze łzy jako para wyśrodkowana pod mapą; na kwotę złota ok. 86 px (2 000 000 000 się mieści) */
 ${N} .interface-layer .hud-container .btn-min { display: none !important; }
 ${N} .interface-layer .hud-container .gold-tip,
 ${N} .interface-layer .hud-container .credits-tip { top: 59px !important; width: 18px !important; height: 18px !important; transform: none !important; }
-${N} .interface-layer .hud-container .gold-tip { left: calc(50% - 76px) !important; background: url("${IMG.gold}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
-${N} .interface-layer .hud-container .credits-tip { left: calc(50% + 16px) !important; background: url("${IMG.tears}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
+${N} .interface-layer .hud-container .gold-tip { left: calc(50% - 86px) !important; background: url("${IMG.gold}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
+${N} .interface-layer .hud-container .credits-tip { left: calc(50% + 30px) !important; background: url("${IMG.tears}") center / contain no-repeat !important; filter: drop-shadow(0 1px 2px #000); }
 ${N} .interface-layer .hud-container .herogold,
 ${N} .interface-layer .hud-container .herocredits {
   top: 60px !important; width: auto !important;
   text-align: left !important;
   color: var(--tmg-text) !important; text-shadow: 0 1px 2px #000;
 }
-${N} .interface-layer .hud-container .herogold { left: calc(50% - 54px) !important; }
-${N} .interface-layer .hud-container .herocredits { left: calc(50% + 38px) !important; }
-${N} .interface-layer .hud-container .herogold-difference { left: calc(50% - 54px) !important; top: 112px !important; text-align: left !important; }
-${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 38px) !important; top: 112px !important; text-align: left !important; }
+${N} .interface-layer .hud-container .herogold { left: calc(50% - 64px) !important; }
+${N} .interface-layer .hud-container .herocredits { left: calc(50% + 52px) !important; }
+${N} .interface-layer .hud-container .herogold-difference { left: calc(50% - 64px) !important; top: 112px !important; text-align: left !important; }
+${N} .interface-layer .hud-container .herocredits-difference { left: calc(50% + 52px) !important; top: 112px !important; text-align: left !important; }
 
 /* kulka trybu PvP mapy → medalion zwisający z dolnej krawędzi ramy: żelazny pierścień z mosiężną obwódką,
    w środku żarzący się kamień w kolorze mapy (gra nadal przełącza klasy green/yellow/orange/red).
