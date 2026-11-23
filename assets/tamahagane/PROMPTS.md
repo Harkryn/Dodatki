@@ -99,3 +99,6 @@ Negative: photorealistic, photo, realistic, text, letters, watermark, blurry, lo
 - rogi (seed 2100265740): of thin glossy black lacquer with a fine dark iron edging, two small curved demon horns rising at the top left and top right corners, faint red ember glow at the horn bases
 - habaki (seed 1512321190, negative + sword): shaped like a katana blade collar, a thin dark steel band with small flared brass-and-iron clips at the left and right ends like a habaki, subtle red ember glow at the clips, slim and refined
 Obróbka: klucz jasnego tła i szarego wnętrza (ciemność + nasycenie), odkażenie krawędzi, otwór wyznaczony zalaniem od środka; wnętrze w kształcie ramy (wszystko nieosiągalne z brzegu obrazka, przy otworze) wypełnione lakierem pasek-tlo; żelazo ×0,5 (żar bez zmian); zapis w 2× skali wyświetlania (otwór = 124 px wysokości).
+
+## tooltip-rama-<ranga>, tooltip-tlo-<ranga>, podkreslenie-<ranga> (.webp, 2.24.1, bez nowych promptów)
+Gotowe przebarwienia tooltip-rama / tooltip-tlo / podkreslenie dla rang premium, common, uniupg, her, upgraded, leg (domyślny pomarańcz), art – wygenerowane tą samą funkcją co w skrypcie (lavaImage, wersja statyczna), żeby kolor był od razu po najechaniu.
