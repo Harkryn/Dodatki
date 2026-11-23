@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.23.0
+// @version      2.23.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -57,7 +57,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.23.0';
+  const VERSION = '2.23.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -992,14 +992,15 @@ ${cssPlates}
    niżej złoto i smocze łzy obok siebie, wszystko wyśrodkowane */
 ${N} .interface-layer .hud-container .heroname {
   transform: translateY(24px);
-  /* oryginalna czcionka gry; kolor płynnej magmy: od żółtego żaru u góry do czerwieni u dołu (tekst wypełniony
-     gradientem, cień przez drop-shadow – zwykły text-shadow przykryłby gradient) */
-  color: #ffa040 !important;
-  background: linear-gradient(#ffe7a8 15%, #ffa040 55%, #e0461e 90%) !important;
+  /* oryginalna czcionka gry; kolor tej samej lawy co w pęknięciach ram (próbki z grafik: rdzeń 255/138/110,
+     środek 232/84/70) – od jasnego rdzenia u góry do czerwieni u dołu (tekst wypełniony gradientem,
+     cień przez drop-shadow – zwykły text-shadow przykryłby gradient; dół nie ciemniejszy niż #d0402f dla czytelności) */
+  color: #f0604a !important;
+  background: linear-gradient(#ffb09a 10%, #f0604a 55%, #d0402f 95%) !important;
   -webkit-background-clip: text !important; background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   text-shadow: none !important;
-  filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 2px #000) drop-shadow(0 0 5px rgb(255 90 30 / .45));
+  filter: drop-shadow(0 1px 1px #000) drop-shadow(0 0 2px #000) drop-shadow(0 0 5px rgb(230 60 40 / .5));
 }
 ${N} .interface-layer .hud-container .heroname * { -webkit-text-fill-color: transparent !important; text-shadow: none !important; }
 /* nazwa świata jest przenoszona przez skrypt do .map-data (arrangeHud), więc cały rząd to jeden flex */
