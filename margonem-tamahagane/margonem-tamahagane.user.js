@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.3
+// @version      2.17.4
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.3';
+  const VERSION = '2.17.4';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -658,6 +658,19 @@ ${N} .shop-wrapper .shop-info-wrapper,
 ${N} .shop-wrapper .shop-info-wrapper * { color: var(--tmg-dim) !important; text-shadow: 0 1px 2px #000; }
 ${N} .shop-wrapper .total-price { color: var(--tmg-text) !important; letter-spacing: .04em; }
 ${N} .shop-wrapper .shop-content .shop-balance::after { background: var(--tmg-edge) !important; }
+
+/* --- okno łupów: wybrana decyzja (chcę / nie chcę / chcę bardzo) na zielono. Gra zapisuje wybór w data-state kafelka
+   przedmiotu, a każdy przycisk ma ikonę z tą samą nazwą (.label.want/.not/.must) – dopasowanie po nich nie zależy
+   od kolorów, które gra nadaje przyciskom. Niewybrane przyciski przygaszone. --- */
+${N} .loot-window .loot-item-wrapper .button-holder .button {
+  filter: brightness(.62) saturate(.5) !important;
+}
+${N} .loot-window .loot-item-wrapper[data-state="want"] .button-holder .button:has(.label.want),
+${N} .loot-window .loot-item-wrapper[data-state="not"] .button-holder .button:has(.label.not),
+${N} .loot-window .loot-item-wrapper[data-state="must"] .button-holder .button:has(.label.must) {
+  filter: hue-rotate(118deg) saturate(1.5) brightness(1.2) !important;
+  box-shadow: 0 0 0 1px #000, 0 0 9px rgb(70 210 100 / .7), inset 0 0 6px rgb(70 210 100 / .35) !important;
+}
 
 /* --- sklep: etykiety „Kup/Sprzedaj” jako mała płytka lakieru z pęknięciem z magmą pod spodem; złota skrzynia gry
    w stopce (premium-footer) zastąpiona malowaną skrzynią z żarem (ikona z premium-ikony.webp) --- */
