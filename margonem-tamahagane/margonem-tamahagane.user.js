@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.23.1
+// @version      2.24.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -57,13 +57,13 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.23.1';
+  const VERSION = '2.24.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
   const KEY_FX = 'tmg-effects';
   const KEY_PLATE = 'tmg-plate';     // styl górnej ramki (PLATES)
-  const KEY_LEG = 'tmg-leg-color';   // '' = kolor z gry (ramka legendy) albo domyślny pomarańcz; inaczej #rrggbb
+  const KEY_LEG = 'tmg-leg-color';   // '' = domyślny pomarańcz; inaczej #rrggbb
   const root = document.documentElement;
 
   const get = (k, d) => { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch (e) { return d; } };
@@ -840,8 +840,12 @@ ${N} .tip-wrapper .item-tip-section :is(.tip-item-stat-reqp, .tip-item-stat-lvl)
    teraz osobny, wyśrodkowany rząd pod rangą */
 ${N} .tip-wrapper .tip-item-stat-expires { position: static !important; text-align: center !important; margin-top: 2px; }
 ${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--tmg-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+/* stałe kolory rang (motyw, nie ustawienia gry): nazwa przedmiotu w kolorze rangi, zwykłe – kolor tekstu motywu */
+${N} .tip-wrapper:has(.item-head) .item-name,
+${N} .tip-wrapper:has(.item-head) .item-name * { color: var(--tmg-text) !important; }
+${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-art)) :is(.item-name, .item-name *, .item-rarity *) { color: rgb(var(--tmg-rar)) !important; }
 /* legenda: napis rangi (gra koloruje go klasą .color-legendary na samym napisie) i nazwa przedmiotu w kolorze legendy
-   – własnym z okienka „Kolor legendy”, z ramki legendy gry albo domyślnym pomarańczu (--tmg-rar-leg) */
+   – własnym z okienka „Kolor legendy” albo domyślnym pomarańczu (--tmg-rar-leg) */
 ${N} .tip-wrapper .color-legendary,
 ${N} .tip-wrapper:has(.item-head .highlight.t-leg) :is(.item-rarity, .item-rarity *, .item-name, .item-name *) {
   color: rgb(var(--tmg-rar-leg, 255 132 0)) !important;
@@ -1803,8 +1807,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const shimmer = (name) => cachedLava(name, null, true);
 
   // Tooltipy: lawa w ramie i pęknięcia-podkreślenia w kolorze rangi przedmiotu; zwykłe przedmioty – szare,
-  // wystygłe pęknięcia. Legenda bierze kolor z ustawienia gry „ramka legendy” (--ln-frame_item_color, gdy
-  // włączone body.ln-frame-item-active), więc np. czerwona ramka legendy daje czerwoną lawę.
+  // wystygłe pęknięcia. Kolory rang są stałe (RARITY), niezależne od ustawień gry; do wyboru jest tylko kolor
+  // legendy (okienko „Kolor legendy”, bez wyboru – pomarańcz).
   // Wersje trafiają do zmiennych CSS na <html> (--tmg-tip-<ranga>, --tmg-ul-<ranga>), czytanych w cssTooltips.
   const RARITY = { premium: [214, 170, 70], common: [138, 134, 128], uniupg: [255, 251, 0], her: [56, 184, 235], upgraded: [255, 89, 175], leg: [255, 132, 0], art: [225, 64, 70] };
   const TINTED = { tip: 'tipFrame', ul: 'underline', bg: 'tipBg' };
@@ -1825,11 +1829,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const rarityColors = () => {
     const c = { ...RARITY };
     const own = parseColor(get(KEY_LEG, ''));
-    if (own) { c.leg = own; return c; }
-    if (document.body && document.body.classList.contains('ln-frame-item-active')) {
-      const ln = parseColor(getComputedStyle(document.body).getPropertyValue('--ln-frame_item_color'));
-      if (ln) c.leg = ln;
-    }
+    if (own) c.leg = own;
     return c;
   };
   // Liczone leniwie: tylko dla rang, których tooltipy właśnie są na ekranie (i dla okna Premium, gdy otwarte).
@@ -1979,8 +1979,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     document.body.append(b, t);
   };
 
-  // Wybór koloru lawy legendarnych tooltipów: próbnik koloru + „Z gry” (wraca do koloru ramki legendy z ustawień gry,
-  // a gdy jej brak – do pomarańczu). Zmiana od razu przelicza legendarne przebarwienia (z pamięci podręcznej, jeśli już były).
+  // Wybór koloru legendarnych tooltipów: próbnik koloru + „Domyślny” (wraca do pomarańczu). Ustawienia gry nie zmieniają
+  // kolorów rang. Zmiana od razu przelicza legendarne przebarwienia (z pamięci podręcznej, jeśli już były).
   const hex = (c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
   const refreshLeg = () => { tintDone.delete('leg'); legSet = ''; applyTints(glowOn); };
   const openLegPicker = () => {
@@ -1992,20 +1992,20 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       p.setAttribute('aria-label', 'Kolor legendy');
       p.innerHTML = '<div class="tmg-lp-title">Kolor legendy</div>'
         + '<span class="tmg-lp-swatch"></span><input type="color" aria-label="Wybierz kolor legendy">'
-        + '<button type="button" data-a="game">Z gry</button><button type="button" data-a="close">Zamknij</button>'
+        + '<button type="button" data-a="game">Domyślny</button><button type="button" data-a="close">Zamknij</button>'
         + '<div class="tmg-lp-note"></div>';
       const input = p.querySelector('input'), sw = p.querySelector('.tmg-lp-swatch'), note = p.querySelector('.tmg-lp-note');
       p.tmgSync = () => {
         const own = get(KEY_LEG, '');
         const c = rarityColors().leg;
         input.value = hex(c); sw.style.color = hex(c);
-        note.textContent = own ? 'Własny kolor lawy w tooltipach legend.' : 'Kolor z ustawień gry (ramka legendy) albo domyślny.';
+        note.textContent = own ? 'Własny kolor legend w tooltipach.' : 'Domyślny pomarańcz legend.';
       };
       input.addEventListener('input', () => { sw.style.color = input.value; });
       input.addEventListener('change', () => { set(KEY_LEG, input.value); p.tmgSync(); refreshLeg(); toast('Kolor legendy: ' + input.value); });
       p.addEventListener('click', (e) => {
         const a = e.target.closest('button') && e.target.closest('button').dataset.a;
-        if (a === 'game') { set(KEY_LEG, ''); p.tmgSync(); refreshLeg(); toast('Kolor legendy: z gry'); }
+        if (a === 'game') { set(KEY_LEG, ''); p.tmgSync(); refreshLeg(); toast('Kolor legendy: domyślny'); }
         if (a === 'close') p.classList.remove('show');
       });
       p.addEventListener('keydown', (e) => { if (e.key === 'Escape') p.classList.remove('show'); });
