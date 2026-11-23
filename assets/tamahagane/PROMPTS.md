@@ -89,3 +89,4 @@ Stylized hand-painted dark fantasy game UI element: a wide straight horizontal s
 
 ## Przyciemnienie (2.17.0, bez nowych promptów)
 Wszystkie grafiki motywu oprócz ikon i cieczy kuli HP przyciemnione lokalnie: piksele poza lawą × 0,68, lawa/żar (ciepły jasny kolor silniejszy od błękitu) bez zmian.
+2.17.1: kamień i żelazo w ramach, przyciskach, guzikach HUD, markizie, tooltipie, medalionie i tsubie jeszcze raz × 0,62 (razem ~0,42 pierwotnej jasności), lawa bez zmian.
