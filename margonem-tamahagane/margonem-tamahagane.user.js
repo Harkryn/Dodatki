@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.20.1
+// @version      2.21.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.20.1';
+  const VERSION = '2.21.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1215,10 +1215,17 @@ html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood:
 @keyframes tmg-wave-line { to { background-position: -49px 0, 0 0, 0 0; } }
 /* puls: żar w kuli rozjaśnia się podwójnym uderzeniem jak bicie serca (co 2,2 s) */
 @keyframes tmg-beat { 0%, 40%, 100% { filter: brightness(1); } 8% { filter: brightness(1.35) saturate(1.15); } 16% { filter: brightness(1.05); } 24% { filter: brightness(1.25) saturate(1.1); } }
+/* napis na kuli: kute cyfry (Cinzel 900) w kolorze rozgrzanej stali – od kremowej bieli do pomarańczu i czerwieni,
+   czarny obrys i lekka czerwona poświata (drop-shadow, bo tekst jest wypełniony gradientem) */
 ${B} .hp-indicator-wrapper .value {
-  color: var(--tmg-text) !important;
-  font-weight: bold;
-  text-shadow: 0 0 6px #000, 0 0 2px #000, 0 1px 1px #000 !important;
+  font-family: Cinzel, Georgia, serif !important;
+  font-weight: 900 !important; font-size: 22px !important; letter-spacing: .5px;
+  color: #ffe6c7 !important;
+  background: linear-gradient(#fff4e0 20%, #ffb070 60%, #e2552a 95%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 1px #000) drop-shadow(0 0 5px rgb(255 80 30 / .55));
 }
 
 /* --- ping (lagmeter) usunięty: psuł symetrię paska --- */
@@ -1835,6 +1842,13 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const baseCss = [cssVars, cssBase, cssWindows, cssChat, cssInventory, cssTooltips, cssBattle, cssBars, cssBottomBar, cssAnim, cssToggle].join('\n');
   const style = addStyle(baseCss);
   if (style && 'id' in style) style.id = 'tmg-theme';
+  // krój Cinzel (Google Fonts) – tylko dla napisu na kuli HP; bez niego zostaje Georgia
+  if (!document.getElementById('tmg-font')) {
+    const fl = document.createElement('link');
+    fl.id = 'tmg-font'; fl.rel = 'stylesheet';
+    fl.href = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@900&display=swap';
+    (document.head || root).appendChild(fl);
+  }
 
 
   const enabled = () => get(KEY_ON, true);
