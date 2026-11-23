@@ -2,7 +2,7 @@
 // @name         Margonem – Fioletowa Pustka (Violet Void)
 // @namespace    https://github.com/Harkryn/Dodatki
 // @author       Harkryn
-// @version      1.33.0
+// @version      1.33.1
 // @description  Mroczny motyw interfejsu Margonem: prawie czarne panele z grafitowymi krawędziami, fiolet pustki tylko jako akcent (cienkie linie, stany aktywne, focus, najechanie). Tylko wygląd UI – mapa, sprite'y i logika gry bez zmian. Tylko nowy interfejs (NI); na starym (SI) skrypt nic nie robi.
 // @match        https://*.margonem.pl/*
 // @match        https://margonem.pl/*
@@ -439,8 +439,14 @@ ${N} .dialogue-window .content .answers-scroll::before {
 ${N} .dialogue-window .content .answers li {
   border-bottom-color: rgb(42 36 51 / .8) !important;
   border-radius: 2px;
-  transition: background-color .15s ease, box-shadow .15s ease;
 }
+/* bez przejść CSS w treści dialogu: gra nasłuchuje „transitionend” na całym oknie dialogu i przy każdym takim
+   zdarzeniu przewija wiadomość i odpowiedzi do góry – płynne podświetlenie odpowiedzi pod kursorem przy przewijaniu
+   cofało listę na początek */
+${N} .dialogue-window .content,
+${N} .dialogue-window .content *,
+${N} .dialogue-window .content *::before,
+${N} .dialogue-window .content *::after { transition: none !important; }
 ${N} .dialogue-window .content .answers li .icon { filter: grayscale(1) brightness(.8) sepia(.4) hue-rotate(220deg) saturate(1.5); }
 ${N} .dialogue-window .content .answers li:hover {
   background: linear-gradient(90deg, rgb(143 69 230 / .2), rgb(143 69 230 / .05) 60%, transparent) !important;
