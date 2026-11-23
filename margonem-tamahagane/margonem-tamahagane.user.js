@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.21.0
+// @version      2.22.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -20,6 +20,10 @@
 // @resource     tmgGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ikona-zlota.webp
 // @resource     tmgTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/ikona-smoczych-lez.webp
 // @resource     tmgPlate     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki.webp
+// @resource     tmgPlateChmury https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki-chmury.webp
+// @resource     tmgPlateSzpice https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki-szpice.webp
+// @resource     tmgPlateRogi   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki-rogi.webp
+// @resource     tmgPlateHabaki https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/rama-tabliczki-habaki.webp
 // @resource     tmgWinFrame  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/okno-rama.webp
 // @resource     tmgWinTitle  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/okno-tytul.webp
 // @resource     tmgButton    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/tamahagane/przycisk.webp
@@ -53,11 +57,12 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.21.0';
+  const VERSION = '2.22.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
   const KEY_FX = 'tmg-effects';
+  const KEY_PLATE = 'tmg-plate';     // styl górnej ramki (PLATES)
   const KEY_LEG = 'tmg-leg-color';   // '' = kolor z gry (ramka legendy) albo domyślny pomarańcz; inaczej #rrggbb
   const root = document.documentElement;
 
@@ -97,7 +102,11 @@
     separator: res('tmgSeparator', 'separator.webp'), // 50×120, czerwone pociągnięcie pędzla sumi-e
     gold: res('tmgGold', 'ikona-zlota.webp'),         // 64×51, stos monet koban
     tears: res('tmgTears', 'ikona-smoczych-lez.webp'), // 47×64, czerwony kryształ łzy z ogniem
-    plate: res('tmgPlate', 'rama-tabliczki.webp'),     // 600×205, rama górnej tabliczki (gniazda z ogniem na końcach)
+    plate: res('tmgPlate', 'rama-tabliczki.webp'),     // 600×205, rama górnej tabliczki (gniazda z ogniem na końcach) – styl „klasyczna”
+    plateChmury: res('tmgPlateChmury', 'rama-tabliczki-chmury.webp'), // 679×202, smukła belka, zwoje chmur na końcach
+    plateSzpice: res('tmgPlateSzpice', 'rama-tabliczki-szpice.webp'), // 1196×247, wąska rama z długimi szpicami, lawa u góry
+    plateRogi: res('tmgPlateRogi', 'rama-tabliczki-rogi.webp'),       // 535×246, lakier w okuciu, demonie rogi z ogniem
+    plateHabaki: res('tmgPlateHabaki', 'rama-tabliczki-habaki.webp'), // 999×272, stalowa belka, mosiężne obejmy, żarzące się końce
     winFrame: res('tmgWinFrame', 'okno-rama.webp'),    // 256×258, rama okien: kamienie z lawą, kolce w narożnikach (9-slice, wycinek 32)
     winTitle: res('tmgWinTitle', 'okno-tytul.webp'),   // 300×130, tytuł okna: żelazna płytka z lawą, zakrzywione kolce na końcach (końce 62 px)
     button: res('tmgButton', 'przycisk.webp'),         // 150×78, przycisk: czarny lakier w kutej oprawie z nitami (9-slice, wycinek 22)
@@ -930,6 +939,27 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
    * === PASKI (belki, tabliczka HUD, kula HP, doświadczenie, paski postępu, minimapa) ===
    * HP jak czerwony lakier z połyskiem, paski jak ostrze (stalowa krawędź + ciemnoczerwona głownia).
    * ===================================================================== */
+  // Style górnej ramki (wybór: Ctrl+Alt+R, menu Tampermonkey). Grafiki zapisane w 2× skali wyświetlania;
+  // otwór ramy trafia dokładnie na pole tekstu (342 px × od `top` do 80 px), ozdoby wystają na boki, w górę i w dół.
+  const PLATES = {
+    chmury:    { key: 'plateChmury', label: 'Chmury',    bi: '27 55 50 60 / 13.5px 27.5px 25px 30px / 0 27.5px 25px 30px', top: 13.5 },
+    szpice:    { key: 'plateSzpice', label: 'Szpice',    bi: '62 166 61 170 / 31px 83px 30.5px 85px / 13px 83px 30.5px 85px', top: 18 },
+    rogi:      { key: 'plateRogi',   label: 'Rogi',      bi: '85 40 37 40 / 42.5px 20px 18.5px 20px / 24.5px 20px 18.5px 20px', top: 18 },
+    habaki:    { key: 'plateHabaki', label: 'Habaki',    bi: '75 103 73 92 / 37.5px 51.5px 36.5px 46px / 19.5px 51.5px 36.5px 46px', top: 18 },
+    klasyczna: { key: 'plate',       label: 'Klasyczna', bi: null, top: 0 },
+  };
+  const PLATE_DEF = 'chmury';
+  const plateName = () => (PLATES[get(KEY_PLATE, PLATE_DEF)] ? get(KEY_PLATE, PLATE_DEF) : PLATE_DEF);
+  const cssPlates = Object.entries(PLATES).filter(([, v]) => v.bi).map(([n, v]) => `
+html.${ON}.tmg-ni.tmg-pl-${n} .interface-layer .hud-container {
+  border-image: url("${IMG[v.key]}") ${v.bi} stretch !important;
+  background:
+    var(--tmg-brush-dim) center 42px / 60% 6px no-repeat,
+    radial-gradient(ellipse 45% 70% at 50% 100%, rgb(122 18 18 / .2), transparent 70%),
+    url("${IMG.bar}") 0 ${v.top}px / auto 140% repeat-x,
+    linear-gradient(var(--tmg-k0), var(--tmg-k0)) 0 ${v.top}px / 100% 100% no-repeat !important;
+}`).join('');
+
   const cssBars = `
 /* --- GÓRA w tym samym stylu co dolny pasek ---
    belka: ten sam malowany lakier co dół (kafel bez szwów) */
@@ -958,6 +988,8 @@ ${N} .interface-layer .hud-container {
   color: var(--tmg-text) !important;
   overflow: visible !important;
 }
+
+${cssPlates}
 
 /* ZWARTY UKŁAD (wnętrze ramy: 24–77 px): imię, pod nim mapa + koordynaty + świat w jednym rzędzie,
    niżej złoto i smocze łzy obok siebie, wszystko wyśrodkowane */
@@ -1393,6 +1425,27 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
 }
 #tmg-legpick button:hover, #tmg-legpick button:focus-visible { border-color: #9e1b1b; box-shadow: 0 0 6px rgb(196 42 42 / .5); outline: none; }
 #tmg-legpick .tmg-lp-swatch { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #000; box-shadow: 0 0 6px currentColor; background: currentColor; }
+#tmg-platepick {
+  position: fixed; left: 40px; bottom: 40px; z-index: 2147483001;
+  display: none; gap: 8px; align-items: center; flex-wrap: wrap; width: 230px;
+  padding: 10px 12px;
+  background: rgb(10 7 7 / .97); color: #e6dccf;
+  font: 12px/1.4 Arial, sans-serif;
+  border: 1px solid #5c0d0d; border-radius: 2px;
+  box-shadow: 0 0 0 1px #000, 0 4px 14px rgb(0 0 0 / .85);
+}
+#tmg-platepick.show { display: flex; }
+#tmg-platepick .tmg-lp-title { width: 100%; font-weight: bold; color: #e6dccf; }
+#tmg-platepick .tmg-lp-note { width: 100%; color: #8f8478; font-size: 11px; }
+#tmg-platepick input[type=color] { width: 44px; height: 26px; padding: 0; border: 1px solid #000; background: #050404; cursor: pointer; }
+#tmg-platepick button {
+  height: 26px; padding: 0 10px; cursor: pointer;
+  background: linear-gradient(#16100f, #0a0707); color: #e6dccf;
+  border: 1px solid #5c0d0d; border-radius: 2px; font: 12px Arial, sans-serif;
+}
+#tmg-platepick button:hover, #tmg-platepick button:focus-visible { border-color: #9e1b1b; box-shadow: 0 0 6px rgb(196 42 42 / .5); outline: none; }
+#tmg-platepick .tmg-lp-swatch { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #000; box-shadow: 0 0 6px currentColor; background: currentColor; }
+#tmg-platepick button.on { border-color: #e04a2a; box-shadow: 0 0 6px rgb(224 74 42 / .6); }
 `;
 
   /* ─────────────────────────────────────────────────────────────────────────
@@ -1823,7 +1876,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const reducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   const buildGlow = () => glowMap || (glowMap = (async () => {
     const m = new Map();
-    for (const k of LAVA_KEYS) {
+    for (const k of LAVA_KEYS.map((x) => (x === 'plate' ? PLATES[plateName()].key : x))) {
       try { const u = await shimmer(k); if (u) m.set(IMG[k], u); } catch (e) { /* zostaje statyczna */ }
     }
     return m;
@@ -1854,11 +1907,14 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const enabled = () => get(KEY_ON, true);
   const effects = () => get(KEY_FX, true);
   const apply = () => {
+    const pn = plateName();
+    for (const n of Object.keys(PLATES)) root.classList.toggle('tmg-pl-' + n, n === pn);
     root.classList.toggle(ON, enabled());
     root.classList.toggle(FX, enabled() && effects());
   };
   // mienienie lawy: animowane wersje grafik tylko przy włączonym motywie i efektach, bez reduced-motion
   const glowWanted = () => enabled() && effects() && !(reducedMotion && reducedMotion.matches);
+  const glowCss = (m) => { let t = baseCss; for (const [from, to] of m) t = t.split(from).join(to); return t; };
   const syncGlow = async () => {
     if (!style || !root.classList.contains('tmg-ni')) return;
     if (glowWanted()) {
@@ -1866,9 +1922,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       if (!glowWanted()) return;
       await applyTints(true);
       if (glowOn || !m.size || !glowWanted()) return;
-      let t = baseCss;
-      for (const [from, to] of m) t = t.split(from).join(to);
-      style.textContent = t;
+      style.textContent = glowCss(m);
       glowOn = true;
     } else {
       await applyTints(false);
@@ -1909,9 +1963,9 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     const b = document.createElement('button');
     b.id = 'tmg-toggle';
     b.type = 'button';
-    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty żaru, popiołu i mgły (Ctrl+Alt+P)\nShift+klik: kolor legendy (Ctrl+Alt+L)';
+    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty żaru, popiołu i mgły (Ctrl+Alt+P)\nShift+klik: kolor legendy (Ctrl+Alt+L)\nAlt+klik: górna ramka (Ctrl+Alt+R)';
     b.setAttribute('aria-label', 'Przełącz motyw Tamahagane');
-    b.addEventListener('click', (e) => { e.stopPropagation(); if (e.shiftKey) openLegPicker(); else toggle(); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); if (e.shiftKey) openLegPicker(); else if (e.altKey) openPlatePicker(); else toggle(); });
     b.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); toggleFx(); });
     const t = document.createElement('div');
     t.id = 'tmg-toast';
@@ -1954,6 +2008,46 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     p.tmgSync();
     p.classList.toggle('show');
     if (p.classList.contains('show')) p.querySelector('input').focus();
+  };
+
+  // Wybór stylu górnej ramki: przyciski w panelu (jak kolor legendy). Zmiana działa od razu; przy mieniącej się
+  // lawie dociągana jest animowana wersja nowej ramki (z pamięci podręcznej, jeśli już była liczona).
+  const setPlate = async (n) => {
+    if (!PLATES[n]) return;
+    set(KEY_PLATE, n);
+    apply();
+    toast('Górna ramka: ' + PLATES[n].label);
+    const pp = document.getElementById('tmg-platepick');
+    if (pp) pp.tmgSync();
+    if (glowOn && glowMap) {
+      const m = await glowMap, k = PLATES[n].key;
+      if (!m.has(IMG[k])) { try { const u = await shimmer(k); if (u) m.set(IMG[k], u); } catch (e) { /* statyczna */ } }
+      if (glowOn) style.textContent = glowCss(m);
+    }
+  };
+  const openPlatePicker = () => {
+    let p = document.getElementById('tmg-platepick');
+    if (!p) {
+      p = document.createElement('div');
+      p.id = 'tmg-platepick';
+      p.setAttribute('role', 'dialog');
+      p.setAttribute('aria-label', 'Górna ramka');
+      p.innerHTML = '<div class="tmg-lp-title">Górna ramka</div>'
+        + Object.entries(PLATES).map(([n, v]) => `<button type="button" data-p="${n}">${v.label}</button>`).join('')
+        + '<button type="button" data-a="close">Zamknij</button>';
+      p.tmgSync = () => p.querySelectorAll('[data-p]').forEach((b) => b.classList.toggle('on', b.dataset.p === plateName()));
+      p.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        if (b.dataset.p) setPlate(b.dataset.p);
+        if (b.dataset.a === 'close') p.classList.remove('show');
+      });
+      p.addEventListener('keydown', (e) => { if (e.key === 'Escape') p.classList.remove('show'); });
+      document.body.appendChild(p);
+    }
+    p.tmgSync();
+    p.classList.toggle('show');
+    if (p.classList.contains('show')) p.querySelector('button.on, button').focus();
   };
 
   // Górna tabliczka: nazwa świata trafia do rzędu z mapą i koordynatami (.map-data – flex w CSS),
@@ -2016,12 +2110,14 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     GM_registerMenuCommand('Tamahagane: włącz / wyłącz (Ctrl+Alt+H)', toggle);
     GM_registerMenuCommand('Tamahagane: efekty żaru, popiołu i mgły (Ctrl+Alt+P)', toggleFx);
     GM_registerMenuCommand('Tamahagane: kolor legendy (Ctrl+Alt+L)', () => openLegPicker());
+    GM_registerMenuCommand('Tamahagane: górna ramka (Ctrl+Alt+R)', () => openPlatePicker());
   }
   window.addEventListener('keydown', (e) => {
     if (!e.ctrlKey || !e.altKey || e.shiftKey || e.metaKey) return;
     if (e.code === 'KeyH') { e.preventDefault(); toggle(); }
     else if (e.code === 'KeyP') { e.preventDefault(); toggleFx(); }
     else if (e.code === 'KeyL') { e.preventDefault(); openLegPicker(); }
+    else if (e.code === 'KeyR') { e.preventDefault(); openPlatePicker(); }
   }, true);
 
   console.info(`[Tamahagane] v${VERSION} ${enabled() ? 'włączony' : 'wyłączony'}`);

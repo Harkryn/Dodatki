@@ -90,3 +90,12 @@ Stylized hand-painted dark fantasy game UI element: a wide straight horizontal s
 ## Przyciemnienie (2.17.0, bez nowych promptów)
 Wszystkie grafiki motywu oprócz ikon i cieczy kuli HP przyciemnione lokalnie: piksele poza lawą × 0,68, lawa/żar (ciepły jasny kolor silniejszy od błękitu) bez zmian.
 2.17.1: kamień i żelazo w ramach, przyciskach, guzikach HUD, markizie, tooltipie, medalionie i tsubie jeszcze raz × 0,62 (razem ~0,42 pierwotnej jasności), lawa bez zmian.
+
+## rama-tabliczki-{chmury,szpice,rogi,habaki}.webp – smukłe style górnej ramki (Qwen-Image 16:9, wybór: Ctrl+Alt+R)
+Wspólny początek: Stylized hand-painted dark fantasy game UI nameplate frame, a very long low horizontal (rectangular) frame ... ; koniec: the long inside of the frame is completely empty plain light grey, front view, game interface asset, painterly, not photorealistic, isolated on plain flat light grey background
+Negative: photorealistic, photo, realistic, text, letters, watermark, blurry, low resolution, thick, massive, bulky, medallion, anything inside the frame
+- chmury (seed 1376060487): made of a THIN slim band of dark forged iron, delicate and light, small carved swirling cloud scroll ornaments only at the left and right ends, a few hair-thin glowing red ember cracks
+- szpice (seed 1633156813, negative + sword, blade, weapon, knife): of a slim dark iron band, the left and right short sides taper outward into a single sharp elegant point, one thin glowing red lava crack running along the top band, minimal and light
+- rogi (seed 2100265740): of thin glossy black lacquer with a fine dark iron edging, two small curved demon horns rising at the top left and top right corners, faint red ember glow at the horn bases
+- habaki (seed 1512321190, negative + sword): shaped like a katana blade collar, a thin dark steel band with small flared brass-and-iron clips at the left and right ends like a habaki, subtle red ember glow at the clips, slim and refined
+Obróbka: klucz jasnego tła i szarego wnętrza (ciemność + nasycenie), odkażenie krawędzi, otwór wyznaczony zalaniem od środka; żelazo ×0,5 (żar bez zmian); zapis w 2× skali wyświetlania (otwór = 124 px wysokości).
