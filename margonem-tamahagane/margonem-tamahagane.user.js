@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.22.0
+// @version      2.22.1
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -57,7 +57,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.22.0';
+  const VERSION = '2.22.1';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -941,6 +941,7 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
    * ===================================================================== */
   // Style górnej ramki (wybór: Ctrl+Alt+R, menu Tampermonkey). Grafiki zapisane w 2× skali wyświetlania;
   // otwór ramy trafia dokładnie na pole tekstu (342 px × od `top` do 80 px), ozdoby wystają na boki, w górę i w dół.
+  // Lakier tła jest w grafice (wnętrze w kształcie ramy, border-image fill) – bez prostokątnego tła tabliczki.
   const PLATES = {
     chmury:    { key: 'plateChmury', label: 'Chmury',    bi: '27 55 50 60 / 13.5px 27.5px 25px 30px / 0 27.5px 25px 30px', top: 13.5 },
     szpice:    { key: 'plateSzpice', label: 'Szpice',    bi: '62 166 61 170 / 31px 83px 30.5px 85px / 13px 83px 30.5px 85px', top: 18 },
@@ -952,12 +953,8 @@ ${N} .dialogue-window .content .answers li:hover .icon { filter: grayscale(1) se
   const plateName = () => (PLATES[get(KEY_PLATE, PLATE_DEF)] ? get(KEY_PLATE, PLATE_DEF) : PLATE_DEF);
   const cssPlates = Object.entries(PLATES).filter(([, v]) => v.bi).map(([n, v]) => `
 html.${ON}.tmg-ni.tmg-pl-${n} .interface-layer .hud-container {
-  border-image: url("${IMG[v.key]}") ${v.bi} stretch !important;
-  background:
-    var(--tmg-brush-dim) center 42px / 60% 6px no-repeat,
-    radial-gradient(ellipse 45% 70% at 50% 100%, rgb(122 18 18 / .2), transparent 70%),
-    url("${IMG.bar}") 0 ${v.top}px / auto 140% repeat-x,
-    linear-gradient(var(--tmg-k0), var(--tmg-k0)) 0 ${v.top}px / 100% 100% no-repeat !important;
+  border-image: url("${IMG[v.key]}") ${v.bi.replace(' /', ' fill /')} stretch !important;
+  background: var(--tmg-brush-dim) center 42px / 60% 6px no-repeat !important;
 }`).join('');
 
   const cssBars = `
