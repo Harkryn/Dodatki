@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.2.0
+// @version      1.2.1
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -43,7 +43,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.2.1';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -547,7 +547,7 @@ ${HPB} .hp-indicator .blood {
   mask: url("${IMG.hpPaw}") center bottom / auto var(--nkt-hp-h) no-repeat;
   transition: height .5s ease;
 }
-html.${HPRED} ${HPB} .hp-indicator .blood { background: linear-gradient(#ffc4ca, #e0566a 10%, #a52a3e 60%, #4e0f1c) !important; }
+html.${ON}.${NI}.${HPRED} .hp-indicator-wrapper-template .hp-indicator .blood { background: linear-gradient(#ffc4ca, #e0566a 10%, #a52a3e 60%, #4e0f1c) !important; }
 /* tekstura łapki (sierść, poduszki) prześwituje przez kolor wypełnienia */
 ${HPB} .hp-indicator .blood::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--nkt-hp-h); pointer-events: none;
@@ -571,9 +571,10 @@ html.${ON}.${NI}.${ANIM}.nkt-hp-low .hp-indicator-wrapper-template .hp-indicator
   const cssLoader = `
 ${N} .layer.loader-layer {
   background:
-    url("${IMG.loader}") center calc(50% - 150px) / 380px 380px no-repeat,
-    radial-gradient(ellipse 55% 45% at 50% 40%, rgb(123 79 214 / .14), transparent 70%),
-    #0a0a0d !important;
+    /* logo gry stoi ~100 px nad środkiem – ilustracja tuż nad nim; rozmiar zależy od wysokości okna (niskie ekrany) */
+    url("${IMG.loader}") 50% calc(50% - 100px - min(150px, 20vh)) / min(300px, 40vh) min(300px, 40vh) no-repeat,
+    radial-gradient(ellipse 30% 18% at 50% 56%, rgb(123 79 214 / .12), transparent 70%),
+    #08080a !important;
 }
 ${N} .layer.loader-layer .loader-image {
   filter: sepia(1) hue-rotate(225deg) saturate(2.2) brightness(1.05) drop-shadow(0 0 10px rgb(123 79 214 / .6)) drop-shadow(0 2px 4px #000);
