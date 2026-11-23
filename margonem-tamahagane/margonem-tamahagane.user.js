@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.16.1
+// @version      2.17.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.16.1';
+  const VERSION = '2.17.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -130,16 +130,16 @@
    * === ZMIENNE ===
    * Przewaga czerni (ciepłe warstwy paneli), ciemna czerwień tylko na akcentach,
    * jasna czerwień oszczędnie, mosiądz rzadko. Tekst w kolorze papieru washi.
-   * Kontrast: #e6dccf na #0e0a0a ≈ 15:1, przygaszony #8f8478 ≈ 5,4:1 (WCAG AA).
+   * Kontrast: #e6dccf na #0a0707 ≈ 15:1, przygaszony #8f8478 ≈ 5,4:1 (WCAG AA).
    * ===================================================================== */
   const cssVars = `
 :root {
-  --tmg-k0: #070505;
-  --tmg-k1: #0e0a0a;
-  --tmg-k2: #161010;
-  --tmg-k3: #1f1716;            /* podniesiona płytka, aktywna zakładka */
-  --tmg-edge: #2a1f1d;          /* krawędź lakieru */
-  --tmg-edge-hi: #3a2b28;
+  --tmg-k0: #050404;
+  --tmg-k1: #0a0707;
+  --tmg-k2: #0f0b0b;
+  --tmg-k3: #16100f;            /* podniesiona płytka, aktywna zakładka */
+  --tmg-edge: #1d1614;          /* krawędź lakieru */
+  --tmg-edge-hi: #291e1c;
   --tmg-r1: #5c0d0d;
   --tmg-r2: #7a1212;
   --tmg-r3: #9e1b1b;
@@ -150,7 +150,7 @@
   --tmg-ember: 0 0 8px rgb(196 42 42 / .45), 0 0 2px rgb(196 42 42 / .6);   /* żarzący się węgiel */
   /* połysk lakieru urushi: miękkie światło z góry, głęboka czerń niżej */
   --tmg-urushi: linear-gradient(170deg, rgb(255 235 220 / .035) 0, rgb(255 235 220 / 0) 38%),
-                linear-gradient(rgb(14 10 10 / .55), rgb(7 5 5 / .8)),
+                linear-gradient(rgb(10 7 7 / .65), rgb(5 4 4 / .88)),
                 url("${IMG.bar}") 0 0 / auto 90px repeat;
   --tmg-frame: url("${IMG.winFrame}");   /* kamienie z pęknięciami pełnymi lawy, kolce w narożnikach (9-slice, wycinek 32) */
   --tmg-frame-thin: url("${IMG.frameThin}");
@@ -174,11 +174,11 @@ ${N} ::-webkit-scrollbar-corner { background: var(--tmg-k0); }
 /* suwaki gry (własne, nie natywne): rowek z czarnego lakieru, uchwyt jak płytka zbroi */
 ${N} .scrollbar-wrapper .track { background: var(--tmg-k0) !important; box-shadow: inset 0 0 0 1px var(--tmg-edge); }
 ${N} .scrollbar-wrapper .handle {
-  background: linear-gradient(90deg, #0b0808, var(--tmg-edge-hi) 50%, #0b0808) !important;
+  background: linear-gradient(90deg, #080606, var(--tmg-edge-hi) 50%, #080606) !important;
   box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgb(255 235 220 / .06) !important;
   border-radius: 2px;
 }
-${N} .scrollbar-wrapper .handle:hover { background: linear-gradient(90deg, #1a0606, var(--tmg-r2) 50%, #1a0606) !important; }
+${N} .scrollbar-wrapper .handle:hover { background: linear-gradient(90deg, #120404, var(--tmg-r2) 50%, #120404) !important; }
 
 /* pola tekstowe: czarna wnęka, karetka i obrys przy fokusie w czerwieni */
 ${N} input[type="text"], ${N} input[type="number"], ${N} input[type="search"], ${N} input[type="password"],
@@ -236,7 +236,7 @@ ${N} .c-table th {
   text-shadow: 0 1px 2px #000;
 }
 ${N} .c-table td, ${N} .c-table tr, ${N} .c-table table { border-color: var(--tmg-edge) !important; }
-${N} .c-table td { background-color: rgb(7 5 5 / .55); }
+${N} .c-table td { background-color: rgb(5 4 4 / .55); }
 
 /* tekst rozjaśniony przez skaner czytelności (ciemny tekst z dawnego pergaminu) */
 ${N} .tmg-lt { color: var(--tmg-c) !important; }
@@ -332,7 +332,7 @@ ${N} .interface-element-active-card-border-image {
 
 /* --- okna przezroczyste (minimapa, obserwowane zadania, zegar…): półprzezroczysty lakier w cienkiej ramie --- */
 ${N} .border-window.transparent .border-image {
-  background: rgb(7 5 5 / .78) !important;
+  background: rgb(5 4 4 / .78) !important;
   border-style: solid;
   border-width: 0;
   border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
@@ -348,7 +348,7 @@ ${N} .border-window.transparent .header-label .text {
 ${N} .border-window.tip-window {
   border-style: solid !important;
   border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
-  background: rgb(14 10 10 / .96) !important;
+  background: rgb(10 7 7 / .96) !important;
   background-clip: border-box !important;
   box-shadow: 0 0 0 1px #000, 0 6px 16px rgb(0 0 0 / .7) !important;
 }
@@ -360,7 +360,7 @@ ${N} .border-window.tip-window .header-label-positioner .header-label .right-dec
 /* --- okno komunikatu (mAlert): pergamin → lakier --- */
 ${N} .border-window.mAlert .paper-background,
 ${N} .border-window.mAlert-mobile-layer .paper-background {
-  background: rgb(14 10 10 / .97) !important;
+  background: rgb(10 7 7 / .97) !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge), inset 0 0 18px rgb(0 0 0 / .7);
 }
 
@@ -373,7 +373,7 @@ ${N} .bubbledialog .bg-layer {
   border-style: solid;
   border-width: 0;
   border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
-  background: rgb(14 10 10 / .95) !important;
+  background: rgb(10 7 7 / .95) !important;
 }
 
 /* --- wspólne panele wnętrz okien (interface-element-*): lakier w cienkiej ramie --- */
@@ -388,7 +388,7 @@ ${N} .interface-element-wood-box-background {
   border-style: solid !important;
   border-color: transparent !important;
   border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 0 round !important;
-  background: rgb(14 10 10 / .94) !important;
+  background: rgb(10 7 7 / .94) !important;
   background-clip: border-box !important;
   box-shadow: inset 0 0 16px rgb(0 0 0 / .7);
   color: var(--tmg-text);
@@ -398,7 +398,7 @@ ${N} .interface-element-background-color-2,
 ${N} .interface-element-background-color-3 { background: var(--tmg-k1) !important; color: var(--tmg-text); }
 ${N} .interface-element-green-box-background,
 ${N} .interface-element-green-box-background-stretch {
-  background: linear-gradient(90deg, var(--tmg-k0), #1c0b0b 30%, #1c0b0b 70%, var(--tmg-k0)) !important;
+  background: linear-gradient(90deg, var(--tmg-k0), #140808 30%, #140808 70%, var(--tmg-k0)) !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge);
 }
 /* nagłówki sekcji i paski: czarny pas z podkreśleniem – pęknięciem z magmą */
@@ -417,7 +417,7 @@ ${N} .trade-window header .h_background .middle {
   border-color: transparent !important;
   background:
     var(--tmg-brush-dim) center bottom / 92% 6px no-repeat,
-    linear-gradient(90deg, transparent, rgb(22 16 16 / .95) 18%, rgb(22 16 16 / .95) 82%, transparent) !important;
+    linear-gradient(90deg, transparent, rgb(15 11 11 / .95) 18%, rgb(15 11 11 / .95) 82%, transparent) !important;
   box-shadow: none !important;
 }
 ${N} .trade-window header .h_background .left,
@@ -464,12 +464,12 @@ ${N} .button.disable { filter: grayscale(.7) brightness(.65); }
 
   /* =====================================================================
    * === CZAT ===
-   * Pod wiadomościami prawie nieprzezroczysta czerń (#070505 / 93%): kolory kanałów zostają z gry,
+   * Pod wiadomościami prawie nieprzezroczysta czerń (#050404 / 93%): kolory kanałów zostają z gry,
    * tekst washi ma kontrast ~15:1, przygaszone znaczniki czasu ~5:1 (WCAG AA).
    * ===================================================================== */
   const cssChat = `
 ${N} .interface-layer > .left-column.main-column,
-${N} .new-chat-window { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, url("${IMG.colTile}") center top / 100% auto repeat-y, var(--tmg-k0) !important; }
+${N} .new-chat-window { background: linear-gradient(rgb(5 4 4 / .25), rgb(5 4 4 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, url("${IMG.colTile}") center top / 100% auto repeat-y, var(--tmg-k0) !important; }
 /* listwy kolumn: pionowa belka czarnego lakieru z czerwonym sznurem pośrodku */
 ${N} .interface-layer > .left-column.main-column > .border,
 ${N} .interface-layer > .right-column.main-column > .border {
@@ -480,7 +480,7 @@ ${N} .interface-layer > .right-column.main-column > .border {
 }
 /* wiadomości */
 ${N} .new-chat-window .chat-message-wrapper {
-  background: radial-gradient(ellipse 120% 70px at 50% 0, rgb(122 18 18 / .1), transparent), rgb(7 5 5 / .93) !important;
+  background: radial-gradient(ellipse 120% 70px at 50% 0, rgb(122 18 18 / .1), transparent), rgb(5 4 4 / .93) !important;
   border-top-color: var(--tmg-edge) !important;
   border-bottom-color: var(--tmg-edge) !important;
   box-shadow: inset 0 0 14px 2px rgb(0 0 0 / .85) !important;
@@ -535,7 +535,7 @@ ${N} .new-chat-window .magic-input-placeholder { color: var(--tmg-dim) !importan
 /* menu kanału (lista wyboru nad polem) i powiadomienia czatu */
 ${N} .new-chat-window .control-wrapper .card-list,
 ${N} .new-chat-window .menu-card {
-  background: rgb(14 10 10 / .97) !important;
+  background: rgb(10 7 7 / .97) !important;
   box-shadow: 0 0 0 1px #000, inset 0 0 0 1px var(--tmg-edge) !important;
   color: var(--tmg-text) !important;
 }
@@ -547,7 +547,7 @@ ${N} .new-chat-window .chat-notification { text-shadow: 0 1px 2px #000; }
    * Ikony przedmiotów i ramki rzadkości w slotach zostają nietknięte.
    * ===================================================================== */
   const cssInventory = `
-${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(7 5 5 / .25), rgb(7 5 5 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, url("${IMG.colTile}") center top / 100% auto repeat-y, var(--tmg-k0) !important; }
+${N} .interface-layer > .right-column.main-column { background: linear-gradient(rgb(5 4 4 / .25), rgb(5 4 4 / .25)), url("${IMG.column}") center bottom / 100% auto no-repeat, url("${IMG.colTile}") center top / 100% auto repeat-y, var(--tmg-k0) !important; }
 ${N} .interface-element-grid-border,
 ${N} .interface-element-grid-border-light {
   outline-color: var(--tmg-k0) !important;
@@ -565,7 +565,7 @@ ${N} .interface-element-one-item-slot-background-to-repeat {
   background-image:
     linear-gradient(90deg, transparent 32px, #2a0a0a 32px),
     linear-gradient(transparent 32px, #2a0a0a 32px),
-    radial-gradient(circle at 50% 40%, #1a1312, #0a0707 70%) !important;
+    radial-gradient(circle at 50% 40%, #120d0d, #070505 70%) !important;
   background-size: 33px 33px !important;
   background-repeat: repeat !important;
 }
@@ -583,7 +583,7 @@ ${N} .interface-element-item-slot-grid-stretch::after {
   animation: tmg-shine 11s linear infinite;
 }
 ${N} .interface-element-one-item-slot-2 {
-  background: radial-gradient(circle at 50% 40%, #1a1312, var(--tmg-k0) 75%) !important;
+  background: radial-gradient(circle at 50% 40%, #120d0d, var(--tmg-k0) 75%) !important;
   border-color: var(--tmg-edge) !important;
   outline-color: #000 !important;
   box-shadow: inset 0 0 8px #000 !important;
@@ -596,7 +596,7 @@ ${N} .interface-layer > .right-column.main-column .inventory-grid-bg {
   border-style: solid !important;
   border-width: 0 !important;
   border-image: var(--tmg-frame-thin) 9 10 10 9 / 4px / 4px round !important;
-  box-shadow: 0 0 0 4px rgb(7 5 5 / .95), 0 4px 12px 4px rgb(0 0 0 / .7) !important;
+  box-shadow: 0 0 0 4px rgb(5 4 4 / .95), 0 4px 12px 4px rgb(0 0 0 / .7) !important;
   outline: none !important;
 }
 ${N} .interface-layer > .right-column.main-column .equipment-wrapper-outline {
@@ -604,13 +604,13 @@ ${N} .interface-layer > .right-column.main-column .equipment-wrapper-outline {
 }
 /* sloty postaci: osobne wnęki z cienką czerwoną krawędzią od dołu (jak sznur pod płytką) */
 ${N} .interface-layer > .right-column.main-column .equipment-wrapper .eq-slot.interface-element-one-item-slot-background-to-repeat {
-  background: radial-gradient(circle at 50% 40%, #1c1412, #080505 72%) !important;
+  background: radial-gradient(circle at 50% 40%, #140e0d, #060404 72%) !important;
   background-size: auto !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge), inset 0 2px 6px #000, inset 0 -1px 0 rgb(122 18 18 / .45) !important;
   border-radius: 2px;
 }
 ${N} .interface-layer > .right-column.main-column .bags-navigation-bg .bag-slot-wrapper {
-  background: radial-gradient(circle at 50% 40%, #1c1412, #080505 75%) !important;
+  background: radial-gradient(circle at 50% 40%, #140e0d, #060404 75%) !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge) !important;
 }
 ${N} .interface-layer > .right-column.main-column .bags-navigation .item.bag.active {
@@ -676,7 +676,7 @@ ${N} .premium-footer__chest::before {
 /* --- okno Premium: kafelki kategorii zamiast zielonych pól ze złotą obwódką – malowana rama tooltipa
    (kamień, lawa przebarwiona na złoto: --tmg-tip-premium), ciemne wnętrze; złote ikony gry zostają. --- */
 ${N} .premium-item {
-  background-color: #0b0707 !important;
+  background-color: #080505 !important;
   border-color: transparent !important;
   border-style: solid !important;
   border-image: var(--tmg-tip-premium, url("${IMG.tipFrame}")) 40 / 14px / 3px stretch !important;
@@ -713,14 +713,14 @@ ${N} body[data-res] .game-window-positioner > .interface-layer {
   border-image: url("${IMG.winFrame}") 32 / 16px / 9px round !important;
 }
 ${N} body[data-res] .window-mode-background-layer {
-  background: radial-gradient(ellipse 65% 65% at 50% 50%, rgb(122 18 18 / .14), transparent 72%), #050303 !important;
+  background: radial-gradient(ellipse 65% 65% at 50% 50%, rgb(122 18 18 / .14), transparent 72%), #040202 !important;
 }
 
 /* --- przyciski HUD (widżety): malowana rama – kute żelazo z żarem w środku i rombowym nitem (guzik-hud.webp,
    arkusz 4 obrotów). Kolejne guziki mają nit z innej strony, więc rząd nie jest monotonny. Ikony gry
    przygaszone do koloru starego papieru, przy najechaniu żarzą się. Kolory stanów gry – jako łuna we wnętrzu. --- */
 ${N} .widget-button {
-  background: url("${IMG.hudBtn}") 0 0 / 400% 100% no-repeat, #050303 !important;
+  background: url("${IMG.hudBtn}") 0 0 / 400% 100% no-repeat, #040202 !important;
   border-radius: 2px !important;
   box-shadow: 0 1px 3px rgb(0 0 0 / .8) !important;
 }
@@ -747,7 +747,7 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
 
   /* =====================================================================
    * === TOOLTIPY ===
-   * Karta z czarnego lakieru (#0e0a0a / 97%) – tekst washi ~15:1, przygaszony ~5,4:1 (WCAG AA).
+   * Karta z czarnego lakieru (#0a0707 / 97%) – tekst washi ~15:1, przygaszony ~5,4:1 (WCAG AA).
    * Kolor rzadkości (--tmg-rar, „r g b”) z klasy ramki ikony w nagłówku (t-…): obwódka, górna linia,
    * łuna i oprawa ikony. Nazwy i statystyki zachowują kolory gry. Zwykłe przedmioty – stonowana czerwień.
    * ===================================================================== */
@@ -768,7 +768,7 @@ ${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; borde
 ${N} .tip-wrapper {
   border-style: solid; border-width: 0;
   border-image: url("${IMG.tipFrame}") 40 / 20px / 14px stretch !important;
-  background: url("${IMG.tipBg}") center / cover no-repeat, #0b0707 !important;
+  background: url("${IMG.tipBg}") center / cover no-repeat, #080505 !important;
   box-shadow: none !important;
   filter: drop-shadow(0 0 7px rgb(var(--tmg-rar) / .28)) drop-shadow(0 10px 14px rgb(0 0 0 / .85));
 }
@@ -835,7 +835,7 @@ ${N} .battle-controller .battle-border {
 }
 ${N} .battle-controller .middle-graphic,
 ${N} .battle-controller .graphics {
-  background: radial-gradient(ellipse 100% 60px at 50% 0, rgb(122 18 18 / .14), transparent), linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .96) 70px) !important;
+  background: radial-gradient(ellipse 100% 60px at 50% 0, rgb(122 18 18 / .14), transparent), linear-gradient(rgb(15 11 11 / .96), rgb(5 4 4 / .96) 70px) !important;
 }
 /* pasek czasu tury jak ostrze: stalowa krawędź u góry, ciemnoczerwony lakier */
 ${N} .battle-controller .c-timer {
@@ -866,13 +866,13 @@ ${N} .battle-controller .turn-prediction__item { border-color: var(--tmg-edge) !
    pęknięcie z magmą między wypowiedzią a odpowiedziami, odpowiedzi żarzą się przy najechaniu --- */
 ${N} .dialogue-window .border-image {
   background:
-    linear-gradient(rgb(22 16 16 / .96), rgb(7 5 5 / .95) 80px) !important;
+    linear-gradient(rgb(15 11 11 / .96), rgb(5 4 4 / .95) 80px) !important;
   border-style: solid !important;
   border-width: 0 !important;
   border-image: var(--tmg-frame) 32 / 10px / 0 round !important;
   box-shadow: 0 0 0 1px #000, 0 10px 26px rgb(0 0 0 / .85) !important;
 }
-${N} .dialogue-window .dialogue-background-color { background: rgb(7 5 5 / .7) !important; }
+${N} .dialogue-window .dialogue-background-color { background: rgb(5 4 4 / .7) !important; }
 ${N} .dialogue-window .content { color: var(--tmg-text); }
 ${N} .dialogue-window .content .npc-dialogue-wrapper .h_content {
   color: var(--tmg-text) !important;
@@ -887,7 +887,7 @@ ${N} .dialogue-window .content .answers-scroll::before {
   opacity: .8;
 }
 ${N} .dialogue-window .content .answers li {
-  border-bottom-color: rgb(42 31 29 / .8) !important;
+  border-bottom-color: rgb(29 22 20 / .8) !important;
   transition: background-color .15s ease, box-shadow .15s ease;
 }
 ${N} .dialogue-window .content .answers li .icon { filter: grayscale(1) sepia(.35) brightness(.85); }
@@ -990,7 +990,7 @@ ${N} .interface-layer .hud-container .map_ball {
   background:
     url("${IMG.medal}") 0 0 / 100% 100% no-repeat,
     radial-gradient(circle at 11.6px 18.2px, rgb(255 255 255 / .6) 0 1.2px, transparent 2.2px),
-    radial-gradient(circle at 12.7px 19.5px, rgb(var(--tmg-pvp)) 0 3.8px, rgb(var(--tmg-pvp) / .6) 5.6px, #0b0707 7.6px, transparent 8px) !important;
+    radial-gradient(circle at 12.7px 19.5px, rgb(var(--tmg-pvp)) 0 3.8px, rgb(var(--tmg-pvp) / .6) 5.6px, #080505 7.6px, transparent 8px) !important;
   box-shadow: none;
   filter: drop-shadow(0 2px 2px #000) drop-shadow(0 0 4px rgb(var(--tmg-pvp) / .5));
   cursor: pointer;
@@ -1061,7 +1061,7 @@ ${B}::before {
 
 /* sloty: czarne lakierowane kwadraty z cienką krawędzią; najechanie = żarzący się węgiel */
 ${B} .usable-slot {
-  background: radial-gradient(circle at 50% 38%, #1d1513, #090606 70%) !important;
+  background: radial-gradient(circle at 50% 38%, #140f0d, #060404 70%) !important;
   border-color: #000 !important;
   outline: none !important;
   box-shadow: inset 0 0 0 1px var(--tmg-edge-hi), inset 0 -1px 0 rgb(122 18 18 / .55), inset 0 0 8px #000, 0 1px 2px #000 !important;
@@ -1136,7 +1136,7 @@ ${B} .hp-indicator-wrapper-template::before {
   filter: drop-shadow(0 2px 5px #000);
 }
 /* tło kuli (pusta część): głęboka czerń wody z ledwie widoczną czerwienią */
-${B} .hp-indicator-wrapper { background: radial-gradient(circle at 50% 40%, #1a0707, #050202 70%) !important; }
+${B} .hp-indicator-wrapper { background: radial-gradient(circle at 50% 40%, #120505, #040101 70%) !important; }
 ${B} .hp-indicator-wrapper .glass { opacity: .55; }
 /* ciecz: płynny żar wirujący w czarnej wodzie (ciecz-orba.webp – kafel bez szwów).
    Wysokość .blood ustawia gra (HP), overflow: hidden przycina ciecz do aktualnego poziomu.
@@ -1193,7 +1193,7 @@ ${B} .exp-bar-wrapper .exp-progress .overlay {
   pointer-events: none;
 }
 ${B} .exp-bar-wrapper .exp-progress .progress {
-  background: linear-gradient(#030202, #0e0a0a 60%, #070505) !important;
+  background: linear-gradient(#020101, #0a0707 60%, #050404) !important;
   box-shadow: inset 0 1px 2px #000, inset 0 0 0 1px rgb(92 13 13 / .45);
   overflow: hidden;
 }
@@ -1215,7 +1215,7 @@ ${B} .exp-bar-wrapper .exp-progress .progress .inner::after {
   pointer-events: none;
 }
 ${B} .exp-bar-wrapper .exp-progress .progress.noexp .inner {
-  background: linear-gradient(rgb(230 220 207 / .35), transparent 2px), linear-gradient(#3a3430, #141110) !important;
+  background: linear-gradient(rgb(230 220 207 / .35), transparent 2px), linear-gradient(#292422, #0e0c0b) !important;
 }
 ${B} .exp-bar-wrapper .exp-progress .progress.noexp .inner::after { display: none; }
 
@@ -1315,7 +1315,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
 #tmg-toast {
   position: fixed; left: 40px; bottom: 10px; z-index: 2147483000;
   padding: 4px 10px;
-  background: rgb(14 10 10 / .95); color: #e6dccf;
+  background: rgb(10 7 7 / .95); color: #e6dccf;
   font: 12px/1.4 Arial, sans-serif;
   border: 1px solid #5c0d0d; border-radius: 2px;
   box-shadow: 0 2px 8px rgb(0 0 0 / .8);
@@ -1326,7 +1326,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   position: fixed; left: 40px; bottom: 40px; z-index: 2147483001;
   display: none; gap: 8px; align-items: center; flex-wrap: wrap; width: 230px;
   padding: 10px 12px;
-  background: rgb(14 10 10 / .97); color: #e6dccf;
+  background: rgb(10 7 7 / .97); color: #e6dccf;
   font: 12px/1.4 Arial, sans-serif;
   border: 1px solid #5c0d0d; border-radius: 2px;
   box-shadow: 0 0 0 1px #000, 0 4px 14px rgb(0 0 0 / .85);
@@ -1334,10 +1334,10 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
 #tmg-legpick.show { display: flex; }
 #tmg-legpick .tmg-lp-title { width: 100%; font-weight: bold; color: #e6dccf; }
 #tmg-legpick .tmg-lp-note { width: 100%; color: #8f8478; font-size: 11px; }
-#tmg-legpick input[type=color] { width: 44px; height: 26px; padding: 0; border: 1px solid #000; background: #070505; cursor: pointer; }
+#tmg-legpick input[type=color] { width: 44px; height: 26px; padding: 0; border: 1px solid #000; background: #050404; cursor: pointer; }
 #tmg-legpick button {
   height: 26px; padding: 0 10px; cursor: pointer;
-  background: linear-gradient(#1f1716, #0e0a0a); color: #e6dccf;
+  background: linear-gradient(#16100f, #0a0707); color: #e6dccf;
   border: 1px solid #5c0d0d; border-radius: 2px; font: 12px Arial, sans-serif;
 }
 #tmg-legpick button:hover, #tmg-legpick button:focus-visible { border-color: #9e1b1b; box-shadow: 0 0 6px rgb(196 42 42 / .5); outline: none; }
@@ -1380,7 +1380,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       if (s < 0.22 && l > 0.6) {                      // jasne ikony i glify – zostają czytelne, lekko ciepłe
         a[i] *= 0.9; a[i + 1] *= 0.86; a[i + 2] *= 0.81;
       } else if (warm || s < 0.22) {                  // drewno, brąz, pergamin, szarości → lakier
-        const L = 0.022 + Math.pow(l, 1.45) * 0.4;
+        const L = 0.015 + Math.pow(l, 1.45) * 0.29;   // przyciemnione (2.17.0)
         a[i] = Math.min(255, L * 1.12 * 255); a[i + 1] = L * 0.92 * 255; a[i + 2] = L * 0.88 * 255;
       }
     }
@@ -1468,7 +1468,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     }
     const bg = st.getPropertyValue('background-color');
     if (lum(bg) > 0.72) {
-      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(14, 10, 10, .94)', st.getPropertyPriority('background-color'));
+      remember(rule, 'background-color'); st.setProperty('background-color', 'rgba(10, 7, 7, .94)', st.getPropertyPriority('background-color'));
       const col = st.getPropertyValue('color');
       if (lum(col) >= 0 && lum(col) < 0.45) { remember(rule, 'color'); st.setProperty('color', '#e6dccf', st.getPropertyPriority('color')); }
     } else if (neutral(bg) && lum(bg) > 0.2) {

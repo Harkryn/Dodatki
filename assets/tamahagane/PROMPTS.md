@@ -86,3 +86,6 @@ Drugi arkusz (ten sam początek): Top row: a radiant sun emblem of iron with glo
 
 ## markiza.webp (Qwen-Image 16:9, BiRefNet; dolny pas 271×44 + jego odbicie)
 Stylized hand-painted dark fantasy game UI element: a wide straight horizontal shop awning seen from the front, made of dark forged iron plates riveted together with a scalloped lower edge of pointed iron spikes, thin glowing red lava cracks between the plates, alternating darker and lighter iron segments, spans the full image width from left edge to right edge, short height, plain flat light grey background below, front view, painterly
+
+## Przyciemnienie (2.17.0, bez nowych promptów)
+Wszystkie grafiki motywu oprócz ikon i cieczy kuli HP przyciemnione lokalnie: piksele poza lawą × 0,68, lawa/żar (ciepły jasny kolor silniejszy od błękitu) bez zmian.
