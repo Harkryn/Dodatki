@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.19.0
+// @version      2.20.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.19.0';
+  const VERSION = '2.20.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1207,12 +1207,14 @@ ${B} .hp-indicator .blood::after {
     linear-gradient(rgb(0 0 0 / .35), transparent 8px),
     radial-gradient(ellipse 70% 120% at 50% 100%, transparent 55%, rgb(0 0 0 / .55) 100%);
 }
-html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood { animation: tmg-wave 5s linear infinite; }
+html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood { animation: tmg-wave 5s linear infinite, tmg-beat 2.2s ease-in-out infinite; }
 html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::before { animation: tmg-liquid 38s linear infinite; }
 html.${ON}.${FX}.tmg-ni .bottom-panel-of-bottom-positioner .hp-indicator .blood::after { animation: tmg-wave-line 5s linear infinite; }
 @keyframes tmg-liquid { from { transform: translate(0, 0); } to { transform: translate(110px, -110px); } }
 @keyframes tmg-wave { to { -webkit-mask-position: -49px 0, 0 6px; mask-position: -49px 0, 0 6px; } }
 @keyframes tmg-wave-line { to { background-position: -49px 0, 0 0, 0 0; } }
+/* puls: żar w kuli rozjaśnia się podwójnym uderzeniem jak bicie serca (co 2,2 s) */
+@keyframes tmg-beat { 0%, 40%, 100% { filter: brightness(1); } 8% { filter: brightness(1.35) saturate(1.15); } 16% { filter: brightness(1.05); } 24% { filter: brightness(1.25) saturate(1.1); } }
 ${B} .hp-indicator-wrapper .value {
   color: var(--tmg-text) !important;
   font-weight: bold;
