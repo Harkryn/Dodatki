@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.1.0
+// @version      1.1.1
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -38,7 +38,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -953,11 +953,11 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
         layer.appendChild(deco.tail);
       }
       const r = relRect(strip, layer);
-      setPos(deco.tail, r.left + r.width / 2 - 18, r.top + Math.min(90, r.height * 0.12));
+      setPos(deco.tail, r.left + r.width / 2 - 18, r.top - 4);   // zaczepiony tuż pod górną belką
     }
-    // kot przy minimapie: zagląda zza górnej krawędzi mapy, łapki na ramce
-    // TODO: zweryfikuj selektor (.handheld-mini-map / .mini-map i ich okno .border-window)
-    const map = document.querySelector('.handheld-mini-map') || document.querySelector('.mini-map');
+    // kot przy minimapie: zagląda zza górnej krawędzi mapy (canvas), łapki na jej krawędzi; po prawej od środka,
+    // żeby nie zasłaniał tytułu okna (sprawdzone w grze: okno .handheld-window, mapa .handheld-mini-map-canvas)
+    const map = document.querySelector('.handheld-mini-map-canvas') || document.querySelector('.handheld-mini-map') || document.querySelector('.mini-map');
     const win = map && (map.closest('.border-window') || map.parentElement);
     if (map && win && map.offsetWidth) {
       if (!deco.mini || deco.mini.parentElement !== win) {
@@ -966,7 +966,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
         win.appendChild(deco.mini);
       }
       const r = relRect(map, win);
-      setPos(deco.mini, r.left + r.width / 2 - 40, r.top - 45);   // krawędź grafiki (y 90 z 113 → 45 px) na górze mapy
+      setPos(deco.mini, r.left + r.width * 0.72 - 40, r.top - 45);   // krawędź grafiki (y 90 z 113 → 45 px) na górze mapy
     }
   };
   let decoTimer = 0;
