@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.5
+// @version      2.17.6
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.5';
+  const VERSION = '2.17.6';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -764,6 +764,14 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
 /* ranga przedmiotu: kolor łuny, a lawa w ramie i pęknięcia w środku przebarwione na ten kolor; zwykłe
    przedmioty – szare, wystygłe pęknięcia; legenda w kolorze ramki legendy z ustawień gry (wersje robi skrypt –
    lavaImage z tintem; zanim powstaną, zostaje czerwona lawa). Tooltipy bez przedmiotu zostają czerwone. */
+/* porównanie przedmiotów: etykieta „Wyposażony” to mały tooltip (.own) przypięty nad tooltipem porównania (.cmp-tip) –
+   dostaje cieńszą ramę i siedzi nad ramą porównania zamiast na niej */
+${N} .tip-wrapper.cmp-tip > .tip-wrapper.own {
+  top: -38px !important;
+  border-image-width: 12px !important;
+  border-image-outset: 6px !important;
+  filter: drop-shadow(0 2px 4px #000) !important;
+}
 /* wszystkie tooltipy bez rangi (postacie, NPC, przyciski, zwykłe przedmioty) – szara, wystygła lawa */
 ${N} .tip-wrapper { --tmg-rar: 120 116 110; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head) { --tmg-rar: 120 116 110; border-image-source: var(--tmg-tip-common, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-common, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
