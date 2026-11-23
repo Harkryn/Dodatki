@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.4
+// @version      2.17.5
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.4';
+  const VERSION = '2.17.5';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -764,7 +764,8 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
 /* ranga przedmiotu: kolor łuny, a lawa w ramie i pęknięcia w środku przebarwione na ten kolor; zwykłe
    przedmioty – szare, wystygłe pęknięcia; legenda w kolorze ramki legendy z ustawień gry (wersje robi skrypt –
    lavaImage z tintem; zanim powstaną, zostaje czerwona lawa). Tooltipy bez przedmiotu zostają czerwone. */
-${N} .tip-wrapper { --tmg-rar: 122 18 18; }
+/* wszystkie tooltipy bez rangi (postacie, NPC, przyciski, zwykłe przedmioty) – szara, wystygła lawa */
+${N} .tip-wrapper { --tmg-rar: 120 116 110; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head) { --tmg-rar: 120 116 110; border-image-source: var(--tmg-tip-common, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-common, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-common, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head .highlight.t-uniupg) { --tmg-rar: 255 251 0; border-image-source: var(--tmg-tip-uniupg, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-uniupg, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-uniupg, url("${IMG.underline}")); }
 ${N} .tip-wrapper:has(.item-head .highlight.t-her) { --tmg-rar: 56 184 235; border-image-source: var(--tmg-tip-her, url("${IMG.tipFrame}")) !important; background-image: var(--tmg-bg-her, url("${IMG.tipBg}")) !important; --tmg-brush-dim: var(--tmg-ul-her, url("${IMG.underline}")); }
@@ -776,8 +777,8 @@ ${N} .tip-wrapper:has(.item-head .highlight.t-art) { --tmg-rar: 225 64 70; borde
    a układ tooltipa się nie zmienia. Cień i łuna rzadkości przez drop-shadow – idą po kształcie ramy. */
 ${N} .tip-wrapper {
   border-style: solid; border-width: 0;
-  border-image: url("${IMG.tipFrame}") 40 / 20px / 14px stretch !important;
-  background: url("${IMG.tipBg}") center / cover no-repeat, #080505 !important;
+  border-image: var(--tmg-tip-common, url("${IMG.tipFrame}")) 40 / 20px / 14px stretch !important;
+  background: var(--tmg-bg-common, url("${IMG.tipBg}")) center / cover no-repeat, #080505 !important;
   box-shadow: none !important;
   filter: drop-shadow(0 0 7px rgb(var(--tmg-rar) / .28)) drop-shadow(0 10px 14px rgb(0 0 0 / .85));
 }
@@ -810,7 +811,7 @@ ${N} .tip-wrapper .item-head .item {
 ${N} .tip-wrapper .item-name { font-weight: bold; text-shadow: 0 0 6px rgb(var(--tmg-rar) / .35), 0 1px 2px #000 !important; }
 ${N} .tip-wrapper .item-type,
 ${N} .tip-wrapper .item-builds { color: var(--tmg-dim) !important; letter-spacing: .03em; }
-${N} .tip-wrapper .item-rarity { color: var(--tmg-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+${N} .tip-wrapper .item-rarity { text-align: center !important; color: var(--tmg-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
 ${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--tmg-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
 /* legenda: napis rangi (gra koloruje go klasą .color-legendary na samym napisie) i nazwa przedmiotu w kolorze legendy
    – własnym z okienka „Kolor legendy”, z ramki legendy gry albo domyślnym pomarańczu (--tmg-rar-leg) */
@@ -1743,7 +1744,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   };
   const neededRanks = () => {
     const need = new Set();
-    for (const t of document.querySelectorAll('.tip-wrapper')) if (t.querySelector('.item-head')) need.add(rarityOf(t));
+    need.add('common');   // szare tooltipy (postacie, NPC, przyciski, zwykłe przedmioty) – gotowe od startu
+    for (const t of document.querySelectorAll('.tip-wrapper')) need.add(t.querySelector('.item-head') ? rarityOf(t) : 'common');
     if (document.querySelector('.premium-item')) need.add('premium');
     return need;
   };
