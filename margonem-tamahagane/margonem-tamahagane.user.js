@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.15.5
+// @version      2.16.0
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,11 +53,12 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.15.5';
+  const VERSION = '2.16.0';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
   const KEY_FX = 'tmg-effects';
+  const KEY_LEG = 'tmg-leg-color';   // '' = kolor z gry (ramka legendy) albo domyślny pomarańcz; inaczej #rrggbb
   const root = document.documentElement;
 
   const get = (k, d) => { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch (e) { return d; } };
@@ -1315,6 +1316,26 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   opacity: 0; pointer-events: none; transition: opacity .25s;
 }
 #tmg-toast.show { opacity: 1; }
+#tmg-legpick {
+  position: fixed; left: 40px; bottom: 40px; z-index: 2147483001;
+  display: none; gap: 8px; align-items: center; flex-wrap: wrap; width: 230px;
+  padding: 10px 12px;
+  background: rgb(14 10 10 / .97); color: #e6dccf;
+  font: 12px/1.4 Arial, sans-serif;
+  border: 1px solid #5c0d0d; border-radius: 2px;
+  box-shadow: 0 0 0 1px #000, 0 4px 14px rgb(0 0 0 / .85);
+}
+#tmg-legpick.show { display: flex; }
+#tmg-legpick .tmg-lp-title { width: 100%; font-weight: bold; color: #e6dccf; }
+#tmg-legpick .tmg-lp-note { width: 100%; color: #8f8478; font-size: 11px; }
+#tmg-legpick input[type=color] { width: 44px; height: 26px; padding: 0; border: 1px solid #000; background: #070505; cursor: pointer; }
+#tmg-legpick button {
+  height: 26px; padding: 0 10px; cursor: pointer;
+  background: linear-gradient(#1f1716, #0e0a0a); color: #e6dccf;
+  border: 1px solid #5c0d0d; border-radius: 2px; font: 12px Arial, sans-serif;
+}
+#tmg-legpick button:hover, #tmg-legpick button:focus-visible { border-color: #9e1b1b; box-shadow: 0 0 6px rgb(196 42 42 / .5); outline: none; }
+#tmg-legpick .tmg-lp-swatch { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #000; box-shadow: 0 0 6px currentColor; background: currentColor; }
 `;
 
   /* ─────────────────────────────────────────────────────────────────────────
@@ -1687,6 +1708,8 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   };
   const rarityColors = () => {
     const c = { ...RARITY };
+    const own = parseColor(get(KEY_LEG, ''));
+    if (own) { c.leg = own; return c; }
     if (document.body && document.body.classList.contains('ln-frame-item-active')) {
       const ln = parseColor(getComputedStyle(document.body).getPropertyValue('--ln-frame_item_color'));
       if (ln) c.leg = ln;
@@ -1821,14 +1844,51 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     const b = document.createElement('button');
     b.id = 'tmg-toggle';
     b.type = 'button';
-    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty żaru, popiołu i mgły (Ctrl+Alt+P)';
+    b.title = 'Tamahagane – klik: włącz/wyłącz motyw (Ctrl+Alt+H)\nPrawy klik: efekty żaru, popiołu i mgły (Ctrl+Alt+P)\nShift+klik: kolor legendy (Ctrl+Alt+L)';
     b.setAttribute('aria-label', 'Przełącz motyw Tamahagane');
-    b.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); if (e.shiftKey) openLegPicker(); else toggle(); });
     b.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); toggleFx(); });
     const t = document.createElement('div');
     t.id = 'tmg-toast';
     t.setAttribute('role', 'status');
     document.body.append(b, t);
+  };
+
+  // Wybór koloru lawy legendarnych tooltipów: próbnik koloru + „Z gry” (wraca do koloru ramki legendy z ustawień gry,
+  // a gdy jej brak – do pomarańczu). Zmiana od razu przelicza legendarne przebarwienia (z pamięci podręcznej, jeśli już były).
+  const hex = (c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
+  const refreshLeg = () => { tintDone.delete('leg'); legSet = ''; applyTints(glowOn); };
+  const openLegPicker = () => {
+    let p = document.getElementById('tmg-legpick');
+    if (!p) {
+      p = document.createElement('div');
+      p.id = 'tmg-legpick';
+      p.setAttribute('role', 'dialog');
+      p.setAttribute('aria-label', 'Kolor legendy');
+      p.innerHTML = '<div class="tmg-lp-title">Kolor legendy</div>'
+        + '<span class="tmg-lp-swatch"></span><input type="color" aria-label="Wybierz kolor legendy">'
+        + '<button type="button" data-a="game">Z gry</button><button type="button" data-a="close">Zamknij</button>'
+        + '<div class="tmg-lp-note"></div>';
+      const input = p.querySelector('input'), sw = p.querySelector('.tmg-lp-swatch'), note = p.querySelector('.tmg-lp-note');
+      p.tmgSync = () => {
+        const own = get(KEY_LEG, '');
+        const c = rarityColors().leg;
+        input.value = hex(c); sw.style.color = hex(c);
+        note.textContent = own ? 'Własny kolor lawy w tooltipach legend.' : 'Kolor z ustawień gry (ramka legendy) albo domyślny.';
+      };
+      input.addEventListener('input', () => { sw.style.color = input.value; });
+      input.addEventListener('change', () => { set(KEY_LEG, input.value); p.tmgSync(); refreshLeg(); toast('Kolor legendy: ' + input.value); });
+      p.addEventListener('click', (e) => {
+        const a = e.target.closest('button') && e.target.closest('button').dataset.a;
+        if (a === 'game') { set(KEY_LEG, ''); p.tmgSync(); refreshLeg(); toast('Kolor legendy: z gry'); }
+        if (a === 'close') p.classList.remove('show');
+      });
+      p.addEventListener('keydown', (e) => { if (e.key === 'Escape') p.classList.remove('show'); });
+      document.body.appendChild(p);
+    }
+    p.tmgSync();
+    p.classList.toggle('show');
+    if (p.classList.contains('show')) p.querySelector('input').focus();
   };
 
   // Górna tabliczka: nazwa świata trafia do rzędu z mapą i koordynatami (.map-data – flex w CSS),
@@ -1890,11 +1950,13 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand('Tamahagane: włącz / wyłącz (Ctrl+Alt+H)', toggle);
     GM_registerMenuCommand('Tamahagane: efekty żaru, popiołu i mgły (Ctrl+Alt+P)', toggleFx);
+    GM_registerMenuCommand('Tamahagane: kolor legendy (Ctrl+Alt+L)', () => openLegPicker());
   }
   window.addEventListener('keydown', (e) => {
     if (!e.ctrlKey || !e.altKey || e.shiftKey || e.metaKey) return;
     if (e.code === 'KeyH') { e.preventDefault(); toggle(); }
     else if (e.code === 'KeyP') { e.preventDefault(); toggleFx(); }
+    else if (e.code === 'KeyL') { e.preventDefault(); openLegPicker(); }
   }, true);
 
   console.info(`[Tamahagane] v${VERSION} ${enabled() ? 'włączony' : 'wyłączony'}`);
