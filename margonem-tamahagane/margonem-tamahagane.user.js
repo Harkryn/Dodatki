@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.15.2
+// @version      2.15.3
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.15.2';
+  const VERSION = '2.15.3';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1315,9 +1315,11 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
   const blobCache = new Map();
   const touched = new Map();
 
-  function recolorPixels(ctx, w, h) {
+  async function recolorPixels(ctx, w, h) {
     const id = ctx.getImageData(0, 0, w, h), a = id.data;
+    const CHUNK = 4 * 120000;                         // ~120 tys. pikseli na kawałek, potem przerwa dla gry
     for (let i = 0; i < a.length; i += 4) {
+      if (i && i % CHUNK === 0) await new Promise((ok) => setTimeout(ok, 0));
       if (a[i + 3] === 0) continue;
       const r = a[i] / 255, g = a[i + 1] / 255, b = a[i + 2] / 255;
       const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
@@ -1343,19 +1345,35 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     ctx.putImageData(id, 0, 0);
   }
 
+  // Przebarwione arkusze gry: najpierw pamięć podręczna (Cache API, klucz = wersja motywu + ścieżka), a gdy jej brak –
+  // liczenie po jednym arkuszu naraz, z przerwami (kolejka), żeby gra nie zamierała przy wczytywaniu.
+  let recolorQueue = Promise.resolve();
   function recolored(path) {
     if (!blobCache.has(path)) {
       blobCache.set(path, (async () => {
-        const r = await fetch(path, { credentials: 'same-origin' });
-        if (!r.ok) return null;
-        const bm = await createImageBitmap(await r.blob());
-        const c = document.createElement('canvas');
-        c.width = bm.width; c.height = bm.height;
-        const x = c.getContext('2d', { willReadFrequently: true });
-        x.drawImage(bm, 0, 0);
-        recolorPixels(x, bm.width, bm.height);
-        const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
-        return blob ? URL.createObjectURL(blob) : null;
+        const id = `https://tmg.cache/v${VERSION}/rc/${encodeURIComponent(path)}`;
+        const cache = await lavaCacheOpen();
+        if (cache) {
+          const hit = await cache.match(id).catch(() => null);
+          if (hit) return URL.createObjectURL(await hit.blob());
+        }
+        const job = async () => {
+          const r = await fetch(path, { credentials: 'same-origin' });
+          if (!r.ok) return null;
+          const bm = await createImageBitmap(await r.blob());
+          const c = document.createElement('canvas');
+          c.width = bm.width; c.height = bm.height;
+          const x = c.getContext('2d', { willReadFrequently: true });
+          x.drawImage(bm, 0, 0);
+          await recolorPixels(x, bm.width, bm.height);
+          return new Promise((ok) => c.toBlob(ok, 'image/png'));
+        };
+        const run = recolorQueue.then(() => new Promise((ok) => setTimeout(ok, 16))).then(job);
+        recolorQueue = run.catch(() => null);
+        const blob = await run;
+        if (!blob) return null;
+        if (cache) cache.put(id, new Response(blob, { headers: { 'content-type': 'image/png' } })).catch(() => {});
+        return URL.createObjectURL(blob);
       })().catch(() => null));
     }
     return blobCache.get(path);
