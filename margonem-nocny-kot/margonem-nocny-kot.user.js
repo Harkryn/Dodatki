@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.0.0
+// @version      1.1.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -12,6 +12,12 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_getResourceURL
+// @resource     nktChatCat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/spiacy-kot.png
+// @resource     nktTail      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ogonek.png
+// @resource     nktPaw       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/odcisk.png
+// @resource     nktMiniCat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/kot-minimapa.png
+// @resource     nktTongue    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/jezyk.png
+// @resource     nktEyes      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/oczy.png
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // ==/UserScript==
@@ -32,7 +38,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -65,10 +71,18 @@
       return URL.createObjectURL(new Blob([arr], { type }));
     } catch (e) { return u; }
   };
-  // eslint-disable-next-line no-unused-vars
   const res = (name, file) => {
     try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return toBlobUrl(u); } } catch (e) { /* brak zasobu */ }
     return RAW + file;
+  };
+  // Grafiki z Hugging Face (Qwen-Image, kreskówka; prompty w assets/nocny-kot/PROMPTS.md). Pliki mają 2× rozmiar w grze.
+  const IMG = {
+    chatCat: res('nktChatCat', 'spiacy-kot.png'),   // 240×138, kot śpiący na krawędzi (łapka i ogon zwisają); krawędź na 68% wysokości
+    tail: res('nktTail', 'ogonek.png'),             // 77×180, ogon zwisający z krawędzi, zakręcony w haczyk
+    paw: res('nktPaw', 'odcisk.png'),               // 48×42, fioletowy odcisk łapki z czarnym konturem
+    miniCat: res('nktMiniCat', 'kot-minimapa.png'), // 160×113, kot zaglądający zza krawędzi; nosek (80, 64), krawędź na y 90
+    tongue: res('nktTongue', 'jezyk.png'),          // 34×28, języczek do animacji lizania
+    eyes: res('nktEyes', 'oczy.png')                // 120×55, żółte kocie oczy z fioletową poświatą (ekran wczytywania)
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -437,6 +451,57 @@ ${N} .button.disable { filter: grayscale(1) brightness(.6); }
 `;
 
   /* =====================================================================
+   * === KOCIE DETALE (kot śpiący na czacie, ogon na krawędzi kolumny, kot przy minimapie, odciski łapek) ===
+   * Elementy .nkt-deco tworzy skrypt (placeDecor) i ustawia względem elementów gry; przy wyłączonym motywie
+   * są ukryte. Czarne koty dostają cienką fioletową obwódkę (drop-shadow), żeby nie znikały na czarnym tle.
+   * ===================================================================== */
+  const cssCats = `
+html:not(.${ON}) .nkt-deco { display: none !important; }
+.nkt-deco { position: absolute; z-index: 6; pointer-events: none; }
+.nkt-deco img { display: block; width: 100%; height: auto; -webkit-user-drag: none; user-select: none; }
+.nkt-deco .nkt-cat-img { filter: drop-shadow(0 0 1px #7b4fd6) drop-shadow(0 0 .5px #7b4fd6) drop-shadow(0 2px 3px rgb(0 0 0 / .6)); }
+
+/* kot śpiący na górnej krawędzi pola czatu (TODO: zweryfikuj położenie w grze) */
+.nkt-chatcat { width: 84px; }
+${A} .nkt-chatcat .nkt-cat-img { transform-origin: 50% 70%; animation: nkt-breathe 4.2s ease-in-out infinite; }
+@keyframes nkt-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.035); } }
+
+/* ogon zwisający z krawędzi lewej kolumny; po najechaniu merda (zaczepiony u góry) */
+.nkt-tail { width: 32px; pointer-events: auto; cursor: default; }
+.nkt-tail .nkt-cat-img { transform-origin: 50% 0; }
+${A} .nkt-tail:hover .nkt-cat-img { animation: nkt-wag .95s ease-in-out; }
+@keyframes nkt-wag { 0% { transform: rotate(0); } 20% { transform: rotate(14deg); } 45% { transform: rotate(-11deg); } 70% { transform: rotate(6deg); } 100% { transform: rotate(0); } }
+
+/* kot zaglądający zza górnej krawędzi minimapy; co jakiś czas liże ją (klasa .nkt-lick na 1,2 s) */
+.nkt-minicat { width: 80px; }
+.nkt-minicat .nkt-tongue {
+  position: absolute; left: calc(50% - 8.5px); top: 33px; width: 17px; z-index: 1;
+  transform-origin: 50% 0; transform: scaleY(0); opacity: 0;
+}
+${A} .nkt-minicat.nkt-lick .nkt-cat-img { animation: nkt-lick-head 1.2s ease-in-out; }
+${A} .nkt-minicat.nkt-lick .nkt-tongue { animation: nkt-lick-tongue 1.2s ease-in-out; }
+@keyframes nkt-lick-head { 0%, 100% { transform: translateY(0) rotate(0); } 30%, 70% { transform: translateY(2px) rotate(-3deg); } }
+@keyframes nkt-lick-tongue {
+  0%, 15% { transform: translateY(2px) scaleY(0); opacity: 0; }
+  30% { transform: translateY(2px) scaleY(1); opacity: 1; }
+  45% { transform: translate(1px, 2px) scaleY(.7); opacity: 1; }
+  60% { transform: translateY(2px) scaleY(1); opacity: 1; }
+  80%, 100% { transform: translateY(2px) scaleY(0); opacity: 0; }
+}
+
+/* odciski łapek: wybrana pozycja list z grupami i środek cienkich separatorów */
+${N} .one-item-on-divide-list.active {
+  background: url("${IMG.paw}") 6px 50% / 12px auto no-repeat, rgb(123 79 214 / .16) !important;
+  padding-left: 22px !important;
+}
+${N} .interface-element-line-1-background {
+  background:
+    url("${IMG.paw}") center / auto 9px no-repeat,
+    linear-gradient(90deg, transparent, var(--nkt-v-line) 15% 44%, transparent 44% 56%, var(--nkt-v-line) 56% 85%, transparent) center / 100% 2px no-repeat !important;
+}
+`;
+
+  /* =====================================================================
    * === ANIMACJE (delikatne; tylko z klasą nkt-anim; zawsze wyłączone przy prefers-reduced-motion) ===
    * ===================================================================== */
   const cssAnim = `
@@ -730,7 +795,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     (document.head || root).appendChild(s);
     return s;
   };
-  const baseCss = [cssVars, cssBase, cssWindows, cssAnim, cssToggle].join('\n');
+  const baseCss = [cssVars, cssBase, cssWindows, cssCats, cssAnim, cssToggle].join('\n');
   const style = addStyle(baseCss);
   if (style && 'id' in style) style.id = 'nkt-theme';
 
@@ -772,6 +837,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     apply();
     syncGraphics();
     syncPanel();
+    if (typeof placeDecor === 'function') placeDecor();
     toast(enabled() ? 'Nocny Kot: włączony' : 'Nocny Kot: wyłączony');
   };
   const toggleAnim = () => {
@@ -841,6 +907,83 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     document.body.append(b, t);
   };
 
+  /* ─────────────────────────────────────────────────────────────────────────
+   * KOCIE DETALE – tworzenie i ustawianie (debounce; tylko odczyt położenia elementów gry, bez zmian w nich)
+   * Każdy detal siedzi w kontenerze, który przesuwa się razem z elementem gry (okno czatu, okno minimapy,
+   * warstwa interfejsu), więc przeciąganie okien nie wymaga ciągłego przeliczania.
+   * ───────────────────────────────────────────────────────────────────────── */
+  const mkDeco = (cls, html) => {
+    const d = document.createElement('div');
+    d.className = `nkt-deco ${cls}`;
+    d.setAttribute('aria-hidden', 'true');
+    d.innerHTML = html;
+    return d;
+  };
+  const deco = {};
+  const relRect = (el, host) => {
+    const a = el.getBoundingClientRect(), b = host.getBoundingClientRect();
+    return { left: a.left - b.left + host.scrollLeft, top: a.top - b.top + host.scrollTop, width: a.width, height: a.height };
+  };
+  const setPos = (d, left, top) => {
+    const l = `${Math.round(left)}px`, t = `${Math.round(top)}px`;
+    if (d.style.left !== l) d.style.left = l;
+    if (d.style.top !== t) d.style.top = t;
+  };
+  const placeDecor = () => {
+    if (!enabled() || !root.classList.contains(NI)) return;
+    // kot na czacie: leży na górnej krawędzi paska z polem wpisywania, przy prawym brzegu
+    // TODO: zweryfikuj selektor (.new-chat-window .chat-input-wrapper)
+    const chat = document.querySelector('.new-chat-window'), bar = chat && chat.querySelector('.chat-input-wrapper');
+    if (chat && bar && bar.offsetWidth) {
+      if (!deco.chat || deco.chat.parentElement !== chat) {
+        deco.chat = mkDeco('nkt-chatcat', `<img class="nkt-cat-img" alt="" src="${IMG.chatCat}">`);
+        if (getComputedStyle(chat).position === 'static') chat.style.position = 'relative';
+        chat.appendChild(deco.chat);
+      }
+      const r = relRect(bar, chat);
+      setPos(deco.chat, r.left + r.width - 84 - 10, r.top - 48 * 0.68);   // 84×48, krawędź na 68% wysokości grafiki
+    }
+    // ogon: zwisa z górnej części listwy między lewą kolumną (czat) a mapą
+    // TODO: zweryfikuj selektor (.interface-layer > .left-column.main-column > .border)
+    const layer = document.querySelector('.interface-layer');
+    const strip = document.querySelector('.interface-layer > .left-column.main-column > .border');
+    if (layer && strip && strip.offsetHeight) {
+      if (!deco.tail || deco.tail.parentElement !== layer) {
+        deco.tail = mkDeco('nkt-tail', `<img class="nkt-cat-img" alt="" src="${IMG.tail}">`);
+        layer.appendChild(deco.tail);
+      }
+      const r = relRect(strip, layer);
+      setPos(deco.tail, r.left + r.width / 2 - 18, r.top + Math.min(90, r.height * 0.12));
+    }
+    // kot przy minimapie: zagląda zza górnej krawędzi mapy, łapki na ramce
+    // TODO: zweryfikuj selektor (.handheld-mini-map / .mini-map i ich okno .border-window)
+    const map = document.querySelector('.handheld-mini-map') || document.querySelector('.mini-map');
+    const win = map && (map.closest('.border-window') || map.parentElement);
+    if (map && win && map.offsetWidth) {
+      if (!deco.mini || deco.mini.parentElement !== win) {
+        deco.mini = mkDeco('nkt-minicat', `<img class="nkt-cat-img" alt="" src="${IMG.miniCat}"><img class="nkt-tongue" alt="" src="${IMG.tongue}">`);
+        if (getComputedStyle(win).position === 'static') win.style.position = 'relative';
+        win.appendChild(deco.mini);
+      }
+      const r = relRect(map, win);
+      setPos(deco.mini, r.left + r.width / 2 - 40, r.top - 45);   // krawędź grafiki (y 90 z 113 → 45 px) na górze mapy
+    }
+  };
+  let decoTimer = 0;
+  const queueDecor = () => { clearTimeout(decoTimer); decoTimer = setTimeout(placeDecor, 250); };
+  // lizanie minimapy: losowo co 9–18 s, tylko przy włączonych animacjach, widocznej karcie i bez ograniczenia ruchu
+  const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const scheduleLick = () => {
+    setTimeout(() => {
+      const m = deco.mini;
+      if (m && m.isConnected && root.classList.contains(ANIM) && !document.hidden && !(reduceMotion && reduceMotion.matches)) {
+        m.classList.add('nkt-lick');
+        setTimeout(() => m.classList.remove('nkt-lick'), 1250);
+      }
+      scheduleLick();
+    }, 9000 + Math.random() * 9000);
+  };
+
   // obserwator nowych elementów i arkuszy (debounce) – startuje dopiero po wykryciu NI
   let sheetTimer = 0;
   const gfxObs = new MutationObserver((muts) => {
@@ -848,8 +991,9 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     let sheets = false;
     for (const m of muts) for (const n of m.addedNodes) {
       if (n.nodeName === 'STYLE' || n.nodeName === 'LINK') sheets = true;
-      else queueFix(n);
+      else if (!(n.nodeType === 1 && n.classList.contains('nkt-deco'))) queueFix(n);
     }
+    queueDecor();
     if (sheets) { clearTimeout(sheetTimer); sheetTimer = setTimeout(scanSheets, 80); }
   });
 
@@ -866,6 +1010,10 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     scanSheets();
     document.querySelectorAll(TEXT_SCOPE).forEach(fixText);
     gfxObs.observe(root, { childList: true, subtree: true });
+    placeDecor();
+    window.addEventListener('resize', queueDecor);
+    setInterval(placeDecor, 4000);   // zmiana układu bez nowych węzłów (np. zmiana rozmiaru kolumn)
+    scheduleLick();
     let ticks = 0;
     const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
     setTimeout(pruneCache, 20000);
