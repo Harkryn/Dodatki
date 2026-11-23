@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.6
+// @version      2.17.7
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.6';
+  const VERSION = '2.17.7';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -767,7 +767,8 @@ ${N} .widget-button.disabled { filter: grayscale(.8) brightness(.55); }
 /* porównanie przedmiotów: etykieta „Wyposażony” to mały tooltip (.own) przypięty nad tooltipem porównania (.cmp-tip) –
    dostaje cieńszą ramę i siedzi nad ramą porównania zamiast na niej */
 ${N} .tip-wrapper.cmp-tip > .tip-wrapper.own {
-  top: -38px !important;
+  top: -29px !important;
+  z-index: 1 !important;
   border-image-width: 12px !important;
   border-image-outset: 6px !important;
   filter: drop-shadow(0 2px 4px #000) !important;
