@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.15.3
+// @version      2.15.4
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.15.3';
+  const VERSION = '2.15.4';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -1393,6 +1393,24 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
     return `rgba(${k + 5}, ${Math.max(0, k - 1)}, ${Math.max(0, k - 2)}, ${c[3]})`;
   }
 
+  // Podmiany grafik w regułach zbierane i wykonywane razem (jedno przeliczenie stylów gry zamiast setek):
+  // gotowe arkusze spływają w różnych chwilach, więc czekamy 150 ms ciszy (najwyżej 1 s) i podmieniamy wszystko naraz.
+  const pendingSets = [];
+  let flushTimer = 0, flushFirst = 0;
+  function flushSets() {
+    flushFirst = 0;
+    const list = pendingSets.splice(0);
+    if (!root.classList.contains(ON)) return;
+    for (const [rule, prop, v] of list) { remember(rule, prop); rule.style.setProperty(prop, v, rule.style.getPropertyPriority(prop)); }
+  }
+  function queueSet(rule, prop, v) {
+    pendingSets.push([rule, prop, v]);
+    const now = performance.now();
+    if (!flushFirst) flushFirst = now;
+    clearTimeout(flushTimer);
+    flushTimer = setTimeout(flushSets, now - flushFirst > 1000 ? 0 : 150);
+  }
+
   async function processRule(rule) {
     const st = rule.style;
     const hl = /:hover|\.active|\.selected|highlight|\.is-active|\.pressed/.test(rule.selectorText);
@@ -1404,7 +1422,7 @@ html.${ON}:not(.${FX}) #tmg-toggle { filter: saturate(.4); }
       if (!jobs.length) continue;
       let nv = v;
       for (const [token, p] of jobs) { const u = await p; if (u) nv = nv.split(token).join(`url("${u}")`); }
-      if (nv !== v && root.classList.contains(ON)) { remember(rule, prop); st.setProperty(prop, nv, st.getPropertyPriority(prop)); }
+      if (nv !== v && root.classList.contains(ON)) queueSet(rule, prop, nv);
     }
     const bg = st.getPropertyValue('background-color');
     if (lum(bg) > 0.72) {
