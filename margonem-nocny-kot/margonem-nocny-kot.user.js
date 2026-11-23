@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.1.1
+// @version      1.2.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -18,6 +18,11 @@
 // @resource     nktMiniCat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/kot-minimapa.png
 // @resource     nktTongue    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/jezyk.png
 // @resource     nktEyes      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/oczy.png
+// @resource     nktHpPaw     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/lapka-hp.png
+// @resource     nktEarL      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/uszko-l.png
+// @resource     nktEarR      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/uszko-p.png
+// @resource     nktToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/przelacznik.png
+// @resource     nktLoader    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ekran-ladowania.webp
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // ==/UserScript==
@@ -38,7 +43,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.1.1';
+  const VERSION = '1.2.0';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -75,14 +80,19 @@
     try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return toBlobUrl(u); } } catch (e) { /* brak zasobu */ }
     return RAW + file;
   };
-  // Grafiki z Hugging Face (Qwen-Image, kreskówka; prompty w assets/nocny-kot/PROMPTS.md). Pliki mają 2× rozmiar w grze.
+  // Grafiki z Hugging Face (Qwen-Image, styl malowany; prompty w assets/nocny-kot/PROMPTS.md). Pliki mają 2× rozmiar w grze.
   const IMG = {
-    chatCat: res('nktChatCat', 'spiacy-kot.png'),   // 240×138, kot śpiący na krawędzi (łapka i ogon zwisają); krawędź na 68% wysokości
-    tail: res('nktTail', 'ogonek.png'),             // 77×180, ogon zwisający z krawędzi, zakręcony w haczyk
-    paw: res('nktPaw', 'odcisk.png'),               // 48×42, fioletowy odcisk łapki z czarnym konturem
-    miniCat: res('nktMiniCat', 'kot-minimapa.png'), // 160×113, kot zaglądający zza krawędzi; nosek (80, 64), krawędź na y 90
+    chatCat: res('nktChatCat', 'spiacy-kot.png'),   // 240×123, kot śpiący na krawędzi (łapka i ogon zwisają); krawędź na 53% wysokości
+    tail: res('nktTail', 'ogonek.png'),             // 81×180, puszysty ogon zwisający z krawędzi, miękki zakręt
+    paw: res('nktPaw', 'odcisk.png'),               // 48×42, ciemne poduszki łapki na fioletowej poświacie
+    miniCat: res('nktMiniCat', 'kot-minimapa.png'), // 160×110, kot zaglądający zza krawędzi; nosek (85, 79), pyszczek y 90, krawędź y 96
     tongue: res('nktTongue', 'jezyk.png'),          // 34×28, języczek do animacji lizania
-    eyes: res('nktEyes', 'oczy.png')                // 120×55, żółte kocie oczy z fioletową poświatą (ekran wczytywania)
+    eyes: res('nktEyes', 'oczy.png'),               // 120×47, bursztynowe kocie oczy w ciemności (ekran wczytywania)
+    hpPaw: res('nktHpPaw', 'lapka-hp.png'),         // 200×217, spód kociej łapki – kształt i tekstura kuli HP
+    earL: res('nktEarL', 'uszko-l.png'),            // 58×72, puszyste lewe ucho z pędzelkiem
+    earR: res('nktEarR', 'uszko-p.png'),            // 57×72, puszyste prawe ucho z pędzelkiem
+    toggle: res('nktToggle', 'przelacznik.png'),    // 64×64, kot na tle półksiężyca (fioletowy kafelek)
+    loader: res('nktLoader', 'ekran-ladowania.webp') // 480×480, kot na murku patrzy na księżyc (brzegi wygaszone do czerni)
   };
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -102,12 +112,8 @@
   const CLOSE_ICON = (c) => svgUrl(
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='${c}' stroke-width='2.4' stroke-linecap='round'>` +
     `<path d='M4.5 4.5l7 7M11.5 4.5l-7 7'/></svg>`);
-  // pyszczek kota (przełącznik motywu) – tymczasowy, wersje A/B przy sekcji ikon
-  const CAT_FACE = svgUrl(
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>` +
-    `<path d='M6 27c-2-3-2.4-7-1.2-10.6L5 5l7.2 5.2a12 12 0 0 1 7.6 0L27 5l.2 11.4c1.2 3.6.8 7.6-1.2 10.6z' fill='#121216' stroke='#7b4fd6' stroke-width='2.2' stroke-linejoin='round'/>` +
-    `<ellipse cx='11.6' cy='18.4' rx='1.8' ry='2.4' fill='#ecebf2'/><ellipse cx='20.4' cy='18.4' rx='1.8' ry='2.4' fill='#ecebf2'/>` +
-    `<path d='M14.6 22.4h2.8L16 24z' fill='#f2a7c3'/></svg>`);
+  // przełącznik motywu: malowany kafelek z kotem i półksiężycem
+  const CAT_FACE = `url("${IMG.toggle}")`;
 
   /* =====================================================================
    * === ZMIENNE ===
@@ -461,13 +467,13 @@ html:not(.${ON}) .nkt-deco { display: none !important; }
 .nkt-deco img { display: block; width: 100%; height: auto; -webkit-user-drag: none; user-select: none; }
 .nkt-deco .nkt-cat-img { filter: drop-shadow(0 0 1px #7b4fd6) drop-shadow(0 0 .5px #7b4fd6) drop-shadow(0 2px 3px rgb(0 0 0 / .6)); }
 
-/* kot śpiący na górnej krawędzi pola czatu (TODO: zweryfikuj położenie w grze) */
-.nkt-chatcat { width: 84px; }
+/* kot śpiący na górnej krawędzi pola czatu (sprawdzone w grze: .new-chat-window .chat-input-wrapper) */
+.nkt-chatcat { width: 92px; }
 ${A} .nkt-chatcat .nkt-cat-img { transform-origin: 50% 70%; animation: nkt-breathe 4.2s ease-in-out infinite; }
 @keyframes nkt-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.035); } }
 
 /* ogon zwisający z krawędzi lewej kolumny; po najechaniu merda (zaczepiony u góry) */
-.nkt-tail { width: 32px; pointer-events: auto; cursor: default; }
+.nkt-tail { width: 36px; pointer-events: auto; cursor: default; }
 .nkt-tail .nkt-cat-img { transform-origin: 50% 0; }
 ${A} .nkt-tail:hover .nkt-cat-img { animation: nkt-wag .95s ease-in-out; }
 @keyframes nkt-wag { 0% { transform: rotate(0); } 20% { transform: rotate(14deg); } 45% { transform: rotate(-11deg); } 70% { transform: rotate(6deg); } 100% { transform: rotate(0); } }
@@ -475,7 +481,7 @@ ${A} .nkt-tail:hover .nkt-cat-img { animation: nkt-wag .95s ease-in-out; }
 /* kot zaglądający zza górnej krawędzi minimapy; co jakiś czas liże ją (klasa .nkt-lick na 1,2 s) */
 .nkt-minicat { width: 80px; }
 .nkt-minicat .nkt-tongue {
-  position: absolute; left: calc(50% - 8.5px); top: 33px; width: 17px; z-index: 1;
+  position: absolute; left: 34px; top: 43px; width: 17px; z-index: 1;   /* pod pyszczkiem (85, 90 w pliku → 42,5 / 45 px) */
   transform-origin: 50% 0; transform: scaleY(0); opacity: 0;
 }
 ${A} .nkt-minicat.nkt-lick .nkt-cat-img { animation: nkt-lick-head 1.2s ease-in-out; }
@@ -499,6 +505,100 @@ ${N} .interface-element-line-1-background {
     url("${IMG.paw}") center / auto 9px no-repeat,
     linear-gradient(90deg, transparent, var(--nkt-v-line) 15% 44%, transparent 44% 56%, var(--nkt-v-line) 56% 85%, transparent) center / 100% 2px no-repeat !important;
 }
+
+/* uszy: dwa puszyste uszy wystające zza górnej krawędzi zwykłych okien, rozstawione przy rogach;
+   podstawa schowana za oknem (z-index -1 w kontekście okna), po najechaniu na okno strzygą */
+${W} .header-label-positioner::before,
+${W} .header-label-positioner::after {
+  content: ""; position: absolute; top: -30px; width: 29px; height: 36px; z-index: -1;
+  pointer-events: none; transform-origin: 50% 100%;
+  background: center bottom / contain no-repeat;
+  filter: drop-shadow(0 0 1px rgb(123 79 214 / .7));
+}
+${W} .header-label-positioner::before { left: 13%; background-image: url("${IMG.earL}"); }
+${W} .header-label-positioner::after { right: 13%; background-image: url("${IMG.earR}"); }
+${A} .border-window:not(.transparent):not(.tip-window):hover .header-label-positioner::before { animation: nkt-ear-l .7s ease-in-out; }
+${A} .border-window:not(.transparent):not(.tip-window):hover .header-label-positioner::after { animation: nkt-ear-r .7s ease-in-out .08s; }
+@keyframes nkt-ear-l { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg); } 55% { transform: rotate(6deg); } }
+@keyframes nkt-ear-r { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(14deg); } 55% { transform: rotate(-6deg); } }
+`;
+
+  /* =====================================================================
+   * === ŁAPKA HP ===
+   * Kula gry: .hp-indicator-wrapper (98×98, przycięta do koła) → .hp-indicator (98×78) → .blood (wysokość = % HP,
+   * ustawia ją gra) i .hpp .value (napis). Poziomu nie liczymy sami – maska łapki jest zakotwiczona u dołu .blood,
+   * więc wypełnienie rośnie od dołu dokładnie tak, jak gra zmienia wysokość krwi. Pusta część: ta sama łapka
+   * przygaszona (::before). Kliknięcia i podpowiedzi zostają na elementach gry (dekoracje bez pointer-events).
+   * ===================================================================== */
+  const HPB = `${N} .hp-indicator-wrapper-template`;
+  const cssHp = `
+${HPB} .hp-indicator-wrapper { overflow: visible !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+${HPB} .hp-indicator-wrapper .glass { opacity: 0 !important; }
+${HPB} .hp-indicator { --nkt-hp-h: 78px; }
+${HPB} .hp-indicator::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: url("${IMG.hpPaw}") center / auto 100% no-repeat;
+  filter: grayscale(1) brightness(.3) drop-shadow(0 0 1px rgb(123 79 214 / .8)) drop-shadow(0 3px 6px rgb(0 0 0 / .7));
+}
+${HPB} .hp-indicator .blood {
+  z-index: 1; overflow: hidden;
+  background: linear-gradient(#d8c2ff, #8d5ff0 10%, #5a32b0 60%, #2c1660) !important;
+  -webkit-mask: url("${IMG.hpPaw}") center bottom / auto var(--nkt-hp-h) no-repeat;
+  mask: url("${IMG.hpPaw}") center bottom / auto var(--nkt-hp-h) no-repeat;
+  transition: height .5s ease;
+}
+html.${HPRED} ${HPB} .hp-indicator .blood { background: linear-gradient(#ffc4ca, #e0566a 10%, #a52a3e 60%, #4e0f1c) !important; }
+/* tekstura łapki (sierść, poduszki) prześwituje przez kolor wypełnienia */
+${HPB} .hp-indicator .blood::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--nkt-hp-h); pointer-events: none;
+  background: url("${IMG.hpPaw}") center bottom / auto var(--nkt-hp-h) no-repeat;
+  mix-blend-mode: luminosity; opacity: .55;
+}
+${HPB} .hp-indicator .blood-frame { display: none !important; }
+${HPB} .hp-indicator .hpp { z-index: 2; }
+${HPB} .hp-indicator .hpp .value {
+  color: #fff !important; font-family: var(--nkt-font) !important; font-weight: 800 !important;
+  text-shadow: 0 0 3px #000, 0 0 2px #000, 0 1px 1px #000, 0 0 6px rgb(0 0 0 / .8) !important;
+}
+/* niskie HP (< 25%): łapka delikatnie pulsuje – klasę nkt-hp-low ustawia skrypt z wysokości .blood */
+html.${ON}.${NI}.${ANIM}.nkt-hp-low .hp-indicator-wrapper-template .hp-indicator { animation: nkt-hp-pulse 1.4s ease-in-out infinite; }
+@keyframes nkt-hp-pulse { 0%, 100% { transform: scale(1); filter: none; } 50% { transform: scale(1.05); filter: drop-shadow(0 0 7px rgb(160 124 240 / .7)); } }
+`;
+
+  /* =====================================================================
+   * === EKRAN WCZYTYWANIA (warstwa gry .layer.loader-layer: logo .loader-image, pasek .inner-wrapper > .inner) ===
+   * ===================================================================== */
+  const cssLoader = `
+${N} .layer.loader-layer {
+  background:
+    url("${IMG.loader}") center calc(50% - 150px) / 380px 380px no-repeat,
+    radial-gradient(ellipse 55% 45% at 50% 40%, rgb(123 79 214 / .14), transparent 70%),
+    #0a0a0d !important;
+}
+${N} .layer.loader-layer .loader-image {
+  filter: sepia(1) hue-rotate(225deg) saturate(2.2) brightness(1.05) drop-shadow(0 0 10px rgb(123 79 214 / .6)) drop-shadow(0 2px 4px #000);
+}
+${N} .layer.loader-layer .progress-bar .inner-wrapper {
+  height: 12px !important; border-radius: 999px; overflow: hidden;
+  background: #121216 !important; box-shadow: 0 0 0 2px var(--nkt-v-line), 0 0 14px rgb(123 79 214 / .25);
+}
+${N} .layer.loader-layer .progress-bar .inner-wrapper .inner {
+  border-radius: 999px;
+  background: url("${IMG.paw}") 3px 50% / 10px auto repeat-x, linear-gradient(#b596ff, #7b4fd6) !important;
+  transition: width .3s ease;
+}
+${N} .layer.loader-layer .bottom-info { color: var(--nkt-dim) !important; font-family: var(--nkt-font); }
+/* bursztynowe oczy w ciemnych rogach, co kilka sekund mrugają */
+${N} .layer.loader-layer::before,
+${N} .layer.loader-layer::after {
+  content: ""; position: absolute; width: 84px; height: 33px; pointer-events: none;
+  background: url("${IMG.eyes}") center / contain no-repeat; opacity: .8;
+}
+${N} .layer.loader-layer::before { left: 6%; top: 9%; }
+${N} .layer.loader-layer::after { right: 7%; bottom: 14%; width: 64px; height: 25px; opacity: .6; }
+${A} .layer.loader-layer::before { animation: nkt-blink 5.2s infinite; }
+${A} .layer.loader-layer::after { animation: nkt-blink 6.4s 2.3s infinite; }
+@keyframes nkt-blink { 0%, 90%, 100% { transform: scaleY(1); } 93% { transform: scaleY(.08); } }
 `;
 
   /* =====================================================================
@@ -521,8 +621,8 @@ ${A} .close-button-corner-decor .close-button:hover { animation: nkt-hop .32s ea
   const cssToggle = `
 #nkt-toggle {
   position: fixed; left: 8px; bottom: 8px; z-index: 2147483000;
-  width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
-  background: ${CAT_FACE} center / 26px 26px no-repeat, #0a0a0d;
+  width: 32px; height: 32px; padding: 0; border: 0; border-radius: 9px;
+  background: ${CAT_FACE} center / cover no-repeat, #0a0a0d;
   box-shadow: 0 0 0 2px #3b2a63;
   cursor: pointer;
   opacity: .6;
@@ -795,7 +895,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     (document.head || root).appendChild(s);
     return s;
   };
-  const baseCss = [cssVars, cssBase, cssWindows, cssCats, cssAnim, cssToggle].join('\n');
+  const baseCss = [cssVars, cssBase, cssWindows, cssCats, cssHp, cssLoader, cssAnim, cssToggle].join('\n');
   const style = addStyle(baseCss);
   if (style && 'id' in style) style.id = 'nkt-theme';
 
@@ -941,7 +1041,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
         chat.appendChild(deco.chat);
       }
       const r = relRect(bar, chat);
-      setPos(deco.chat, r.left + r.width - 84 - 10, r.top - 48 * 0.68);   // 84×48, krawędź na 68% wysokości grafiki
+      setPos(deco.chat, r.left + r.width - 92 - 10, r.top - 47 * 0.53);   // 92×47, krawędź na 53% wysokości grafiki
     }
     // ogon: zwisa z górnej części listwy między lewą kolumną (czat) a mapą
     // TODO: zweryfikuj selektor (.interface-layer > .left-column.main-column > .border)
@@ -966,7 +1066,14 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
         win.appendChild(deco.mini);
       }
       const r = relRect(map, win);
-      setPos(deco.mini, r.left + r.width * 0.72 - 40, r.top - 45);   // krawędź grafiki (y 90 z 113 → 45 px) na górze mapy
+      setPos(deco.mini, r.left + r.width * 0.72 - 40, r.top - 48);   // krawędź grafiki (y 96 z 110 → 48 px) na górze mapy
+    }
+    // łapka HP: niskie HP (< 25%) z wysokości krwi ustawianej przez grę → klasa nkt-hp-low (pulsowanie)
+    const ind = document.querySelector('.hp-indicator-wrapper-template .hp-indicator');
+    const blood = ind && ind.querySelector('.blood');
+    if (ind && blood && ind.offsetHeight) {
+      const low = blood.offsetHeight / ind.offsetHeight < 0.25;
+      if (root.classList.contains('nkt-hp-low') !== low) root.classList.toggle('nkt-hp-low', low);
     }
   };
   let decoTimer = 0;
@@ -1012,7 +1119,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     gfxObs.observe(root, { childList: true, subtree: true });
     placeDecor();
     window.addEventListener('resize', queueDecor);
-    setInterval(placeDecor, 4000);   // zmiana układu bez nowych węzłów (np. zmiana rozmiaru kolumn)
+    setInterval(placeDecor, 1500);   // zmiana układu bez nowych węzłów (rozmiar kolumn) i poziom HP (pulsowanie łapki)
     scheduleLick();
     let ticks = 0;
     const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);

@@ -1,27 +1,41 @@
 # Nocny Kot – prompty grafik
 
-Model: Qwen-Image (mcp-tools/Qwen-Image), 16 kroków. Tło usunięte BiRefNet (Upsampler/birefnet-background-removal),
-krawędzie oczyszczone z koloru tła, kadr, zmniejszenie z premultiplikacją (Pillow). Oczy: przezroczystość z jasności (czarne tło).
-Wspólny negative prompt: photorealistic, photo, realistic, 3d render, text, letters, watermark, pixel art, sticker border, white outline, busy background, logo (+ dopiski przy elementach).
+Styl: malowany (wybrany 2026-11-24 zamiast kreskówki). Model: Qwen-Image (mcp-tools/Qwen-Image), 16 kroków.
+Negative prompt (wspólny): photorealistic, photo, realistic, 3d render, cartoon, chibi, thick outline, flat colors, text, letters, watermark, pixel art, busy background, logo (+ dopiski przy elementach).
+Tło: jasne, płaskie → usuwane lokalnie (alfa z różnicy koloru względem tła z miękkim przejściem, oczyszczenie koloru krawędzi), kadr i zmniejszenie z premultiplikacją (Pillow). Oczy: alfa z jasności na czarnym tle. Ekran wczytywania: malowany od razu na czerni, brzegi wygaszone.
 
-## spiacy-kot.png (240×138)
-Cartoon illustration of a cute chubby black cat sleeping flat on its belly stretched out along the top of a thin flat horizontal shelf, both front paws and one back leg dangling lazily over the front edge, chin resting on the edge, eyes closed as two curved lines, small violet collar, flat near-black charcoal fur, very thick smooth dark violet outline. Cute chunky minimalist flat cartoon style, simple shapes, no texture, front three-quarter view, centered, isolated on plain flat light grey background
-Negative +: zzz, bread, food, pillow, blanket, furniture, bell, famous character
+## spiacy-kot.png (240×123) – kot śpiący na krawędzi czatu
+Stylized hand-painted game art illustration of a black cat sleeping stretched out on its belly along the top of a thin flat horizontal ledge, one front paw and the tail hanging lazily down over the front edge, eyes closed, natural cat proportions, soft painterly shading, subtle fur texture, glossy charcoal black fur with a soft violet rim light along the back, small violet collar, elegant and cozy, not cartoon, not photorealistic, side view, centered, isolated on plain flat light grey background
+Negative +: bread, food, pillow, furniture
 
-## ogonek.png (77×180) – zwisający ogon
-Simple flat cartoon drawing of a black cat's tail hanging down vertically from the top edge of the image, the tail tapers and its lower end curls into a playful hook shape like the letter J, rounded soft tip with a small violet fur tip, flat near-black charcoal, very thick smooth dark violet outline, cute chunky minimalist cartoon style, no texture, no shading, centered, isolated on plain flat light grey background
-Negative +: cylinder, tube, cut end, cat body, head, ears, eyes, paws. Obróbka: góra ucięta równo.
+## kot-minimapa.png (160×110) – kot zaglądający zza krawędzi minimapy
+Stylized hand-painted game art illustration of a black cat peeking up from behind a straight horizontal edge, only its head and two front paws resting on the edge visible, curious big amber-yellow eyes, natural cat proportions, soft painterly shading, subtle fur texture, glossy charcoal black fur with a soft violet rim light, elegant and cute, not cartoon, not photorealistic, front view, centered, isolated on plain flat light grey background
 
-## odcisk.png (48×42)
-Small flat cartoon icon of a single cat paw print, one main pad and four toe pads, all pads filled solid bright violet with a slightly lighter violet top highlight, thick soft near-black outline around each pad. Cute minimalist flat cartoon icon style, bold simple shapes readable at tiny size, no texture, centered, isolated on plain flat light grey background
+## ogonek.png (81×180) – ogon na krawędzi kolumny
+Stylized hand-painted game art illustration of one long black cat tail only, hanging straight down from the top edge of the image, gently swaying, its lower end curling into a soft hook, fluffy rounded tip, soft painterly shading, subtle fur texture, glossy charcoal black fur with a soft violet rim light on one side, elegant, not cartoon, not photorealistic, centered, isolated on plain flat light grey background
+Negative +: cat body, head, ears, eyes, paws
 
-## kot-minimapa.png (160×113)
-Cartoon illustration of a cute black cat peeking up from behind a straight horizontal edge, only head and two front paws visible, paws resting on the edge, big round curious violet eyes, tiny pink nose, flat near-black charcoal, thin even violet outline. Cute minimalist flat cartoon style, simple shapes, no texture, centered, isolated on plain flat light grey background
-Obróbka: linie krawędzi poza kotem usunięte.
+## odcisk.png (48×42) – odcisk łapki
+Game UI icon: a single cat paw print made of one main pad and four toe pads, each pad painted as a soft glossy dark charcoal bean with a gentle violet glow and violet rim highlight on its top edge, stylized hand-painted, soft painterly shading, readable at small size, not cartoon, not photorealistic, centered, isolated on plain flat light grey background
 
-## oczy.png (120×55)
-Cartoon illustration of only a pair of cute cat eyes glowing in total darkness, two big round eyes side by side, warm yellow iris with a vertical black slit pupil and one small white sparkle highlight each, thin violet glow rim, nothing else visible, no face outline. Cute minimalist flat cartoon style, simple bold shapes, centered, wide image, isolated on plain flat solid black background
+## lapka-hp.png (200×217) – łapka HP
+Game HUD element: the underside of a black cat paw seen straight from below, one rounded paw shape with four toe bumps along the top, soft dusty-pink toe beans and a large pink main pad, short glossy black fur between and around the pads, stylized hand-painted, soft painterly shading, subtle fur texture, soft violet rim light, symmetric, not cartoon, not photorealistic, centered, isolated on plain flat light grey background
+Negative +: claws, arm, leg, face, eyes
 
-## jezyk.png (34×28) – języczek do animacji lizania (kot przy minimapie)
+## uszko-l.png, uszko-p.png (58×72, 57×72) – uszy nad oknami
+Two separate fluffy black cat ears drawn as standalone shapes far apart: one ear at the far left and one ear at the far right of the image, with completely empty space between them and nothing connecting them, each ear slightly rounded with a long lynx-like black fur tuft on its tip and soft lavender fluffy inner fur, straight flat bottom edge, stylized hand-painted with soft painterly shading and fur texture, glossy charcoal black with violet sheen, not cartoon, not photorealistic, isolated on plain flat light grey background
+Negative +: head, face, eyes, nose, cat body, headband, hair, band, arc. Obróbka: obraz rozcięty na lewe i prawe ucho.
+
+## przelacznik.png (64×64) – przełącznik motywu
+Game UI button icon: an elegant black cat sitting upright seen from behind, looking back over its shoulder, tail curled around its paws, in front of a small glowing violet crescent moon, natural cat proportions, stylized hand-painted with soft painterly shading and subtle fur texture, glossy charcoal black fur with soft violet rim light, readable at small size, not cartoon, not photorealistic, centered, isolated on plain flat light grey background
+Obróbka: przycięty do fioletowego kafelka.
+
+## ekran-ladowania.webp (480×480) – ekran wczytywania
+Stylized hand-painted game loading screen illustration on a near-black night background: an elegant black cat seen from behind sitting on a thin straight stone ledge, looking up at a large softly glowing violet crescent moon above it, its long tail hanging down below the ledge, a few tiny faint violet stars, the cat's fur lit by violet moonlight rim light, natural cat proportions, soft painterly shading, subtle fur texture, calm and dreamy, not cartoon, not photorealistic, the edges of the image fade smoothly into pure black vignette, centered composition
+Negative +: roof, house, buildings, city, second cat, bright sky, blue sky, yellow, clouds
+
+## oczy.png (120×47) – oczy na ekranie wczytywania
+Stylized hand-painted game art illustration of only a pair of glowing cat eyes in total darkness, two almond-shaped eyes side by side, luminous amber-gold irises with narrow vertical slit pupils, soft wet highlight, faint violet glow around them, a barely visible hint of black fur around the eyes, mysterious, not cartoon, not photorealistic, centered, wide image, on plain solid black background
+
+## jezyk.png (34×28) – języczek do animacji lizania (tymczasowy, z poprzedniej, kreskówkowej serii)
 One single small cute cartoon cat tongue only, seen from the front, short rounded pink tongue shape hanging downward with a thin center line, soft pink #f2a7c3, thin even dark violet outline, flat colors. Minimalist flat cartoon sticker element, no mouth, no face, centered, isolated on plain flat light grey background
-Obróbka: model dorysował buźkę – wycięty sam język spod linii pyszczka.
