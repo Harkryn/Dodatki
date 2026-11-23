@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.17.8
+// @version      2.17.9
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -53,7 +53,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.17.8';
+  const VERSION = '2.17.9';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -821,6 +821,9 @@ ${N} .tip-wrapper .item-name { font-weight: bold; text-shadow: 0 0 6px rgb(var(-
 ${N} .tip-wrapper .item-type,
 ${N} .tip-wrapper .item-builds { color: var(--tmg-dim) !important; letter-spacing: .03em; }
 ${N} .tip-wrapper .item-rarity { text-align: center !important; color: var(--tmg-dim) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
+/* czas wygaśnięcia: gra stawia go absolutnie w rzędzie rangi (po prawej) – po wyśrodkowaniu rangi nachodził na nią;
+   teraz osobny, wyśrodkowany rząd pod rangą */
+${N} .tip-wrapper .tip-item-stat-expires { position: static !important; text-align: center !important; margin-top: 2px; }
 ${N} .tip-wrapper:has(.item-head .highlight:is(.t-uniupg, .t-her, .t-upgraded, .t-leg, .t-art)) .item-rarity { color: rgb(var(--tmg-rar)) !important; letter-spacing: .1em; text-transform: uppercase; font-size: 10px !important; font-weight: bold; }
 /* legenda: napis rangi (gra koloruje go klasą .color-legendary na samym napisie) i nazwa przedmiotu w kolorze legendy
    – własnym z okienka „Kolor legendy”, z ramki legendy gry albo domyślnym pomarańczu (--tmg-rar-leg) */
