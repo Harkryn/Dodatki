@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.4.1
+// @version      1.5.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -16,7 +16,6 @@
 // @resource     nktTail      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ogonek.png
 // @resource     nktPaw       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/odcisk.png
 // @resource     nktMiniCat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/kot-minimapa.png
-// @resource     nktMiniLick  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/kot-minimapa-lize.png
 // @resource     nktEyes      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/oczy.png
 // @resource     nktHpPaw     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/lapka-hp.png
 // @resource     nktEarL      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/uszko-l.png
@@ -27,6 +26,9 @@
 // @resource     nktFrame     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/rama-hud.png
 // @resource     nktGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/zloto.png
 // @resource     nktTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/smocze-lzy.png
+// @resource     nktFur       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/futro.png
+// @resource     nktOrn       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/zdobienie-hp.png
+// @resource     nktExp       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/pasek-exp.png
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // ==/UserScript==
@@ -47,7 +49,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.4.1';
+  const VERSION = '1.5.0';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -89,8 +91,7 @@
     chatCat: res('nktChatCat', 'spiacy-kot.png'),   // 240×123, kot śpiący na krawędzi (łapka i ogon zwisają); krawędź na 53% wysokości
     tail: res('nktTail', 'ogonek.png'),             // 81×180, puszysty ogon zwisający z krawędzi, miękki zakręt
     paw: res('nktPaw', 'odcisk.png'),               // 48×42, ciemne poduszki łapki na fioletowej poświacie
-    miniCat: res('nktMiniCat', 'kot-minimapa.png'),        // 160×118, kot zaglądający zza krawędzi; dół głowy (krawędź) y 102
-    miniLick: res('nktMiniLick', 'kot-minimapa-lize.png'), // 160×118, ta sama klatka liżąca (lokalne ComfyUI: FLUX.2 Klein + RMBG 3.0)
+    miniCat: res('nktMiniCat', 'kot-minimapa.png'),        // 160×118, kot zaglądający zza krawędzi (nad dolnym paskiem); dół głowy (krawędź) y 102
     eyes: res('nktEyes', 'oczy.png'),               // 120×47, bursztynowe kocie oczy w ciemności (ekran wczytywania)
     hpPaw: res('nktHpPaw', 'lapka-hp.png'),         // 200×217, spód kociej łapki – kształt i tekstura kuli HP
     earL: res('nktEarL', 'uszko-l.png'),            // 58×72, puszyste lewe ucho z pędzelkiem
@@ -101,7 +102,10 @@
     hudIcons: res('nktHudIcons', 'ikony-hud.png'),  // 1200×60, 20 ikon HUD po 60×60 (kolejność w HUD_ICONS)
     frame: res('nktFrame', 'rama-hud.png'),         // ramka przycisku HUD z kocimi uszkami 100×104 (wymiary w FRAME)
     gold: res('nktGold', 'zloto.png'),              // 42×42, stos monet z odciskiem łapki
-    tears: res('nktTears', 'smocze-lzy.png')        // 42×42, karmazynowo-fioletowa kropla
+    tears: res('nktTears', 'smocze-lzy.png'),       // 42×42, karmazynowo-fioletowa kropla
+    fur: res('nktFur', 'futro.png'),                // 240×237, kwadratowa ramka z czarnej sierści (border-image, sierść ~20% boku)
+    orn: res('nktOrn', 'zdobienie-hp.png'),         // 1180×216, dwa kocie ogony w spiralach i okrągłe gniazdo kuli (środek gniazda y 138)
+    exp: res('nktExp', 'pasek-exp.png')             // 500×43, ramka paska expa z odciskiem łapki na lewym końcu
   };
 
   const FRAME = { w: 100, h: 104 }; // rama-hud.png; kwadratowa część ma 100×100 u dołu, nad nią uszy
@@ -265,6 +269,12 @@ ${W} {
   color: var(--nkt-text);
 }
 ${W} > .content { background: transparent !important; color: var(--nkt-text); }
+/* futrzana ramka: miękka czarna sierść nałożona na krawędź okna (border-image 9-slice, nakładka bez kliknięć) */
+${W}::after {
+  content: ""; position: absolute; inset: -10px; pointer-events: none;
+  border: 18px solid transparent; border-image: url("${IMG.fur}") 20% round;
+  filter: drop-shadow(0 0 1px rgb(123 79 214 / .35)) drop-shadow(0 2px 3px rgb(0 0 0 / .5));
+}
 
 /* tytuł: zaokrąglona plakietka (pigułka) w grafitowym odcieniu, czcionka Nunito 800 */
 ${W} .header-label-positioner .header-label {
@@ -489,17 +499,8 @@ ${A} .nkt-chatcat .nkt-cat-img { transform-origin: 50% 70%; animation: nkt-breat
 ${A} .nkt-tail:hover .nkt-cat-img { animation: nkt-wag .95s ease-in-out; }
 @keyframes nkt-wag { 0% { transform: rotate(0); } 20% { transform: rotate(14deg); } 45% { transform: rotate(-11deg); } 70% { transform: rotate(6deg); } 100% { transform: rotate(0); } }
 
-/* kot zaglądający zza górnej krawędzi minimapy; co jakiś czas liże ją (klasa .nkt-lick na 1,3 s):
-   dwie nałożone klatki tego samego kota (zwykła i liżąca – zmrużone oczy, język na krawędzi; pokrywają się co do
-   piksela), podczas lizania płynnie się podmieniają, a kot lekko pochyla się do mapy. Obwódka na kontenerze,
-   żeby przy przenikaniu nie była podwójna. */
-.nkt-minicat { width: 80px; height: 59px; filter: drop-shadow(0 0 1px #7b4fd6) drop-shadow(0 0 .5px #7b4fd6) drop-shadow(0 2px 3px rgb(0 0 0 / .6)); }
-.nkt-minicat img { position: absolute; inset: 0; }
-.nkt-minicat .nkt-lick-frame { opacity: 0; }
-${A} .nkt-minicat.nkt-lick .nkt-base-frame { animation: nkt-lick-base 1.3s ease-in-out; }
-${A} .nkt-minicat.nkt-lick .nkt-lick-frame { animation: nkt-lick-frame 1.3s ease-in-out; }
-@keyframes nkt-lick-base { 0%, 8% { opacity: 1; transform: translateY(0); } 18%, 82% { opacity: 0; transform: translateY(2px); } 92%, 100% { opacity: 1; transform: translateY(0); } }
-@keyframes nkt-lick-frame { 0%, 8% { opacity: 0; transform: translateY(0); } 18%, 82% { opacity: 1; transform: translateY(2px); } 50% { transform: translateY(3px); } 92%, 100% { opacity: 0; transform: translateY(0); } }
+/* kot zaglądający znad górnej krawędzi dolnego paska (na stałe, na prawo od zdobienia kuli HP); łapki na krawędzi paska */
+.nkt-barcat { width: 96px; z-index: 5; }
 
 /* odciski łapek: wybrana pozycja list z grupami i środek cienkich separatorów */
 ${N} .one-item-on-divide-list.active {
@@ -539,6 +540,8 @@ ${A} .border-window:not(.transparent):not(.tip-window):hover .header-label-posit
   const HPB = `${N} .hp-indicator-wrapper-template`;
   const cssHp = `
 ${HPB} .hp-indicator-wrapper { overflow: visible !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+/* łapka półtora raza większa: rośnie w górę od dołu kuli i spokojnie wystaje na mapę (transform na samej kuli – kliknięcia i podpowiedzi działają) */
+${HPB} .hp-indicator-wrapper { transform: scale(1.5); transform-origin: 50% 88%; z-index: 3; }
 ${HPB} .hp-indicator-wrapper .glass { opacity: 0 !important; }
 ${HPB} .hp-indicator { --nkt-hp-h: 78px; }
 ${HPB} .hp-indicator::before {
@@ -561,6 +564,26 @@ ${HPB} .hp-indicator .blood::after {
   mix-blend-mode: luminosity; opacity: .55;
 }
 ${HPB} .hp-indicator .blood-frame { display: none !important; }
+/* zdobienie wokół łapki: dwa kocie ogony w spiralach, okrągłe gniazdo pod łapką (zamiast grafiki gry .bottom-panel-graphic 590×100) */
+${N} .bottom-panel-of-bottom-positioner .bottom-panel-graphic {
+  background: url("${IMG.orn}") 50% -27px / 590px auto no-repeat !important;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / .6));
+}
+/* paski expa: ramka z odciskiem łapki (prawa w lustrze), żółte wypełnienie z łagodnym przesuwającym się połyskiem */
+${N} .exp-bar-wrapper .exp-progress .overlay { background: url("${IMG.exp}") center / 100% 100% no-repeat !important; }
+${N} .exp-bar-wrapper .exp-progress.right .overlay { transform: scaleX(-1); }
+${N} .exp-bar-wrapper .exp-progress .progress { border-radius: 999px; overflow: hidden; }
+${N} .exp-bar-wrapper .exp-progress .progress .inner {
+  border-radius: 999px;
+  background:
+    linear-gradient(100deg, transparent 40%, rgb(255 251 225 / .6) 50%, transparent 60%) 100% 0 / 300% 100% no-repeat,
+    linear-gradient(#fff1b8, #f5c542 45%, #c98a12) !important;
+  box-shadow: 0 0 6px rgb(245 197 66 / .45);
+}
+${A} .exp-bar-wrapper .exp-progress .progress .inner { animation: nkt-exp-shine 4s ease-in-out infinite, nkt-exp-glow 4s ease-in-out infinite; }
+${A} .exp-bar-wrapper .exp-progress.right .progress .inner { animation-delay: 2s; }
+@keyframes nkt-exp-shine { 0% { background-position: 100% 0, 0 0; } 55%, 100% { background-position: 0% 0, 0 0; } }
+@keyframes nkt-exp-glow { 0%, 100% { box-shadow: 0 0 5px rgb(245 197 66 / .35); } 50% { box-shadow: 0 0 10px rgb(245 197 66 / .7); } }
 ${HPB} .hp-indicator .hpp { z-index: 2; }
 ${HPB} .hp-indicator .hpp .value {
   color: #fff !important; font-family: var(--nkt-font) !important; font-weight: 800 !important;
@@ -1104,18 +1127,18 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
       const r = relRect(strip, layer);
       setPos(deco.tail, r.left + r.width / 2 - 18, r.top - 4);   // zaczepiony tuż pod górną belką
     }
-    // kot przy minimapie: zagląda zza górnej krawędzi mapy (canvas), łapki na jej krawędzi; po prawej od środka,
-    // żeby nie zasłaniał tytułu okna (sprawdzone w grze: okno .handheld-window, mapa .handheld-mini-map-canvas)
-    const map = document.querySelector('.handheld-mini-map-canvas') || document.querySelector('.handheld-mini-map') || document.querySelector('.mini-map');
-    const win = map && (map.closest('.border-window') || map.parentElement);
-    if (map && win && map.offsetWidth) {
-      if (!deco.mini || deco.mini.parentElement !== win) {
-        deco.mini = mkDeco('nkt-minicat', `<img class="nkt-base-frame" alt="" src="${IMG.miniCat}"><img class="nkt-lick-frame" alt="" src="${IMG.miniLick}">`);
-        if (getComputedStyle(win).position === 'static') win.style.position = 'relative';
-        win.appendChild(deco.mini);
+    // kot nad dolnym paskiem: zagląda znad jego górnej krawędzi zaraz na prawo od kuli HP – na stałe względem
+    // środka dolnego panelu (panel gry jest wyśrodkowany), więc przy zmianie szerokości okna nie jeździ
+    // (sprawdzone w grze: pasek .bottom.positioner > .bg, panel .bottom-panel-of-bottom-positioner)
+    const barBg = document.querySelector('.interface-layer .bottom.positioner > .bg');
+    const panel = document.querySelector('.bottom-panel-of-bottom-positioner');
+    if (layer && barBg && panel && barBg.offsetWidth) {
+      if (!deco.bar || deco.bar.parentElement !== layer) {
+        deco.bar = mkDeco('nkt-barcat', `<img class="nkt-cat-img" alt="" src="${IMG.miniCat}">`);
+        layer.appendChild(deco.bar);
       }
-      const r = relRect(map, win);
-      setPos(deco.mini, r.left + r.width * 0.72 - 40, r.top - 51);   // krawędź grafiki (dół głowy y 102 z 118 → 51 px) na górze mapy
+      const b = relRect(barBg, layer), p = relRect(panel, layer);
+      setPos(deco.bar, p.left + p.width / 2 + 140, b.top - 61);   // 96×71, krawędź (dół głowy y 102 z 118 → 61 px) na górze paska
     }
     // łapka HP: niskie HP (< 25%) z wysokości krwi ustawianej przez grę → klasa nkt-hp-low (pulsowanie)
     const ind = document.querySelector('.hp-indicator-wrapper-template .hp-indicator');
@@ -1127,19 +1150,6 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
   };
   let decoTimer = 0;
   const queueDecor = () => { clearTimeout(decoTimer); decoTimer = setTimeout(placeDecor, 250); };
-  // lizanie minimapy: losowo co 9–18 s, tylko przy włączonych animacjach, widocznej karcie i bez ograniczenia ruchu
-  const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-  const scheduleLick = () => {
-    setTimeout(() => {
-      const m = deco.mini;
-      if (m && m.isConnected && root.classList.contains(ANIM) && !document.hidden && !(reduceMotion && reduceMotion.matches)) {
-        m.classList.add('nkt-lick');
-        setTimeout(() => m.classList.remove('nkt-lick'), 1350);
-      }
-      scheduleLick();
-    }, 9000 + Math.random() * 9000);
-  };
-
   // obserwator nowych elementów i arkuszy (debounce) – startuje dopiero po wykryciu NI
   let sheetTimer = 0;
   const gfxObs = new MutationObserver((muts) => {
@@ -1169,7 +1179,6 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     placeDecor();
     window.addEventListener('resize', queueDecor);
     setInterval(placeDecor, 1500);   // zmiana układu bez nowych węzłów (rozmiar kolumn) i poziom HP (pulsowanie łapki)
-    scheduleLick();
     let ticks = 0;
     const iv = setInterval(() => { scanSheets(); if (++ticks >= 40) clearInterval(iv); }, 3000);
     setTimeout(pruneCache, 20000);

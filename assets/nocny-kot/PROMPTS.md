@@ -39,11 +39,6 @@ Negative +: roof, house, buildings, city, second cat, bright sky, blue sky, yell
 ## oczy.png (120×47) – oczy na ekranie wczytywania
 Stylized hand-painted game art illustration of only a pair of glowing cat eyes in total darkness, two almond-shaped eyes side by side, luminous amber-gold irises with narrow vertical slit pupils, soft wet highlight, faint violet glow around them, a barely visible hint of black fur around the eyes, mysterious, not cartoon, not photorealistic, centered, wide image, on plain solid black background
 
-## kot-minimapa-lize.png (160×118) – klatka lizania (lokalne ComfyUI)
-Model: FLUX.2 Klein 4B Image Edit (klein_edit_api, 4 kroki, CFG 1, batch 2), obraz wejściowy: kot-minimapa (oryginał 1472×1104).
-The black cat closes its eyes happily and sticks out a small pink tongue, licking the edge right in front of it. Keep exactly the same cat, the same pose and paws, the same framing and size, the same painterly style, colors, violet rim light and the same plain light grey background. Change only the eyes and the mouth.
-Tło: RMBG 3.0 (rmbg_api) z notatką: Subject: the black cat only - its head, ears, whiskers, tongue and both front paws resting on the edge. The grey ledge/box at the bottom and the plain background are NOT part of the subject. Dalej oczyszczenie koloru krawędzi i wspólny kadr z klatką bazową.
-
 ## ikony-hud.png (1200×60) – 20 ikon przycisków HUD (lokalne ComfyUI)
 Model: Z-Image Turbo (zimage_api, 8 kroków, CFG 1, 768×768, batch 2), tło: RMBG 3.0, kadr i zmniejszenie z premultiplikacją do 56 px w polu 60×60.
 Wspólny szablon: `Game UI icon of <PRZEDMIOT>, with a small cute black cat detail integrated into it (tiny cat ears on top, or a cat paw, or a curled cat tail), stylized hand-painted, soft painterly shading, dark charcoal and soft lavender silver with gentle violet glow highlights, simple bold silhouette readable at small size, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters`
@@ -60,3 +55,15 @@ Game currency icon: a small neat stack of round gold coins, the top coin engrave
 ## smocze-lzy.png (42×42) – smocze łzy (lokalne ComfyUI)
 Model: Z-Image Turbo, tło: RMBG 3.0.
 Game currency icon: a single glowing teardrop-shaped crystal gem, deep crimson red fading to violet inside with a bright inner sparkle, faceted, stylized hand-painted, soft painterly shading, bold simple silhouette readable at small size, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## futro.png (240×237) – futrzana ramka okien (lokalne ComfyUI)
+Model: Z-Image Turbo (1024×1024), tło: RMBG 3.0. Używana jako border-image (sierść ~20% boku).
+Square picture frame made entirely of soft fluffy black cat fur, thick even fur border with short wispy hairs sticking out on the outer and inner edges, subtle violet sheen on the fur, the center is completely empty plain light grey, front view, symmetric, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## zdobienie-hp.png (1180×216) – zdobienie wokół łapki HP (lokalne ComfyUI)
+Model: Z-Image Turbo (1536×384), tło: RMBG 3.0, szarość w gnieździe i spiralach wycięta.
+Wide horizontal game HUD ornament, in the middle an empty round socket ring for a health orb, on both sides two long fluffy black cat tails curling outward into elegant spirals along a thin dark charcoal metal bar with violet glow accents, symmetric, front view, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## pasek-exp.png (500×43) – ramka paska expa (lokalne ComfyUI)
+Model: Z-Image Turbo (1536×192), tło: RMBG 3.0, kanał w środku wycięty. Wypełnienie (żółte, z połyskiem) rysuje CSS.
+Long thin horizontal progress bar frame, dark charcoal lacquer border with a thin glowing violet rim, the empty inner channel is plain light grey, a small cat paw print emblem at the left end, front view, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
