@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.3.0
+// @version      1.4.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -23,6 +23,10 @@
 // @resource     nktEarR      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/uszko-p.png
 // @resource     nktToggle    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/przelacznik.png
 // @resource     nktLoader    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ekran-ladowania.webp
+// @resource     nktHudIcons  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ikony-hud.png
+// @resource     nktFrame     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/rama-hud.png
+// @resource     nktGold      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/zloto.png
+// @resource     nktTears     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/smocze-lzy.png
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // ==/UserScript==
@@ -43,7 +47,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -80,7 +84,7 @@
     try { if (typeof GM_getResourceURL === 'function') { const u = GM_getResourceURL(name); if (u) return toBlobUrl(u); } } catch (e) { /* brak zasobu */ }
     return RAW + file;
   };
-  // Grafiki z Hugging Face (Qwen-Image, styl malowany; prompty w assets/nocny-kot/PROMPTS.md). Pliki mają 2× rozmiar w grze.
+  // Grafiki malowane (Qwen-Image i lokalne ComfyUI; prompty w assets/nocny-kot/PROMPTS.md). Pliki mają 2× rozmiar w grze.
   const IMG = {
     chatCat: res('nktChatCat', 'spiacy-kot.png'),   // 240×123, kot śpiący na krawędzi (łapka i ogon zwisają); krawędź na 53% wysokości
     tail: res('nktTail', 'ogonek.png'),             // 81×180, puszysty ogon zwisający z krawędzi, miękki zakręt
@@ -92,8 +96,15 @@
     earL: res('nktEarL', 'uszko-l.png'),            // 58×72, puszyste lewe ucho z pędzelkiem
     earR: res('nktEarR', 'uszko-p.png'),            // 57×72, puszyste prawe ucho z pędzelkiem
     toggle: res('nktToggle', 'przelacznik.png'),    // 64×64, kot na tle półksiężyca (fioletowy kafelek)
-    loader: res('nktLoader', 'ekran-ladowania.webp') // 480×480, kot na murku patrzy na księżyc (brzegi wygaszone do czerni)
+    loader: res('nktLoader', 'ekran-ladowania.webp'), // 480×480, kot na murku patrzy na księżyc (brzegi wygaszone do czerni)
+    // lokalne ComfyUI (Z-Image Turbo + RMBG 3.0):
+    hudIcons: res('nktHudIcons', 'ikony-hud.png'),  // 1200×60, 20 ikon HUD po 60×60 (kolejność w HUD_ICONS)
+    frame: res('nktFrame', 'rama-hud.png'),         // ramka przycisku HUD z kocimi uszkami 100×104 (wymiary w FRAME)
+    gold: res('nktGold', 'zloto.png'),              // 42×42, stos monet z odciskiem łapki
+    tears: res('nktTears', 'smocze-lzy.png')        // 42×42, karmazynowo-fioletowa kropla
   };
+
+  const FRAME = { w: 100, h: 104 }; // rama-hud.png; kwadratowa część ma 100×100 u dołu, nad nią uszy
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
 
@@ -598,6 +609,48 @@ ${A} .layer.loader-layer::after { animation: nkt-blink 6.4s 2.3s infinite; }
 `;
 
   /* =====================================================================
+   * === PRZYCISKI HUD (.widget-button 44×44 z .icon.<nazwa> 30×30) i WALUTY (.gold-tip / .credits-tip 21×21) ===
+   * ===================================================================== */
+  // Kolejność ikon w arkuszu ikony-hud.png (po 60×60 px, w grze 30×30). Nazwy = klasy .icon w grze.
+  const HUD_ICONS = ['exit', 'world-icon', 'config', 'rewards-calendar-icon', 'clans', 'globe', 'party',
+    'inventory-browser-icon', 'matchmaking-icon', 'chat', 'photo', 'portable-map-icon', 'compass', 'loot-filter-icon',
+    'timer-icon', 'star', 'skills', 'friends', 'scroll', 'news-icon'];
+  const WB = `${N} .widget-button`;
+  const cssHud = `
+/* kolory grup gry (zielony/niebieski/fioletowy/czerwony) zastępuje jednolity grafit; ramka z kocimi uszkami to obrazek */
+${WB} {
+  background: radial-gradient(120% 90% at 50% 12%, #22202b, #0e0e12 72%) !important;
+  border: 0 !important; border-radius: 10px !important; box-shadow: none !important; overflow: visible !important;
+}
+${WB}::before {
+  inset: 2px !important; border-radius: 8px !important; background-color: transparent;
+  box-shadow: none !important; transition: background-color .18s ease, box-shadow .18s ease;
+}
+${WB}::after {
+  content: "" !important; position: absolute; left: -3px !important; right: -3px; bottom: -3px; top: auto !important;
+  width: auto !important; height: calc((100% + 6px) * ${FRAME.h / FRAME.w}) !important;
+  background: url("${IMG.frame}") center bottom / 100% auto no-repeat !important;
+  box-shadow: none !important; border-radius: 0 !important; pointer-events: none; z-index: 2;
+}
+${WB}:hover::before { background-color: rgb(123 79 214 / .14); box-shadow: 0 0 10px rgb(123 79 214 / .45) !important; }
+${WB}.window-is-open::before { background-color: rgb(123 79 214 / .22) !important; }
+${WB}.active::before { background-color: rgb(0 0 0 / .35); }
+${WB} .red-notification { z-index: 3; }
+${HUD_ICONS.map((n, i) => `${WB} .icon.${n}`).join(',\n')} {
+  background: url("${IMG.hudIcons}") 0 0 / ${HUD_ICONS.length * 30}px 30px no-repeat !important;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / .7));
+  transition: transform .18s ease;
+}
+${HUD_ICONS.map((n, i) => `${WB} .icon.${n} { background-position: ${-i * 30}px 0 !important; }`).join('\n')}
+${A} .widget-button:hover .icon { transform: translateY(-1px) scale(1.06); }
+/* waluty na górnej tabliczce: złoto z odciskiem łapki, smocze łzy */
+${N} .hud-container .gold-tip,
+${N} .hud-container .credits-tip { border-radius: 50%; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .8)); }
+${N} .hud-container .gold-tip { background: url("${IMG.gold}") center / contain no-repeat, #1a1a20 !important; }
+${N} .hud-container .credits-tip { background: url("${IMG.tears}") center / contain no-repeat, #1a1a20 !important; }
+`;
+
+  /* =====================================================================
    * === ANIMACJE (delikatne; tylko z klasą nkt-anim; zawsze wyłączone przy prefers-reduced-motion) ===
    * ===================================================================== */
   const cssAnim = `
@@ -891,7 +944,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     (document.head || root).appendChild(s);
     return s;
   };
-  const baseCss = [cssVars, cssBase, cssWindows, cssCats, cssHp, cssLoader, cssAnim, cssToggle].join('\n');
+  const baseCss = [cssVars, cssBase, cssWindows, cssCats, cssHp, cssLoader, cssHud, cssAnim, cssToggle].join('\n');
   const style = addStyle(baseCss);
   if (style && 'id' in style) style.id = 'nkt-theme';
 

@@ -43,3 +43,20 @@ Stylized hand-painted game art illustration of only a pair of glowing cat eyes i
 Model: FLUX.2 Klein 4B Image Edit (klein_edit_api, 4 kroki, CFG 1, batch 2), obraz wejściowy: kot-minimapa (oryginał 1472×1104).
 The black cat closes its eyes happily and sticks out a small pink tongue, licking the edge right in front of it. Keep exactly the same cat, the same pose and paws, the same framing and size, the same painterly style, colors, violet rim light and the same plain light grey background. Change only the eyes and the mouth.
 Tło: RMBG 3.0 (rmbg_api) z notatką: Subject: the black cat only - its head, ears, whiskers, tongue and both front paws resting on the edge. The grey ledge/box at the bottom and the plain background are NOT part of the subject. Dalej oczyszczenie koloru krawędzi i wspólny kadr z klatką bazową.
+
+## ikony-hud.png (1200×60) – 20 ikon przycisków HUD (lokalne ComfyUI)
+Model: Z-Image Turbo (zimage_api, 8 kroków, CFG 1, 768×768, batch 2), tło: RMBG 3.0, kadr i zmniejszenie z premultiplikacją do 56 px w polu 60×60.
+Wspólny szablon: `Game UI icon of <PRZEDMIOT>, with a small cute black cat detail integrated into it (tiny cat ears on top, or a cat paw, or a curled cat tail), stylized hand-painted, soft painterly shading, dark charcoal and soft lavender silver with gentle violet glow highlights, simple bold silhouette readable at small size, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters`
+Przedmioty w kolejności arkusza: exit – an arched wooden door standing ajar with a small arrow pointing out of it; world-icon – a small floating planet with a thin orbit ring and tiny stars; config – a single gear cog; rewards-calendar-icon – a small calendar page tied with a ribbon bow like a gift; clans – a heraldic kite shield with two crossed swords behind it; globe – a terrestrial globe on a small stand; party – three small hooded adventurer figures standing together; inventory-browser-icon – a magnifying glass over a small leather backpack; matchmaking-icon – two crossed swords; chat – a rounded speech bubble with three dots; photo – an old-fashioned camera; portable-map-icon – a folded parchment map with a dotted path; compass – a round compass with a needle; loot-filter-icon – a funnel with a few coins falling into it; timer-icon – an hourglass with flowing sand; star – a five-pointed star; skills – an open spell book with a glowing rune above it; friends – two small hearts overlapping; scroll – a rolled parchment quest scroll with a wax seal; news-icon – a small hand bell.
+
+## rama-hud.png (100×104) – ramka przycisku HUD z uszkami (lokalne ComfyUI)
+Model: Z-Image Turbo, tło: RMBG 3.0, środek wycięty (wypełnienie od środka), szerokość 100 px.
+Square game UI button frame with softly rounded corners, smooth dark charcoal lacquer border with a thin glowing violet inner rim and two tiny black cat ears sticking up from the top edge, the center is completely empty plain light grey, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, front view, centered, isolated on a plain flat light grey background, no text, no letters
+
+## zloto.png (42×42) – złoto (lokalne ComfyUI)
+Model: Z-Image Turbo, tło: RMBG 3.0.
+Game currency icon: a small neat stack of round gold coins, the top coin engraved with a cat paw print, warm aged gold with soft painterly highlights and a faint violet rim light, stylized hand-painted, bold simple silhouette readable at small size, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## smocze-lzy.png (42×42) – smocze łzy (lokalne ComfyUI)
+Model: Z-Image Turbo, tło: RMBG 3.0.
+Game currency icon: a single glowing teardrop-shaped crystal gem, deep crimson red fading to violet inside with a bright inner sparkle, faceted, stylized hand-painted, soft painterly shading, bold simple silhouette readable at small size, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
