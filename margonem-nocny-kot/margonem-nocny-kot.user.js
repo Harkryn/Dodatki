@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.6.0
+// @version      1.6.1
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -50,7 +50,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.6.0';
+  const VERSION = '1.6.1';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -538,6 +538,19 @@ ${W} .header-label-positioner::before { left: 13%; background-image: url("${IMG.
 ${W} .header-label-positioner::after { right: 13%; background-image: url("${IMG.earR}"); }
 ${A} .border-window:not(.transparent):not(.tip-window):hover .header-label-positioner::before { animation: nkt-ear-l .7s ease-in-out; }
 ${A} .border-window:not(.transparent):not(.tip-window):hover .header-label-positioner::after { animation: nkt-ear-r .7s ease-in-out .08s; }
+/* te same uszy na oknach przezroczystych (minimapa, gracze w pobliżu, zadania…): na samym oknie (ma własny z-index),
+   pod półprzezroczystym tłem .border-image (z-index -1), więc podstawa ucha chowa się za oknem */
+${N} .border-window.transparent:not(.tip-window)::before,
+${N} .border-window.transparent:not(.tip-window)::after {
+  content: ""; position: absolute; top: -34px; width: 29px; height: 36px; z-index: -2;
+  pointer-events: none; transform-origin: 50% 100%;
+  background: center bottom / contain no-repeat;
+  filter: drop-shadow(0 0 1px rgb(123 79 214 / .7));
+}
+${N} .border-window.transparent:not(.tip-window)::before { left: 13%; background-image: url("${IMG.earL}"); }
+${N} .border-window.transparent:not(.tip-window)::after { right: 13%; background-image: url("${IMG.earR}"); }
+${A} .border-window.transparent:not(.tip-window):hover::before { animation: nkt-ear-l .7s ease-in-out; }
+${A} .border-window.transparent:not(.tip-window):hover::after { animation: nkt-ear-r .7s ease-in-out .08s; }
 @keyframes nkt-ear-l { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg); } 55% { transform: rotate(6deg); } }
 @keyframes nkt-ear-r { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(14deg); } 55% { transform: rotate(-6deg); } }
 `;
