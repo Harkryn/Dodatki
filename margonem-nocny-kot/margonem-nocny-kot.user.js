@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.6.1
+// @version      1.7.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -30,6 +30,10 @@
 // @resource     nktOrn       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/zdobienie-hp.png
 // @resource     nktExp       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/pasek-exp.png
 // @resource     nktNick      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ramka-nicku.png
+// @resource     nktChatIcons https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ikony-czatu.png
+// @resource     nktSlot      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/slot.png
+// @resource     nktBar       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/pasek-dolny.png
+// @resource     nktBarFur    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/pasek-futro.png
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // ==/UserScript==
@@ -107,9 +111,15 @@
     fur: res('nktFur', 'futro.png'),                // 240×237, kwadratowa ramka z czarnej sierści (border-image, sierść ~20% boku)
     orn: res('nktOrn', 'zdobienie-hp.png'),         // 1180×216, dwa kocie ogony w spiralach i okrągłe gniazdo kuli (środek gniazda y 138)
     exp: res('nktExp', 'pasek-exp.png'),            // 500×43, ramka paska expa z odciskiem łapki na lewym końcu
-    nick: res('nktNick', 'ramka-nicku.png')         // 684×135, grafitowa tabliczka obszyta czarnym futrem (górna tabliczka z nickiem)
+    nick: res('nktNick', 'ramka-nicku.png'),        // 684×135, grafitowa tabliczka obszyta czarnym futrem (górna tabliczka z nickiem)
+    chatIcons: res('nktChatIcons', 'ikony-czatu.png'), // 384×40, 8 ikon kanałów czatu po 48×40 (kolejność w CHAT_ICONS)
+    slot: res('nktSlot', 'slot.png'),               // 66×66, czarna wnęka z fioletowym brzegiem (kratka torby)
+    bar: res('nktBar', 'pasek-dolny.png'),          // 1536×99, grafitowa belka z fioletową linią u góry (dolny pasek)
+    barFur: res('nktBarFur', 'pasek-futro.png')     // 1536×38, pas czarnej sierści nad dolnym paskiem
   };
 
+  const CHAT_ICONS = ['GENERAL', 'GLOBAL', 'LOCAL', 'TRADE', 'GROUP', 'CLAN', 'SYSTEM', 'PRIVATE']; // ikony-czatu.png
+  const SLOT = 33; // okres siatki kratek torby w grze (px)
   const FRAME = { w: 100, h: 104 }; // rama-hud.png; kwadratowa część ma 100×100 u dołu, nad nią uszy
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -701,6 +711,25 @@ ${N} .hud-container .gold-tip,
 ${N} .hud-container .credits-tip { border-radius: 50%; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .8)); }
 ${N} .hud-container .gold-tip { background: url("${IMG.gold}") center / contain no-repeat, #1a1a20 !important; }
 ${N} .hud-container .credits-tip { background: url("${IMG.tears}") center / contain no-repeat, #1a1a20 !important; }
+/* zakładki kanałów czatu: własne ikony (24×20), nieaktywne przygaszone */
+${CHAT_ICONS.map((n) => `${N} .chat-channel-card.${n}-channel .chat-channel-card-icon`).join(',\n')} {
+  background: url("${IMG.chatIcons}") 0 0 / ${CHAT_ICONS.length * 24}px 20px no-repeat !important;
+  filter: brightness(.8) drop-shadow(0 0 1px rgb(160 124 240 / .5)); transition: filter .2s ease;
+}
+${CHAT_ICONS.map((n, i) => `${N} .chat-channel-card.${n}-channel .chat-channel-card-icon { background-position: ${-i * 24}px 0 !important; }`).join('\n')}
+${N} .chat-channel-card:hover .chat-channel-card-icon { filter: brightness(1.1) drop-shadow(0 0 1px rgb(160 124 240 / .6)); }
+${N} .chat-channel-card.active .chat-channel-card-icon { filter: brightness(1.3) drop-shadow(0 0 3px rgb(160 124 240 / .7)); }
+${N} .chat-channel-card.channel-disabled .chat-channel-card-icon { filter: grayscale(1) brightness(.35); }
+/* kratki torby: czarna wnęka z fioletowym brzegiem zamiast kafla gry */
+${N} .interface-element-item-slot-grid-stretch {
+  background: url("${IMG.slot}") 0 0 / ${SLOT}px ${SLOT}px repeat, #050407 !important; filter: none !important;
+}
+/* dolny pasek: grafitowa belka z fioletową linią, nad nią pas czarnej sierści wystający na mapę */
+${N} .interface-layer .bottom.positioner > .bg { background: url("${IMG.bar}") center top / 100% 100% no-repeat, #0e0e12 !important; }
+${N} .interface-layer .bottom.positioner > .bg::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 19px; margin-bottom: -3px; pointer-events: none;
+  background: url("${IMG.barFur}") center bottom / 100% 100% no-repeat;
+}
 `;
 
   /* =====================================================================

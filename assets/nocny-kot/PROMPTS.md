@@ -71,3 +71,19 @@ Long thin horizontal progress bar frame, dark charcoal lacquer border with a thi
 ## ramka-nicku.png (684×135) – górna tabliczka z nickiem (lokalne ComfyUI, wersja 6 z 10)
 Model: Z-Image Turbo (1344×256, batch 2), tło: RMBG 3.0.
 Wide horizontal name plate for a game HUD, the plaque face is plain smooth dark charcoal and empty, framed all around with a thick border of short dense soft black cat fur with a subtle violet sheen, front view, symmetric, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## ikony-hud.png – komórka 10 (photo → crafting) (lokalne ComfyUI, wariant B)
+Model: Z-Image Turbo (768×768, batch 2), tło: RMBG 3.0. Zastępuje aparat w arkuszu ikon HUD.
+Game UI icon of a small blacksmith anvil with a hammer resting on it, with a small cute black cat detail integrated into it (tiny cat ears on top, or a cat paw, or a curled cat tail), stylized hand-painted, soft painterly shading, dark charcoal and soft lavender silver with gentle violet glow highlights, simple bold silhouette readable at small size, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## ikony-czatu.png (384×40) – 8 ikon kanałów czatu (lokalne ComfyUI, wariant B)
+Model: Z-Image Turbo (768×768, batch 2), tło: RMBG 3.0. Ten sam prompt co ikona crafting, z {s}:
+GENERAL: a speech bubble · GLOBAL: a globe · LOCAL: a small castle town · TRADE: a merchant scale with coins · GROUP: three small figures standing together · CLAN: a crown · SYSTEM: a gear cog with an exclamation mark shape · PRIVATE: a sealed envelope
+
+## slot.png (66×66) – kratka torby (lokalne ComfyUI, wariant A2)
+Model: Z-Image Turbo (768×768, batch 2), tło: RMBG 3.0, wnętrze przyciemnione do czerni.
+Square inventory item slot tile for a game UI, slightly rounded corners, dark charcoal inset well with a thin soft violet rim and subtle inner shadow, the center is plain empty dark charcoal, front view, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## pasek-dolny.png (1536×99) + pasek-futro.png (1536×38) – dolny pasek (lokalne ComfyUI, wariant A1)
+Model: Z-Image Turbo (1536×192, batch 2), tło: RMBG 3.0, rozcięte na belkę i pas sierści nad nią.
+Long horizontal game HUD bottom bar background strip, dark graphite lacquer with a thin glowing violet line along the top edge and a soft fringe of short black cat fur along the top edge, seamless horizontally, front view, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
