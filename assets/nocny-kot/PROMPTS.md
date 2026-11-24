@@ -67,3 +67,7 @@ Wide horizontal game HUD ornament, in the middle an empty round socket ring for 
 ## pasek-exp.png (500×43) – ramka paska expa (lokalne ComfyUI)
 Model: Z-Image Turbo (1536×192), tło: RMBG 3.0, kanał w środku wycięty. Wypełnienie (żółte, z połyskiem) rysuje CSS.
 Long thin horizontal progress bar frame, dark charcoal lacquer border with a thin glowing violet rim, the empty inner channel is plain light grey, a small cat paw print emblem at the left end, front view, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters
+
+## ramka-nicku.png (684×135) – górna tabliczka z nickiem (lokalne ComfyUI, wersja 6 z 10)
+Model: Z-Image Turbo (1344×256, batch 2), tło: RMBG 3.0.
+Wide horizontal name plate for a game HUD, the plaque face is plain smooth dark charcoal and empty, framed all around with a thick border of short dense soft black cat fur with a subtle violet sheen, front view, symmetric, stylized hand-painted, soft painterly shading, elegant, not cartoon, not photorealistic, centered, isolated on a plain flat light grey background, no text, no letters

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.5.1
+// @version      1.6.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -29,6 +29,7 @@
 // @resource     nktFur       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/futro.png
 // @resource     nktOrn       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/zdobienie-hp.png
 // @resource     nktExp       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/pasek-exp.png
+// @resource     nktNick      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ramka-nicku.png
 // @updateURL    https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // @downloadURL  https://raw.githubusercontent.com/Harkryn/Dodatki/main/margonem-nocny-kot/margonem-nocny-kot.user.js
 // ==/UserScript==
@@ -49,7 +50,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.5.1';
+  const VERSION = '1.6.0';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -105,7 +106,8 @@
     tears: res('nktTears', 'smocze-lzy.png'),       // 42×42, karmazynowo-fioletowa kropla
     fur: res('nktFur', 'futro.png'),                // 240×237, kwadratowa ramka z czarnej sierści (border-image, sierść ~20% boku)
     orn: res('nktOrn', 'zdobienie-hp.png'),         // 1180×216, dwa kocie ogony w spiralach i okrągłe gniazdo kuli (środek gniazda y 138)
-    exp: res('nktExp', 'pasek-exp.png')             // 500×43, ramka paska expa z odciskiem łapki na lewym końcu
+    exp: res('nktExp', 'pasek-exp.png'),            // 500×43, ramka paska expa z odciskiem łapki na lewym końcu
+    nick: res('nktNick', 'ramka-nicku.png')         // 684×135, grafitowa tabliczka obszyta czarnym futrem (górna tabliczka z nickiem)
   };
 
   const FRAME = { w: 100, h: 104 }; // rama-hud.png; kwadratowa część ma 100×100 u dołu, nad nią uszy
@@ -351,6 +353,13 @@ ${N} .border-window.transparent .border-image {
   background: rgb(10 10 13 / .8) !important;
   border-radius: var(--nkt-r) !important;
   box-shadow: 0 0 0 2px rgb(59 42 99 / .8), 0 6px 16px rgb(0 0 0 / .5) !important;
+}
+/* futro także na oknach przezroczystych (minimapa, ludzie na mapie, zadania…): na tle okna (.border-image, z-index -1 w grze),
+   więc przyciski, mapa i lista zostają nad sierścią */
+${N} .border-window.transparent .border-image::after {
+  content: ""; position: absolute; inset: -9px; pointer-events: none;
+  border: 16px solid transparent; border-image: url("${IMG.fur}") 20% round;
+  filter: brightness(1.15) drop-shadow(0 0 1px rgb(123 79 214 / .5)) drop-shadow(0 2px 3px rgb(0 0 0 / .5));
 }
 ${N} .border-window.transparent .header-label .text {
   color: var(--nkt-text) !important;
@@ -672,6 +681,8 @@ ${HUD_ICONS.map((n, i) => `${WB} .icon.${n}`).join(',\n')} {
 }
 ${HUD_ICONS.map((n, i) => `${WB} .icon.${n} { background-position: ${-i * 30}px 0 !important; }`).join('\n')}
 ${A} .widget-button:hover .icon { transform: translateY(-1px) scale(1.06); }
+/* górna tabliczka (nick, lokacja, waluty): grafitowa płytka obszyta czarnym futrem zamiast grafiki gry (342×65) */
+${N} .hud-container { background: url("${IMG.nick}") center / 100% 100% no-repeat !important; }
 /* waluty na górnej tabliczce: złoto z odciskiem łapki, smocze łzy */
 ${N} .hud-container .gold-tip,
 ${N} .hud-container .credits-tip { border-radius: 50%; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .8)); }
