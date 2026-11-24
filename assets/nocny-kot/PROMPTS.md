@@ -2,14 +2,16 @@
 
 Styl: malowany (wybrany 2026-11-24 zamiast kreskówki). Model: Qwen-Image (mcp-tools/Qwen-Image), 16 kroków.
 Negative prompt (wspólny): photorealistic, photo, realistic, 3d render, cartoon, chibi, thick outline, flat colors, text, letters, watermark, pixel art, busy background, logo (+ dopiski przy elementach).
+Od 2026-11-24 nowe grafiki powstają wyłącznie lokalnie w ComfyUI (RX 7900 XT).
 Tło: jasne, płaskie → usuwane lokalnie (alfa z różnicy koloru względem tła z miękkim przejściem, oczyszczenie koloru krawędzi), kadr i zmniejszenie z premultiplikacją (Pillow). Oczy: alfa z jasności na czarnym tle. Ekran wczytywania: malowany od razu na czerni, brzegi wygaszone.
 
 ## spiacy-kot.png (240×123) – kot śpiący na krawędzi czatu
 Stylized hand-painted game art illustration of a black cat sleeping stretched out on its belly along the top of a thin flat horizontal ledge, one front paw and the tail hanging lazily down over the front edge, eyes closed, natural cat proportions, soft painterly shading, subtle fur texture, glossy charcoal black fur with a soft violet rim light along the back, small violet collar, elegant and cozy, not cartoon, not photorealistic, side view, centered, isolated on plain flat light grey background
 Negative +: bread, food, pillow, furniture
 
-## kot-minimapa.png (160×110) – kot zaglądający zza krawędzi minimapy
+## kot-minimapa.png (160×118) – kot zaglądający zza krawędzi minimapy
 Stylized hand-painted game art illustration of a black cat peeking up from behind a straight horizontal edge, only its head and two front paws resting on the edge visible, curious big amber-yellow eyes, natural cat proportions, soft painterly shading, subtle fur texture, glossy charcoal black fur with a soft violet rim light, elegant and cute, not cartoon, not photorealistic, front view, centered, isolated on plain flat light grey background
+Obróbka (2026-11-24, lokalne ComfyUI): przeskalowany do 1168×880 i przepuszczony przez RMBG 3.0 razem z klatką liżącą, przycięty tym samym prostokątem – obie klatki pokrywają się co do piksela.
 
 ## ogonek.png (81×180) – ogon na krawędzi kolumny
 Stylized hand-painted game art illustration of one long black cat tail only, hanging straight down from the top edge of the image, gently swaying, its lower end curling into a soft hook, fluffy rounded tip, soft painterly shading, subtle fur texture, glossy charcoal black fur with a soft violet rim light on one side, elegant, not cartoon, not photorealistic, centered, isolated on plain flat light grey background
@@ -37,5 +39,7 @@ Negative +: roof, house, buildings, city, second cat, bright sky, blue sky, yell
 ## oczy.png (120×47) – oczy na ekranie wczytywania
 Stylized hand-painted game art illustration of only a pair of glowing cat eyes in total darkness, two almond-shaped eyes side by side, luminous amber-gold irises with narrow vertical slit pupils, soft wet highlight, faint violet glow around them, a barely visible hint of black fur around the eyes, mysterious, not cartoon, not photorealistic, centered, wide image, on plain solid black background
 
-## jezyk.png (34×28) – języczek do animacji lizania (tymczasowy, z poprzedniej, kreskówkowej serii)
-One single small cute cartoon cat tongue only, seen from the front, short rounded pink tongue shape hanging downward with a thin center line, soft pink #f2a7c3, thin even dark violet outline, flat colors. Minimalist flat cartoon sticker element, no mouth, no face, centered, isolated on plain flat light grey background
+## kot-minimapa-lize.png (160×118) – klatka lizania (lokalne ComfyUI)
+Model: FLUX.2 Klein 4B Image Edit (klein_edit_api, 4 kroki, CFG 1, batch 2), obraz wejściowy: kot-minimapa (oryginał 1472×1104).
+The black cat closes its eyes happily and sticks out a small pink tongue, licking the edge right in front of it. Keep exactly the same cat, the same pose and paws, the same framing and size, the same painterly style, colors, violet rim light and the same plain light grey background. Change only the eyes and the mouth.
+Tło: RMBG 3.0 (rmbg_api) z notatką: Subject: the black cat only - its head, ears, whiskers, tongue and both front paws resting on the edge. The grey ledge/box at the bottom and the plain background are NOT part of the subject. Dalej oczyszczenie koloru krawędzi i wspólny kadr z klatką bazową.

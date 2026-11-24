@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.2.1
+// @version      1.3.0
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -16,7 +16,7 @@
 // @resource     nktTail      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/ogonek.png
 // @resource     nktPaw       https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/odcisk.png
 // @resource     nktMiniCat   https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/kot-minimapa.png
-// @resource     nktTongue    https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/jezyk.png
+// @resource     nktMiniLick  https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/kot-minimapa-lize.png
 // @resource     nktEyes      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/oczy.png
 // @resource     nktHpPaw     https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/lapka-hp.png
 // @resource     nktEarL      https://raw.githubusercontent.com/Harkryn/Dodatki/main/assets/nocny-kot/uszko-l.png
@@ -43,7 +43,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.2.1';
+  const VERSION = '1.3.0';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -85,8 +85,8 @@
     chatCat: res('nktChatCat', 'spiacy-kot.png'),   // 240×123, kot śpiący na krawędzi (łapka i ogon zwisają); krawędź na 53% wysokości
     tail: res('nktTail', 'ogonek.png'),             // 81×180, puszysty ogon zwisający z krawędzi, miękki zakręt
     paw: res('nktPaw', 'odcisk.png'),               // 48×42, ciemne poduszki łapki na fioletowej poświacie
-    miniCat: res('nktMiniCat', 'kot-minimapa.png'), // 160×110, kot zaglądający zza krawędzi; nosek (85, 79), pyszczek y 90, krawędź y 96
-    tongue: res('nktTongue', 'jezyk.png'),          // 34×28, języczek do animacji lizania
+    miniCat: res('nktMiniCat', 'kot-minimapa.png'),        // 160×118, kot zaglądający zza krawędzi; dół głowy (krawędź) y 102
+    miniLick: res('nktMiniLick', 'kot-minimapa-lize.png'), // 160×118, ta sama klatka liżąca (lokalne ComfyUI: FLUX.2 Klein + RMBG 3.0)
     eyes: res('nktEyes', 'oczy.png'),               // 120×47, bursztynowe kocie oczy w ciemności (ekran wczytywania)
     hpPaw: res('nktHpPaw', 'lapka-hp.png'),         // 200×217, spód kociej łapki – kształt i tekstura kuli HP
     earL: res('nktEarL', 'uszko-l.png'),            // 58×72, puszyste lewe ucho z pędzelkiem
@@ -478,22 +478,17 @@ ${A} .nkt-chatcat .nkt-cat-img { transform-origin: 50% 70%; animation: nkt-breat
 ${A} .nkt-tail:hover .nkt-cat-img { animation: nkt-wag .95s ease-in-out; }
 @keyframes nkt-wag { 0% { transform: rotate(0); } 20% { transform: rotate(14deg); } 45% { transform: rotate(-11deg); } 70% { transform: rotate(6deg); } 100% { transform: rotate(0); } }
 
-/* kot zaglądający zza górnej krawędzi minimapy; co jakiś czas liże ją (klasa .nkt-lick na 1,2 s) */
-.nkt-minicat { width: 80px; }
-.nkt-minicat .nkt-tongue {
-  position: absolute; left: 34px; top: 43px; width: 17px; z-index: 1;   /* pod pyszczkiem (85, 90 w pliku → 42,5 / 45 px) */
-  transform-origin: 50% 0; transform: scaleY(0); opacity: 0;
-}
-${A} .nkt-minicat.nkt-lick .nkt-cat-img { animation: nkt-lick-head 1.2s ease-in-out; }
-${A} .nkt-minicat.nkt-lick .nkt-tongue { animation: nkt-lick-tongue 1.2s ease-in-out; }
-@keyframes nkt-lick-head { 0%, 100% { transform: translateY(0) rotate(0); } 30%, 70% { transform: translateY(2px) rotate(-3deg); } }
-@keyframes nkt-lick-tongue {
-  0%, 15% { transform: translateY(2px) scaleY(0); opacity: 0; }
-  30% { transform: translateY(2px) scaleY(1); opacity: 1; }
-  45% { transform: translate(1px, 2px) scaleY(.7); opacity: 1; }
-  60% { transform: translateY(2px) scaleY(1); opacity: 1; }
-  80%, 100% { transform: translateY(2px) scaleY(0); opacity: 0; }
-}
+/* kot zaglądający zza górnej krawędzi minimapy; co jakiś czas liże ją (klasa .nkt-lick na 1,3 s):
+   dwie nałożone klatki tego samego kota (zwykła i liżąca – zmrużone oczy, język na krawędzi; pokrywają się co do
+   piksela), podczas lizania płynnie się podmieniają, a kot lekko pochyla się do mapy. Obwódka na kontenerze,
+   żeby przy przenikaniu nie była podwójna. */
+.nkt-minicat { width: 80px; height: 59px; filter: drop-shadow(0 0 1px #7b4fd6) drop-shadow(0 0 .5px #7b4fd6) drop-shadow(0 2px 3px rgb(0 0 0 / .6)); }
+.nkt-minicat img { position: absolute; inset: 0; }
+.nkt-minicat .nkt-lick-frame { opacity: 0; }
+${A} .nkt-minicat.nkt-lick .nkt-base-frame { animation: nkt-lick-base 1.3s ease-in-out; }
+${A} .nkt-minicat.nkt-lick .nkt-lick-frame { animation: nkt-lick-frame 1.3s ease-in-out; }
+@keyframes nkt-lick-base { 0%, 8% { opacity: 1; transform: translateY(0); } 18%, 82% { opacity: 0; transform: translateY(2px); } 92%, 100% { opacity: 1; transform: translateY(0); } }
+@keyframes nkt-lick-frame { 0%, 8% { opacity: 0; transform: translateY(0); } 18%, 82% { opacity: 1; transform: translateY(2px); } 50% { transform: translateY(3px); } 92%, 100% { opacity: 0; transform: translateY(0); } }
 
 /* odciski łapek: wybrana pozycja list z grupami i środek cienkich separatorów */
 ${N} .one-item-on-divide-list.active {
@@ -1062,12 +1057,12 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
     const win = map && (map.closest('.border-window') || map.parentElement);
     if (map && win && map.offsetWidth) {
       if (!deco.mini || deco.mini.parentElement !== win) {
-        deco.mini = mkDeco('nkt-minicat', `<img class="nkt-cat-img" alt="" src="${IMG.miniCat}"><img class="nkt-tongue" alt="" src="${IMG.tongue}">`);
+        deco.mini = mkDeco('nkt-minicat', `<img class="nkt-base-frame" alt="" src="${IMG.miniCat}"><img class="nkt-lick-frame" alt="" src="${IMG.miniLick}">`);
         if (getComputedStyle(win).position === 'static') win.style.position = 'relative';
         win.appendChild(deco.mini);
       }
       const r = relRect(map, win);
-      setPos(deco.mini, r.left + r.width * 0.72 - 40, r.top - 48);   // krawędź grafiki (y 96 z 110 → 48 px) na górze mapy
+      setPos(deco.mini, r.left + r.width * 0.72 - 40, r.top - 51);   // krawędź grafiki (dół głowy y 102 z 118 → 51 px) na górze mapy
     }
     // łapka HP: niskie HP (< 25%) z wysokości krwi ustawianej przez grę → klasa nkt-hp-low (pulsowanie)
     const ind = document.querySelector('.hp-indicator-wrapper-template .hp-indicator');
@@ -1086,7 +1081,7 @@ html:not(.${ON}) #nkt-toggle { filter: grayscale(1); opacity: .35; }
       const m = deco.mini;
       if (m && m.isConnected && root.classList.contains(ANIM) && !document.hidden && !(reduceMotion && reduceMotion.matches)) {
         m.classList.add('nkt-lick');
-        setTimeout(() => m.classList.remove('nkt-lick'), 1250);
+        setTimeout(() => m.classList.remove('nkt-lick'), 1350);
       }
       scheduleLick();
     }, 9000 + Math.random() * 9000);
