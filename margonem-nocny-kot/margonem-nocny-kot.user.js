@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.5.0
+// @version      1.5.1
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -49,7 +49,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -270,11 +270,14 @@ ${W} {
 }
 ${W} > .content { background: transparent !important; color: var(--nkt-text); }
 /* futrzana ramka: miękka czarna sierść nałożona na krawędź okna (border-image 9-slice, nakładka bez kliknięć) */
+/* pozycja liczona od wnętrza przezroczystej ramki gry (32 px góra/dół, 20 px boki) – futro leży na zewnętrznej krawędzi okna
+   TODO: zweryfikuj selektor – okna o innej grubości ramki gry dostaną futro trochę przesunięte */
 ${W}::after {
-  content: ""; position: absolute; inset: -10px; pointer-events: none;
-  border: 18px solid transparent; border-image: url("${IMG.fur}") 20% round;
-  filter: drop-shadow(0 0 1px rgb(123 79 214 / .35)) drop-shadow(0 2px 3px rgb(0 0 0 / .5));
+  content: ""; position: absolute; top: -42px; bottom: -42px; left: -30px; right: -30px; z-index: 0; pointer-events: none;
+  border: 22px solid transparent; border-image: url("${IMG.fur}") 20% round;
+  filter: brightness(1.15) drop-shadow(0 0 1px rgb(123 79 214 / .5)) drop-shadow(0 2px 3px rgb(0 0 0 / .5));
 }
+${W} > .header-label-positioner, ${W} > .close-button-corner-decor { z-index: 1; }   /* tytuł, uszy i zamykanie nad futrem */
 
 /* tytuł: zaokrąglona plakietka (pigułka) w grafitowym odcieniu, czcionka Nunito 800 */
 ${W} .header-label-positioner .header-label {
@@ -565,8 +568,11 @@ ${HPB} .hp-indicator .blood::after {
 }
 ${HPB} .hp-indicator .blood-frame { display: none !important; }
 /* zdobienie wokół łapki: dwa kocie ogony w spiralach, okrągłe gniazdo pod łapką (zamiast grafiki gry .bottom-panel-graphic 590×100) */
-${N} .bottom-panel-of-bottom-positioner .bottom-panel-graphic {
-  background: url("${IMG.orn}") 50% -27px / 590px auto no-repeat !important;
+${N} .bottom-panel-of-bottom-positioner .bottom-panel-graphic { background: none !important; }
+/* ramiona zdobienia leżą na górnej krawędzi dolnego paska, spirale wychodzą na mapę (grafika gry jest niżej, pod paskiem) */
+${N} .bottom-panel-of-bottom-positioner .bottom-panel-graphic::before {
+  content: ""; position: absolute; left: 50%; top: -53px; width: 590px; height: 108px; margin-left: -295px; pointer-events: none;
+  background: url("${IMG.orn}") center / 100% 100% no-repeat;
   filter: drop-shadow(0 2px 4px rgb(0 0 0 / .6));
 }
 /* paski expa: ramka z odciskiem łapki (prawa w lustrze), żółte wypełnienie z łagodnym przesuwającym się połyskiem */
