@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.7.0
+// @version      1.7.1
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -119,7 +119,7 @@
   };
 
   const CHAT_ICONS = ['GENERAL', 'GLOBAL', 'LOCAL', 'TRADE', 'GROUP', 'CLAN', 'SYSTEM', 'PRIVATE']; // ikony-czatu.png
-  const SLOT = 33; // okres siatki kratek torby w grze (px)
+  const SLOT = 33; // okres siatki kratek torby w grze (px); pierwsza kratka zaczyna się 1 px od brzegu
   const FRAME = { w: 100, h: 104 }; // rama-hud.png; kwadratowa część ma 100×100 u dołu, nad nią uszy
 
   const svgUrl = (s) => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
@@ -722,12 +722,12 @@ ${N} .chat-channel-card.active .chat-channel-card-icon { filter: brightness(1.3)
 ${N} .chat-channel-card.channel-disabled .chat-channel-card-icon { filter: grayscale(1) brightness(.35); }
 /* kratki torby: czarna wnęka z fioletowym brzegiem zamiast kafla gry */
 ${N} .interface-element-item-slot-grid-stretch {
-  background: url("${IMG.slot}") 0 0 / ${SLOT}px ${SLOT}px repeat, #050407 !important; filter: none !important;
+  background: url("${IMG.slot}") 1px 1px / ${SLOT}px ${SLOT}px repeat, #050407 !important; filter: none !important;
 }
 /* dolny pasek: grafitowa belka z fioletową linią, nad nią pas czarnej sierści wystający na mapę */
 ${N} .interface-layer .bottom.positioner > .bg { background: url("${IMG.bar}") center top / 100% 100% no-repeat, #0e0e12 !important; }
 ${N} .interface-layer .bottom.positioner > .bg::before {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 19px; margin-bottom: -3px; pointer-events: none;
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 14px; margin-bottom: -5px; pointer-events: none;
   background: url("${IMG.barFur}") center bottom / 100% 100% no-repeat;
 }
 `;
