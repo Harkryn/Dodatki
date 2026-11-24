@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Nocny Kot
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      1.4.0
+// @version      1.4.1
 // @description  Minimalistyczny czarny motyw nowego interfejsu (NI) z kreskówkowymi kotami; fiolet tylko jako akcent. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -47,7 +47,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
   const ON = 'nkt-on';          // motyw włączony
   const NI = 'nkt-ni';          // wykryto nowy interfejs
   const ANIM = 'nkt-anim';      // kocie animacje włączone
@@ -638,7 +638,7 @@ ${WB}.active::before { background-color: rgb(0 0 0 / .35); }
 ${WB} .red-notification { z-index: 3; }
 ${HUD_ICONS.map((n, i) => `${WB} .icon.${n}`).join(',\n')} {
   background: url("${IMG.hudIcons}") 0 0 / ${HUD_ICONS.length * 30}px 30px no-repeat !important;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / .7));
+  filter: brightness(1.3) drop-shadow(0 0 1px rgb(160 124 240 / .6)) drop-shadow(0 1px 1px rgb(0 0 0 / .7)); /* ciemne ikony czytelne na grafitowym tle */
   transition: transform .18s ease;
 }
 ${HUD_ICONS.map((n, i) => `${WB} .icon.${n} { background-position: ${-i * 30}px 0 !important; }`).join('\n')}
