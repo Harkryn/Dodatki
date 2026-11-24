@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem – Tamahagane
 // @namespace    https://github.com/Harkryn/Dodatki
-// @version      2.24.1
+// @version      2.24.2
 // @description  Motyw nowego interfejsu (NI) z hartowanej stali tamahagane: żelazo z żarzącymi się pęknięciami, czarny lakier, tsuba i płynny żar. Tylko wygląd – bez zmian w logice gry.
 // @author       Harkryn
 // @match        https://*.margonem.pl/*
@@ -78,7 +78,7 @@
   // Stary interfejs (SI): gra zapisuje wybór w ciasteczku `interface` – w SI nic nie robimy.
   try { if (/(?:^|;\s*)interface=si\b/i.test(document.cookie || '')) return; } catch (e) { /* brak ciasteczek */ }
 
-  const VERSION = '2.24.1';
+  const VERSION = '2.24.2';
   const ON = 'tmg-on';          // motyw włączony
   const FX = 'tmg-fx';          // efekty (popiół, mgła) włączone
   const KEY_ON = 'tmg-enabled';
@@ -957,8 +957,14 @@ ${N} .dialogue-window .content .answers-scroll::before {
 }
 ${N} .dialogue-window .content .answers li {
   border-bottom-color: rgb(29 22 20 / .8) !important;
-  transition: background-color .15s ease, box-shadow .15s ease;
 }
+/* bez przejść CSS w treści dialogu: gra nasłuchuje „transitionend” na całym oknie dialogu i przy każdym takim
+   zdarzeniu przewija wypowiedź i odpowiedzi do góry – płynne podświetlenie odpowiedzi pod kursorem cofało długie
+   kwestie na początek (ta sama poprawka co w Fioletowej Pustce 1.33.1) */
+${N} .dialogue-window .content,
+${N} .dialogue-window .content *,
+${N} .dialogue-window .content *::before,
+${N} .dialogue-window .content *::after { transition: none !important; }
 ${N} .dialogue-window .content .answers li .icon { filter: grayscale(1) sepia(.35) brightness(.85); }
 ${N} .dialogue-window .content .answers li:hover {
   background: linear-gradient(90deg, rgb(158 27 27 / .25), rgb(122 18 18 / .06) 60%, transparent) !important;
